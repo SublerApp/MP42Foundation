@@ -253,7 +253,7 @@
                         videoTrack.horizOffN = cleanApertureHorizontalOffset;
                         videoTrack.horizOffD = 1;
                         videoTrack.vertOffN = cleanApertureVerticalOffset;
-                        videoTrack.VertOffD = 1;
+                        videoTrack.vertOffD = 1;
                     }
                 }
                 newTrack = videoTrack;

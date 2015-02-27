@@ -59,9 +59,9 @@
              [[fileURL pathExtension] caseInsensitiveCompare: @"idx"] == NSOrderedSame)
         self = [MP42VobSubImporter alloc];
 #if !__LP64__
-    else if ([[fileURL pathExtension] caseInsensitiveCompare: @"mov"] == NSOrderedSame) {
+    /*else if ([[fileURL pathExtension] caseInsensitiveCompare: @"mov"] == NSOrderedSame) {
         self = [MP42QTImporter alloc];
-    }
+    }*/
 #endif
     // If we are on 10.7 or later, use the AVFoundation path
     else if (NSClassFromString(@"AVAsset")) {
