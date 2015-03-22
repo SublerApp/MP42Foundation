@@ -12,7 +12,7 @@
     void *tess_base;
 }
 
-- (instancetype)initWithLanguage:(NSString *)language;
+- (instancetype)initWithLanguage:(NSString *)language extendedLanguageTag:(NSString *)extendedLanguageTag;
 - (NSString *)performOCROnCGImage:(CGImageRef)image;
 
 @end

@@ -86,13 +86,15 @@ protected:
     return NO;
 }
 
-- (instancetype)initWithLanguage:(NSString *)language
+- (instancetype)initWithLanguage:(NSString *)language extendedLanguageTag:(NSString *)extendedLanguageTag;
 {
     if ((self = [super init])) {
         NSString *lang = [NSString stringWithUTF8String:lang_for_english([language UTF8String])->iso639_2];
 
-        if ([lang isEqualToString:@"zho"]) {
+        if ([lang isEqualToString:@"zho"] || [extendedLanguageTag isEqualToString:@"zh-Hans"]) {
             lang = @"chi_sim";
+        } else if ([extendedLanguageTag isEqualToString:@"zh-Hant"]) {
+            lang = @"chi_tra";
         }
 
         NSURL *dataURL = [self appSupportUrl];
