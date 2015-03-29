@@ -1324,51 +1324,61 @@ static const genreType_t genreType_strings[] = {
     /* Rewrite extended metadata using the generic iTMF api */
 
     if ([tagsDict valueForKey:@"Rating"]) {
-        MP4ItmfItemList* list = MP4ItmfGetItemsByMeaning(fileHandle, "com.apple.iTunes", "iTunEXTC");
+        MP4ItmfItemList  *list = MP4ItmfGetItemsByMeaning(fileHandle, "com.apple.iTunes", "iTunEXTC");
         if (list) {
-            uint32_t i;
-            for (i = 0; i < list->size; i++) {
-                MP4ItmfItem* item = &list->elements[i];
+            for (uint32_t i = 0; i < list->size; i++) {
+                MP4ItmfItem *item = &list->elements[i];
                 MP4ItmfRemoveItem(fileHandle, item);
             }
         }
         MP4ItmfItemListFree(list);
 
-        MP4ItmfItem* newItem = MP4ItmfItemAlloc( "----", 1 );
-        newItem->mean = strdup( "com.apple.iTunes" );
-        newItem->name = strdup( "iTunEXTC" );
+        MP4ItmfItem *newItem = MP4ItmfItemAlloc("----", 1);
+        newItem->mean = strdup("com.apple.iTunes");
+        newItem->name = strdup("iTunEXTC");
 
-        MP4ItmfData* data = &newItem->dataList.elements[0];
+        MP4ItmfData *data = &newItem->dataList.elements[0];
 
+        NSString *ratingString = ratingiTunesCode;
+        NSArray *iTunesCodes = [[MP42Ratings defaultManager] iTunesCodes];
+
+        // This whole thing is extremely convoluted and wrong in some cases.
         if (![[tagsDict valueForKey:@"Rating"] isKindOfClass:[NSNumber class]] ||
             [[tagsDict valueForKey:@"Rating"] unsignedIntegerValue] == [[MP42Ratings defaultManager] unknownIndex]) {
-            if (!ratingiTunesCode) {
-                ratingiTunesCode = [[[[MP42Ratings defaultManager] iTunesCodes] objectAtIndex:[[MP42Ratings defaultManager] unknownIndex]] retain];
+            if (!ratingString) {
+                ratingString = [iTunesCodes objectAtIndex:[[MP42Ratings defaultManager] unknownIndex]];
             }
         } else {
-            ratingiTunesCode = [[[[MP42Ratings defaultManager] iTunesCodes] objectAtIndex:[[tagsDict valueForKey:@"Rating"] unsignedIntegerValue]] retain];
+            NSUInteger index = [[tagsDict valueForKey:@"Rating"] unsignedIntegerValue];
+            if (iTunesCodes.count > index) {
+                ratingString = [iTunesCodes objectAtIndex:[[tagsDict valueForKey:@"Rating"] unsignedIntegerValue]];
+            }
         }
-        NSString *ratingString = ratingiTunesCode;
+
         if ([[tagsDict valueForKey:@"Rating Annotation"] length] && [ratingString length]) {
 			ratingString = [NSString stringWithFormat:@"%@%@", ratingString, [tagsDict valueForKey:@"Rating Annotation"]];
 		}
-        data->typeCode = MP4_ITMF_BT_UTF8;
-        data->valueSize = strlen([ratingString UTF8String]);
-        data->value = (uint8_t*)malloc( data->valueSize );
-        memcpy( data->value, [ratingString UTF8String], data->valueSize );
 
-        MP4ItmfAddItem(fileHandle, newItem);
+        if (ratingString) {
+            data->typeCode = MP4_ITMF_BT_UTF8;
+            data->valueSize = strlen([ratingString UTF8String]);
+            data->value = (uint8_t*)malloc( data->valueSize );
+            memcpy( data->value, [ratingString UTF8String], data->valueSize );
+
+            MP4ItmfAddItem(fileHandle, newItem);
+        }
+
         MP4ItmfItemFree(newItem);
-    }
-    else {
+
+    } else {
         MP4ItmfItemList* list = MP4ItmfGetItemsByMeaning(fileHandle, "com.apple.iTunes", "iTunEXTC");
         if (list) {
-            uint32_t i;
-            for (i = 0; i < list->size; i++) {
-                MP4ItmfItem* item = &list->elements[i];
+            for (uint32_t i = 0; i < list->size; i++) {
+                MP4ItmfItem *item = &list->elements[i];
                 MP4ItmfRemoveItem(fileHandle, item);
             }
         }
+
         MP4ItmfItemListFree(list);
     }
 
