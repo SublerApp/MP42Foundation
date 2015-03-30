@@ -41,6 +41,11 @@
             _format = [getHumanReadableTrackMediaDataName(fileHandle, _Id) retain];
             _name = [getTrackName(fileHandle, _Id) retain];
             _language = [getHumanReadableTrackLanguage(fileHandle, _Id) retain];
+
+            const char *elng;
+            if (MP4GetTrackStringProperty(fileHandle, _Id, "mdia.elng", &elng)) {
+                _extendedLanguageTag = [[NSString stringWithCString:elng encoding:NSASCIIStringEncoding] retain];
+            }
             _bitrate = MP4GetTrackBitRate(fileHandle, _Id);
             _duration = MP4ConvertFromTrackDuration(fileHandle, _Id,
                                                    MP4GetTrackDuration(fileHandle, _Id),
@@ -74,6 +79,7 @@
         copy->_format = [_format retain];
         copy->_name = [_name retain];
         copy->_language = [_language retain];
+        copy->_extendedLanguageTag = [_extendedLanguageTag retain];
         copy->_enabled = _enabled;
         copy->_alternate_group = _alternate_group;
         copy->_startOffset = _startOffset;
@@ -132,6 +138,8 @@
         setTrackStartOffset(fileHandle, _Id, _startOffset);
     if ([_updatedProperty valueForKey:@"language"] || !_muxed)
         MP4SetTrackLanguage(fileHandle, _Id, lang_for_english([_language UTF8String])->iso639_2);
+    if ([_updatedProperty valueForKey:@"extendedLanguageTag"] || !_muxed)
+        MP4SetTrackStringProperty(fileHandle, _Id, "mdia.elng", [_extendedLanguageTag cStringUsingEncoding:NSASCIIStringEncoding]);
     if ([_updatedProperty valueForKey:@"enabled"] || !_muxed) {
         if (_enabled) MP4SetTrackEnabled(fileHandle, _Id);
         else MP4SetTrackDisabled(fileHandle, _Id);
@@ -152,6 +160,7 @@
 @synthesize format = _format;
 @synthesize sourceFormat = _sourceFormat;
 @synthesize name = _name;
+@synthesize extendedLanguageTag = _extendedLanguageTag;
 
 - (NSString *)name {
     return [[_name retain] autorelease];
@@ -182,6 +191,18 @@
     _language = [newLang retain];
     self.isEdited = YES;
     [_updatedProperty setValue:@"True" forKey:@"language"];
+}
+
+- (NSString *)extendedLanguageTag {
+    return [[_extendedLanguageTag retain] autorelease];
+}
+
+- (void)setExtendedLanguageTag:(NSString *)newExtendedLanguageTag
+{
+    [_extendedLanguageTag autorelease];
+    _extendedLanguageTag = [newExtendedLanguageTag retain];
+    self.isEdited = YES;
+    [_updatedProperty setValue:@"True" forKey:@"extendedLanguageTag"];
 }
 
 - (BOOL)enabled {
@@ -256,6 +277,7 @@
     [coder encodeObject:_format forKey:@"format"];
     [coder encodeObject:_name forKey:@"name"];
     [coder encodeObject:_language forKey:@"language"];
+    [coder encodeObject:_extendedLanguageTag forKey:@"extendedLanguageTag"];
 
     [coder encodeBool:_enabled forKey:@"enabled"];
 
@@ -302,6 +324,7 @@
     _format = [[decoder decodeObjectForKey:@"format"] retain];
     _name = [[decoder decodeObjectForKey:@"name"] retain];
     _language = [[decoder decodeObjectForKey:@"language"] retain];
+    _extendedLanguageTag = [[decoder decodeObjectForKey:@"extendedLanguageTag"] retain];
 
     _enabled = [decoder decodeBoolForKey:@"enabled"];
 
@@ -345,6 +368,7 @@
     [_sourceURL release];
     [_name release];
     [_language release];
+    [_extendedLanguageTag release];
     [super dealloc];
 }
 

@@ -380,7 +380,7 @@ void FFInitFFmpeg() {
 
         srcMagicCookie = [[track.muxer_helper->importer magicCookieForTrack:track] retain];
 
-        ocr = [[MP42OCRWrapper alloc] initWithLanguage:[track language]];
+        ocr = [[MP42OCRWrapper alloc] initWithLanguage:[track language] extendedLanguageTag:[track extendedLanguageTag]];
 
         _done = dispatch_semaphore_create(0);
 

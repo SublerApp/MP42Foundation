@@ -60,6 +60,7 @@
 
 @property(nonatomic, readwrite, retain) NSString *name;
 @property(nonatomic, readwrite, retain) NSString *language;
+@property(nonatomic, readwrite, retain) NSString *extendedLanguageTag;
 
 @property(nonatomic, readwrite) BOOL     enabled;
 @property(nonatomic, readwrite) uint64_t alternate_group;
