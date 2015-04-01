@@ -28,7 +28,7 @@
 }
 
 + (NSArray *)generatePreviewImagesQTKitFromChapters:(NSArray *)chapters andFile:(NSURL *)file {
-    __block QTMovie * qtMovie;
+    __block QTMovie *qtMovie;
 
     // QTMovie objects must always be create on the main thread.
     NSDictionary *movieAttributes = @{QTMovieURLAttribute: file,
@@ -42,30 +42,33 @@
         dispatch_sync(dispatch_get_main_queue(), ^{
             qtMovie = [[QTMovie alloc] initWithAttributes:movieAttributes error:nil];
         });
-    }
-    else
+    } else {
         qtMovie = [[QTMovie alloc] initWithAttributes:movieAttributes error:nil];
+    }
 
-    if (!qtMovie)
+    if (!qtMovie) {
         return nil;
+    }
 
-    for (QTTrack *qtTrack in [qtMovie tracksOfMediaType:@"sbtl"])
+    for (QTTrack *qtTrack in [qtMovie tracksOfMediaType:@"sbtl"]) {
         [qtTrack setAttribute:@NO forKey:QTTrackEnabledAttribute];
+    }
 
     NSDictionary *attributes = [NSDictionary dictionaryWithObject:QTMovieFrameImageTypeNSImage forKey:QTMovieFrameImageType];
-    NSMutableArray *images = [[NSMutableArray alloc] initWithCapacity:[chapters count]];
+    NSMutableArray *images = [[NSMutableArray alloc] initWithCapacity:chapters.count];
 
     for (MP42TextSample *chapter in chapters) {
         QTTime chapterTime = {
-            [chapter timestamp] + 1500, // Add a short offset, hopefully we will get a better image
-            1000,                       // if there is a fade
+            chapter.timestamp + 1500, // Add a short offset, hopefully we will get a better image
+            1000,                     // if there is a fade
             0
         };
 
         NSImage *frame = [qtMovie frameImageAtTime:chapterTime withAttributes:attributes error:nil];
 
-        if (images)
+        if (frame) {
             [images addObject:frame];
+        }
     }
 
     // Release the movie, we don't want to keep it open while we are writing in it using another library.
@@ -74,9 +77,9 @@
         dispatch_sync(dispatch_get_main_queue(), ^{
             [qtMovie release];
         });
-    }
-    else
+    } else {
         [qtMovie release];
+    }
 
     return [images autorelease];
 }
