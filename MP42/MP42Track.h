@@ -24,6 +24,7 @@
 
     NSString    *_name;
     NSString    *_language;
+    NSString    *_extendedLanguageTag;
 
     BOOL        _enabled;
     uint64_t    _alternate_group;
