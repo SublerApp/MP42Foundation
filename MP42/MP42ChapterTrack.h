@@ -35,8 +35,16 @@
 
 - (NSInteger)chapterCount;
 
+- (BOOL)updateFromCSVFile:(NSURL *)URL error:(NSError **)outError;
+
 - (BOOL)exportToURL:(NSURL *)url error:(NSError **)error;
 
 @property(nonatomic, readonly, retain) NSArray *chapters;
+
+@end
+
+@interface NSArray (CSVAdditions)
+
++ (NSArray *)arrayWithContentsOfCSVURL: (NSURL *)url;
 
 @end
