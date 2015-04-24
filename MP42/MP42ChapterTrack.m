@@ -278,6 +278,28 @@
     return @"Chapter Track";
 }
 
+- (BOOL)updateFromCSVFile:(NSURL *)URL error:(NSError **)outError {
+    NSArray *csvData = [NSArray arrayWithContentsOfCSVURL:URL];
+    if (csvData.count == self.chapterCount) {
+        for (NSInteger i = 0; i < csvData.count; ++i) {
+            NSArray *lineFields = csvData[i];
+            if (lineFields.count != 2 || [lineFields[0] integerValue] != i + 1) {
+                if (NULL != outError)
+                    *outError = MP42Error(@"Invalid chapters CSV file.", @"The CSV file is not a valid chapters CSV file.", 150);
+                return NO;
+            }
+        }
+        for (NSInteger i = 0; i < csvData.count; ++i) {
+            MP42TextSample *chapter = self.chapters[i];
+            chapter.title = csvData[i][1];
+        }
+        return YES;
+    }
+    if (NULL != outError)
+        *outError = MP42Error(@"Incorrect line count", @"The line count in the chapters CSV file does not match the number of chapters in the movie.", 151);
+    return NO;
+}
+
 @synthesize chapters;
 
 - (void)encodeWithCoder:(NSCoder *)coder
@@ -300,6 +322,108 @@
 {
     [chapters release];
     [super dealloc];
+}
+
+@end
+
+@implementation NSArray (CSVAdditions)
+
+// CSV parsing examples
+// CSV Record:
+//     one,two,three
+// Fields:
+//     <one>
+//     <two>
+//     <three>
+// CSV Record:
+//     one, two, three
+// Fields:
+//     <one>
+//     < two>
+//     < three>
+// CSV Record:
+//     one,"2,345",three
+// Fields:
+//     <one>
+//     <2,345>
+//     <three>
+// CSV record:
+//     one,"John said, ""Hello there.""",three
+// Explanation: inside a quoted field, two double quotes in a row count
+// as an escaped double quote in the field data.
+// Fields:
+//     <one>
+//     <John said, "Hello there.">
+//     <three>
++ (NSArray *)arrayWithContentsOfCSVURL: (NSURL *)url
+{
+    NSString *str1 = STLoadFileWithUnknownEncoding(url.path);
+    NSMutableString *csvString = STStandardizeStringNewlines(str1);
+    if (!csvString) return 0;
+    
+    if ([csvString characterAtIndex:0] == 0xFEFF) [csvString deleteCharactersInRange:NSMakeRange(0,1)];
+    if ([csvString characterAtIndex:[csvString length]-1] != '\n') [csvString appendFormat:@"%c",'\n'];
+    NSScanner *sc = [NSScanner scannerWithString:csvString];
+    sc.charactersToBeSkipped =  nil;
+    NSMutableArray *csvArray = [NSMutableArray array];
+    [csvArray addObject:[NSMutableArray array]];
+    NSCharacterSet *commaNewlineCS = [NSCharacterSet characterSetWithCharactersInString:@",\n"];
+    while (sc.scanLocation < csvString.length) {
+        if ([sc scanString:@"\"" intoString:NULL]) {
+            // Quoted field
+            NSMutableString *field = [NSMutableString string];
+            BOOL done = NO;
+            NSString *quotedString;
+            // Scan until we get to the end double quote or the EOF.
+            while (!done && sc.scanLocation < csvString.length) {
+                if ([sc scanUpToString:@"\"" intoString:&quotedString])
+                    [field appendString:quotedString];
+                if ([sc scanString:@"\"\"" intoString:NULL]) {
+                    // Escaped double quote inside the quoted string.
+                    [field appendString:@"\""];
+                }
+                else {
+                    done = YES;
+                }
+            }
+            if (sc.scanLocation < csvString.length) {
+                ++sc.scanLocation;
+                BOOL nextIsNewline = [sc scanString:@"\n" intoString:NULL];
+                BOOL nextIsComma = NO;
+                if (!nextIsNewline)
+                    nextIsComma = [sc scanString:@"," intoString:NULL];
+                if (nextIsNewline || nextIsComma) {
+                    [[csvArray lastObject] addObject:field];
+                    if (nextIsNewline && sc.scanLocation < csvString.length) {
+                        [csvArray addObject:[NSMutableArray array]];
+                    }
+                }
+                else {
+                    // Quoted fields must be immediately followed by a comma or newline.
+                    return nil;
+                }
+            }
+            else {
+                // No close quote found before EOF, so file is invalid CSV.
+                return nil;
+            }
+        }
+        else {
+            NSString *field;
+            [sc scanUpToCharactersFromSet:commaNewlineCS intoString:&field];
+            BOOL nextIsNewline = [sc scanString:@"\n" intoString:NULL];
+            BOOL nextIsComma = NO;
+            if (!nextIsNewline)
+                nextIsComma = [sc scanString:@"," intoString:NULL];
+            if (nextIsNewline || nextIsComma) {
+                [[csvArray lastObject] addObject:field];
+                if (nextIsNewline && sc.scanLocation < csvString.length) {
+                    [csvArray addObject:[NSMutableArray array]];
+                }
+            }
+        }
+    }
+    return csvArray;
 }
 
 @end
