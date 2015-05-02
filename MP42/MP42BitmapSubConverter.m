@@ -437,14 +437,14 @@ void FFInitFFmpeg() {
 
 - (void)dealloc
 {
-    if (codecData) {
-        av_freep(&codecData);
-    }
     if (avCodec) {
         avcodec_close(avContext);
     }
     if (avContext) {
         av_freep(&avContext);
+    }
+    if (codecData) {
+        av_freep(&codecData);
     }
     if (subtitle.rects) {
         for (int i = 0; i < subtitle.num_rects; i++) {
