@@ -893,7 +893,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 
             [NSGraphicsContext restoreGraphicsState];
 
-            imageData = [bitmap representationUsingType:NSJPEGFileType properties:nil];
+            imageData = [bitmap representationUsingType:NSJPEGFileType properties:@{}];
             [bitmap release];
         }
 

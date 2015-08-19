@@ -45,7 +45,7 @@ MP42Duration TimeFromString(NSString *time_string, MP42Duration timeScale)
 
 NSArray *supportedFileFormat()
 {
-    return [NSArray arrayWithObjects:@"scc", @"smi",  @"txt", @"m4v", @"mp4", @"m4a", @"m4a", @"mov", @"mts", @"m2ts",
+    return [NSArray arrayWithObjects:@"scc", @"smi",  @"txt", @"m4v", @"mp4", @"m4a", @"m4a", @"mov", @"ts", @"mts", @"m2ts",
             @"mkv", @"mka", @"mks", @"h264", @"264", @"idx", @"aac", @"ac3", @"srt", nil];
 }
 

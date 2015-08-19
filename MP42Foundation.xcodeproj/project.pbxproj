@@ -853,7 +853,7 @@
 		A9B9C1E4182391DF00416A4E /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0630;
+				LastUpgradeCheck = 0700;
 				ORGANIZATIONNAME = "Damiano Galassi";
 				TargetAttributes = {
 					A9B9C203182391DF00416A4E = {
@@ -1118,7 +1118,7 @@
 					suppress,
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = macosx10.8;
+				SDKROOT = macosx;
 			};
 			name = Debug;
 		};
@@ -1145,7 +1145,7 @@
 					suppress,
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = macosx10.8;
+				SDKROOT = macosx;
 			};
 			name = Release;
 		};
@@ -1261,6 +1261,7 @@
 					"$(SRCROOT)/ffmpeg/lib",
 					"$(SRCROOT)/Tesseract/lib",
 				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.galad.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = MP42Foundation;
 				WRAPPER_EXTENSION = framework;
 			};
@@ -1283,6 +1284,7 @@
 					"$(SRCROOT)/ffmpeg/lib",
 					"$(SRCROOT)/Tesseract/lib",
 				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.galad.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = MP42Foundation;
 				WRAPPER_EXTENSION = framework;
 			};
@@ -1304,6 +1306,7 @@
 					"$(inherited)",
 				);
 				INFOPLIST_FILE = "MP42Tests/MP42FoundationTests-Info.plist";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.galad.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = MP42FoundationFoundationTests;
 				TEST_HOST = "$(BUNDLE_LOADER)";
 				WRAPPER_EXTENSION = xctest;
@@ -1322,6 +1325,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "MP42/MP42Foundation-Prefix.pch";
 				INFOPLIST_FILE = "MP42Tests/MP42FoundationTests-Info.plist";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.galad.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = MP42FoundationFoundationTests;
 				TEST_HOST = "$(BUNDLE_LOADER)";
 				WRAPPER_EXTENSION = xctest;

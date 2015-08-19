@@ -1291,9 +1291,7 @@ static const genreType_t genreType_strings[] = {
             for (i = 0; i < [artworks count]; i++) {
                 MP42Image *artwork;
                 MP4TagArtwork newArtwork;
-                NSArray *representations;
-                NSData *bitmapData;
-                
+
                 artwork = [artworks objectAtIndex:i];
                 if (artwork.data) {
                     newArtwork.data = (void *)[artwork.data bytes];
@@ -1301,13 +1299,17 @@ static const genreType_t genreType_strings[] = {
                     newArtwork.type = artwork.type;
                 }
                 else {
-                    representations = [artwork.image representations];
-                    bitmapData = [NSBitmapImageRep representationOfImageRepsInArray:representations
-                                                                          usingType:NSPNGFileType properties:nil];
-                    
-                    newArtwork.data = (void *)[bitmapData bytes];
-                    newArtwork.size = [bitmapData length];
-                    newArtwork.type = MP4_ART_PNG;
+                    NSArray *representations = [artwork.image representations];
+                    if (representations.count) {
+                        NSData *bitmapData = [NSBitmapImageRep representationOfImageRepsInArray:representations
+                                                                                      usingType:NSPNGFileType properties:@{}];
+
+                        if (bitmapData) {
+                            newArtwork.data = (void *)[bitmapData bytes];
+                            newArtwork.size = [bitmapData length];
+                            newArtwork.type = MP4_ART_PNG;
+                        }
+                    }
                 }
                 
                 if (tags->artworkCount > i)
