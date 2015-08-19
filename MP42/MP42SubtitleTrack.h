@@ -9,6 +9,8 @@
 #import <Foundation/Foundation.h>
 #import "MP42VideoTrack.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface MP42SubtitleTrack : MP42VideoTrack <NSCoding> {
 @private
     BOOL _verticalPlacement;
@@ -26,6 +28,8 @@
 @property(nonatomic, readwrite) BOOL allSamplesAreForced;
 
 @property(nonatomic, readonly)  MP42TrackId forcedTrackId;
-@property(nonatomic, readwrite, assign) MP42Track *forcedTrack;
+@property(nonatomic, readwrite, assign, nullable) MP42Track *forcedTrack;
 
 @end
+
+NS_ASSUME_NONNULL_END

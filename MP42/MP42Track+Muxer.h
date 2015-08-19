@@ -11,6 +11,8 @@
 #import "MP42Fifo.h"
 #import "MP42ConverterProtocol.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 typedef struct muxer_helper {
     // Input helpers
     MP42FileImporter *importer;
@@ -25,8 +27,10 @@ typedef struct muxer_helper {
 
 @interface MP42Track (MP42TrackMuxerExtentions)
 
-@property(nonatomic, readonly) muxer_helper *muxer_helper;
+@property(nonatomic, readonly, nullable) muxer_helper *muxer_helper;
 
 - (MP42SampleBuffer *)copyNextSample;
 
 @end
+
+NS_ASSUME_NONNULL_END

@@ -9,6 +9,8 @@
 #import <Foundation/Foundation.h>
 #import "MP42MediaFormat.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 /**
  *  MP42Track
  */
@@ -54,14 +56,14 @@
 @property(nonatomic, readwrite) MP42TrackId Id;
 @property(nonatomic, readwrite) MP42TrackId sourceId;
 
-@property(nonatomic, readwrite, retain) NSURL *sourceURL;
-@property(nonatomic, readwrite, retain) NSString *format;
-@property(nonatomic, readwrite, retain) NSString *sourceFormat;
-@property(nonatomic, readonly, retain) NSString *mediaType;
+@property(nonatomic, readwrite, copy) NSURL *sourceURL;
+@property(nonatomic, readwrite, copy) NSString *format;
+@property(nonatomic, readwrite, copy) NSString *sourceFormat;
+@property(nonatomic, readonly, copy) NSString *mediaType;
 
-@property(nonatomic, readwrite, retain) NSString *name;
-@property(nonatomic, readwrite, retain) NSString *language;
-@property(nonatomic, readwrite, retain) NSString *extendedLanguageTag;
+@property(nonatomic, readwrite, copy) NSString *name;
+@property(nonatomic, readwrite, copy) NSString *language;
+@property(nonatomic, readwrite, copy) NSString *extendedLanguageTag;
 
 @property(nonatomic, readwrite) BOOL     enabled;
 @property(nonatomic, readwrite) uint64_t alternate_group;
@@ -78,3 +80,5 @@
 @property(nonatomic, readwrite) uint64_t dataLength;
 
 @end
+
+NS_ASSUME_NONNULL_END

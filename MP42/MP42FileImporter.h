@@ -12,6 +12,8 @@
 #import "MP42MediaFormat.h"
 #import "MP42Sample.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 @class MP42Sample;
 @class MP42Metadata;
 @class MP42Track;
@@ -23,9 +25,9 @@
     NSInteger       _chapterId;
     MP42Metadata   *_metadata;
 
-    NSMutableArray *_tracksArray;
-    NSMutableArray *_inputTracks;
-    NSMutableArray *_outputsTracks;
+    NSMutableArray<MP42Track *> *_tracksArray;
+    NSMutableArray<MP42Track *> *_inputTracks;
+    NSMutableArray<MP42Track *> *_outputsTracks;
     NSThread       *_demuxerThread;
 
     CGFloat       _progress;
@@ -59,6 +61,8 @@
 - (BOOL)cleanUp:(MP42FileHandle) fileHandle;
 
 @property(readwrite, retain) MP42Metadata *metadata;
-@property(readonly) NSMutableArray  *tracks;
+@property(readonly) NSMutableArray<MP42Track *> *tracks;
 
 @end
+
+NS_ASSUME_NONNULL_END

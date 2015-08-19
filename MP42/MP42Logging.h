@@ -8,6 +8,8 @@
 
 #import <Foundation/Foundation.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 @protocol MP42Logging <NSObject>
 
 @required
@@ -16,3 +18,5 @@
 - (void)writeErrorToLog:(NSError *)error;
 
 @end
+
+NS_ASSUME_NONNULL_END

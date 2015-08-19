@@ -69,7 +69,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 @property(nonatomic, readwrite)  MP42FileHandle fileHandle;
 @property(nonatomic, readwrite, retain) NSURL *URL;
 
-@property(nonatomic, readonly) NSMutableArray *itracks;
+@property(nonatomic, readonly) NSMutableArray<__kindof MP42Track *> *itracks;
 @property(nonatomic, readonly) NSMutableDictionary *importers;
 
 @property(nonatomic, readwrite) MP42Status status;

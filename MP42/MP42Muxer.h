@@ -10,6 +10,8 @@
 #import "mp4v2.h"
 #import "MP42Logging.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 @class MP42Track;
 
 @protocol MP42MuxerDelegate
@@ -23,7 +25,7 @@
     id <MP42MuxerDelegate>  _delegate;
     id <MP42Logging>        _logger;
 
-    NSMutableArray *_workingTracks;
+    NSMutableArray<MP42Track *> *_workingTracks;
     int32_t         _cancelled;
 }
 
@@ -37,3 +39,5 @@
 - (void)cancel;
 
 @end
+
+NS_ASSUME_NONNULL_END

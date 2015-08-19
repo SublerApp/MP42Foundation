@@ -19,6 +19,8 @@
 #import "MP42MediaFormat.h"
 #import "MP42Logging.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 extern NSString * const MP4264BitData;
 extern NSString * const MP4264BitTime;
 extern NSString * const MP42GenerateChaptersPreviewTrack;
@@ -58,8 +60,8 @@ typedef enum MP42Status : NSInteger {
     MP42Status  _status;
     BOOL        _cancelled;
 
-    NSMutableArray  *_tracks;
-    NSMutableArray  *_tracksToBeDeleted;
+    NSMutableArray<__kindof MP42Track *>  *_tracks;
+    NSMutableArray<MP42Track *>  *_tracksToBeDeleted;
     MP42Metadata    *_metadata;
     MP42Muxer       *_muxer;
     NSMutableDictionary *_importers;
@@ -115,12 +117,12 @@ typedef enum MP42Status : NSInteger {
  *
  *  @return An instance of MP42File
  */
-- (instancetype)initWithExistingFile:(NSURL *)URL andDelegate:(id <MP42FileDelegate>)del;
+- (instancetype)initWithExistingFile:(NSURL *)URL andDelegate:(_Nullable id <MP42FileDelegate>)del;
 
 /**
  * Provides the array of MP42Tracks contained by the mp4 file
  */
-@property(nonatomic, readonly) NSArray *tracks;
+@property(nonatomic, readonly, copy) NSArray<MP42Track *> *tracks;
 
 /**
  *  Provides an instance of MP42Track that represents the track of the specified index.
@@ -147,7 +149,7 @@ typedef enum MP42Status : NSInteger {
  *
  *  @return An NSArray of MP42Tracks; may be empty if no tracks of the specified media type are available.
  */
-- (NSArray *)tracksWithMediaType:(NSString *)mediaType;
+- (NSArray<MP42Track *> *)tracksWithMediaType:(NSString *)mediaType;
 
 /**
  *  Add a track to the mp4 file.
@@ -231,3 +233,5 @@ typedef enum MP42Status : NSInteger {
 - (void)cancel;
 
 @end
+
+NS_ASSUME_NONNULL_END

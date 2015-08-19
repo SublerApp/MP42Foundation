@@ -10,9 +10,11 @@
 #import "MP42Track.h"
 #import "MP42TextSample.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface MP42ChapterTrack : MP42Track <NSCoding> {
 @private
-    NSMutableArray *chapters;
+    NSMutableArray<MP42TextSample *> *chapters;
     BOOL _areChaptersEdited;
 }
 
@@ -48,3 +50,5 @@
 + (NSArray *)arrayWithContentsOfCSVURL: (NSURL *)url;
 
 @end
+
+NS_ASSUME_NONNULL_END

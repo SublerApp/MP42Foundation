@@ -9,16 +9,20 @@
 #import <Cocoa/Cocoa.h>
 #import "MP42MediaFormat.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
+@class MP42Image;
+
 @interface MP42Metadata : NSObject <NSCoding, NSCopying> {
 @private
     NSString                *presetName;
     NSMutableDictionary     *tagsDict;
 
-    NSMutableArray          *artworks;
+    NSMutableArray<MP42Image *> *artworks;
 
-    NSArray                 *artworkThumbURLs;
-    NSArray                 *artworkFullsizeURLs;
-    NSArray                 *artworkProviderNames;
+    NSArray<NSURL *>        *artworkThumbURLs;
+    NSArray<NSURL *>        *artworkFullsizeURLs;
+    NSArray<NSString *>     *artworkProviderNames;
 
 	NSString *ratingiTunesCode;
 
@@ -46,7 +50,7 @@
 - (BOOL) setContentRatingFromString:(NSString *)contentRatingString;
 - (BOOL) setArtworkFromFilePath:(NSString *)imageFilePath;
 
-- (BOOL) writeMetadataWithFileHandle: (MP42FileHandle *) fileHandle;
+- (BOOL) writeMetadataWithFileHandle: (MP42FileHandle) fileHandle;
 
 - (BOOL) mergeMetadata: (MP42Metadata *) newMetadata;
 
@@ -56,9 +60,9 @@
 
 @property(nonatomic, readwrite, retain) NSMutableArray *artworks;
 
-@property(nonatomic, readwrite, retain) NSArray    *artworkThumbURLs;
-@property(nonatomic, readwrite, retain) NSArray    *artworkFullsizeURLs;
-@property(nonatomic ,readwrite, retain) NSArray    *artworkProviderNames;
+@property(nonatomic, readwrite, retain, nullable) NSArray<NSURL *> *artworkThumbURLs;
+@property(nonatomic, readwrite, retain, nullable) NSArray<NSURL *> *artworkFullsizeURLs;
+@property(nonatomic ,readwrite, retain, nullable) NSArray<NSString *> *artworkProviderNames;
 
 @property(nonatomic, readwrite) uint8_t    mediaKind;
 @property(nonatomic, readwrite) uint8_t    contentRating;
@@ -69,3 +73,5 @@
 @property(nonatomic, readwrite) BOOL       isArtworkEdited;
 
 @end
+
+NS_ASSUME_NONNULL_END

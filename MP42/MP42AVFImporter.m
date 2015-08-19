@@ -328,7 +328,6 @@
  *  Converts the AVAsset metadata to the MP42File format
  */
 - (void)convertMetadata {
-    NSArray *items = nil;
     NSDictionary *commonItemsDict = [NSDictionary dictionaryWithObjectsAndKeys:@"Name", AVMetadataCommonKeyTitle,
                                      //nil, AVMetadataCommonKeyCreator,
                                      //nil, AVMetadataCommonKeySubject,
@@ -356,13 +355,14 @@
 
     _metadata = [[MP42Metadata alloc] init];
 
-    for (NSString *commonKey in [commonItemsDict allKeys]) {
-        items = [AVMetadataItem metadataItemsFromArray:_localAsset.commonMetadata withKey:commonKey keySpace:AVMetadataKeySpaceCommon];
-        if ([items count])
+    for (NSString *commonKey in commonItemsDict.allKeys) {
+        NSArray<AVMetadataItem *> *items = [AVMetadataItem metadataItemsFromArray:_localAsset.commonMetadata withKey:commonKey keySpace:AVMetadataKeySpaceCommon];
+        if ([items count]) {
             [_metadata setTag:[[items lastObject] value] forKey:[commonItemsDict objectForKey:commonKey]];
+        }
     }
 
-    items = [AVMetadataItem metadataItemsFromArray:_localAsset.commonMetadata withKey:AVMetadataCommonKeyArtwork keySpace:AVMetadataKeySpaceCommon];
+    NSArray<AVMetadataItem *> *items = [AVMetadataItem metadataItemsFromArray:_localAsset.commonMetadata withKey:AVMetadataCommonKeyArtwork keySpace:AVMetadataKeySpaceCommon];
     if ([items count]) {
         id artworkData = [[items lastObject] value];
         if ([artworkData isKindOfClass:[NSData class]]) {
@@ -372,7 +372,7 @@
         }
     }
 
-    NSArray *availableMetadataFormats = [_localAsset availableMetadataFormats];
+    NSArray<NSString *> *availableMetadataFormats = [_localAsset availableMetadataFormats];
 
     if ([availableMetadataFormats containsObject:AVMetadataFormatiTunesMetadata]) {
         NSArray *itunesMetadata = [_localAsset metadataForFormat:AVMetadataFormatiTunesMetadata];
@@ -450,7 +450,7 @@
 
         for (NSString *itunesKey in [itunesMetadataDict allKeys]) {
             items = [AVMetadataItem metadataItemsFromArray:itunesMetadata withKey:itunesKey keySpace:AVMetadataKeySpaceiTunes];
-            if ([items count]) {
+            if (items.count) {
                 [_metadata setTag:[[items lastObject] value] forKey:[itunesMetadataDict objectForKey:itunesKey]];
             }
         }
@@ -466,7 +466,7 @@
         }*/
     }
     if ([availableMetadataFormats containsObject:AVMetadataFormatQuickTimeMetadata]) {
-        NSArray *quicktimeMetadata = [_localAsset metadataForFormat:AVMetadataFormatQuickTimeMetadata];
+        NSArray<AVMetadataItem *> *quicktimeMetadata = [_localAsset metadataForFormat:AVMetadataFormatQuickTimeMetadata];
         
         NSDictionary *quicktimeMetadataDict = [NSDictionary dictionaryWithObjectsAndKeys:
                                                @"Arist",        AVMetadataQuickTimeMetadataKeyAuthor,
@@ -494,15 +494,15 @@
                                                @"Phonogram Rights", AVMetadataQuickTimeMetadataKeyPhonogramRights,
                                                @"Name",         AVMetadataQuickTimeMetadataKeyTitle, nil];
         
-        for (NSString *qtKey in [quicktimeMetadataDict allKeys]) {
+        for (NSString *qtKey in quicktimeMetadataDict.allKeys) {
             items = [AVMetadataItem metadataItemsFromArray:quicktimeMetadata withKey:qtKey keySpace:AVMetadataKeySpaceQuickTimeUserData];
-            if ([items count]) {
+            if (items.count) {
                 [_metadata setTag:[[items lastObject] value] forKey:[quicktimeMetadataDict objectForKey:qtKey]];
             }
         }
     }
     if ([availableMetadataFormats containsObject:AVMetadataFormatQuickTimeUserData]) {
-        NSArray *quicktimeUserDataMetadata = [_localAsset metadataForFormat:AVMetadataFormatQuickTimeUserData];
+        NSArray<AVMetadataItem *> *quicktimeUserDataMetadata = [_localAsset metadataForFormat:AVMetadataFormatQuickTimeUserData];
         
         NSDictionary *quicktimeUserDataMetadataDict = [NSDictionary dictionaryWithObjectsAndKeys:
                                                        @"Album",                AVMetadataQuickTimeUserDataKeyAlbum,
@@ -527,9 +527,9 @@
                                                        @"Credits",              AVMetadataQuickTimeUserDataKeyCredits,
                                                        @"Phonogram Rights",     AVMetadataQuickTimeUserDataKeyPhonogramRights, nil];
 
-        for (NSString *qtUserDataKey in [quicktimeUserDataMetadataDict allKeys]) {
+        for (NSString *qtUserDataKey in quicktimeUserDataMetadataDict.allKeys) {
             items = [AVMetadataItem metadataItemsFromArray:quicktimeUserDataMetadata withKey:qtUserDataKey keySpace:AVMetadataKeySpaceQuickTimeUserData];
-            if ([items count]) {
+            if (items.count) {
                 [_metadata setTag:[[items lastObject] value] forKey:[quicktimeUserDataMetadataDict objectForKey:qtUserDataKey]];
             }
         }

@@ -36,6 +36,6 @@
 @property(nonatomic, readwrite, assign) MP42Track *fallbackTrack;
 @property(nonatomic, readwrite, assign) MP42Track *followsTrack;
 
-@property(nonatomic, readwrite, retain) NSString *mixdownType;
+@property(nonatomic, readwrite, copy) NSString *mixdownType;
 
 @end

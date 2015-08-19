@@ -543,7 +543,7 @@ static const genreType_t genreType_strings[] = {
         }
     }
 
-    for (NSImage *artwork in newMetadata.artworks) {
+    for (MP42Image *artwork in newMetadata.artworks) {
         isArtworkEdited = YES;
         [artworks addObject:artwork];
     }
@@ -1042,7 +1042,7 @@ static const genreType_t genreType_strings[] = {
     }
 }
 
-- (BOOL) writeMetadataWithFileHandle: (MP4FileHandle *)fileHandle
+- (BOOL) writeMetadataWithFileHandle: (MP4FileHandle)fileHandle
 {
     if (!fileHandle)
         return NO;
