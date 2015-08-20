@@ -16,7 +16,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface MP42Metadata : NSObject <NSCoding, NSCopying> {
 @private
     NSString                *presetName;
-    NSMutableDictionary     *tagsDict;
+    NSMutableDictionary<NSString *, id> *tagsDict;
 
     NSMutableArray<MP42Image *> *artworks;
 
@@ -54,11 +54,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (BOOL) mergeMetadata: (MP42Metadata *) newMetadata;
 
-@property(nonatomic, readonly) NSMutableDictionary *tagsDict;
+@property(nonatomic, readonly) NSMutableDictionary<NSString *, id> *tagsDict;
 
 @property(nonatomic, readwrite, copy) NSString *presetName;
 
-@property(nonatomic, readwrite, retain) NSMutableArray *artworks;
+@property(nonatomic, readwrite, retain) NSMutableArray<MP42Image *> *artworks;
 
 @property(nonatomic, readwrite, retain, nullable) NSArray<NSURL *> *artworkThumbURLs;
 @property(nonatomic, readwrite, retain, nullable) NSArray<NSURL *> *artworkFullsizeURLs;

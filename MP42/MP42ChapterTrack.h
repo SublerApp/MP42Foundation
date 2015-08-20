@@ -47,7 +47,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface NSArray (CSVAdditions)
 
-+ (NSArray *)arrayWithContentsOfCSVURL: (NSURL *)url;
++ (NSArray<NSArray<NSString *> *> * __nullable)arrayWithContentsOfCSVURL:(NSURL *)url;
 
 @end
 

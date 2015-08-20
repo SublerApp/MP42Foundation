@@ -8,6 +8,8 @@
 
 #import <Foundation/Foundation.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface MP42Fifo : NSObject {
 @private
     id *_array;
@@ -28,8 +30,8 @@
 - (instancetype)initWithCapacity:(NSUInteger)numItems;
 
 - (void)enqueue:(id)item;
-- (id)deque NS_RETURNS_RETAINED;
-- (id)dequeAndWait NS_RETURNS_RETAINED;
+- (nullable id)deque NS_RETURNS_RETAINED;
+- (nullable id)dequeAndWait NS_RETURNS_RETAINED;
 
 - (NSInteger)count;
 
@@ -40,3 +42,5 @@
 - (void)cancel;
 
 @end
+
+NS_ASSUME_NONNULL_END

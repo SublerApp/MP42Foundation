@@ -9,6 +9,8 @@
 #import <Foundation/Foundation.h>
 #import "MP42Sample.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 @protocol MP42ConverterProtocol <NSObject>
 
 @optional
@@ -24,3 +26,5 @@
 - (void)setInputDone;
 
 @end
+
+NS_ASSUME_NONNULL_END

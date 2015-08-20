@@ -59,7 +59,7 @@
 
 - (BOOL)setup:(NSError **)outError
 {
-    NSMutableArray *unsupportedTracks = [[NSMutableArray alloc] init];;
+    NSMutableArray<MP42Track *> *unsupportedTracks = [[NSMutableArray alloc] init];;
 
     for (MP42Track *track in _workingTracks) {
         MP4TrackId dstTrackId = 0;
@@ -388,21 +388,24 @@
 
 - (void)work
 {
-    if (![_workingTracks count])
+    if (![_workingTracks count]) {
         return;
+    }
 
     @autoreleasepool {
-        NSMutableArray *trackImportersArray = [[NSMutableArray alloc] init];
+        NSMutableArray<MP42FileImporter *> *trackImportersArray = [[NSMutableArray alloc] init];
         NSUInteger done = 0, update = 0;
         CGFloat progress = 0;
 
         for (MP42Track *track in _workingTracks) {
-            if (![trackImportersArray containsObject:track.muxer_helper->importer])
+            if (![trackImportersArray containsObject:track.muxer_helper->importer]) {
                 [trackImportersArray addObject:track.muxer_helper->importer];
+            }
         }
 
-        for (MP42FileImporter *importerHelper in trackImportersArray)
+        for (MP42FileImporter *importerHelper in trackImportersArray) {
             [importerHelper startReading];
+        }
 
         NSUInteger tracksImportersCount = [trackImportersArray count];
         NSUInteger tracksCount = [_workingTracks count];
@@ -426,8 +429,9 @@
                 done += (track.muxer_helper->done ? 1 : 0);
             }
 
-            if (_cancelled)
+            if (_cancelled) {
                 break;
+            }
 
             // If all tracks are done, exit the loop
             if (done == tracksCount) {
@@ -439,8 +443,9 @@
             // Update progress
             if (!(update % 200)) {
                 progress = 0;
-                for (MP42FileImporter *importerHelper in trackImportersArray)
+                for (MP42FileImporter *importerHelper in trackImportersArray) {
                     progress += [importerHelper progress];
+                }
 
                 progress /= tracksImportersCount;
 

@@ -67,7 +67,7 @@
     return NSMakeSize([currentTrack width], [currentTrack height]);
 }
 
-- (NSData*)magicCookieForTrack:(MP42Track *)track
+- (NSData *)magicCookieForTrack:(MP42Track *)track
 {
     if (!_fileHandle)
         _fileHandle = MP4Read([[_fileURL path] UTF8String]);

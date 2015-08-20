@@ -8,6 +8,8 @@
 
 #import <Foundation/Foundation.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 /**
  *  A simple heap/priority queue implementations with a static size.
  *  It takes a NSComparator in input.
@@ -24,7 +26,7 @@
 - (instancetype)initWithCapacity:(NSUInteger)numItems andComparator:(NSComparator)cmptr;
 
 - (void)insert:(id)item;
-- (id)extract NS_RETURNS_RETAINED; 
+- (nullable id)extract NS_RETURNS_RETAINED;
 
 - (NSInteger)count;
 
@@ -32,3 +34,5 @@
 - (BOOL)isEmpty;
 
 @end
+
+NS_ASSUME_NONNULL_END

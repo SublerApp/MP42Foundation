@@ -30,11 +30,11 @@ extern NSString * const MP42OrganizeAlternateGroups;
 /**
  *  MP42Status
  */
-typedef enum MP42Status : NSInteger {
+typedef NS_ENUM(NSUInteger, MP42Status) {
     MP42StatusLoaded = 0,
     MP42StatusReading,
     MP42StatusWriting
-} MP42Status;
+};
 
 /**
  *  MP42FileDelegate
@@ -42,7 +42,6 @@ typedef enum MP42Status : NSInteger {
 @protocol MP42FileDelegate <NSObject>
 @optional
 - (void)progressStatus:(CGFloat)progress;
-- (void)saveDidEnd:(id)sender;
 @end
 
 @class MP42Muxer;
@@ -77,7 +76,7 @@ typedef enum MP42Status : NSInteger {
 /**
  * indicates the URL with which the instance of MP42File was initialized.
  */
-@property(nonatomic, readonly) NSURL *URL;
+@property(nonatomic, readonly, nullable) NSURL *URL;
 
 /**
  * Provides access to the mp4 file MP42Metadata instance.
@@ -117,7 +116,7 @@ typedef enum MP42Status : NSInteger {
  *
  *  @return An instance of MP42File
  */
-- (instancetype)initWithExistingFile:(NSURL *)URL andDelegate:(_Nullable id <MP42FileDelegate>)del;
+- (instancetype)initWithExistingFile:(NSURL *)URL andDelegate:(nullable id <MP42FileDelegate>)del;
 
 /**
  * Provides the array of MP42Tracks contained by the mp4 file
@@ -140,7 +139,7 @@ typedef enum MP42Status : NSInteger {
  *
  *  @return An instance of MP42Track; may be nil if no track of the specified trackID is available.
  */
-- (MP42Track *)trackWithTrackID:(NSUInteger)trackID;
+- (MP42Track * __nullable)trackWithTrackID:(NSUInteger)trackID;
 
 /**
  *  Provides an array of MP42Track of the file that present media of the specified media type.

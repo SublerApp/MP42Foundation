@@ -596,9 +596,6 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
         [fileManager release];
     }
 
-    if ([self.delegate respondsToSelector:@selector(saveDidEnd:)])
-        [self.delegate performSelector:@selector(saveDidEnd:) withObject:self];
-
     return noErr;
 }
 
@@ -827,10 +824,6 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
         [self createChaptersPreview];
     } else if ([[attributes valueForKey:MP42CustomChaptersPreviewTrack] boolValue] && [self.itracks count]) {
         [self customChaptersPreview];
-    }
-
-    if ([self.delegate respondsToSelector:@selector(saveDidEnd:)]) {
-        [self.delegate performSelector:@selector(saveDidEnd:) withObject:self];
     }
 
     return YES;

@@ -6,7 +6,7 @@
 //  Copyright 2010 Damiano Galassi. All rights reserved.
 //
 
-#import <Cocoa/Cocoa.h>
+#import <Foundation/Foundation.h>
 #import "mp4v2.h"
 #import "MP42Logging.h"
 

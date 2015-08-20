@@ -43,7 +43,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (NSUInteger)timescaleForTrack:(MP42Track *)track;
 - (NSSize)sizeForTrack:(MP42Track *)track;
-- (NSData *)magicCookieForTrack:(MP42Track *)track;
+- (nullable NSData *)magicCookieForTrack:(MP42Track *)track;
 - (AudioStreamBasicDescription)audioDescriptionForTrack:(MP42Track *)track;
 
 - (void)setActiveTrack:(MP42Track *)track;
@@ -58,10 +58,10 @@ NS_ASSUME_NONNULL_BEGIN
 - (BOOL)done;
 - (void)setDone:(BOOL)status;
 
-- (BOOL)cleanUp:(MP42FileHandle) fileHandle;
+- (BOOL)cleanUp:(MP42FileHandle)fileHandle;
 
-@property(readwrite, retain) MP42Metadata *metadata;
-@property(readonly) NSMutableArray<MP42Track *> *tracks;
+@property(readonly) MP42Metadata *metadata;
+@property(readonly) NSArray<MP42Track *> *tracks;
 
 @end
 
