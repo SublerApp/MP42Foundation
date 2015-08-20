@@ -28,7 +28,7 @@ OSStatus EncoderDataProc(AudioConverterRef              inAudioConverter,
                          AudioStreamPacketDescription**	outDataPacketDescription,
                          void*							inUserData)
 {
-	struct AudioFileIO* afio = (struct AudioFileIO*)inUserData;
+	struct AudioFileIO *afio = (struct AudioFileIO *)inUserData;
 
 	// figure out how much to read
 	if (*ioNumberDataPackets > afio->numPacketsPerRead) *ioNumberDataPackets = afio->numPacketsPerRead;
@@ -263,7 +263,7 @@ OSStatus DecoderDataProc(AudioConverterRef              inAudioConverter,
                          void*							inUserData)
 {
     OSStatus err = noErr;
-    struct AudioFileIO * afio = inUserData;
+    struct AudioFileIO *afio = inUserData;
 
     if (afio->sample)
         [afio->sample release];
@@ -316,7 +316,7 @@ OSStatus DecoderDataProc(AudioConverterRef              inAudioConverter,
 	decoderData.pos = 0;
 	decoderData.srcFormat = decoderData.inputFormat;    
     decoderData.numPacketsPerRead = 1;
-    decoderData.pktDescs = (AudioStreamPacketDescription*)malloc(decoderData.numPacketsPerRead);
+    decoderData.pktDescs = (AudioStreamPacketDescription *)malloc(decoderData.numPacketsPerRead * sizeof(AudioStreamPacketDescription));
     decoderData.inputSamplesBuffer = _inputSamplesBuffer;
 
     // set up our output buffers
