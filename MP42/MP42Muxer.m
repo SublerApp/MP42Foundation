@@ -130,18 +130,29 @@
             for (i = 0; i < spsCount; i++) {
                 uint16_t spsSize = (avcCAtom[ptrPos++] << 8) & 0xff00;
                 spsSize += avcCAtom[ptrPos++] & 0xff;
-                MP4AddH264SequenceParameterSet(_fileHandle, dstTrackId,
-                                               avcCAtom+ptrPos, spsSize);
-                ptrPos += spsSize;
+
+                if (spsSize + ptrPos < magicCookie.length) {
+                    MP4AddH264SequenceParameterSet(_fileHandle, dstTrackId,
+                                                   avcCAtom+ptrPos, spsSize);
+                    ptrPos += spsSize;
+                } else {
+                    break;
+                }
             }
 
             int8_t ppsCount = avcCAtom[ptrPos++];
             for (i = 0; i < ppsCount; i++) {
                 uint16_t ppsSize = (avcCAtom[ptrPos++] << 8) & 0xff00;
                 ppsSize += avcCAtom[ptrPos++] & 0xff;
-                MP4AddH264PictureParameterSet(_fileHandle, dstTrackId,
-                                              avcCAtom + ptrPos, ppsSize);
-                ptrPos += ppsSize;
+
+                if (ppsSize + ptrPos < magicCookie.length) {
+                    MP4AddH264PictureParameterSet(_fileHandle, dstTrackId,
+                                                  avcCAtom + ptrPos, ppsSize);
+                    ptrPos += ppsSize;
+
+                } else {
+                    break;
+                }
             }
 
             MP4SetVideoProfileLevel(_fileHandle, 0x15);

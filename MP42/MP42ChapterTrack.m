@@ -215,7 +215,7 @@
                 refTrackDuration = moovDuration;
 
             for (i = 0; i < chapterCount; i++) {
-                MP42TextSample * chapter = [chapters objectAtIndex:i];
+                MP42TextSample *chapter = [chapters objectAtIndex:i];
                 if ([[chapter title] UTF8String])
                     strcpy(fileChapters[i].title, [[chapter title] UTF8String]);
 

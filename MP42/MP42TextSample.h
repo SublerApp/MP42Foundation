@@ -10,15 +10,18 @@
 #import "MP42MediaFormat.h"
 #import "MP42Image.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface MP42TextSample : NSObject <NSCoding> {
-    MP42Duration timestamp;
-    MP42Image *image;
-    NSString *title;
+    MP42Duration _timestamp;
+    MP42Image *_image;
+    NSString *_title;
 }
 
-@property(readwrite, retain) NSString *title;
-@property(readwrite, retain) MP42Image *image;
-@property(readwrite) MP42Duration timestamp;
+@property (nonatomic, readwrite, copy) NSString *title;
+@property (nonatomic, readwrite, retain, nullable) MP42Image *image;
+@property (nonatomic, readwrite) MP42Duration timestamp;
 
 @end
 
+NS_ASSUME_NONNULL_END

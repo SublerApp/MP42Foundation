@@ -10,41 +10,50 @@
 
 @implementation MP42TextSample
 
--(NSComparisonResult)compare:(MP42TextSample *)otherObject
+- (NSComparisonResult)compare:(MP42TextSample *)otherObject
 {
-    MP42Duration otherTimestamp = [otherObject timestamp];
+    MP42Duration otherTimestamp = otherObject.timestamp;
 
-    if (timestamp < otherTimestamp)
+    if (_timestamp < otherTimestamp)
         return NSOrderedAscending;
-    else if (timestamp > otherTimestamp)
+    else if (_timestamp > otherTimestamp)
         return NSOrderedDescending;
 
     return NSOrderedSame;
 }
 
--(void) dealloc
+- (void)dealloc
 {
-    [image release];
-    [title release];
+    [_image release];
+    [_title release];
     [super dealloc];
 }
 
-@synthesize timestamp;
-@synthesize title;
-@synthesize image;
+@synthesize timestamp = _timestamp;
+@synthesize title = _title;
+@synthesize image = _image;
+
+- (void)setTitle:(NSString *)title
+{
+    if (title == nil) {
+        _title = @"";
+    } else {
+        _title = [title copy];
+    }
+}
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
-    [coder encodeInt64:timestamp forKey:@"timestamp"];
-    [coder encodeObject:title forKey:@"title"];
+    [coder encodeInt64:_timestamp forKey:@"timestamp"];
+    [coder encodeObject:_title forKey:@"title"];
 }
 
 - (id)initWithCoder:(NSCoder *)decoder
 {
     self = [super init];
 
-    timestamp = [decoder decodeInt64ForKey:@"timestamp"];
-    title = [[decoder decodeObjectForKey:@"title"] retain];
+    _timestamp = [decoder decodeInt64ForKey:@"timestamp"];
+    _title = [[decoder decodeObjectForKey:@"title"] retain];
 
     return self;
 }
