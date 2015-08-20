@@ -110,8 +110,10 @@
 
         // H.264 video track
         if ([track isMemberOfClass:[MP42VideoTrack class]] && [track.format isEqualToString:MP42VideoFormatH264]) {
-            if ([magicCookie length] < sizeof(uint8_t) * 6)
+
+            if ([magicCookie length] < sizeof(uint8_t) * 6) {
                 continue;
+            }
 
             NSSize size = [helper->importer sizeForTrack:track];
 
@@ -127,13 +129,14 @@
             SInt64 i;
             int8_t spsCount = (avcCAtom[5] & 0x1f);
             uint8_t ptrPos = 6;
+            NSUInteger len = magicCookie.length;
             for (i = 0; i < spsCount; i++) {
                 uint16_t spsSize = (avcCAtom[ptrPos++] << 8) & 0xff00;
                 spsSize += avcCAtom[ptrPos++] & 0xff;
 
-                if (spsSize + ptrPos < magicCookie.length) {
+                if (ptrPos + spsSize <= len) {
                     MP4AddH264SequenceParameterSet(_fileHandle, dstTrackId,
-                                                   avcCAtom+ptrPos, spsSize);
+                                                   avcCAtom + ptrPos, spsSize);
                     ptrPos += spsSize;
                 } else {
                     break;
@@ -145,7 +148,7 @@
                 uint16_t ppsSize = (avcCAtom[ptrPos++] << 8) & 0xff00;
                 ppsSize += avcCAtom[ptrPos++] & 0xff;
 
-                if (ppsSize + ptrPos < magicCookie.length) {
+                if (ptrPos + ppsSize <= len) {
                     MP4AddH264PictureParameterSet(_fileHandle, dstTrackId,
                                                   avcCAtom + ptrPos, ppsSize);
                     ptrPos += ppsSize;

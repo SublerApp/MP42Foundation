@@ -1079,8 +1079,8 @@ static const genreType_t genreType_strings[] = {
 
     if ([tagsDict valueForKey:@"Track #"]) {
         MP4TagTrack dtrack; int trackNum = 0, totalTrackNum = 0;
-        char separator;
-        sscanf([[tagsDict valueForKey:@"Track #"] UTF8String],"%u%[/- ]%u", &trackNum, &separator, &totalTrackNum);
+        char separator[3];
+        sscanf([[tagsDict valueForKey:@"Track #"] UTF8String],"%u%[/- ]%u", &trackNum, separator, &totalTrackNum);
         dtrack.index = trackNum;
         dtrack.total = totalTrackNum;
         MP4TagsSetTrack(tags, &dtrack);
@@ -1090,8 +1090,8 @@ static const genreType_t genreType_strings[] = {
     
     if ([tagsDict valueForKey:@"Disk #"]) {
         MP4TagDisk ddisk; int diskNum = 0, totalDiskNum = 0;
-        char separator;
-        sscanf([[tagsDict valueForKey:@"Disk #"] UTF8String],"%u%[/- ]%u", &diskNum, &separator, &totalDiskNum);
+        char separator[3];
+        sscanf([[tagsDict valueForKey:@"Disk #"] UTF8String],"%u%[/- ]%u", &diskNum, separator, &totalDiskNum);
         ddisk.index = diskNum;
         ddisk.total = totalDiskNum;
         MP4TagsSetDisk(tags, &ddisk);

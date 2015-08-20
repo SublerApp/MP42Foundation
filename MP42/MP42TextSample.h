@@ -13,6 +13,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface MP42TextSample : NSObject <NSCoding> {
+@private
     MP42Duration _timestamp;
     MP42Image *_image;
     NSString *_title;
