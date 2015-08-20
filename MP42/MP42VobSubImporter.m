@@ -176,7 +176,7 @@ static NSArray* LoadVobSubSubtitles(NSURL *theDirectory, NSString *filename)
                     case VOB_SUB_STATE_READING_TRACK_HEADER:
                         if([line hasPrefix:@"id: "])
                         {
-                            char *langStr = (char *)malloc([line length]);
+                            char *langStr = (char *)malloc(line.length * sizeof(char));
                             int index;
                             sscanf([line UTF8String], "id: %s index: %d", langStr, &index);
                             size_t langLength = strlen(langStr);
@@ -195,9 +195,9 @@ static NSArray* LoadVobSubSubtitles(NSURL *theDirectory, NSString *filename)
                         break;
                     case VOB_SUB_STATE_READING_TRACK_DATA:
                     {
-                        char *timeStr = (char *)malloc([line length]);
+                        char *timeStr = (char *)malloc(line.length * sizeof(char));
                         unsigned int position;
-                        sscanf([line UTF8String], "timestamp: %s filepos: %x", timeStr, &position);
+                        sscanf(line.UTF8String, "timestamp: %s filepos: %x", timeStr, &position);
                         long time = ParseSubTime(timeStr, 1000, YES);
                         free(timeStr);
                         if(position > subFileSize)

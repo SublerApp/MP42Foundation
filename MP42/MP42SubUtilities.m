@@ -241,7 +241,7 @@ canOutput:
 unsigned ParseSubTime(const char *time, unsigned secondScale, BOOL hasSign)
 {
 	unsigned hour, minute, second, subsecond, timeval;
-	char separator;
+	char separator[3];
 	int sign = 1;
 
 	if (hasSign && *time == '-') {
@@ -249,13 +249,16 @@ unsigned ParseSubTime(const char *time, unsigned secondScale, BOOL hasSign)
 		time++;
 	}
 
-	if (sscanf(time,"%u:%u:%u%[,.:]%u",&hour,&minute,&second,&separator,&subsecond) < 5)
+    if (sscanf(time, "%u:%u:%u%[,.:]%u", &hour, &minute, &second, separator, &subsecond) < 5) {
 		return 0;
+    }
 
-    if (second > 60)
+    if (second > 60) {
         second = 0;
-    if (subsecond > secondScale)
+    }
+    if (subsecond > secondScale) {
         subsecond = 0;
+    }
 
 	timeval = hour * 60 * 60 + minute * 60 + second;
 	timeval = secondScale * timeval + subsecond;

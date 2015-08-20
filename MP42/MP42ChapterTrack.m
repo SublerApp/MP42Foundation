@@ -235,7 +235,7 @@
             }
 
             removeAllChapterTrackReferences(fileHandle);
-            MP4SetChapters(fileHandle, fileChapters, i, MP4ChapterTypeAny);
+            MP4SetChapters(fileHandle, fileChapters, i, MP4ChapterTypeQt);
 
             free(fileChapters);
             success = _Id = findChapterTrackId(fileHandle);

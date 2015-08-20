@@ -491,7 +491,7 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
       return NSMakeSize([(MP42VideoTrack*)track width], [(MP42VideoTrack*) track height]);
 }
 
-- (NSData*)magicCookieForTrack:(MP42Track *)track
+- (NSData *)magicCookieForTrack:(MP42Track *)track
 {
     if (!_matroskaFile)
         return nil;
@@ -522,7 +522,7 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
         if (readMkvPacket(_ioStream, trackInfo, FilePos, &frame, &FrameSize)) {
             // parse AC3 header
             // collect all the necessary meta information
-            uint32_t fscod, frmsizecod, bsid, bsmod, acmod, lfeon;
+            uint64_t fscod, frmsizecod, bsid, bsmod, acmod, lfeon;
             uint32_t lfe_offset = 4;
 
             fscod = (*(frame+4) >> 6) & 0x3;

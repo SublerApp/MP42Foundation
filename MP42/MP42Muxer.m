@@ -115,7 +115,7 @@
 
             NSSize size = [helper->importer sizeForTrack:track];
 
-            uint8_t *avcCAtom = (uint8_t*)[magicCookie bytes];
+            uint8_t *avcCAtom = (uint8_t *)[magicCookie bytes];
             dstTrackId = MP4AddH264VideoTrack(_fileHandle, timeScale,
                                               MP4_INVALID_DURATION,
                                               size.width, size.height,
@@ -140,7 +140,7 @@
                 uint16_t ppsSize = (avcCAtom[ptrPos++] << 8) & 0xff00;
                 ppsSize += avcCAtom[ptrPos++] & 0xff;
                 MP4AddH264PictureParameterSet(_fileHandle, dstTrackId,
-                                              avcCAtom+ptrPos, ppsSize);
+                                              avcCAtom + ptrPos, ppsSize);
                 ptrPos += ppsSize;
             }
 
