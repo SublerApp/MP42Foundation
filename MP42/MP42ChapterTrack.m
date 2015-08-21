@@ -355,7 +355,7 @@
 //     <one>
 //     <John said, "Hello there.">
 //     <three>
-+ (NSArray<NSArray<NSString *> *> * __nullable)arrayWithContentsOfCSVURL:(NSURL *)url;
++ (nullable NSArray<NSArray<NSString *> *> *)arrayWithContentsOfCSVURL:(NSURL *)url;
 {
     NSString *str1 = STLoadFileWithUnknownEncoding(url.path);
     NSMutableString *csvString = STStandardizeStringNewlines(str1);

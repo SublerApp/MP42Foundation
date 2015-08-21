@@ -8,6 +8,8 @@
 
 #import <Foundation/Foundation.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 typedef struct iso639_lang_t
 {
     char * eng_name;        /* Description in English */
@@ -41,16 +43,25 @@ extern "C" {
 #endif
 
 @interface MP42Languages : NSObject {
-    @private
-    NSArray *_languagesArray;
-    NSArray *_iso6391languagesArray;
+@private
+    NSArray<NSString *> *_languagesArray;
+    NSArray<NSString *> *_iso6391languagesArray;
 }
 
 + (MP42Languages *)defaultManager;
 
-- (NSArray *)languages;
-- (NSArray *)iso6391languages;
+/**
+ *  Returns the complete languages list
+ */
+- (NSArray<NSString *> *)languages;
 
-+ (NSString *)iso6391CodeFor:(NSString *)aLanguage;
+/**
+ *  Returns the complete  ISO-639-1 language code list
+ */
+- (NSArray<NSString *> *)iso6391languages;
+
++ (nullable NSString *)iso6391CodeFor:(NSString *)aLanguage;
 
 @end
+
+NS_ASSUME_NONNULL_END

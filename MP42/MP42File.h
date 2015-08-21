@@ -139,7 +139,7 @@ typedef NS_ENUM(NSUInteger, MP42Status) {
  *
  *  @return An instance of MP42Track; may be nil if no track of the specified trackID is available.
  */
-- (MP42Track * __nullable)trackWithTrackID:(NSUInteger)trackID;
+- (nullable MP42Track *)trackWithTrackID:(NSUInteger)trackID;
 
 /**
  *  Provides an array of MP42Track of the file that present media of the specified media type.

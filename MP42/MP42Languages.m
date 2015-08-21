@@ -611,7 +611,7 @@ iso639_lang_t * lang_for_english( const char * english )
     return sharedLanguagesManager;
 }
 
-- (NSArray *)commonLanguages {
+- (NSArray<NSString *> *)commonLanguages {
     return @[@"Unknown", @"English", @"French", @"German", @"Italian", @"Dutch",
              @"Swedish" , @"Spanish" , @"Danish" , @"Portuguese", @"Norwegian", @"Hebrew",
              @"Japanese", @"Arabic", @"Finnish", @"Modern Greek", @"Icelandic", @"Maltese", @"Turkish",
@@ -620,7 +620,7 @@ iso639_lang_t * lang_for_english( const char * english )
              @"Irish", @"Serbian", @"Albanian", @"Bulgarian", @"Czech", @"Slovak", @"Slovenian"];
 }
 
-- (NSArray *)languages {
+- (NSArray<NSString *> *)languages {
     if (!_languagesArray) {
         NSMutableArray *languagesArray = [[NSMutableArray alloc] init];
 
@@ -640,7 +640,7 @@ iso639_lang_t * lang_for_english( const char * english )
     return [[_languagesArray copy] autorelease];
 }
 
-- (NSArray *)iso6391languages {
+- (NSArray<NSString *> *)iso6391languages {
     if (!_iso6391languagesArray) {
         NSMutableArray *languagesArray = [[NSMutableArray alloc] init];
 
