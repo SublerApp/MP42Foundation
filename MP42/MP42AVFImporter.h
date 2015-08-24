@@ -8,9 +8,11 @@
 
 #import <Foundation/Foundation.h>
 #import "MP42FileImporter.h"
+
 @class AVAsset;
 
 @interface MP42AVFImporter : MP42FileImporter {
+@private
     AVAsset *_localAsset;
 }
 

@@ -261,7 +261,7 @@ void FFInitFFmpeg() {
             if (!sampleBuffer)
                 break;
 
-            int ret, got_sub, i;
+            int ret, got_sub;
             uint32_t *imageData;
             BOOL forced = NO;
 
@@ -283,7 +283,7 @@ void FFInitFFmpeg() {
                 continue;
             }
 
-            for (i = 0; i < subtitle.num_rects; i++) {
+            for (unsigned i = 0; i < subtitle.num_rects; i++) {
                 AVSubtitleRect *rect = subtitle.rects[i];
                 NSString *text;
 
@@ -447,7 +447,7 @@ void FFInitFFmpeg() {
         av_freep(&codecData);
     }
     if (subtitle.rects) {
-        for (int i = 0; i < subtitle.num_rects; i++) {
+        for (unsigned i = 0; i < subtitle.num_rects; i++) {
             av_freep(&subtitle.rects[i]->pict.data[0]);
             av_freep(&subtitle.rects[i]->pict.data[1]);
             av_freep(&subtitle.rects[i]);

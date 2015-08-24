@@ -190,12 +190,13 @@
         if (!refTrack)
             refTrack = 1;
 
-        chapterCount = [chapters count];
+        chapterCount = chapters.count;
         
         if (chapterCount) {
             // Insert a chapter at time 0 if there isn't one
-            MP42TextSample * chapter = [chapters objectAtIndex:0];
-            if (chapter.timestamp != 0) {
+            MP42TextSample *firstChapter = chapters.firstObject;
+
+            if (firstChapter.timestamp != 0) {
                 MP42TextSample *st = [[MP42TextSample alloc] init];
                 st.timestamp = 0;
                 st.title = @"Chapter 0";
@@ -256,9 +257,9 @@
     return success;
 }
 
-- (NSInteger)chapterCount
+- (NSUInteger)chapterCount
 {
-  return [chapters count];
+  return chapters.count;
 }
 
 - (BOOL)exportToURL:(NSURL *)url error:(NSError **)error
@@ -281,7 +282,7 @@
 - (BOOL)updateFromCSVFile:(NSURL *)URL error:(NSError **)outError {
     NSArray *csvData = [NSArray arrayWithContentsOfCSVURL:URL];
     if (csvData.count == self.chapterCount) {
-        for (NSInteger i = 0; i < csvData.count; ++i) {
+        for (NSUInteger i = 0; i < csvData.count; ++i) {
             NSArray *lineFields = csvData[i];
             if (lineFields.count != 2 || [lineFields[0] integerValue] != i + 1) {
                 if (NULL != outError)
@@ -289,7 +290,7 @@
                 return NO;
             }
         }
-        for (NSInteger i = 0; i < csvData.count; ++i) {
+        for (NSUInteger i = 0; i < csvData.count; ++i) {
             MP42TextSample *chapter = self.chapters[i];
             chapter.title = csvData[i][1];
         }

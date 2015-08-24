@@ -35,7 +35,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (MP42TextSample *)chapterAtIndex:(NSUInteger)index;
 
-- (NSInteger)chapterCount;
+- (NSUInteger)chapterCount;
 
 - (BOOL)updateFromCSVFile:(NSURL *)URL error:(NSError **)outError;
 

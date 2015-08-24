@@ -686,17 +686,18 @@ MP4Duration getTrackDuration(MP4FileHandle fileHandle, MP4TrackId trackId)
 {
     uint32_t trackEditsCount = MP4GetTrackNumberOfEdits(fileHandle, trackId);
     MP4Duration duration = 0;
-    int i = 1;
+    uint32_t i = 1;
     
-    while( i <= trackEditsCount) {
+    while (i <= trackEditsCount) {
         duration += MP4GetTrackEditDuration(fileHandle, trackId, i);
         i++;
     }
     
-    if (duration == 0)
+    if (duration == 0) {
         duration = MP4ConvertFromTrackDuration(fileHandle, trackId,
                                                MP4GetTrackDuration(fileHandle, trackId),
                                                MP4GetTimeScale(fileHandle));
+    }
     
     return duration;
 }

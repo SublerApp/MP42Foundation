@@ -1441,16 +1441,16 @@ static const genreType_t genreType_strings[] = {
                                         dataFromPropertyList:iTunMovi
                                         format:NSPropertyListXMLFormat_v1_0
                                         errorDescription:nil];
-        if ([iTunMovi count]) {
-            MP4ItmfItemList* list = MP4ItmfGetItemsByMeaning(fileHandle, "com.apple.iTunes", "iTunMOVI");
-            if (list) {
+        if (iTunMovi.count) {
+            MP4ItmfItemList *moviList = MP4ItmfGetItemsByMeaning(fileHandle, "com.apple.iTunes", "iTunMOVI");
+            if (moviList) {
                 uint32_t i;
-                for (i = 0; i < list->size; i++) {
-                    MP4ItmfItem* item = &list->elements[i];
+                for (i = 0; i < moviList->size; i++) {
+                    MP4ItmfItem *item = &moviList->elements[i];
                     MP4ItmfRemoveItem(fileHandle, item);
                 }
             }
-            MP4ItmfItemListFree(list);
+            MP4ItmfItemListFree(moviList);
 
             MP4ItmfItem* newItem = MP4ItmfItemAlloc( "----", 1 );
             newItem->mean = strdup( "com.apple.iTunes" );
@@ -1466,15 +1466,15 @@ static const genreType_t genreType_strings[] = {
             MP4ItmfItemFree(newItem);
         }
         else {
-            MP4ItmfItemList* list = MP4ItmfGetItemsByMeaning(fileHandle, "com.apple.iTunes", "iTunMOVI");
-            if (list) {
+            MP4ItmfItemList* moviList = MP4ItmfGetItemsByMeaning(fileHandle, "com.apple.iTunes", "iTunMOVI");
+            if (moviList) {
                 uint32_t i;
-                for (i = 0; i < list->size; i++) {
-                    MP4ItmfItem* item = &list->elements[i];
+                for (i = 0; i < moviList->size; i++) {
+                    MP4ItmfItem* item = &moviList->elements[i];
                     MP4ItmfRemoveItem(fileHandle, item);
                 }
             }
-            MP4ItmfItemListFree(list);
+            MP4ItmfItemListFree(moviList);
         }
     }
 

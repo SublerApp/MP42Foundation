@@ -10,7 +10,8 @@
 #import "MP42FileImporter.h"
 
 @interface MP42AC3Importer : MP42FileImporter {
-    FILE* inFile;
+@private
+    FILE *inFile;
     int64_t size;
 
     NSMutableData *ac3Info;

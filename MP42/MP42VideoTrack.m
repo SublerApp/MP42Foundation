@@ -85,7 +85,7 @@
     if (_Id) {
         [super writeToFile:fileHandle error:outError];
 
-        if (trackWidth && trackHeight) {
+        if (trackWidth > 0 && trackHeight > 0) {
             MP4SetTrackFloatProperty(fileHandle, _Id, "tkhd.width", trackWidth);
 
             MP4SetTrackFloatProperty(fileHandle, _Id, "tkhd.height", trackHeight);
@@ -146,7 +146,7 @@
         }
     }
 
-    return _Id;
+    return (_Id > 0);
 }
 
 - (NSString *)defaultName {
@@ -267,11 +267,11 @@
     offsetX = [decoder decodeInt32ForKey:@"offsetX"];
     offsetY = [decoder decodeInt32ForKey:@"offsetY"];
 
-    _origProfile = [decoder decodeInt32ForKey:@"origProfile"];
-    _origLevel = [decoder decodeInt32ForKey:@"origLevel"];
+    _origProfile = [decoder decodeIntForKey:@"origProfile"];
+    _origLevel = [decoder decodeIntForKey:@"origLevel"];
 
-    _newProfile = [decoder decodeInt32ForKey:@"newProfile"];
-    _newLevel = [decoder decodeInt32ForKey:@"newLevel"];
+    _newProfile = [decoder decodeIntForKey:@"newProfile"];
+    _newLevel = [decoder decodeIntForKey:@"newLevel"];
 
     return self;
 }

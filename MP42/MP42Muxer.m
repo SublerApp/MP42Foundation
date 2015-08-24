@@ -42,10 +42,10 @@
 - (BOOL)canAddTrack:(MP42Track *)track
 {
     if (isTrackMuxable(track.format)) {
-        return YES;
         if ([track isMemberOfClass:[MP42AudioTrack class]]) {
             // TO-DO Check if we can initialize the audio converter
         }
+        return YES;
     } else {
         return NO;
     }
@@ -250,10 +250,10 @@
 
             NSInteger vPlacement = [(MP42SubtitleTrack*)track verticalPlacement];
 
-            for (id track in _workingTracks)
-                if ([track isMemberOfClass:[MP42VideoTrack class]]) {
-                    videoSize.width  = [track trackWidth];
-                    videoSize.height = [track trackHeight];
+            for (id workingTrack in _workingTracks)
+                if ([workingTrack isMemberOfClass:[MP42VideoTrack class]]) {
+                    videoSize.width  = [workingTrack trackWidth];
+                    videoSize.height = [workingTrack trackHeight];
                     break;
                 }
 
@@ -361,10 +361,10 @@
         else if ([track isMemberOfClass:[MP42ClosedCaptionTrack class]]) {
             NSSize videoSize = [helper->importer sizeForTrack:track];
 
-            for (id track in _workingTracks)
-                if ([track isMemberOfClass:[MP42VideoTrack class]]) {
-                    videoSize.width  = [track trackWidth];
-                    videoSize.height = [track trackHeight];
+            for (id workingTrack in _workingTracks)
+                if ([workingTrack isMemberOfClass:[MP42VideoTrack class]]) {
+                    videoSize.width  = [workingTrack trackWidth];
+                    videoSize.height = [workingTrack trackHeight];
                     break;
                 }
 

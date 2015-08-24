@@ -500,7 +500,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
                                 MP42MediaTypeAudio,
                                 MP42MediaTypeSubtitle];
 
-    for (int i = 0; i < [typeToOrganize count]; i++) {
+    for (NSUInteger i = 0; i < typeToOrganize.count; i++) {
         [self organizeAlternateGroupsForMediaType:[typeToOrganize objectAtIndex:i]
                                       withGroupID:i];
     }
@@ -582,7 +582,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
             if (noErr && [[[MP42File alloc] initWithExistingFile:tempURL andDelegate:nil] autorelease]) {
                 // Replace the original file
                 NSURL *result = nil;
-                noErr = [fileManager replaceItemAtURL:self.URL withItemAtURL:tempURL backupItemName:nil options:0 resultingItemURL:&result error:&error];
+                noErr = [fileManager replaceItemAtURL:self.URL withItemAtURL:tempURL backupItemName:nil options:NSFileManagerItemReplacementWithoutDeletingBackupItem resultingItemURL:&result error:&error];
                 if (noErr) {
                     self.URL = result;
                 }

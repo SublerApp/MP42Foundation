@@ -182,14 +182,15 @@ OSStatus EncoderDataProc(AudioConverterRef              inAudioConverter,
 	if (!err && cookieSize) {
 		char* cookie = (char *) malloc(cookieSize);
         UInt8* cookieBuffer;
-        int size;
 
 		err = AudioConverterGetProperty(converterEnc, kAudioConverterCompressionMagicCookie, &cookieSize, cookie);
 		if (err) {
             NSLog(@"err Get Cookie From AudioConverter");
         }
-        ReadESDSDescExt(cookie, &cookieBuffer, &size, 1);
-        outputMagicCookie = [[NSData dataWithBytes:cookieBuffer length:size] retain];
+
+        int ESDSsize;
+        ReadESDSDescExt(cookie, &cookieBuffer, &ESDSsize, 1);
+        outputMagicCookie = [[NSData dataWithBytes:cookieBuffer length:ESDSsize] retain];
 
         free(cookieBuffer);
 		free(cookie);
@@ -199,7 +200,7 @@ OSStatus EncoderDataProc(AudioConverterRef              inAudioConverter,
 	SInt64 outputPos = 0;
     
 	while (1) {
-        AudioStreamPacketDescription odesc = {0};
+        AudioStreamPacketDescription odesc = {0, 0, 0};
         
 		// set up output buffer list
 		AudioBufferList fillBufList;
@@ -208,8 +209,9 @@ OSStatus EncoderDataProc(AudioConverterRef              inAudioConverter,
 		fillBufList.mBuffers[0].mDataByteSize = theOutputBufSize;
 		fillBufList.mBuffers[0].mData = outputBuffer;
         
-        while ((sfifo_used(&fifo) < (inputFormat.mBytesPerPacket * encoderFormat.mFramesPerPacket * 4)) && !readerDone)
+        while ((sfifo_used(&fifo) < (inputFormat.mBytesPerPacket * encoderFormat.mFramesPerPacket * 4)) && !readerDone) {
             usleep(500);
+        }
         
         // convert data
 		UInt32 ioOutputDataPackets = 1;
@@ -401,8 +403,9 @@ OSStatus DecoderDataProc(AudioConverterRef              inAudioConverter,
             hb_sample_t *samples = (hb_sample_t *)malloc(samplesBufferSize);
             hb_downmix(downmix, samples, downmix_buffer, ioOutputDataPackets);
 
-            while (sfifo_space(&fifo) < (samplesBufferSize))
+            while (sfifo_space(&fifo) < (samplesBufferSize)) {
                 usleep(5000);
+            }
 
             sfifo_write(&fifo, samples, samplesBufferSize);
             free(samples);
@@ -410,8 +413,9 @@ OSStatus DecoderDataProc(AudioConverterRef              inAudioConverter,
         else {
             UInt32 inNumBytes = fillBufList.mBuffers[0].mDataByteSize;
 
-            while (sfifo_space(&fifo) < inNumBytes)
+            while (sfifo_space(&fifo) < inNumBytes) {
                 usleep(5000);
+            }
 
             sfifo_write(&fifo, outputBuffer, inNumBytes);
         }

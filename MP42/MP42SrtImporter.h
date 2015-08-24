@@ -12,6 +12,7 @@
 @class SBSubSerializer;
 
 @interface MP42SrtImporter : MP42FileImporter {
+@private
     SBSubSerializer *_ss;
 
     BOOL    _verticalPlacement;

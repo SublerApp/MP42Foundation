@@ -10,6 +10,7 @@
 #import "MP42FileImporter.h"
 
 @interface MP42MkvImporter : MP42FileImporter {
+@private
     struct MatroskaFile	*_matroskaFile;
 	struct StdIoStream  *_ioStream;
 

@@ -12,6 +12,7 @@
 #import "mp4v2.h"
 
 @interface MP42Mp4Importer : MP42FileImporter <MP42FileDelegate> {
+@private
     MP4FileHandle   _fileHandle;
 }
 

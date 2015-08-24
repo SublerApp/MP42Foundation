@@ -8,6 +8,8 @@
 
 #import <Foundation/Foundation.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 @class MP42Metadata;
 
 @interface MP42XMLReader : NSObject {
@@ -16,6 +18,8 @@
 
 - (instancetype)initWithURL:(NSURL *)url error:(NSError **)error;
 
-@property(readonly) MP42Metadata *mMetadata;
+@property (nonatomic, readonly) MP42Metadata *mMetadata;
 
 @end
+
+NS_ASSUME_NONNULL_END

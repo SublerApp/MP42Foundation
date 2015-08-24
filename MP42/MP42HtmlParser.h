@@ -37,11 +37,11 @@ int compare_color(rgba_color c1, rgba_color c2);
 
 - (instancetype)initWithStyle:(NSInteger)style type:(NSInteger)type location:(NSUInteger) location color:(rgba_color) color;
 
-@property (readwrite) NSInteger style;
-@property (readwrite) rgba_color color;
-@property (readwrite) NSInteger type;
-@property (readwrite) NSUInteger location;
-@property (readwrite) NSUInteger length;
+@property (nonatomic, readwrite) NSInteger style;
+@property (nonatomic, readwrite) rgba_color color;
+@property (nonatomic, readwrite) NSInteger type;
+@property (nonatomic, readwrite) NSUInteger location;
+@property (nonatomic, readwrite) NSUInteger length;
 
 @end
 
@@ -53,9 +53,9 @@ int compare_color(rgba_color c1, rgba_color c2);
     rgba_color _defaultColor;
 }
 
-@property (readonly) NSString *text;
-@property (readonly) NSArray *styles;
-@property (readwrite) rgba_color defaultColor;
+@property (nonatomic, readonly) NSString *text;
+@property (nonatomic, readonly) NSArray *styles;
+@property (nonatomic, readwrite) rgba_color defaultColor;
 
 - (instancetype)initWithString:(NSString *)string;
 - (NSInteger) parseNextTag;

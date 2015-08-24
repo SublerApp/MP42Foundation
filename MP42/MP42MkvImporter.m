@@ -590,7 +590,6 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
     uint32_t        Track, FrameSize, FrameFlags;
     uint8_t         *frame = NULL;
 
-    MP42Track           *track = nil;
     MatroskaDemuxHelper *demuxHelper = nil;
     MatroskaSample      *frameSample = nil, *currentSample = nil;
     int64_t             offset, minOffset = 0, duration, next_duration;
@@ -610,6 +609,8 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
     while (!mkv_ReadFrame(_matroskaFile, 0, &Track, &StartTime, &EndTime, &FilePos, &FrameSize, &FrameFlags) && !_cancelled) {
         _progress = (StartTime / _fileDuration / 10000);
         muxer_helper *helper = NULL;
+
+        MP42Track *track = nil;
 
         for (MP42Track *fTrack in _inputTracks){
             if (fTrack.sourceId == Track) {
@@ -643,23 +644,23 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
 
 #ifdef VARIABLE_AUDIO_RATE
                 if (demuxHelper->previousSample) {
-                    uint64_t duration = (sample->timestamp * (double)mkv_TruncFloat(trackInfo->AV.Audio.SamplingFreq) / 1000000000.f) - demuxHelper->current_time;
+                    uint64_t sampleDuration = (sample->timestamp * (double)mkv_TruncFloat(trackInfo->AV.Audio.SamplingFreq) / 1000000000.f) - demuxHelper->current_time;
 
                     // MKV timestamps are a bit random, try to round them
                     // to make the sample table in the mp4 smaller.
 
                     // Round aac
-                    if (duration < 1060 && duration > 990)
-                        duration = 1024;
+                    if (sampleDuration < 1060 && sampleDuration > 990)
+                        sampleDuration = 1024;
 
                     // Round ac3
-                    if (duration < 1576 && duration > 1500)
-                        duration = 1536;
+                    if (sampleDuration < 1576 && sampleDuration > 1500)
+                        sampleDuration = 1536;
 
-                    demuxHelper->previousSample->duration = duration;
+                    demuxHelper->previousSample->duration = sampleDuration;
                     [self enqueue:demuxHelper->previousSample];
 
-                    demuxHelper->current_time += duration;
+                    demuxHelper->current_time += sampleDuration;
                 } else {
                     demuxHelper->current_time = sample->timestamp * (double)mkv_TruncFloat(trackInfo->AV.Audio.SamplingFreq) / 1000000000.f;
                 }
@@ -957,8 +958,7 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
         MP4TrackId trackId = track.Id;
 
         if (demuxHelper->minDisplayOffset != 0) {
-            int i;
-            for (i = 0; i < demuxHelper->samplesWritten; i++)
+            for (unsigned int i = 0; i < demuxHelper->samplesWritten; i++)
             MP4SetSampleRenderingOffset(fileHandle,
                                         trackId,
                                         1 + i,

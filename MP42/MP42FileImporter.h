@@ -33,6 +33,8 @@ NS_ASSUME_NONNULL_BEGIN
     CGFloat       _progress;
     int32_t       _cancelled;
     int32_t       _done;
+
+@private
     dispatch_semaphore_t _doneSem;
 }
 
@@ -60,8 +62,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (BOOL)cleanUp:(MP42FileHandle)fileHandle;
 
-@property(readonly) MP42Metadata *metadata;
-@property(readonly) NSArray<MP42Track *> *tracks;
+@property(nonatomic, readonly) MP42Metadata *metadata;
+@property(nonatomic, readonly) NSArray<MP42Track *> *tracks;
 
 @end
 

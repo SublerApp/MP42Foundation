@@ -68,7 +68,7 @@ static CFComparisonResult CompareLinesByBeginTime(const void *a, const void *b, 
 		[lines addObject:line];
 	} else {
 		CFIndex i = CFArrayBSearchValues((CFArrayRef)lines, CFRangeMake(0, nlines), line, CompareLinesByBeginTime, NULL);
-		
+
 		if (i >= nlines)
 			[lines addObject:line];
 		else
@@ -271,8 +271,8 @@ NSMutableString *STStandardizeStringNewlines(NSString *str)
     if(str == nil)
 		return nil;
 	NSMutableString *ms = [NSMutableString stringWithString:str];
-	[ms replaceOccurrencesOfString:@"\r\n" withString:@"\n" options:0 range:NSMakeRange(0,[ms length])];
-	[ms replaceOccurrencesOfString:@"\r" withString:@"\n" options:0 range:NSMakeRange(0,[ms length])];
+	[ms replaceOccurrencesOfString:@"\r\n" withString:@"\n" options:NSLiteralSearch range:NSMakeRange(0,[ms length])];
+	[ms replaceOccurrencesOfString:@"\r" withString:@"\n" options:NSLiteralSearch range:NSMakeRange(0,[ms length])];
 	return ms;
 }
 
@@ -1311,7 +1311,6 @@ Boolean ReadPacketTimes(uint8_t *packet, uint32_t length, uint16_t *startTime, u
 					
 				default:
 					return NO;
-					break;
 			}
 		}
 		if(i != INT_MAX)

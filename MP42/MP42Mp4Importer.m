@@ -174,8 +174,8 @@
                                           &pictheader, &pictheadersize);
             NSMutableData *seqData = [[NSMutableData alloc] init];
             for (ix = 0 , iy = 0; seqheadersize[ix] != 0; ix++) {
-                uint16_t temp = seqheadersize[ix] << 8;
-                [seqData appendBytes:&temp length:sizeof(uint16_t)];
+                uint16_t tempSeqSize = seqheadersize[ix] << 8;
+                [seqData appendBytes:&tempSeqSize length:sizeof(uint16_t)];
                 [seqData appendBytes:seqheader[ix] length:seqheadersize[ix]];
                 iy++;
                 free(seqheader[ix]);
@@ -188,8 +188,8 @@
 
             NSMutableData *pictData = [[NSMutableData alloc] init];
             for (ix = 0, iy = 0; pictheadersize[ix] != 0; ix++) {
-                uint16_t temp = pictheadersize[ix] << 8;
-                [pictData appendBytes:&temp length:sizeof(uint16_t)];
+                uint16_t tempPictSize = pictheadersize[ix] << 8;
+                [pictData appendBytes:&tempPictSize length:sizeof(uint16_t)];
                 [pictData appendBytes:pictheader[ix] length:pictheadersize[ix]];
                 iy++;
                 free(pictheader[ix]);
@@ -231,7 +231,7 @@
     }
 
     MP4Timestamp currentTime = 1;
-    MP4Duration duration = MP4GetDuration(_fileHandle);
+    MP4Duration totalDuration = MP4GetDuration(_fileHandle);
     MP4Duration timescale = MP4GetTimeScale(_fileHandle);
 
     while (tracksDone != tracksNumber) {
@@ -282,7 +282,7 @@
             }
         }
 
-        _progress = ((CGFloat)currentTime * timescale / duration) * 100;
+        _progress = ((CGFloat)currentTime * timescale / totalDuration) * 100;
         currentTime += 3;
     }
 

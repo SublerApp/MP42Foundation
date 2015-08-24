@@ -184,7 +184,7 @@
         MP42ChapterTrack *chapters = nil;
 
         // Checks if there is a chapter tracks
-        if ([tracks count]) {
+        if (tracks.count) {
             for (NSLocale *locale in availableChapter) {
                 chapters = [[MP42ChapterTrack alloc] init];
                 NSArray *chapterList = [_localAsset chapterMetadataGroupsWithTitleLocale:locale containingItemsWithCommonKeys:nil];
@@ -670,7 +670,7 @@
 }
 
 - (void)demux:(id)sender {
-    NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 
 	BOOL success = YES;
     OSStatus err = noErr;
@@ -702,8 +702,10 @@
     }
 
     success = [assetReader startReading];
-	if (!success)
+
+    if (!success) {
 		localError = [assetReader error];
+    }
 
     for (MP42Track *track in _inputTracks) {
         demuxHelper = track.muxer_helper->demuxer_context;
@@ -766,8 +768,9 @@
                     currentDataLength += sampleSize;
                 } else {
                     // The CMSampleBufferRef contains more than one sample
-                    if (!CMSampleBufferDataIsReady(sampleBuffer))
+                    if (!CMSampleBufferDataIsReady(sampleBuffer)) {
                         CMSampleBufferMakeDataReady(sampleBuffer);
+                    }
 
                     // A CMSampleBufferRef can contains an unknown number of samples, check how many needs to be divided to separated MP42SampleBuffers
                     // First get the array with the timings for each sample
@@ -918,7 +921,7 @@
 
         AVFDemuxHelper *helper = inputTrack.muxer_helper->demuxer_context;
 
-        for (int i = 0; i < helper->editsConstructor.editsCount; i++) {
+        for (uint64_t i = 0; i < helper->editsConstructor.editsCount; i++) {
             CMTimeRange timeRange = helper->editsConstructor.edits[i];
             CMTime duration = CMTimeConvertScale(timeRange.duration, timescale, kCMTimeRoundingMethod_Default);
 

@@ -10,7 +10,8 @@
 #import "MP42FileImporter.h"
 
 @interface MP42AACImporter : MP42FileImporter {
-    FILE* inFile;
+@private
+    FILE *inFile;
     int64_t size;
 
     NSMutableData *aacInfo;

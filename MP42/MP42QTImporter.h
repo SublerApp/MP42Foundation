@@ -12,6 +12,7 @@
 #import <QTKit/QTKit.h>
 
 @interface MP42QTImporter : MP42FileImporter {
+@private
     QTMovie *_sourceFile;
 }
 
