@@ -134,7 +134,7 @@
     _someSamplesAreForced = value;
     _isEdited = YES;
 
-    [_updatedProperty setValue:@"True" forKey:@"forcedSubtitles"];
+    _updatedProperty[@"forcedSubtitles"] = @YES;
 }
 
 - (BOOL)allSamplesAreForced {
@@ -146,7 +146,7 @@
     _allSamplesAreForced = value;
     _isEdited = YES;
 
-    [_updatedProperty setValue:@"True" forKey:@"forcedSubtitles"];
+    _updatedProperty[@"forcedSubtitles"] = @YES;
 }
 
 @synthesize forcedTrackId = _forcedTrackId;
@@ -388,7 +388,7 @@ static void insertTagsFromStyleRecord(style_record record, NSMutableString *samp
     _forcedTrack = newForcedTrack;
     _forcedTrackId = 0;
     _isEdited = YES;
-    [_updatedProperty setValue:@"True" forKey:@"forced"];
+    _updatedProperty[@"forced"] = @YES;
 }
 
 - (MP42Track *)forcedTrack

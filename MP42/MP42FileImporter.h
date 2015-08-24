@@ -38,7 +38,7 @@ NS_ASSUME_NONNULL_BEGIN
     dispatch_semaphore_t _doneSem;
 }
 
-- (instancetype)initWithURL:(NSURL *)fileURL error:(NSError **)outError;
+- (instancetype)initWithURL:(NSURL *)fileURL error:(NSError **)error;
 
 - (BOOL)containsTrack:(MP42Track *)track;
 - (MP42Track *)inputTrackWithTrackID:(MP42TrackId)trackId;

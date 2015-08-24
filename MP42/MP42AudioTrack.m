@@ -173,7 +173,7 @@ extern u_int8_t MP4AV_AacConfigGetChannels(u_int8_t* pConfig);
 {
     _volume = newVolume;
     _isEdited = YES;
-    [_updatedProperty setValue:@"True" forKey:@"volume"];
+    _updatedProperty[@"volume"] = @YES;
 }
 
 - (float)volume
@@ -186,7 +186,7 @@ extern u_int8_t MP4AV_AacConfigGetChannels(u_int8_t* pConfig);
     _fallbackTrack = newFallbackTrack;
     _fallbackTrackId = 0;
     _isEdited = YES;
-    [_updatedProperty setValue:@"True" forKey:@"fallback"];
+    _updatedProperty[@"fallback"] = @YES;
 }
 
 - (MP42Track *)fallbackTrack
@@ -199,7 +199,7 @@ extern u_int8_t MP4AV_AacConfigGetChannels(u_int8_t* pConfig);
     _followsTrack = newFollowsTrack;
     _followsTrackId = 0;
     _isEdited = YES;
-    [_updatedProperty setValue:@"True" forKey:@"follows"];
+    _updatedProperty[@"follows"] = @YES;
 }
 
 - (MP42Track *)followsTrack

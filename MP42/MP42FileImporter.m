@@ -32,46 +32,57 @@
 
 @implementation MP42FileImporter
 
-- (instancetype)initWithURL:(NSURL *)fileURL error:(NSError **)outError;
+- (instancetype)initWithURL:(NSURL *)fileURL error:(NSError **)error;
 {
     [self release];
     self = nil;
-    if ([[fileURL pathExtension] caseInsensitiveCompare: @"mkv"] == NSOrderedSame ||
-        [[fileURL pathExtension] caseInsensitiveCompare: @"mka"] == NSOrderedSame ||
-        [[fileURL pathExtension] caseInsensitiveCompare: @"mks"] == NSOrderedSame)
+
+    NSString *pathExtension = fileURL.pathExtension;
+
+    if ([pathExtension caseInsensitiveCompare: @"mkv"] == NSOrderedSame ||
+        [pathExtension caseInsensitiveCompare: @"mka"] == NSOrderedSame ||
+        [pathExtension caseInsensitiveCompare: @"mks"] == NSOrderedSame) {
         self = [MP42MkvImporter alloc];
-    else if ([[fileURL pathExtension] caseInsensitiveCompare: @"mp4"] == NSOrderedSame ||
-             [[fileURL pathExtension] caseInsensitiveCompare: @"m4v"] == NSOrderedSame ||
-             [[fileURL pathExtension] caseInsensitiveCompare: @"m4a"] == NSOrderedSame)
+    }
+    else if ([pathExtension caseInsensitiveCompare: @"mp4"] == NSOrderedSame ||
+             [pathExtension caseInsensitiveCompare: @"m4v"] == NSOrderedSame ||
+             [pathExtension caseInsensitiveCompare: @"m4a"] == NSOrderedSame) {
         self = [MP42Mp4Importer alloc];
-    else if ([[fileURL pathExtension] caseInsensitiveCompare: @"srt"] == NSOrderedSame)
+    }
+    else if ([pathExtension caseInsensitiveCompare: @"srt"] == NSOrderedSame) {
         self = [MP42SrtImporter alloc];
-    else if ([[fileURL pathExtension] caseInsensitiveCompare: @"scc"] == NSOrderedSame)
+    }
+    else if ([pathExtension caseInsensitiveCompare: @"scc"] == NSOrderedSame) {
         self = [MP42CCImporter alloc];
-    else if ([[fileURL pathExtension] caseInsensitiveCompare: @"ac3"] == NSOrderedSame)
+    }
+    else if ([pathExtension caseInsensitiveCompare: @"ac3"] == NSOrderedSame) {
         self = [MP42AC3Importer alloc];
-    else if ([[fileURL pathExtension] caseInsensitiveCompare: @"aac"] == NSOrderedSame)
+    }
+    else if ([pathExtension caseInsensitiveCompare: @"aac"] == NSOrderedSame) {
         self = [MP42AACImporter alloc];
-    else if ([[fileURL pathExtension] caseInsensitiveCompare: @"264"] == NSOrderedSame ||
-             [[fileURL pathExtension] caseInsensitiveCompare: @"h264"] == NSOrderedSame)
+    }
+    else if ([pathExtension caseInsensitiveCompare: @"264"] == NSOrderedSame ||
+             [pathExtension caseInsensitiveCompare: @"h264"] == NSOrderedSame) {
         self = [MP42H264Importer alloc];
-    else if ([[fileURL pathExtension] caseInsensitiveCompare: @"idx"] == NSOrderedSame ||
-             [[fileURL pathExtension] caseInsensitiveCompare: @"idx"] == NSOrderedSame)
+    }
+    else if ([pathExtension caseInsensitiveCompare: @"idx"] == NSOrderedSame ||
+             [pathExtension caseInsensitiveCompare: @"idx"] == NSOrderedSame) {
         self = [MP42VobSubImporter alloc];
+    }
 #if !__LP64__
-    else if ([[fileURL pathExtension] caseInsensitiveCompare: @"mov"] == NSOrderedSame) {
+    else if ([pathExtension caseInsensitiveCompare: @"mov"] == NSOrderedSame) {
         self = [MP42QTImporter alloc];
     }
 #endif
-    else if ([[fileURL pathExtension] caseInsensitiveCompare: @"m2ts"] == NSOrderedSame ||
-             [[fileURL pathExtension] caseInsensitiveCompare: @"ts"] == NSOrderedSame ||
-             [[fileURL pathExtension] caseInsensitiveCompare: @"mts"] == NSOrderedSame ||
-             [[fileURL pathExtension] caseInsensitiveCompare: @"mov"] == NSOrderedSame) {
+    else if ([pathExtension caseInsensitiveCompare: @"m2ts"] == NSOrderedSame ||
+             [pathExtension caseInsensitiveCompare: @"ts"] == NSOrderedSame ||
+             [pathExtension caseInsensitiveCompare: @"mts"] == NSOrderedSame ||
+             [pathExtension caseInsensitiveCompare: @"mov"] == NSOrderedSame) {
         self = [MP42AVFImporter alloc];
     }
 
     if (self) {
-        self = [self initWithURL:fileURL error:outError];
+        self = [self initWithURL:fileURL error:error];
 
         if (self) {
             for (MP42Track *track in _tracksArray)

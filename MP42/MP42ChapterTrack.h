@@ -41,7 +41,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (BOOL)exportToURL:(NSURL *)url error:(NSError **)error;
 
-@property(nonatomic, readonly, retain) NSArray *chapters;
+@property(nonatomic, readonly, retain) NSArray<MP42TextSample *> *chapters;
 
 @end
 

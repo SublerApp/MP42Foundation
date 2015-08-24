@@ -1112,7 +1112,6 @@
 					/Users/damians/Dev/sublercli/MP42Foundation/Tesseract/lib,
 					/Users/damians/Dev/sublercli/MP42Foundation/mp4v2,
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				OTHER_LDFLAGS = (
 					"-read_only_relocs",
 					suppress,
@@ -1139,7 +1138,6 @@
 					/Users/damians/Dev/sublercli/MP42Foundation/Tesseract/lib,
 					/Users/damians/Dev/sublercli/MP42Foundation/mp4v2,
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				OTHER_LDFLAGS = (
 					"-read_only_relocs",
 					suppress,

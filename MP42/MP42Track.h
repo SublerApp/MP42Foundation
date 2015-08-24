@@ -41,7 +41,7 @@ NS_ASSUME_NONNULL_BEGIN
 	uint32_t    _bitrate;
 	MP42Duration _duration;
 
-    NSMutableDictionary *_updatedProperty;
+    NSMutableDictionary<NSString *, NSNumber *> *_updatedProperty;
 
     void *_helper;
 }
@@ -65,7 +65,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property(nonatomic, readwrite, copy) NSString *language;
 @property(nonatomic, readwrite, copy) NSString *extendedLanguageTag;
 
-@property(nonatomic, readwrite) BOOL     enabled;
+@property(nonatomic, readwrite, getter=isEnabled) BOOL enabled;
 @property(nonatomic, readwrite) uint64_t alternate_group;
 @property(nonatomic, readwrite) int64_t  startOffset;
 

@@ -70,7 +70,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 @property(nonatomic, readwrite, retain) NSURL *URL;
 
 @property(nonatomic, readonly) NSMutableArray<__kindof MP42Track *> *itracks;
-@property(nonatomic, readonly) NSMutableDictionary *importers;
+@property(nonatomic, readonly) NSMutableDictionary<NSString *, MP42FileImporter *> *importers;
 
 @property(nonatomic, readwrite) MP42Status status;
 @property(nonatomic, retain) MP42Muxer *muxer;
@@ -342,7 +342,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
     return [[chapterTrack retain] autorelease];
 }
 
-- (NSArray *)tracks {
+- (NSArray<MP42Track *> *)tracks {
     return [NSArray arrayWithArray:self.itracks];
 }
 
@@ -359,8 +359,8 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
     return nil;
 }
 
-- (NSArray *)tracksWithMediaType:(NSString *)mediaType {
-    NSMutableArray *tracks = [NSMutableArray array];
+- (NSArray<MP42Track *> *)tracksWithMediaType:(NSString *)mediaType {
+    NSMutableArray<MP42Track *> *tracks = [NSMutableArray array];
 
     for (MP42Track *track in self.itracks) {
         if ([track.mediaType isEqualToString:mediaType])
@@ -409,10 +409,10 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
     }
 
     if (track.muxer_helper->importer && track.sourceURL) {
-        if ([self.importers objectForKey:[[track sourceURL] path]]) {
-            track.muxer_helper->importer = [_importers objectForKey:[[track sourceURL] path]];
+        if (self.importers[track.sourceURL.path]) {
+            track.muxer_helper->importer = self.importers[track.sourceURL.path];
         } else {
-            [self.importers setObject:track.muxer_helper->importer forKey:[[track sourceURL] path]];
+            self.importers[track.sourceURL.path] = track.muxer_helper->importer;
         }
     }
 
@@ -473,24 +473,27 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 }
 
 - (void)organizeAlternateGroupsForMediaType:(NSString *)mediaType withGroupID:(NSUInteger)groupID {
-    NSArray *tracks = [self tracksWithMediaType:mediaType];
+    NSArray<MP42Track *> *tracks = [self tracksWithMediaType:mediaType];
     BOOL enabled = NO;
 
-    if (![tracks count])
+    if (!tracks.count) {
         return;
+    }
 
     for (MP42Track *track in tracks) {
         track.alternate_group = groupID;
 
         if (track.enabled && !enabled) {
             enabled = YES;
-        } else if (track.enabled) {
+        }
+        else if (track.enabled) {
             track.enabled = NO;
         }
     }
 
-    if (!enabled)
-        [[tracks objectAtIndex:0] setEnabled:YES];
+    if (!enabled) {
+        tracks.firstObject.enabled = YES;
+    }
 }
 
 - (void)organizeAlternateGroups {
@@ -538,12 +541,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
         NSURL *folderURL = [fileURL URLByDeletingLastPathComponent];
         tempURL = [fileManager URLForDirectory:NSItemReplacementDirectory inDomain:NSUserDomainMask appropriateForURL:folderURL create:YES error:&error];
     #else
-    // Snow Leopard has got some issue with file reference URLs so here's a workaround
-    if (NSAppKitVersionNumber <= NSAppKitVersionNumber10_6) {
-        tempURL = [[self.URL filePathURL] URLByDeletingLastPathComponent];
-    } else {
         tempURL = [self.URL URLByDeletingLastPathComponent];
-    }
     #endif
 
     if (tempURL) {
@@ -727,7 +725,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
     }
 
     // Init the muxer and prepare the work
-    NSMutableArray *unsupportedTracks = [[NSMutableArray alloc] init];
+    NSMutableArray<MP42Track *> *unsupportedTracks = [[NSMutableArray alloc] init];
     self.muxer = [[[MP42Muxer alloc] initWithFileHandle:self.fileHandle delegate:self logger:_logger] autorelease];
 
     for (MP42Track *track in self.itracks) {
@@ -740,7 +738,9 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 
                     if (!fileImporter) {
                         fileImporter = [[[MP42FileImporter alloc] initWithURL:track.sourceURL error:outError] autorelease];
-                        [self.importers setObject:fileImporter forKey:track.sourceURL.path];
+                        if (fileImporter) {
+                            self.importers[track.sourceURL.path] = fileImporter;
+                        }
                     }
 
                     if (fileImporter) {
@@ -783,7 +783,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
     // Remove the unsupported tracks from the array of the tracks
     // to update. Unsupported tracks haven't been muxed, so there is no
     // to update them.
-    NSMutableArray *tracksToUpdate = [self.itracks mutableCopy];
+    NSMutableArray<MP42Track *> *tracksToUpdate = [self.itracks mutableCopy];
     [tracksToUpdate removeObjectsInArray:unsupportedTracks];
     [unsupportedTracks release];
 
@@ -833,8 +833,9 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 
 - (BOOL)muxChaptersPreviewTrackId:(MP4TrackId)jpegTrack withChapterTrack:(MP42ChapterTrack *)chapterTrack andRefTrack:(MP42VideoTrack *)videoTrack {
     // Reopen the mp4v2 fileHandle
-    if (![self startWriting])
+    if (![self startWriting]) {
         return NO;
+    }
 
     CGFloat maxWidth = 640;
     NSSize imageSize = NSMakeSize(videoTrack.trackWidth, videoTrack.trackHeight);
@@ -857,7 +858,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 
     NSUInteger idx = 1;
 
-    for (MP42TextSample *chapterT in [chapterTrack chapters]) {
+    for (MP42TextSample *chapterT in chapterTrack.chapters) {
         MP4Duration duration = MP4GetSampleDuration(self.fileHandle, chapterTrack.Id, idx++);
 
         NSData *imageData = chapterT.image.data;
@@ -942,45 +943,56 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
     MP4TrackId jpegTrack = 0;
 
     for (MP42Track *track in self.itracks) {
-        if ([track isMemberOfClass:[MP42ChapterTrack class]] && !chapterTrack)
+        if ([track isMemberOfClass:[MP42ChapterTrack class]] && !chapterTrack) {
             chapterTrack = (MP42ChapterTrack *)track;
+        }
 
         if ([track isMemberOfClass:[MP42VideoTrack class]] &&
             ![track.format isEqualToString:MP42VideoFormatJPEG]
-            && !refTrack)
+            && !refTrack) {
             refTrack = (MP42VideoTrack *)track;
+        }
 
-        if ([track.format isEqualToString:MP42VideoFormatJPEG] && !jpegTrack)
+        if ([track.format isEqualToString:MP42VideoFormatJPEG] && !jpegTrack) {
             jpegTrack = track.Id;
+        }
 
-        if ([track.format isEqualToString:MP42VideoFormatH264])
-            if ((((MP42VideoTrack *)track).origProfile) == 110)
+        if ([track.format isEqualToString:MP42VideoFormatH264]) {
+            if ((((MP42VideoTrack *)track).origProfile) == 110) {
                 decodable = 0;
+            }
+        }
     }
 
-    if (!refTrack)
-        refTrack = [self.itracks objectAtIndex:0];
+    if (!refTrack) {
+        refTrack = self.itracks.firstObject;
+    }
 
     if (chapterTrack && decodable && (!jpegTrack)) {
-        NSArray *images = [MP42PreviewGenerator generatePreviewImagesFromChapters:[chapterTrack chapters] andFile:self.URL];
+        NSArray<NSImage *> *images = [MP42PreviewGenerator generatePreviewImagesFromChapters:chapterTrack.chapters fileURL:self.URL];
 
         // If we haven't got any images, return.
-        if (!images || ![images count])
+        if (!images || !images.count) {
             return NO;
+        }
 
-        NSArray *chapters = chapterTrack.chapters;
+        NSArray<MP42TextSample *> *chapters = chapterTrack.chapters;
         [images enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-            MP42TextSample *chapter = [chapters objectAtIndex:idx];
+            MP42TextSample *chapter = chapters[idx];
             chapter.image = [[[MP42Image alloc] initWithImage:obj] autorelease];
         }];
 
         [self muxChaptersPreviewTrackId:jpegTrack withChapterTrack:chapterTrack andRefTrack:refTrack];
 
         return YES;
-    } else if (chapterTrack && jpegTrack) {
+
+    }
+    else if (chapterTrack && jpegTrack) {
+
         // We already have all the tracks, so hook them up.
-        if (![self startWriting])
+        if (![self startWriting]) {
             return NO;
+        }
 
         MP4RemoveAllTrackReferences(self.fileHandle, "tref.chap", refTrack.Id);
         MP4AddTrackReference(self.fileHandle, "tref.chap", chapterTrack.Id, refTrack.Id);
@@ -992,7 +1004,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
     return NO;
 }
 
-#pragma mark - Others
+#pragma mark - NSCoding
 
 - (void)encodeWithCoder:(NSCoder *)coder {
     [coder encodeInt:2 forKey:@"MP42FileVersion"];

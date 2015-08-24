@@ -45,6 +45,7 @@ typedef NS_ENUM(NSUInteger, MP42Status) {
 @end
 
 @class MP42Muxer;
+@class MP42FileImporter;
 
 /**
  *  A MP42File object is an object that represents a mp4 file.
@@ -63,7 +64,7 @@ typedef NS_ENUM(NSUInteger, MP42Status) {
     NSMutableArray<MP42Track *>  *_tracksToBeDeleted;
     MP42Metadata    *_metadata;
     MP42Muxer       *_muxer;
-    NSMutableDictionary *_importers;
+    NSMutableDictionary<NSString *, MP42FileImporter *> *_importers;
 
     BOOL        _hasFileRepresentation;
 

@@ -6,7 +6,7 @@
 //  Copyright 2009 Damiano Galassi. All rights reserved.
 //
 
-#import <Cocoa/Cocoa.h>
+#import <Foundation/Foundation.h>
 #import "MP42MediaFormat.h"
 
 NS_ASSUME_NONNULL_BEGIN
@@ -15,7 +15,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MP42Metadata : NSObject <NSCoding, NSCopying> {
 @private
-    NSString                *presetName;
+    NSString *presetName;
     NSMutableDictionary<NSString *, id> *tagsDict;
 
     NSMutableArray<MP42Image *> *artworks;

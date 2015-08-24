@@ -8,12 +8,14 @@
 
 #import <Foundation/Foundation.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
+@class MP42TextSample;
+
 @interface MP42PreviewGenerator : NSObject
 
-
-+ (NSArray *)generatePreviewImagesFromChapters:(NSArray *)chapters andFile:(NSURL *)file;
-
-+ (NSArray *)generatePreviewImagesQTKitFromChapters:(NSArray *)chapters andFile:(NSURL *)file;
-+ (NSArray *)generatePreviewImagesAVFoundationFromChapters:(NSArray *)chapters andFile:(NSURL *)file;
++ (NSArray<NSImage *> *)generatePreviewImagesFromChapters:(NSArray<MP42TextSample *> *)chapters fileURL:(NSURL *)url;
 
 @end
+
+NS_ASSUME_NONNULL_END

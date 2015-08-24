@@ -214,9 +214,9 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
                 [(MP42AudioTrack*)newTrack setChannels:mkvTrack->AV.Audio.Channels];
                 [newTrack setAlternate_group:1];
 
-                for (MP42Track* audioTrack in _tracksArray) {
+                for (MP42Track *audioTrack in _tracksArray) {
                     if ([audioTrack isMemberOfClass:[MP42AudioTrack class]])
-                        [newTrack setEnabled:NO];
+                        newTrack.enabled = NO;
                 }
             }
 
@@ -225,9 +225,9 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
                 newTrack = [[MP42SubtitleTrack alloc] init];
                 [newTrack setAlternate_group:2];
 
-                for (MP42Track* subtitleTrack in _tracksArray) {
+                for (MP42Track *subtitleTrack in _tracksArray) {
                     if ([subtitleTrack isMemberOfClass:[MP42SubtitleTrack class]])
-                        [newTrack setEnabled:NO];
+                        newTrack.enabled = NO;
                 }
             }
 

@@ -735,12 +735,12 @@
             if (err && AudioChannelLayoutTag_GetNumberOfChannels(channelLayout->mChannelLayoutTag) == 6)
                 channelBitmap = 0x3F;
 
-            uint8_t fscod = 0;
-            uint8_t bsid = 8;
-            uint8_t bsmod = 0;
-            uint8_t acmod = 7;
-            uint8_t lfeon = (channelBitmap & kAudioChannelBit_LFEScreen) ? 1 : 0;
-            uint8_t bit_rate_code = 15;
+            uint64_t fscod = 0;
+            uint64_t bsid = 8;
+            uint64_t bsmod = 0;
+            uint64_t acmod = 7;
+            uint64_t lfeon = (channelBitmap & kAudioChannelBit_LFEScreen) ? 1 : 0;
+            uint64_t bit_rate_code = 15;
 
             switch (AudioChannelLayoutTag_GetNumberOfChannels(channelLayout->mChannelLayoutTag) - lfeon) {
                 case 1:

@@ -173,7 +173,7 @@
 {
     hSpacing = newHSpacing;
     _isEdited = YES;
-    [_updatedProperty setValue:@"True" forKey:@"hSpacing"];
+    _updatedProperty[@"hSpacing"] = @YES;
 }
 
 - (uint64_t)vSpacing {
@@ -184,7 +184,7 @@
 {
     vSpacing = newVSpacing;
     _isEdited = YES;
-    [_updatedProperty setValue:@"True" forKey:@"vSpacing"];
+    _updatedProperty[@"vSpacing"] = @YES;
 }
 
 @synthesize offsetX;
@@ -205,10 +205,12 @@
     _newProfile = newProfile;
     _isEdited = YES;
 
-    if (_newProfile == _origProfile)
-        [_updatedProperty setValue:@"False" forKey:@"profile"];
-    else
-        [_updatedProperty setValue:@"True" forKey:@"profile"];
+    if (_newProfile == _origProfile) {
+        _updatedProperty[@"profile"] = @NO;
+    }
+    else {
+        _updatedProperty[@"profile"] = @YES;
+    }
 }
 
 - (uint8_t)newLevel {
@@ -220,10 +222,12 @@
     _newLevel = newLevel;
     _isEdited = YES;
 
-    if (_newLevel == _origLevel)
-        [_updatedProperty setValue:@"False" forKey:@"level"];
-    else
-        [_updatedProperty setValue:@"True" forKey:@"level"];
+    if (_newLevel == _origLevel) {
+        _updatedProperty[@"level"] = @NO;
+    }
+    else {
+        _updatedProperty[@"level"] = @YES;
+    }
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder

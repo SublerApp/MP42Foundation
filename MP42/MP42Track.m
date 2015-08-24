@@ -178,7 +178,8 @@
     else
         _name = [self defaultName];
     self.isEdited = YES;
-    [_updatedProperty setValue:@"True" forKey:@"name"];
+    _updatedProperty[@"name"] = @YES;
+
 }
 
 - (NSString *)language {
@@ -190,7 +191,8 @@
     [_language autorelease];
     _language = [newLang retain];
     self.isEdited = YES;
-    [_updatedProperty setValue:@"True" forKey:@"language"];
+    _updatedProperty[@"language"] = @YES;
+
 }
 
 - (NSString *)extendedLanguageTag {
@@ -202,11 +204,7 @@
     [_extendedLanguageTag autorelease];
     _extendedLanguageTag = [newExtendedLanguageTag retain];
     self.isEdited = YES;
-    [_updatedProperty setValue:@"True" forKey:@"extendedLanguageTag"];
-}
-
-- (BOOL)enabled {
-    return _enabled;
+    _updatedProperty[@"extendedLanguageTag"] = @YES;
 }
 
 - (void)setEnabled:(BOOL)newState
@@ -214,8 +212,12 @@
     if (_enabled != newState) {
         _enabled = newState;
         self.isEdited = YES;
-        [_updatedProperty setValue:@"True" forKey:@"enabled"];
+        _updatedProperty[@"enabled"] = @YES;
     }
+}
+
+- (BOOL)isEnabled {
+    return _enabled;
 }
 
 - (uint64_t)alternate_group {
@@ -226,7 +228,7 @@
 {
     _alternate_group = newGroup;
     self.isEdited = YES;
-    [_updatedProperty setValue:@"True" forKey:@"alternate_group"];
+    _updatedProperty[@"alternate_group"] = @YES;
 }
 
 - (int64_t)startOffset {
@@ -237,7 +239,7 @@
 {
     _startOffset = newOffset;
     self.isEdited = YES;
-    [_updatedProperty setValue:@"True" forKey:@"start_offset"];
+    _updatedProperty[@"start_offset"] = @YES;
 }
 
 - (NSString *)formatSummary
