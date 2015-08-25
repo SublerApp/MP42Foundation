@@ -180,7 +180,7 @@ typedef NS_ENUM(NSUInteger, MP42Status) {
  *
  *  @return An instance of MP42ChapterTrack.  may be nil if no chapter track is available.
  */
-- (MP42ChapterTrack *)chapters;
+@property (nonatomic, readonly, nullable) MP42ChapterTrack *chapters;
 
 /** 
  * Creates a set of alternate group the way iTunes and Apple devices want:

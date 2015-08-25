@@ -263,7 +263,7 @@ static const genreType_t genreType_strings[] = {
 
 #pragma mark - Supported metadata
 
-- (NSArray *) availableMetadata
+- (NSArray<NSString *> *) availableMetadata
 {
     return @[
             @"Name",
@@ -337,7 +337,7 @@ static const genreType_t genreType_strings[] = {
             @"Sort TV Show"];
 }
 
-- (NSArray *) writableMetadata
+- (NSArray<NSString *> *) writableMetadata
 {
     return @[
             @"Name",
@@ -522,7 +522,7 @@ static const genreType_t genreType_strings[] = {
     return genreIndex;
 }
 
-- (NSArray *) availableGenres
+- (NSArray<NSString *> *) availableGenres
 {
     return [NSArray arrayWithObjects:  @"Animation", @"Classic TV", @"Comedy", @"Drama", 
             @"Fitness & Workout", @"Kids", @"Non-Fiction", @"Reality TV", @"Sci-Fi & Fantasy",

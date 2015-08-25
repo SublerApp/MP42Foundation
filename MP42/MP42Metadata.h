@@ -39,10 +39,10 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype) initWithFileHandle:(MP42FileHandle)fileHandle;
 - (instancetype) initWithFileURL:(NSURL *)URL;
 
-- (NSArray *) availableMetadata;
-- (NSArray *) writableMetadata;
+- (NSArray<NSString *> *) availableMetadata;
+- (NSArray<NSString *> *) writableMetadata;
 
-- (NSArray *) availableGenres;
+- (NSArray<NSString *> *) availableGenres;
 
 - (void) removeTagForKey:(NSString *)aKey;
 - (BOOL) setTag:(id)value forKey:(NSString *)key;
