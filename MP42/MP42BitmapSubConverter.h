@@ -20,7 +20,7 @@
     NSThread *decoderThread;
     NSThread *encoderThread;
 
-    MP42OCRWrapper          *ocr;
+    MP42OCRWrapper          *_ocr;
     CIContext               *_imgContext;
 	AVCodec                 *avCodec;
 	AVCodecContext          *avContext;
@@ -29,7 +29,6 @@
     MP42Fifo    *_inputSamplesBuffer;
     MP42Fifo    *_outputSamplesBuffer;
 
-    int                     compressed;
 	UInt32                  paletteG[16];
     NSData *srcMagicCookie;
 

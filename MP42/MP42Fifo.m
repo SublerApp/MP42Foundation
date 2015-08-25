@@ -68,7 +68,7 @@
     return item;
 }
 
-- (NSInteger)count {
+- (NSUInteger)count {
     return _count;
 }
 

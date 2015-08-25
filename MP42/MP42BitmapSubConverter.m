@@ -8,26 +8,58 @@
 //
 
 #import "MP42BitmapSubConverter.h"
-#import "MP42File.h"
+
 #import "MP42FileImporter.h"
 #import "MP42Sample.h"
+
+#import "MP42PrivateUtilities.h"
+#import "MP42Track+Muxer.h"
+#import "MP42SubtitleTrack.h"
+
 #import "MP42OCRWrapper.h"
 #import "MP42SubUtilities.h"
 
-#import "mp4v2.h"
-#import "MP42PrivateUtilities.h"
-#import "MP42Track+Muxer.h"
-
 #import <QuartzCore/QuartzCore.h>
+
+#include <pthread.h>
 
 #define REGISTER_DECODER(x) { \
 extern AVCodec ff_##x##_decoder; \
 avcodec_register(&ff_##x##_decoder); }
 
+static int ff_lockmgr_cb(void **mutex, enum AVLockOp op)
+{
+    switch (op) {
+        case AV_LOCK_CREATE:
+        {
+            pthread_mutex_t *ff_mutext = calloc(1, sizeof(pthread_mutex_t));
+            *mutex = ff_mutext;
+            pthread_mutex_init(*mutex, NULL);
+        } break;
+        case AV_LOCK_DESTROY:
+        {
+            pthread_mutex_destroy(*mutex);
+            free(*mutex);
+        } break;
+        case AV_LOCK_OBTAIN:
+        {
+            pthread_mutex_lock(*mutex);
+        } break;
+        case AV_LOCK_RELEASE:
+        {
+            pthread_mutex_unlock(*mutex);
+        } break;
+        default:
+            break;
+    }
+    return 0;
+}
+
 void FFInitFFmpeg() {
 	static dispatch_once_t once;
 
 	dispatch_once(&once, ^{
+        av_lockmgr_register(ff_lockmgr_cb);
 		REGISTER_DECODER(dvdsub);
         REGISTER_DECODER(pgssub);
 	});
@@ -85,7 +117,7 @@ void FFInitFFmpeg() {
     return filteredImgRef;
 }
 
-- (void)VobSubDecoderThreadMainRoutine:(id)sender
+- (void)VobSubDecoderThreadMainRoutine
 {
     @autoreleasepool {
         while(1) {
@@ -94,14 +126,15 @@ void FFInitFFmpeg() {
 
                 while (!(sampleBuffer = [_inputSamplesBuffer dequeAndWait]) && !_readerDone);
 
-                if (!sampleBuffer)
+                if (!sampleBuffer) {
                     break;
+                }
 
                 UInt8 *data = (UInt8 *) sampleBuffer->data;
                 int ret, got_sub;
 
-                if(sampleBuffer->size < 4)
-                {
+                if (sampleBuffer->size < 4) {
+                    // Enque an empty subtitle.
                     MP42SampleBuffer *subSample = copyEmptySubtitleSample(sampleBuffer->trackId, sampleBuffer->duration, NO);
 
                     [_outputSamplesBuffer enqueue:subSample];
@@ -125,7 +158,8 @@ void FFInitFFmpeg() {
                 if (data[0] + data[1] == 0) {
                     // remove the MPEG framing
                     sampleBuffer->size = ExtractVobSubPacket(codecData, data, bufferSize, NULL, -1);
-                } else {
+                }
+                else {
                     memcpy(codecData, sampleBuffer->data, sampleBuffer->size);
                 }
 
@@ -148,29 +182,28 @@ void FFInitFFmpeg() {
                     continue;
                 }
 
-                unsigned int i, x, j, y;
-                uint8_t *imageData;
-
+                // Extract the color palette and forced info
                 OSErr err = noErr;
                 PacketControlData controlData;
 
                 memcpy(paletteG, [srcMagicCookie bytes], sizeof(UInt32)*16);
-                int ii;
-                for ( ii = 0; ii <16; ii++ )
+
+                for (int ii = 0; ii <16; ii++ ) {
                     paletteG[ii] = EndianU32_LtoN(paletteG[ii]);
+                }
 
                 BOOL forced = NO;
                 err = ReadPacketControls(codecData, paletteG, &controlData, &forced);
                 int usePalette = 0;
 
-                if (err == noErr)
+                if (err == noErr) {
                     usePalette = true;
+                }
 
-                for (i = 0; i < subtitle.num_rects; i++) {
+                for (unsigned int i = 0; i < subtitle.num_rects; i++) {
                     AVSubtitleRect *rect = subtitle.rects[i];
 
-                    imageData = malloc(sizeof(uint8_t) * rect->w * rect->h * 4);
-                    memset(imageData, 0, rect->w * rect->h * 4);
+                    uint8_t *imageData = calloc(rect->w * rect->h * 4, sizeof(uint8_t));
 
                     uint8_t *line = (uint8_t *)imageData;
                     uint8_t *sub = rect->pict.data[0];
@@ -179,24 +212,25 @@ void FFInitFFmpeg() {
                     uint32_t *palette = (uint32_t *)rect->pict.data[1];
 
                     if (usePalette) {
-                        for (j = 0; j < 4; j++)
+                        for (unsigned int j = 0; j < 4; j++)
                             palette[j] = EndianU32_BtoN(controlData.pixelColor[j]);
                     }
 
-                    for (y = 0; y < h; y++) {
+                    for (unsigned int y = 0; y < h; y++) {
                         uint32_t *pixel = (uint32_t *) line;
 
-                        for (x = 0; x < w; x++)
+                        for (unsigned int x = 0; x < w; x++) {
                             pixel[x] = palette[sub[x]];
+                        }
 
                         line += rect->w*4;
                         sub += rect->pict.linesize[0];
                     }
 
+                    // Kill the alpha
                     size_t length = sizeof(uint8_t) * rect->w * rect->h * 4;
-                    uint8_t* imgData2 = (uint8_t*)imageData;
-                    for (i = 0; i < length; i +=4) {
-                        imgData2[i] = 255;
+                    for (unsigned int ii = 0; ii < length; ii +=4) {
+                        imageData[ii] = 255;
                     }
 
                     CGBitmapInfo bitmapInfo = kCGBitmapByteOrderDefault | kCGImageAlphaFirst;
@@ -217,13 +251,13 @@ void FFInitFFmpeg() {
                     CGColorSpaceRelease(colorSpace);
 
                     CGImageRef filteredCGImage = [self createfilteredCGImage:cgImage];
-
-                    NSString *text = [ocr performOCROnCGImage:filteredCGImage];
+                    NSString *text = [_ocr performOCROnCGImage:filteredCGImage];
 
                     MP42SampleBuffer *subSample = nil;
                     if (text) {
                         subSample = copySubtitleSample(sampleBuffer->trackId, text, sampleBuffer->duration, forced, NO, NO, CGSizeMake(0,0), 0);
-                    } else {
+                    }
+                    else {
                         subSample = copyEmptySubtitleSample(sampleBuffer->trackId, sampleBuffer->duration, forced);
                     }
 
@@ -250,129 +284,141 @@ void FFInitFFmpeg() {
     }
 }
 
-- (void)PGSDecoderThreadMainRoutine:(id)sender
+- (void)PGSDecoderThreadMainRoutine
 {
     @autoreleasepool {
         while(1) {
-            MP42SampleBuffer *sampleBuffer = nil;
+            @autoreleasepool {
+                MP42SampleBuffer *sampleBuffer = nil;
 
-            while (!(sampleBuffer = [_inputSamplesBuffer dequeAndWait]) && !_readerDone);
+                while (!(sampleBuffer = [_inputSamplesBuffer dequeAndWait]) && !_readerDone);
 
-            if (!sampleBuffer)
-                break;
-
-            int ret, got_sub;
-            uint32_t *imageData;
-            BOOL forced = NO;
-
-            AVPacket pkt;
-            av_init_packet(&pkt);
-            pkt.data = sampleBuffer->data;
-            pkt.size = (int)sampleBuffer->size;
-
-            ret = avcodec_decode_subtitle2(avContext, &subtitle, &got_sub, &pkt);
-
-            if (ret < 0 || !got_sub || !subtitle.num_rects) {
-                MP42SampleBuffer *subSample = copyEmptySubtitleSample(sampleBuffer->trackId, sampleBuffer->duration, NO);
-
-                [_outputSamplesBuffer enqueue:subSample];
-                [subSample release];
-
-                [sampleBuffer release];
-
-                continue;
-            }
-
-            for (unsigned i = 0; i < subtitle.num_rects; i++) {
-                AVSubtitleRect *rect = subtitle.rects[i];
-                NSString *text;
-
-                imageData = malloc(sizeof(uint32_t) * rect->w * rect->h * 4);
-                memset(imageData, 0, rect->w * rect->h * 4);
-
-                int xx, yy;
-                for (yy = 0; yy < rect->h; yy++) {
-                    for (xx = 0; xx < rect->w; xx++) {
-                        uint32_t argb;
-                        int pixel;
-                        uint8_t color;
-
-                        pixel = yy * rect->w + xx;
-                        color = rect->pict.data[0][pixel];
-                        argb = ((uint32_t*)rect->pict.data[1])[color];
-
-                        imageData[yy * rect->w + xx] = EndianU32_BtoN(argb);
-                    }
+                if (!sampleBuffer) {
+                    break;
                 }
 
-                if (rect->flags & AV_SUBTITLE_FLAG_FORCED)
-                    forced = YES;
+                AVPacket pkt;
+                av_init_packet(&pkt);
+                pkt.data = sampleBuffer->data;
+                pkt.size = sampleBuffer->size;
 
-                CGBitmapInfo bitmapInfo = kCGBitmapByteOrderDefault | kCGImageAlphaFirst;
-                CFDataRef imgData = CFDataCreateWithBytesNoCopy(kCFAllocatorDefault, (uint8_t*)imageData,rect->w * rect->h * 4, kCFAllocatorNull);
-                CGDataProviderRef provider = CGDataProviderCreateWithCFData(imgData);
-                CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-                CGImageRef cgImage = CGImageCreate(rect->w,
-                                                   rect->h,
-                                                   8,
-                                                   32,
-                                                   rect->w * 4,
-                                                   colorSpace,
-                                                   bitmapInfo,
-                                                   provider,
-                                                   NULL,
-                                                   NO,
-                                                   kCGRenderingIntentDefault);
-                CGColorSpaceRelease(colorSpace);
+                int ret, got_sub;
+                ret = avcodec_decode_subtitle2(avContext, &subtitle, &got_sub, &pkt);
 
-                CGImageRef filteredCGImage = [self createfilteredCGImage:cgImage];
+                if (ret < 0 || !got_sub || !subtitle.num_rects) {
+                    MP42SampleBuffer *subSample = copyEmptySubtitleSample(sampleBuffer->trackId, sampleBuffer->duration, NO);
 
-                MP42SampleBuffer *subSample = nil;
-                if ((text = [ocr performOCROnCGImage:filteredCGImage]))
-                    subSample = copySubtitleSample(sampleBuffer->trackId, text, sampleBuffer->duration, forced, NO, NO, CGSizeMake(0,0), 0);
-                else
-                    subSample = copyEmptySubtitleSample(sampleBuffer->trackId, sampleBuffer->duration, forced);
+                    [_outputSamplesBuffer enqueue:subSample];
+                    [subSample release];
+
+                    [sampleBuffer release];
+
+                    continue;
+                }
+
+                for (unsigned i = 0; i < subtitle.num_rects; i++) {
+                    AVSubtitleRect *rect = subtitle.rects[i];
+
+                    uint32_t *imageData = calloc(rect->w * rect->h * 4, sizeof(uint32_t));
+                    memset(imageData, 0, rect->w * rect->h * 4);
+
+                    // Remove the alpha channel
+                    for (int yy = 0; yy < rect->h; yy++) {
+                        for (int xx = 0; xx < rect->w; xx++) {
+                            uint32_t argb;
+                            int pixel;
+                            uint8_t color;
+
+                            pixel = yy * rect->w + xx;
+                            color = rect->pict.data[0][pixel];
+                            argb = ((uint32_t *)rect->pict.data[1])[color];
+
+                            imageData[yy * rect->w + xx] = EndianU32_BtoN(argb);
+                        }
+                    }
+
+                    BOOL forced = NO;
+
+                    if (rect->flags & AV_SUBTITLE_FLAG_FORCED) {
+                        forced = YES;
+                    }
+
+                    CGBitmapInfo bitmapInfo = kCGBitmapByteOrderDefault | kCGImageAlphaFirst;
+                    CFDataRef imgData = CFDataCreateWithBytesNoCopy(kCFAllocatorDefault, (uint8_t*)imageData,rect->w * rect->h * 4, kCFAllocatorNull);
+                    CGDataProviderRef provider = CGDataProviderCreateWithCFData(imgData);
+                    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+                    CGImageRef cgImage = CGImageCreate(rect->w,
+                                                       rect->h,
+                                                       8,
+                                                       32,
+                                                       rect->w * 4,
+                                                       colorSpace,
+                                                       bitmapInfo,
+                                                       provider,
+                                                       NULL,
+                                                       NO,
+                                                       kCGRenderingIntentDefault);
+                    CGColorSpaceRelease(colorSpace);
+
+                    CGImageRef filteredCGImage = [self createfilteredCGImage:cgImage];
+
+                    NSString *text = nil;
+                    MP42SampleBuffer *subSample = nil;
+                    if ((text = [_ocr performOCROnCGImage:filteredCGImage])) {
+                        subSample = copySubtitleSample(sampleBuffer->trackId, text, sampleBuffer->duration, forced, NO, NO, CGSizeMake(0,0), 0);
+                    }
+                    else {
+                        subSample = copyEmptySubtitleSample(sampleBuffer->trackId, sampleBuffer->duration, forced);
+                    }
+                    
+                    [_outputSamplesBuffer enqueue:subSample];
+                    [subSample release];
+                    
+                    CGImageRelease(cgImage);
+                    CGDataProviderRelease(provider);
+                    CFRelease(imgData);
+                    CFRelease(filteredCGImage);
+                    
+                    free(imageData);
+                }
                 
-                [_outputSamplesBuffer enqueue:subSample];
-                [subSample release];
+                avsubtitle_free(&subtitle);
+                av_free_packet(&pkt);
                 
-                CGImageRelease(cgImage);
-                CGDataProviderRelease(provider);
-                CFRelease(imgData);
-                CFRelease(filteredCGImage);
-
-                free(imageData);
+                [sampleBuffer release];
             }
             
-            avsubtitle_free(&subtitle);
-            av_free_packet(&pkt);
-            
-            [sampleBuffer release];
         }
-        
+
         _encoderDone = YES;
         dispatch_semaphore_signal(_done);
     }
 }
 
-- (instancetype)initWithTrack:(MP42SubtitleTrack *) track error:(NSError **)outError
+- (instancetype)initWithTrack:(MP42SubtitleTrack *)track error:(NSError **)outError
 {
     if ((self = [super init])) {
-        if (!avCodec) {
-            FFInitFFmpeg();
+        FFInitFFmpeg();
 
-            if (([track.sourceFormat isEqualToString:MP42SubtitleFormatVobSub]))
-                avCodec = avcodec_find_decoder(AV_CODEC_ID_DVD_SUBTITLE);
-            else if (([track.sourceFormat isEqualToString:MP42SubtitleFormatPGS]))
-                avCodec = avcodec_find_decoder(AV_CODEC_ID_HDMV_PGS_SUBTITLE);
+        if (([track.sourceFormat isEqualToString:MP42SubtitleFormatVobSub])) {
+            avCodec = avcodec_find_decoder(AV_CODEC_ID_DVD_SUBTITLE);
+        }
+        else if (([track.sourceFormat isEqualToString:MP42SubtitleFormatPGS])) {
+            avCodec = avcodec_find_decoder(AV_CODEC_ID_HDMV_PGS_SUBTITLE);
+        }
 
+        if (avCodec) {
             avContext = avcodec_alloc_context3(NULL);
 
             if (avcodec_open2(avContext, avCodec, NULL)) {
                 NSLog(@"Error opening subtitle decoder");
                 av_freep(&avContext);
+                [self release];
                 return nil;
             }
+        } else {
+            [self release];
+            return nil;
         }
 
         _outputSamplesBuffer = [[MP42Fifo alloc] initWithCapacity:20];
@@ -380,19 +426,19 @@ void FFInitFFmpeg() {
 
         srcMagicCookie = [[track.muxer_helper->importer magicCookieForTrack:track] retain];
 
-        ocr = [[MP42OCRWrapper alloc] initWithLanguage:[track language] extendedLanguageTag:[track extendedLanguageTag]];
+        _ocr = [[MP42OCRWrapper alloc] initWithLanguage:track.language extendedLanguageTag:track.extendedLanguageTag];
 
         _done = dispatch_semaphore_create(0);
 
         if (([track.sourceFormat isEqualToString:MP42SubtitleFormatVobSub])) {
             // Launch the vobsub decoder thread.
-            decoderThread = [[NSThread alloc] initWithTarget:self selector:@selector(VobSubDecoderThreadMainRoutine:) object:self];
+            decoderThread = [[NSThread alloc] initWithTarget:self selector:@selector(VobSubDecoderThreadMainRoutine) object:nil];
             [decoderThread setName:@"VobSub Decoder"];
             [decoderThread start];
         }
         else if (([track.sourceFormat isEqualToString:MP42SubtitleFormatPGS])) {
             // Launch the pgs decoder thread.
-            decoderThread = [[NSThread alloc] initWithTarget:self selector:@selector(PGSDecoderThreadMainRoutine:) object:self];
+            decoderThread = [[NSThread alloc] initWithTarget:self selector:@selector(PGSDecoderThreadMainRoutine) object:nil];
             [decoderThread setName:@"PGS Decoder"];
             [decoderThread start];
         }
@@ -409,8 +455,9 @@ void FFInitFFmpeg() {
 
 - (MP42SampleBuffer *)copyEncodedSample
 {
-    if (![_outputSamplesBuffer count])
+    if (![_outputSamplesBuffer count]) {
         return nil;
+    }
 
     return [_outputSamplesBuffer deque];
 }
@@ -437,15 +484,14 @@ void FFInitFFmpeg() {
 
 - (void)dealloc
 {
-    if (avCodec) {
-        avcodec_close(avContext);
-    }
     if (avContext) {
+        avcodec_close(avContext);
         av_freep(&avContext);
     }
     if (codecData) {
         av_freep(&codecData);
     }
+
     if (subtitle.rects) {
         for (unsigned i = 0; i < subtitle.num_rects; i++) {
             av_freep(&subtitle.rects[i]->pict.data[0]);
@@ -460,10 +506,11 @@ void FFInitFFmpeg() {
     [_inputSamplesBuffer release];
 
     [decoderThread release];
-    [ocr release];
+    [_ocr release];
     [_imgContext release];
 
     dispatch_release(_done);
+
     [super dealloc];
 }
 

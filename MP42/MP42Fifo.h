@@ -33,7 +33,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (nullable id)deque NS_RETURNS_RETAINED;
 - (nullable id)dequeAndWait NS_RETURNS_RETAINED;
 
-- (NSInteger)count;
+- (NSUInteger)count;
 
 - (BOOL)isFull;
 - (BOOL)isEmpty;
