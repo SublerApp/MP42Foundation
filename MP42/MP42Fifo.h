@@ -10,7 +10,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface MP42Fifo : NSObject {
+@interface MP42Fifo<__covariant ObjectType> : NSObject {
 @private
     id *_array;
 
@@ -29,9 +29,9 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)init;
 - (instancetype)initWithCapacity:(NSUInteger)numItems;
 
-- (void)enqueue:(id)item;
-- (nullable id)deque NS_RETURNS_RETAINED;
-- (nullable id)dequeAndWait NS_RETURNS_RETAINED;
+- (void)enqueue:(ObjectType)item;
+- (nullable ObjectType)deque NS_RETURNS_RETAINED;
+- (nullable ObjectType)dequeAndWait NS_RETURNS_RETAINED;
 
 - (NSUInteger)count;
 
