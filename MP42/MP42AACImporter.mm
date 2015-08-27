@@ -9,6 +9,7 @@
 #import "MP42AACImporter.h"
 #import "MP42Languages.h"
 #import "MP42File.h"
+#import "MP42PrivateUtilities.h"
 
 @implementation MP42AACImporter
 
@@ -731,7 +732,9 @@ static bool GetFirstHeader(FILE* inFile)
         u_int8_t channelConfig;
 
         if (!GetFirstHeader(inFile)) {
-            //*outError = MP42Error(@"The audio could not be opened.", @"Data in file doesn't appear to be valid audio.", 100);
+            if (outError) {
+                *outError = MP42Error(@"The audio could not be opened.", @"Data in file doesn't appear to be valid audio.", 100);
+            }
             [newTrack release];
             return nil;
         }
@@ -741,7 +744,9 @@ static bool GetFirstHeader(FILE* inFile)
         profile = MP4AV_AdtsGetProfile(firstHeader);
         if (aacProfileLevel == 2) {
             if (profile > MP4_MPEG4_AAC_SSR_AUDIO_TYPE) {
-                //*outError = MP42Error(@"The audio could not be opened.", @"Can't convert profile to mpeg2", 100);
+                if (outError) {
+                    *outError = MP42Error(@"The audio could not be opened.", @"Can't convert profile to mpeg2", 100);
+                }
                 [newTrack release];
                 return nil;
             }
@@ -768,7 +773,9 @@ static bool GetFirstHeader(FILE* inFile)
                         //audioType = MP4_MPEG2_AAC_SSR_AUDIO_TYPE;
                         break;
                     case 3:
-                        //*outError = MP42Error(@"The audio could not be opened.", @"Data in file doesn't appear to be valid audio.", 100);
+                        if (outError) {
+                            *outError = MP42Error(@"The audio could not be opened.", @"Data in file doesn't appear to be valid audio.", 100);
+                        }
                         [newTrack release];
                         return nil;
                     default:
@@ -821,8 +828,9 @@ static bool GetFirstHeader(FILE* inFile)
 - (void)demux:(id)sender
 {
     @autoreleasepool {
-        if (!inFile)
-            inFile = fopen([[_fileURL path] fileSystemRepresentation], "rb");
+        if (!inFile) {
+            inFile = fopen(_fileURL.path.fileSystemRepresentation, "rb");
+        }
 
         MP4TrackId trackId = [[_inputTracks lastObject] sourceId];
 

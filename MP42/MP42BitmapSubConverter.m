@@ -453,12 +453,8 @@ void FFInitFFmpeg() {
     [_inputSamplesBuffer enqueue:sample];
 }
 
-- (MP42SampleBuffer *)copyEncodedSample
+- (nullable MP42SampleBuffer *)copyEncodedSample
 {
-    if (![_outputSamplesBuffer count]) {
-        return nil;
-    }
-
     return [_outputSamplesBuffer deque];
 }
 
@@ -479,7 +475,7 @@ void FFInitFFmpeg() {
 
 - (BOOL)encoderDone
 {
-    return _encoderDone;
+    return _encoderDone && [_outputSamplesBuffer isEmpty];
 }
 
 - (void)dealloc

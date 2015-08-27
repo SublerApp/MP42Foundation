@@ -20,7 +20,7 @@ typedef struct muxer_helper {
 
     // Output helpers
     id <MP42ConverterProtocol> converter;
-    MP42Fifo *fifo;
+    MP42Fifo<MP42SampleBuffer *> *fifo;
 
     BOOL done;
 } muxer_helper;

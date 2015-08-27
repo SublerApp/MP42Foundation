@@ -12,8 +12,9 @@
 
 - (muxer_helper *)muxer_helper
 {
-    if (_helper == NULL)
+    if (_helper == NULL) {
         _helper = calloc(1, sizeof(muxer_helper));
+    }
 
     return _helper;
 }
@@ -23,21 +24,24 @@
     muxer_helper *helper = (muxer_helper *)_helper;
 
     if (helper->converter) {
-        if ([helper->importer done])
+        if ([helper->importer done]) {
             [helper->converter setInputDone];
+        }
 
-        if ([helper->converter encoderDone])
+        if ([helper->converter encoderDone]) {
             helper->done = YES;
+        }
 
         sample = [helper->converter copyEncodedSample];
-    } else {
-        if ([helper->fifo isEmpty] && [helper->importer done])
-            helper->done = YES;
-
-        if ([helper->fifo count])
-            sample = [helper->fifo deque];
     }
-    
+    else {
+        if ([helper->fifo isEmpty] && [helper->importer done]) {
+            helper->done = YES;
+        }
+
+        sample = [helper->fifo deque];
+    }
+
     return sample;
 }
 

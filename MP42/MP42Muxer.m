@@ -402,29 +402,30 @@
 
 - (void)work
 {
-    if (![_workingTracks count]) {
+    if (!_workingTracks.count) {
         return;
     }
 
-    @autoreleasepool {
-        NSMutableArray<MP42FileImporter *> *trackImportersArray = [[NSMutableArray alloc] init];
-        NSUInteger done = 0, update = 0;
-        CGFloat progress = 0;
+    NSMutableArray<MP42FileImporter *> *trackImportersArray = [[NSMutableArray alloc] init];
+    NSUInteger done = 0, update = 0;
+    CGFloat progress = 0;
 
-        for (MP42Track *track in _workingTracks) {
-            if (![trackImportersArray containsObject:track.muxer_helper->importer]) {
-                [trackImportersArray addObject:track.muxer_helper->importer];
-            }
+    for (MP42Track *track in _workingTracks) {
+        if (![trackImportersArray containsObject:track.muxer_helper->importer]) {
+            [trackImportersArray addObject:track.muxer_helper->importer];
         }
+    }
 
-        for (MP42FileImporter *importerHelper in trackImportersArray) {
-            [importerHelper startReading];
-        }
+    for (MP42FileImporter *importerHelper in trackImportersArray) {
+        [importerHelper startReading];
+    }
 
-        NSUInteger tracksImportersCount = [trackImportersArray count];
-        NSUInteger tracksCount = [_workingTracks count];
+    NSUInteger tracksImportersCount = trackImportersArray.count;
+    NSUInteger tracksCount = _workingTracks.count;
 
-        for (;;) {
+    for (;;) {
+        @autoreleasepool {
+
             usleep(1000);
 
             // Iterate the tracks array and mux the samples
@@ -435,8 +436,9 @@
                     if (!MP4WriteSample(_fileHandle, track.Id,
                                         sampleBuffer->data, sampleBuffer->size,
                                         sampleBuffer->duration, sampleBuffer->offset,
-                                        sampleBuffer->isSync))
+                                        sampleBuffer->isSync)) {
                         _cancelled = YES;
+                    }
 
                     [sampleBuffer release];
                 }
@@ -467,27 +469,29 @@
             }
             update++;
         }
-
-        // Write the converted audio track magic cookie
-        for (MP42Track *track in _workingTracks) {
-            if(track.muxer_helper->converter && track.needConversion && [track isMemberOfClass:[MP42AudioTrack class]]) {
-                NSData *magicCookie = [track.muxer_helper->converter magicCookie];
-                MP4SetTrackESConfiguration(_fileHandle, track.Id,
-                                           [magicCookie bytes],
-                                           [magicCookie length]);
-            }
-        }
-        
-        // Stop the importers and clean ups
-        for (MP42FileImporter *importerHelper in trackImportersArray) {
-            if (_cancelled)
-                [importerHelper cancelReading];
-            else
-                [importerHelper cleanUp:_fileHandle];
-        }
-        
-        [trackImportersArray release];
     }
+
+    // Write the converted audio track magic cookie
+    for (MP42Track *track in _workingTracks) {
+        if(track.muxer_helper->converter && track.needConversion && [track isMemberOfClass:[MP42AudioTrack class]]) {
+            NSData *magicCookie = [track.muxer_helper->converter magicCookie];
+            MP4SetTrackESConfiguration(_fileHandle, track.Id,
+                                       [magicCookie bytes],
+                                       [magicCookie length]);
+        }
+    }
+
+    // Stop the importers and clean ups
+    for (MP42FileImporter *importerHelper in trackImportersArray) {
+        if (_cancelled) {
+            [importerHelper cancelReading];
+        }
+        else {
+            [importerHelper cleanUp:_fileHandle];
+        }
+    }
+
+    [trackImportersArray release];
 }
 
 - (void)cancel

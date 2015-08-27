@@ -159,11 +159,12 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
         _fileURL = [fileURL retain];
 
         _ioStream = calloc(1, sizeof(StdIoStream));
-        _matroskaFile= openMatroskaFile((char *)[[_fileURL path] UTF8String], _ioStream);
+        _matroskaFile = openMatroskaFile((char *)[[_fileURL path] UTF8String], _ioStream);
 
-        if(!_matroskaFile) {
-            if (outError)
+        if (!_matroskaFile) {
+            if (outError) {
                 *outError = MP42Error(@"The movie could not be opened.", @"The file is not a matroska file.", 100);
+            }
 
             [self release];
             return nil;
@@ -574,14 +575,15 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
 
     NSData *magicCookie = [NSData dataWithBytes:trackInfo->CodecPrivate length:trackInfo->CodecPrivateSize];
 
-    if (magicCookie)
+    if (magicCookie) {
         return magicCookie;
-    else
+    }
+    else {
         return nil;
+    }
 }
 
 // Methods to extract all the samples from the active tracks at the same time
-
 - (void)demux:(id)sender
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
@@ -923,12 +925,15 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
             }
         }
 
-        if (demuxHelper->previousSample && [track.mediaType isEqualToString:MP42MediaTypeAudio]) {
+        if (demuxHelper->previousSample) {
+            if ([track.mediaType isEqualToString:MP42MediaTypeSubtitle]) {
+                demuxHelper->previousSample->duration = 100;
+            }
+
             [self enqueue:demuxHelper->previousSample];
             [demuxHelper->previousSample release];
             demuxHelper->previousSample = nil;
         }
-
     }
 
     [self setDone:YES];
@@ -938,9 +943,6 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
 - (void)startReading
 {
     [super startReading];
-
-    if (!_matroskaFile)
-        return;
 
     if (!_demuxerThread && !_done) {
         _demuxerThread = [[NSThread alloc] initWithTarget:self selector:@selector(demux:) object:self];
@@ -976,9 +978,8 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
     return YES;
 }
 
-- (void) dealloc
+- (void)dealloc
 {
-	/* close matroska parser */ 
     closeMatroskaFile(_matroskaFile, _ioStream);
 
     [super dealloc];

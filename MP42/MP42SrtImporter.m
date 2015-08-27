@@ -91,8 +91,9 @@
         [newTrack setDuration:duration];
 
         if (!success) {
-            if (outError)
+            if (outError) {
                 *outError = MP42Error(@"The file could not be opened.", @"The file is not a srt file, or it does not contain any subtitles.", 100);
+            }
             
             [newTrack release];
             [self release];
@@ -106,8 +107,9 @@
             newTrack.verticalPlacement = YES;
             _verticalPlacement = YES;
         }
-        if ([_ss forced])
+        if ([_ss forced]) {
             newTrack.someSamplesAreForced = YES;
+        }
 
         [_tracksArray addObject:newTrack];
         [newTrack release];
@@ -128,34 +130,34 @@
 
 - (void)demux:(id)sender
 {
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    MP42SampleBuffer *sample;
+    @autoreleasepool {
+        MP42SampleBuffer *sample;
 
-    for (MP42SubtitleTrack *track in _inputTracks) {
-        CGSize trackSize;
-        trackSize.width = track.trackWidth;
-        trackSize.height = track.trackHeight;
+        for (MP42SubtitleTrack *track in _inputTracks) {
+            CGSize trackSize;
+            trackSize.width = track.trackWidth;
+            trackSize.height = track.trackHeight;
 
-        while (![_ss isEmpty] && !_cancelled) {
-            SBSubLine *sl = [_ss getSerializedPacket];
+            while (![_ss isEmpty] && !_cancelled) {
+                SBSubLine *sl = [_ss getSerializedPacket];
 
-            if ([sl->line isEqualToString:@"\n"]) {
-                sample = copyEmptySubtitleSample(track.sourceId, sl->end_time - sl->begin_time, NO);
+                if ([sl->line isEqualToString:@"\n"]) {
+                    sample = copyEmptySubtitleSample(track.sourceId, sl->end_time - sl->begin_time, NO);
+                }
+                else {
+                    int top = (sl->top == INT_MAX) ? trackSize.height : sl->top;
+                    sample = copySubtitleSample(track.sourceId, sl->line, sl->end_time - sl->begin_time, sl->forced, _verticalPlacement, YES, trackSize, top);
+                }
+
+                [self enqueue:sample];
+                [sample release];
             }
-            else {
-                int top = (sl->top == INT_MAX) ? trackSize.height : sl->top;
-                sample = copySubtitleSample(track.sourceId, sl->line, sl->end_time - sl->begin_time, sl->forced, _verticalPlacement, YES, trackSize, top);
-            }
-
-            [self enqueue:sample];
-            [sample release];
         }
+        
+        _progress = 100.0;
+        
+        [self setDone:YES];
     }
-
-    _progress = 100.0;
-
-    [self setDone:YES];
-    [pool release];
 }
 
 - (void)startReading

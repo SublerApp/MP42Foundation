@@ -10,6 +10,10 @@
 
 @class MP42Track;
 
+typedef NS_OPTIONS(NSUInteger, MP42SampleBufferFlag) {
+    MP42SampleBufferFlagEndOfFile = 1 << 0,
+};
+
 @interface MP42SampleBuffer : NSObject {
     @public
 	void        *data;
@@ -28,6 +32,7 @@
     BOOL        isForced;
 
     void        *attachments;
+    uint16_t    flags;
 }
 
 @end

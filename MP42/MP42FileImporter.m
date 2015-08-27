@@ -93,6 +93,35 @@
     return self;
 }
 
+- (void)dealloc
+{
+    for (MP42Track *track in _inputTracks) {
+        [track.muxer_helper->demuxer_context release];
+    }
+
+    for (MP42Track *track in _outputsTracks) {
+        [track.muxer_helper->fifo release];
+        [track.muxer_helper->converter release];
+    }
+
+    [_metadata release], _metadata = nil;
+    [_tracksArray release], _tracksArray = nil;
+    [_inputTracks release], _inputTracks = nil;
+    [_outputsTracks release], _outputsTracks = nil;
+
+    [_fileURL release], _fileURL = nil;
+    [_demuxerThread release], _demuxerThread = nil;
+
+    if (_doneSem) {
+        dispatch_release(_doneSem);
+    }
+
+    [super dealloc];
+}
+
+@synthesize metadata = _metadata;
+@synthesize tracks = _tracksArray;
+
 - (NSUInteger)timescaleForTrack:(MP42Track *)track
 {
     return 0;
@@ -103,7 +132,7 @@
     return NSMakeSize(0,0);
 }
 
-- (NSData *)magicCookieForTrack:(MP42Track *)track
+- (nullable NSData *)magicCookieForTrack:(MP42Track *)track
 {
     return nil;
 }
@@ -121,20 +150,24 @@
     }
 
     BOOL alreadyAdded = NO;
-    for (MP42Track *inputTrack in _inputTracks)
-        if (inputTrack.sourceId == track.sourceId)
+    for (MP42Track *inputTrack in _inputTracks) {
+        if (inputTrack.sourceId == track.sourceId) {
             alreadyAdded = YES;
+        }
+    }
 
-    if (!alreadyAdded)
+    if (!alreadyAdded) {
         [_inputTracks addObject:track];
+    }
 
     [_outputsTracks addObject:track];
 }
 
 - (void)startReading
 {
-    for (MP42Track *track in _outputsTracks)
+    for (MP42Track *track in _outputsTracks) {
         track.muxer_helper->fifo = [[MP42Fifo alloc] init];
+    }
 
     _doneSem = dispatch_semaphore_create(0);
 }
@@ -185,7 +218,7 @@
 
 - (BOOL)cleanUp:(MP4FileHandle)fileHandle
 {
-    return NO;
+    return YES;
 }
 
 - (BOOL)containsTrack:(MP42Track *)track
@@ -203,33 +236,5 @@
 
     return nil;
 }
-
-- (void)dealloc
-{
-    for (MP42Track *track in _inputTracks) {
-        [track.muxer_helper->demuxer_context release];
-    }
-    
-    for (MP42Track *track in _outputsTracks) {
-        [track.muxer_helper->fifo release];
-        [track.muxer_helper->converter release];
-    }
-
-    [_metadata release], _metadata = nil;
-    [_tracksArray release], _tracksArray = nil;
-    [_inputTracks release], _inputTracks = nil;
-    [_outputsTracks release], _outputsTracks = nil;
-
-	[_fileURL release], _fileURL = nil;
-    [_demuxerThread release], _demuxerThread = nil;
-
-    if (_doneSem)
-        dispatch_release(_doneSem);
-
-    [super dealloc];
-}
-
-@synthesize metadata = _metadata;
-@synthesize tracks = _tracksArray;
 
 @end

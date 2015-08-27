@@ -11,6 +11,10 @@
 #import "MP42Utilities.h"
 #include "mp4v2.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum {  TRACK_DISABLED = 0x0,
     TRACK_ENABLED = 0x1,
     TRACK_IN_MOVIE = 0x2,
@@ -59,3 +63,7 @@ int rgb2yuv(int rgb);
 void *fast_realloc_with_padding(void *ptr, unsigned int *size, unsigned int min_size);
 int DecompressZlib(uint8_t **sampleData, uint32_t *sampleSize);
 int DecompressBzlib(uint8_t **sampleData, uint32_t *sampleSize);
+
+#ifdef __cplusplus
+}
+#endif

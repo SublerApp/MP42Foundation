@@ -222,7 +222,7 @@ static void insertTagsFromStyleRecord(style_record record, NSMutableString *samp
 
 - (BOOL)exportToURL:(NSURL *)url error:(NSError **)error
 {
-    MP4FileHandle fileHandle = MP4Read([[_sourceURL path] UTF8String]);
+    MP4FileHandle fileHandle = MP4Read(_sourceURL.path.fileSystemRepresentation);
     if (!fileHandle)
         return NO;
 

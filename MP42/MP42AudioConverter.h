@@ -10,12 +10,14 @@
 #include "sfifo.h"
 #include "downmix.h"
 #import "MP42ConverterProtocol.h"
+#import "MP42Fifo.h"
 
 #import <AudioToolbox/AudioToolbox.h>
 #import <CoreAudio/CoreAudio.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 @class MP42SampleBuffer;
-@class MP42Fifo;
 @class MP42AudioTrack;
 
 extern NSString * const SBMonoMixdown;
@@ -41,7 +43,7 @@ struct AudioFileIO
     AudioStreamBasicDescription     srcFormat;
 	AudioStreamPacketDescription    *pktDescs;
 
-    MP42Fifo      *inputSamplesBuffer;
+    MP42Fifo<MP42SampleBuffer *>    *inputSamplesBuffer;
 
     MP42SampleBuffer      *sample;
     int                   fileReaderDone;
@@ -67,8 +69,8 @@ struct AudioFileIO
     NSUInteger  layout;
     hb_chan_map_t *ichanmap;
 
-    MP42Fifo    *_inputSamplesBuffer;
-    MP42Fifo    *_outputSamplesBuffer;
+    MP42Fifo<MP42SampleBuffer *>    *_inputSamplesBuffer;
+    MP42Fifo<MP42SampleBuffer *>    *_outputSamplesBuffer;
 
     NSData * outputMagicCookie;
 
@@ -76,10 +78,10 @@ struct AudioFileIO
     struct AudioFileIO encoderData;
 }
 
-- (instancetype)initWithTrack:(MP42AudioTrack*)track andMixdownType:(NSString *)mixdownType error:(NSError **)outError;
+- (instancetype)initWithTrack:(MP42AudioTrack *)track andMixdownType:(NSString *)mixdownType error:(NSError **)outError;
 
 - (void)addSample:(MP42SampleBuffer *)sample;
-- (MP42SampleBuffer *)copyEncodedSample;
+- (nullable MP42SampleBuffer *)copyEncodedSample;
 
 - (NSData *)magicCookie;
 
@@ -87,5 +89,7 @@ struct AudioFileIO
 - (BOOL)encoderDone;
 
 - (void)setInputDone;
+
+NS_ASSUME_NONNULL_END
 
 @end

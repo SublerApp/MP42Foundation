@@ -339,8 +339,9 @@ static bool GetFirstHeader(FILE* inFile)
 - (void)demux:(id)sender
 {
     @autoreleasepool {
-        if (!inFile)
-            inFile = fopen([[_fileURL path] fileSystemRepresentation], "rb");
+        if (!inFile) {
+            inFile = fopen(_fileURL.path.fileSystemRepresentation, "rb");
+        }
 
         MP4TrackId trackId = [[_inputTracks lastObject] sourceId];
 

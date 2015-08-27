@@ -20,7 +20,7 @@
     if (self) {
         _size = (int32_t)numItems;
         _array = (id *) malloc(sizeof(id) * _size);
-        _full = dispatch_semaphore_create(_size);
+        _full = dispatch_semaphore_create(_size - 1);
         _empty = dispatch_semaphore_create(0);
 
     }
@@ -36,8 +36,9 @@
 
     _array[_tail++] = item;
 
-    if (_tail == _size)
+    if (_tail == _size) {
         _tail = 0;
+    }
 
     OSAtomicIncrement32(&_count);
     dispatch_semaphore_signal(_empty);
@@ -48,8 +49,9 @@
 
     id item = _array[_head++];
 
-    if (_head == _size)
+    if (_head == _size) {
         _head = 0;
+    }
 
     OSAtomicDecrement32(&_count);
     dispatch_semaphore_signal(_full);
@@ -81,8 +83,10 @@
 }
 
 - (void)drain {
-    while (![self isEmpty])
-        [[self deque] release];
+    id item;
+    while ((item = [self deque])) {
+        [item release];
+    }
 }
 
 - (void)cancel {

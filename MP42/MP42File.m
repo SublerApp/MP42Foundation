@@ -110,7 +110,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 
 - (BOOL)startReading {
     NSAssert(self.fileHandle == MP4_INVALID_FILE_HANDLE, @"File Handle already open");
-    _fileHandle = MP4Read([[self.URL path] fileSystemRepresentation]);
+    _fileHandle = MP4Read(self.URL.path.fileSystemRepresentation);
 
     if (self.fileHandle != MP4_INVALID_FILE_HANDLE) {
         self.status = MP42StatusReading;
@@ -129,7 +129,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 
 - (BOOL)startWriting {
     NSAssert(self.fileHandle == MP4_INVALID_FILE_HANDLE, @"File Handle already open");
-    _fileHandle = MP4Modify([[self.URL path] fileSystemRepresentation], 0);
+    _fileHandle = MP4Modify(self.URL.path.fileSystemRepresentation, 0);
 
     if (self.fileHandle != MP4_INVALID_FILE_HANDLE) {
         self.status = MP42StatusWriting;
@@ -165,7 +165,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
     return self;
 }
 
-- (instancetype)initWithExistingFile:(NSURL *)URL andDelegate:(id <MP42FileDelegate>)del {
+- (instancetype)initWithURL:(NSURL *)URL delegate:(nullable id <MP42FileDelegate>)del {
     self = [super init];
     if (self) {
         _delegate = del;
@@ -557,37 +557,47 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 
     @autoreleasepool {
         NSError *error = nil;
-
-        NSFileManager *fileManager = [[NSFileManager alloc] init];
         NSURL *tempURL = [self tempURL];
+        NSFileManager *fileManager = [[NSFileManager alloc] init];
 
         if (tempURL) {
-            unsigned long long originalFileSize = [[[fileManager attributesOfItemAtPath:[self.URL path] error:nil] valueForKey:NSFileSize] unsignedLongLongValue];
+            NSNumber *tempValue;
+            [self.URL getResourceValue:&tempValue forKey:NSURLFileSizeKey error:NULL];
+
+            unsigned long long originalFileSize = tempValue.longLongValue;
 
             dispatch_async(dispatch_get_global_queue(0, 0), ^{
-                noErr = MP4Optimize([[self.URL path] fileSystemRepresentation], [[tempURL path] fileSystemRepresentation]);
+                noErr = MP4Optimize(self.URL.path.fileSystemRepresentation, tempURL.path.fileSystemRepresentation);
                 done = YES;
             });
 
             // Loop to check the progress
             while (!done) {
-                unsigned long long fileSize = [[[fileManager attributesOfItemAtPath:[tempURL path] error:nil] valueForKey:NSFileSize] unsignedLongLongValue];
+                [tempURL getResourceValue:&tempValue forKey:NSURLFileSizeKey error:NULL];
+                unsigned long long fileSize = tempValue.longLongValue;
                 [self progressStatus:((CGFloat)fileSize / originalFileSize) * 100];
                 usleep(450000);
             }
 
             // Additional check to see if we can open the optimized file
-            if (noErr && [[[MP42File alloc] initWithExistingFile:tempURL andDelegate:nil] autorelease]) {
+            if (noErr && [[[MP42File alloc] initWithURL:tempURL delegate:nil] autorelease]) {
                 // Replace the original file
                 NSURL *result = nil;
-                noErr = [fileManager replaceItemAtURL:self.URL withItemAtURL:tempURL backupItemName:nil options:NSFileManagerItemReplacementWithoutDeletingBackupItem resultingItemURL:&result error:&error];
+                noErr = [fileManager replaceItemAtURL:self.URL
+                                        withItemAtURL:tempURL
+                                       backupItemName:nil
+                                              options:NSFileManagerItemReplacementWithoutDeletingBackupItem
+                                     resultingItemURL:&result error:&error];
                 if (noErr) {
                     self.URL = result;
+                } else {
+                    [_logger writeErrorToLog:error];
                 }
             }
+
             if (!noErr) {
                 // Remove the temp file if the optimization didn't complete
-                [fileManager removeItemAtPath:[tempURL path] error:NULL];
+                [fileManager removeItemAtURL:tempURL error:NULL];
             }
         }
 
@@ -613,6 +623,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
     if (!url) {
         if (outError) {
             *outError = MP42Error(@"Invalid path.", @"The destination path cannot be empty.", 100);
+            [_logger writeErrorToLog:*outError];
         }
         return NO;
     }
@@ -697,6 +708,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
             success = NO;
             if (outError) {
                 *outError = MP42Error(@"The file could not be saved.", @"You do not have sufficient permissions for this operation.", 101);
+                [_logger writeErrorToLog:*outError];
             }
         }
     }
@@ -810,7 +822,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 
     // Close the mp4 file handle
     if (![self stopWriting]) {
-        if (*outError == nil) {
+        if (outError) {
             *outError = MP42Error(@"File excedes 4 GB.",
                                   @"The file is bigger than 4 GB, but it was created with 32bit data chunk offset.\nSelect 64bit data chunk offset in the save panel.",
                                   102);
@@ -820,9 +832,9 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
     }
 
     // Generate previews images for chapters
-    if ([[attributes valueForKey:MP42GenerateChaptersPreviewTrack] boolValue] && [self.itracks count]) {
+    if ([attributes[MP42GenerateChaptersPreviewTrack] boolValue] && [self.itracks count]) {
         [self createChaptersPreview];
-    } else if ([[attributes valueForKey:MP42CustomChaptersPreviewTrack] boolValue] && [self.itracks count]) {
+    } else if ([attributes[MP42CustomChaptersPreviewTrack] boolValue] && [self.itracks count]) {
         [self customChaptersPreview];
     }
 

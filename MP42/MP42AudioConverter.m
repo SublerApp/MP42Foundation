@@ -31,7 +31,8 @@ OSStatus EncoderDataProc(AudioConverterRef              inAudioConverter,
 	struct AudioFileIO *afio = (struct AudioFileIO *)inUserData;
 
 	// figure out how much to read
-	if (*ioNumberDataPackets > afio->numPacketsPerRead) *ioNumberDataPackets = afio->numPacketsPerRead;
+    if (*ioNumberDataPackets > afio->numPacketsPerRead) {
+        *ioNumberDataPackets = afio->numPacketsPerRead;}
 
     // read from the fifo    
 	UInt32 outNumBytes;
@@ -45,8 +46,9 @@ OSStatus EncoderDataProc(AudioConverterRef              inAudioConverter,
 		return err;
 	}
 
-    if (*ioNumberDataPackets == 0)
-		printf ("End\n");
+    if (*ioNumberDataPackets == 0) {
+		printf("End\n");
+    }
 
     // put the data pointer into the buffer list
 
@@ -59,10 +61,12 @@ OSStatus EncoderDataProc(AudioConverterRef              inAudioConverter,
     afio->pos += *ioNumberDataPackets;
 
 	if (outDataPacketDescription) {
-		if (afio->pktDescs)
+        if (afio->pktDescs) {
 			*outDataPacketDescription = afio->pktDescs;
-		else
+        }
+        else {
 			*outDataPacketDescription = NULL;
+        }
 	}
 
 	return err;
@@ -70,188 +74,185 @@ OSStatus EncoderDataProc(AudioConverterRef              inAudioConverter,
 
 - (void)EncoderThreadMainRoutine:(id)sender
 {
-    NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
+    @autoreleasepool {
+        encoderDone = NO;
+        OSStatus err;
 
-    encoderDone = NO;
-    OSStatus err;
+        // set up aac converter
+        AudioConverterRef converterEnc;
+        AudioStreamBasicDescription inputFormat, encoderFormat;
 
-    // set up aac converter
-    AudioConverterRef converterEnc;
-    AudioStreamBasicDescription inputFormat, encoderFormat;
+        bzero( &inputFormat, sizeof( AudioStreamBasicDescription ) );
+        inputFormat.mSampleRate = sampleRate;
+        inputFormat.mFormatID = kAudioFormatLinearPCM ;
+        inputFormat.mFormatFlags =  kLinearPCMFormatFlagIsFloat | kAudioFormatFlagsNativeEndian;
+        inputFormat.mBytesPerPacket = 4 * outputChannelCount;
+        inputFormat.mFramesPerPacket = 1;
+        inputFormat.mBytesPerFrame = inputFormat.mBytesPerPacket * inputFormat.mFramesPerPacket;
+        inputFormat.mChannelsPerFrame = outputChannelCount;
+        inputFormat.mBitsPerChannel = 32;
 
-    bzero( &inputFormat, sizeof( AudioStreamBasicDescription ) );
-	inputFormat.mSampleRate = sampleRate;
-	inputFormat.mFormatID = kAudioFormatLinearPCM ;
-	inputFormat.mFormatFlags =  kLinearPCMFormatFlagIsFloat | kAudioFormatFlagsNativeEndian;
-    inputFormat.mBytesPerPacket = 4 * outputChannelCount;
-    inputFormat.mFramesPerPacket = 1;
-	inputFormat.mBytesPerFrame = inputFormat.mBytesPerPacket * inputFormat.mFramesPerPacket;
-	inputFormat.mChannelsPerFrame = outputChannelCount;
-	inputFormat.mBitsPerChannel = 32; 
+        bzero( &encoderFormat, sizeof( AudioStreamBasicDescription ) );
+        encoderFormat.mFormatID = kAudioFormatMPEG4AAC;
+        encoderFormat.mSampleRate = ( Float64 ) inputFormat.mSampleRate;
+        encoderFormat.mChannelsPerFrame = inputFormat.mChannelsPerFrame;
 
-    bzero( &encoderFormat, sizeof( AudioStreamBasicDescription ) );
-    encoderFormat.mFormatID = kAudioFormatMPEG4AAC;
-    encoderFormat.mSampleRate = ( Float64 ) inputFormat.mSampleRate;
-    encoderFormat.mChannelsPerFrame = inputFormat.mChannelsPerFrame;    
-
-    err = AudioConverterNew( &inputFormat, &encoderFormat, &converterEnc );
-    if (err)
-        NSLog(@"Boom encoder converter init failed");
-
-    UInt32 tmp, tmpsiz = sizeof( tmp );
-
-    // set encoder quality to maximum
-    tmp = kAudioConverterQuality_Max;
-    AudioConverterSetProperty( converterEnc, kAudioConverterCodecQuality,
-                              sizeof( tmp ), &tmp );
-
-    // set encoder bitrate control mode to constrained variable
-    tmp = kAudioCodecBitRateControlMode_VariableConstrained;
-    AudioConverterSetProperty( converterEnc, kAudioCodecPropertyBitRateControlMode,
-                              sizeof( tmp ), &tmp );
-
-    // set bitrate
-    UInt32 bitrate = (UInt32)[[[NSUserDefaults standardUserDefaults] valueForKey:@"SBAudioBitrate"] integerValue];
-    if (!bitrate) bitrate = 80;
-
-    // get available bitrates
-    AudioValueRange *bitrates;
-    ssize_t bitrateCounts;
-    err = AudioConverterGetPropertyInfo( converterEnc, kAudioConverterApplicableEncodeBitRates,
-                                        &tmpsiz, NULL);
-    if (err) {
-        NSLog(@"err kAudioConverterApplicableEncodeBitRates From AudioConverter");
-    }
-    bitrates = malloc( tmpsiz );
-    err = AudioConverterGetProperty( converterEnc, kAudioConverterApplicableEncodeBitRates,
-                                    &tmpsiz, bitrates);
-    if (err) {
-        NSLog(@"err kAudioConverterApplicableEncodeBitRates From AudioConverter");
-    }
-    bitrateCounts = tmpsiz / sizeof( AudioValueRange );
-    
-    // set bitrate
-    tmp = bitrate * outputChannelCount * 1000;
-    if( tmp < bitrates[0].mMinimum )
-        tmp = bitrates[0].mMinimum;
-    if( tmp > bitrates[bitrateCounts-1].mMinimum )
-        tmp = bitrates[bitrateCounts-1].mMinimum;
-    free( bitrates );
-
-    AudioConverterSetProperty( converterEnc, kAudioConverterEncodeBitRate,
-                              sizeof( tmp ), &tmp );
-
-    // get real input
-    tmpsiz = sizeof( inputFormat );
-    AudioConverterGetProperty( converterEnc,
-                              kAudioConverterCurrentInputStreamDescription,
-                              &tmpsiz, &inputFormat );
-    
-    // get real output
-    tmpsiz = sizeof( encoderFormat );
-    AudioConverterGetProperty( converterEnc,
-                              kAudioConverterCurrentOutputStreamDescription,
-                              &tmpsiz, &encoderFormat );
-
-    // set up buffers and data proc info struct
-	encoderData.srcBufferSize = 32768;
-	encoderData.srcBuffer = (char *)malloc( encoderData.srcBufferSize );
-	encoderData.pos = 0;
-	encoderData.srcFormat = inputFormat;
-    encoderData.srcSizePerPacket = inputFormat.mBytesPerPacket;
-    encoderData.numPacketsPerRead = encoderData.srcBufferSize / encoderData.srcSizePerPacket;
-    encoderData.pktDescs = NULL;
-    encoderData.fifo = &fifo;
-
-    // set up our output buffers
-
-	int outputSizePerPacket = encoderFormat.mBytesPerPacket; // this will be non-zero if the format is CBR
-    UInt32 size = sizeof(outputSizePerPacket);
-    err = AudioConverterGetProperty(converterEnc, kAudioConverterPropertyMaximumOutputPacketSize,
-                                    &size, &outputSizePerPacket);
-    if (err)
-        NSLog(@"Boom kAudioConverterPropertyMaximumOutputPacketSize");
-
-	UInt32 theOutputBufSize = outputSizePerPacket;
-	char* outputBuffer = (char*)malloc(theOutputBufSize);
-
-    // grab the cookie from the converter and write it to the file
-	UInt32 cookieSize = 0;
-	err = AudioConverterGetPropertyInfo(converterEnc, kAudioConverterCompressionMagicCookie, &cookieSize, NULL);
-    // if there is an error here, then the format doesn't have a cookie, so on we go
-	if (!err && cookieSize) {
-		char* cookie = (char *) malloc(cookieSize);
-        UInt8* cookieBuffer;
-
-		err = AudioConverterGetProperty(converterEnc, kAudioConverterCompressionMagicCookie, &cookieSize, cookie);
-		if (err) {
-            NSLog(@"err Get Cookie From AudioConverter");
+        err = AudioConverterNew( &inputFormat, &encoderFormat, &converterEnc );
+        if (err) {
+            NSLog(@"Boom encoder converter init failed");
         }
 
-        int ESDSsize;
-        ReadESDSDescExt(cookie, &cookieBuffer, &ESDSsize, 1);
-        outputMagicCookie = [[NSData dataWithBytes:cookieBuffer length:ESDSsize] retain];
+        UInt32 tmp, tmpsiz = sizeof( tmp );
 
-        free(cookieBuffer);
-		free(cookie);
-	}
+        // set encoder quality to maximum
+        tmp = kAudioConverterQuality_Max;
+        AudioConverterSetProperty( converterEnc, kAudioConverterCodecQuality,
+                                  sizeof( tmp ), &tmp );
 
-    // loop to convert data
-	SInt64 outputPos = 0;
-    
-	while (1) {
-        AudioStreamPacketDescription odesc = {0, 0, 0};
-        
-		// set up output buffer list
-		AudioBufferList fillBufList;
-		fillBufList.mNumberBuffers = 1;
-		fillBufList.mBuffers[0].mNumberChannels = inputFormat.mChannelsPerFrame;
-		fillBufList.mBuffers[0].mDataByteSize = theOutputBufSize;
-		fillBufList.mBuffers[0].mData = outputBuffer;
-        
-        while ((sfifo_used(&fifo) < (inputFormat.mBytesPerPacket * encoderFormat.mFramesPerPacket * 4)) && !readerDone) {
-            usleep(500);
+        // set encoder bitrate control mode to constrained variable
+        tmp = kAudioCodecBitRateControlMode_VariableConstrained;
+        AudioConverterSetProperty( converterEnc, kAudioCodecPropertyBitRateControlMode,
+                                  sizeof( tmp ), &tmp );
+
+        // set bitrate
+        UInt32 bitrate = (UInt32)[[[NSUserDefaults standardUserDefaults] valueForKey:@"SBAudioBitrate"] integerValue];
+        if (!bitrate) bitrate = 80;
+
+        // get available bitrates
+        AudioValueRange *bitrates;
+        ssize_t bitrateCounts;
+        err = AudioConverterGetPropertyInfo( converterEnc, kAudioConverterApplicableEncodeBitRates,
+                                            &tmpsiz, NULL);
+        if (err) {
+            NSLog(@"err kAudioConverterApplicableEncodeBitRates From AudioConverter");
+        }
+        bitrates = malloc( tmpsiz );
+        err = AudioConverterGetProperty( converterEnc, kAudioConverterApplicableEncodeBitRates,
+                                        &tmpsiz, bitrates);
+        if (err) {
+            NSLog(@"err kAudioConverterApplicableEncodeBitRates From AudioConverter");
+        }
+        bitrateCounts = tmpsiz / sizeof( AudioValueRange );
+
+        // set bitrate
+        tmp = bitrate * outputChannelCount * 1000;
+        if( tmp < bitrates[0].mMinimum ) {
+            tmp = bitrates[0].mMinimum;
+        }
+        if( tmp > bitrates[bitrateCounts-1].mMinimum ) {
+            tmp = bitrates[bitrateCounts-1].mMinimum;
+        }
+        free( bitrates );
+
+        AudioConverterSetProperty( converterEnc, kAudioConverterEncodeBitRate,
+                                  sizeof( tmp ), &tmp );
+
+        // get real input
+        tmpsiz = sizeof(inputFormat);
+        AudioConverterGetProperty( converterEnc,
+                                  kAudioConverterCurrentInputStreamDescription,
+                                  &tmpsiz, &inputFormat );
+
+        // get real output
+        tmpsiz = sizeof(encoderFormat);
+        AudioConverterGetProperty( converterEnc,
+                                  kAudioConverterCurrentOutputStreamDescription,
+                                  &tmpsiz, &encoderFormat );
+
+        // set up buffers and data proc info struct
+        encoderData.srcBufferSize = 32768;
+        encoderData.srcBuffer = (char *) malloc(encoderData.srcBufferSize);
+        encoderData.pos = 0;
+        encoderData.srcFormat = inputFormat;
+        encoderData.srcSizePerPacket = inputFormat.mBytesPerPacket;
+        encoderData.numPacketsPerRead = encoderData.srcBufferSize / encoderData.srcSizePerPacket;
+        encoderData.pktDescs = NULL;
+        encoderData.fifo = &fifo;
+
+        // set up our output buffers
+        int outputSizePerPacket = encoderFormat.mBytesPerPacket; // this will be non-zero if the format is CBR
+        UInt32 size = sizeof(outputSizePerPacket);
+        err = AudioConverterGetProperty(converterEnc, kAudioConverterPropertyMaximumOutputPacketSize,
+                                        &size, &outputSizePerPacket);
+        if (err) {
+            NSLog(@"Boom kAudioConverterPropertyMaximumOutputPacketSize");
+        }
+
+        UInt32 theOutputBufSize = outputSizePerPacket;
+        char *outputBuffer = (char *)malloc(theOutputBufSize);
+
+        // grab the cookie from the converter and write it to the file
+        UInt32 cookieSize = 0;
+        err = AudioConverterGetPropertyInfo(converterEnc, kAudioConverterCompressionMagicCookie, &cookieSize, NULL);
+        // if there is an error here, then the format doesn't have a cookie, so on we go
+        if (!err && cookieSize) {
+            char* cookie = (char *) malloc(cookieSize);
+            UInt8* cookieBuffer;
+
+            err = AudioConverterGetProperty(converterEnc, kAudioConverterCompressionMagicCookie, &cookieSize, cookie);
+            if (err) {
+                NSLog(@"err Get Cookie From AudioConverter");
+            }
+
+            int ESDSsize;
+            ReadESDSDescExt(cookie, &cookieBuffer, &ESDSsize, 1);
+            outputMagicCookie = [[NSData dataWithBytes:cookieBuffer length:ESDSsize] retain];
+
+            free(cookieBuffer);
+            free(cookie);
+        }
+
+        // loop to convert data
+        SInt64 outputPos = 0;
+
+        while (1) {
+            AudioStreamPacketDescription odesc = {0, 0, 0};
+
+            // set up output buffer list
+            AudioBufferList fillBufList;
+            fillBufList.mNumberBuffers = 1;
+            fillBufList.mBuffers[0].mNumberChannels = inputFormat.mChannelsPerFrame;
+            fillBufList.mBuffers[0].mDataByteSize = theOutputBufSize;
+            fillBufList.mBuffers[0].mData = outputBuffer;
+
+            while ((sfifo_used(&fifo) < (inputFormat.mBytesPerPacket * encoderFormat.mFramesPerPacket * 4)) && !readerDone) {
+                usleep(500);
+            }
+
+            // convert data
+            UInt32 ioOutputDataPackets = 1;
+            err = AudioConverterFillComplexBuffer(converterEnc, EncoderDataProc, &encoderData, &ioOutputDataPackets,
+                                                  &fillBufList, &odesc);
+            if (err) {
+                //NSLog(@"Error converterEnc %ld", (long)err);
+            }
+            if (ioOutputDataPackets == 0) {
+                // this is the EOF conditon
+                break;
+            }
+            
+            MP42SampleBuffer *sample = [[MP42SampleBuffer alloc] init];
+            sample->data = malloc(fillBufList.mBuffers[0].mDataByteSize);
+            memcpy(sample->data, outputBuffer, fillBufList.mBuffers[0].mDataByteSize);
+            
+            sample->size = fillBufList.mBuffers[0].mDataByteSize;
+            sample->duration = 1024;
+            sample->offset = 0;
+            sample->timestamp = outputPos;
+            sample->isSync = YES;
+            
+            [_outputSamplesBuffer enqueue:sample];
+            [sample release];
+            
+            outputPos += ioOutputDataPackets;
         }
         
-        // convert data
-		UInt32 ioOutputDataPackets = 1;
-		err = AudioConverterFillComplexBuffer(converterEnc, EncoderDataProc, &encoderData, &ioOutputDataPackets,
-                                              &fillBufList, &odesc);
-        if (err)
-        {
-            //NSLog(@"Error converterEnc %ld", (long)err);
-        }
-        if (ioOutputDataPackets == 0) {
-			// this is the EOF conditon
-			break;
-		}
+        free(outputBuffer);
         
-        MP42SampleBuffer *sample = [[MP42SampleBuffer alloc] init];
-        sample->data = malloc(fillBufList.mBuffers[0].mDataByteSize);
-        memcpy(sample->data, outputBuffer, fillBufList.mBuffers[0].mDataByteSize);
+        AudioConverterDispose(converterEnc);
 
-        sample->size = fillBufList.mBuffers[0].mDataByteSize;
-        sample->duration = 1024;
-        sample->offset = 0;
-        sample->timestamp = outputPos;
-        sample->isSync = YES;
-
-        while ([_outputSamplesBuffer isFull] && !_cancelled)
-            usleep(500);
-
-        [_outputSamplesBuffer enqueue:sample];
-        [sample release];
-
-		outputPos += ioOutputDataPackets;
+        encoderDone = YES;
     }
-
-    free(outputBuffer);
-    
-    AudioConverterDispose(converterEnc);
-
-    [pool release];
-
-    encoderDone = YES;
 
     return;
 }
@@ -267,17 +268,19 @@ OSStatus DecoderDataProc(AudioConverterRef              inAudioConverter,
     OSStatus err = noErr;
     struct AudioFileIO *afio = inUserData;
 
-    if (afio->sample)
+    if (afio->sample) {
         [afio->sample release];
+    }
 
     // figure out how much to read
 	if (*ioNumberDataPackets > afio->numPacketsPerRead) *ioNumberDataPackets = afio->numPacketsPerRead;
 
     // read from the buffer    
-    while (![afio->inputSamplesBuffer count] && !afio->fileReaderDone)
+    while ([afio->inputSamplesBuffer isEmpty] && !afio->fileReaderDone) {
         usleep(250);
+    }
 
-    if (![afio->inputSamplesBuffer count] && afio->fileReaderDone) {
+    if ([afio->inputSamplesBuffer isEmpty] && afio->fileReaderDone) {
         *ioNumberDataPackets = 0;
         return err;
     }
@@ -300,8 +303,9 @@ OSStatus DecoderDataProc(AudioConverterRef              inAudioConverter,
             afio->pktDescs->mDataByteSize = afio->sample->size;
 			*outDataPacketDescription = afio->pktDescs;
         }
-		else
+        else {
 			*outDataPacketDescription = NULL;
+        }
 	}
 
 	return err;
@@ -424,8 +428,9 @@ OSStatus DecoderDataProc(AudioConverterRef              inAudioConverter,
 
     free(outputBuffer);
 
-    if (downmix)
+    if (downmix) {
         hb_downmix_close(&downmix);
+    }
 
     AudioConverterDispose(decoderData.converter);
 
@@ -433,7 +438,7 @@ OSStatus DecoderDataProc(AudioConverterRef              inAudioConverter,
     return;
 }
 
-- (instancetype)initWithTrack:(MP42AudioTrack *)track andMixdownType:(NSString *) mixdownType error:(NSError **)outError
+- (instancetype)initWithTrack:(MP42AudioTrack *)track andMixdownType:(NSString *)mixdownType error:(NSError **)outError
 {
     if ((self = [super init])) {
         OSStatus err;
@@ -451,8 +456,9 @@ OSStatus DecoderDataProc(AudioConverterRef              inAudioConverter,
             return nil;
         }
 
-        if (outputChannelCount > inputChannelsCount)
+        if (outputChannelCount > inputChannelsCount) {
             outputChannelCount = inputChannelsCount;
+        }
 
         if ([mixdownType isEqualToString:SBMonoMixdown] && inputChannelsCount > 1) {
             downmixType = HB_AMIXDOWN_MONO;
@@ -530,10 +536,12 @@ OSStatus DecoderDataProc(AudioConverterRef              inAudioConverter,
             }
             else if ([track.sourceFormat isEqualToString:MP42AudioFormatPCM]) {
                 AudioStreamBasicDescription temp = [track.muxer_helper->importer audioDescriptionForTrack:track];
-                if (temp.mFormatID)
+                if (temp.mFormatID) {
                     inputFormat = temp;
-                else
+                }
+                else {
                     inputFormat.mFormatID = kAudioFormatLinearPCM;
+                }
             }
         }
 
@@ -604,15 +612,17 @@ OSStatus DecoderDataProc(AudioConverterRef              inAudioConverter,
         UInt32 size = sizeof(inputFormat);
         err = AudioConverterGetProperty( decoderData.converter, kAudioConverterCurrentInputStreamDescription,
                                         &size, &inputFormat);
-        if (err != noErr)
+        if (err != noErr) {
             NSLog(@"Boom kAudioConverterCurrentInputStreamDescription %ld",(long)err);
+        }
 
         // Read the complete outputStreamDescription from the audio converter.
         size = sizeof(outputFormat);
         err = AudioConverterGetProperty(decoderData.converter, kAudioConverterCurrentOutputStreamDescription,
                                         &size, &outputFormat);
-        if (err != noErr)
+        if (err != noErr) {
             NSLog(@"Boom kAudioConverterCurrentOutputStreamDescription %ld",(long)err);
+        }
 
         decoderData.inputFormat = inputFormat;
         decoderData.outputFormat = outputFormat;
@@ -633,9 +643,6 @@ OSStatus DecoderDataProc(AudioConverterRef              inAudioConverter,
 
 - (MP42SampleBuffer *)copyEncodedSample
 {
-    if (![_outputSamplesBuffer count])
-        return nil;
-
     return [_outputSamplesBuffer deque];
 }
 
@@ -655,8 +662,9 @@ OSStatus DecoderDataProc(AudioConverterRef              inAudioConverter,
     [_inputSamplesBuffer cancel];
     [_outputSamplesBuffer cancel];
 
-    while (!(readerDone && encoderDone))
+    while (!(readerDone && encoderDone)) {
         usleep(500);
+    }
 }
 
 - (BOOL)encoderDone

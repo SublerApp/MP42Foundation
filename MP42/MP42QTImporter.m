@@ -24,8 +24,8 @@
 
 @interface MP42QTImporter(Private)
     -(void) movieLoaded;
-    -(NSString*)formatForTrack: (QTTrack *)track;
-    -(NSString*)langForTrack: (QTTrack *)track;
+    -(NSString *)formatForTrack: (QTTrack *)track;
+    -(NSString *)langForTrack: (QTTrack *)track;
 @end
 
 @interface MovDemuxHelper : NSObject {
@@ -47,27 +47,25 @@
     if ((self = [super init])) {
         _fileURL = [fileURL retain];
 
-		NSDictionary * dict = [NSDictionary dictionaryWithObjectsAndKeys:
-							   _fileURL, QTMovieURLAttribute,
-							   @NO, @"QTMovieOpenAsyncRequiredAttribute",
-							   @NO, @"QTMovieOpenAsyncOKAttribute",
-							   nil];
+        NSDictionary *attrs = @{@"QTMovieOpenAsyncRequiredAttribute": @NO,
+                               @"QTMovieOpenAsyncOKAttribute": @NO};
 
         if (dispatch_get_current_queue() != dispatch_get_main_queue()) {
             dispatch_sync(dispatch_get_main_queue(), ^{
-                _sourceFile = [[QTMovie alloc] initWithAttributes:dict
+                _sourceFile = [[QTMovie alloc] initWithAttributes:attrs
                                                            error:outError];
             });
         }
-        else
-            _sourceFile = [[QTMovie alloc] initWithAttributes:dict
+        else {
+            _sourceFile = [[QTMovie alloc] initWithAttributes:attrs
                                                        error:outError];
+        }
 
-		if (_sourceFile)
+        if (_sourceFile) {
 			[self movieLoaded];
+        }
 		else {
             [self release];
-
 			return nil;
         }
     }
@@ -75,16 +73,17 @@
     return self;
 }
 
--(void) movieLoaded
+- (void)movieLoaded
 {
-    for (QTTrack *track in [_sourceFile tracks])
-        if ([[track attributeForKey:QTTrackIsChapterTrackAttribute] boolValue])
+    for (QTTrack *track in _sourceFile.tracks) {
+        if ([[track attributeForKey:QTTrackIsChapterTrackAttribute] boolValue]) {
             _chapterId = [[track attributeForKey:QTTrackIDAttribute] integerValue];
+        }
+    }
 
     _tracksArray = [[NSMutableArray alloc] init];
 
-    if (NSClassFromString(@"QTMetadataItem")) //QTMetadataItem is only 10.7+
-        [self convertMetadata];
+    [self convertMetadata];
 
     for (QTTrack *track in [_sourceFile tracks]) {
         NSString* mediaType = [track attributeForKey:QTTrackMediaTypeAttribute];
@@ -828,111 +827,111 @@
 
 - (void)demux:(id)sender
 {
-    NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
-    OSStatus err = noErr;
+    @autoreleasepool {
+        OSStatus err = noErr;
 
-    NSInteger tracksNumber = [_inputTracks count];
-    NSInteger tracksDone = 0;
+        NSInteger tracksNumber = [_inputTracks count];
+        NSInteger tracksDone = 0;
 
-    MovDemuxHelper *demuxHelper = nil;
+        MovDemuxHelper *demuxHelper = nil;
 
-    for (MP42Track *track in _inputTracks) {
-        track.muxer_helper->demuxer_context = [[MovDemuxHelper alloc] init];
+        for (MP42Track *track in _inputTracks) {
+            track.muxer_helper->demuxer_context = [[MovDemuxHelper alloc] init];
 
-        Track qtcTrack = [[_sourceFile trackWithTrackID:[track sourceId]] quickTimeTrack];
-        Media media = GetTrackMedia(qtcTrack);
+            Track qtcTrack = [[_sourceFile trackWithTrackID:[track sourceId]] quickTimeTrack];
+            Media media = GetTrackMedia(qtcTrack);
 
-        demuxHelper = track.muxer_helper->demuxer_context;
-        demuxHelper->totalSampleNumber = GetMediaSampleCount(media);
-    }
-
-    for (MP42Track * track in _inputTracks) {
-        if (_cancelled)
-            break;
-        
-        muxer_helper *helper = track.muxer_helper;
-        Track qtcTrack = [[_sourceFile trackWithTrackID:[track sourceId]] quickTimeTrack];
-        Media media = GetTrackMedia(qtcTrack);
-        demuxHelper = helper->demuxer_context;
-
-        // Create a QTSampleTable which contains all the informatio of the track samples.
-        TimeValue64 sampleTableStartDecodeTime = 0;
-        QTMutableSampleTableRef sampleTable = NULL;
-        err = CopyMediaMutableSampleTable(media,
-                                          0,
-                                          &sampleTableStartDecodeTime,
-                                          0,
-                                          0,
-                                          &sampleTable);
-        require_noerr(err, bail);
-
-        TimeValue64 minDisplayOffset = 0;
-        err = QTSampleTableGetProperty(sampleTable,
-                                       kQTPropertyClass_SampleTable,
-                                       kQTSampleTablePropertyID_MinDisplayOffset,
-                                       sizeof(TimeValue64),
-                                       &minDisplayOffset,
-                                       NULL);
-        require_noerr(err, bail);
-
-        demuxHelper->minDisplayOffset = minDisplayOffset;
-
-        SInt64 sampleIndex, sampleCount;
-        sampleCount = QTSampleTableGetNumberOfSamples(sampleTable);
-
-        for (sampleIndex = 1; sampleIndex <= sampleCount && !_cancelled; sampleIndex++) {
-            TimeValue64 sampleDecodeTime = 0;
-            ByteCount sampleDataSize = 0;
-            MediaSampleFlags sampleFlags = 0;
-            UInt8 *sampleData = NULL;
-            TimeValue64 decodeDuration = QTSampleTableGetDecodeDuration(sampleTable, sampleIndex);
-            TimeValue64 displayOffset = QTSampleTableGetDisplayOffset(sampleTable, sampleIndex);
-            //uint32_t dflags = 0;
-
-            // Get the frame's data size and sample flags.  
-            SampleNumToMediaDecodeTime( media, sampleIndex, &sampleDecodeTime, NULL);
-            sampleDataSize = QTSampleTableGetDataSizePerSample(sampleTable, sampleIndex);
-            sampleFlags = QTSampleTableGetSampleFlags(sampleTable, sampleIndex);
-            /*dflags |= (sampleFlags & mediaSampleHasRedundantCoding) ? MP4_SDT_HAS_REDUNDANT_CODING : 0;
-            dflags |= (sampleFlags & mediaSampleHasNoRedundantCoding) ? MP4_SDT_HAS_NO_REDUNDANT_CODING : 0;
-            dflags |= (sampleFlags & mediaSampleIsDependedOnByOthers) ? MP4_SDT_HAS_DEPENDENTS : 0;
-            dflags |= (sampleFlags & mediaSampleIsNotDependedOnByOthers) ? MP4_SDT_HAS_NO_DEPENDENTS : 0;
-            dflags |= (sampleFlags & mediaSampleDependsOnOthers) ? MP4_SDT_IS_DEPENDENT : 0;
-            dflags |= (sampleFlags & mediaSampleDoesNotDependOnOthers) ? MP4_SDT_IS_INDEPENDENT : 0;
-            dflags |= (sampleFlags & mediaSampleEarlierDisplayTimesAllowed) ? MP4_SDT_EARLIER_DISPLAY_TIMES_ALLOWED : 0;*/
-
-            // Load the frame.
-            sampleData = malloc(sampleDataSize);
-            GetMediaSample2(media, sampleData, sampleDataSize, NULL, sampleDecodeTime,
-                            NULL, NULL, NULL, NULL, NULL, 1, NULL, NULL);
-
-            demuxHelper->currentSampleId = demuxHelper->currentSampleId + 1;
-            demuxHelper->currentTime = demuxHelper->currentTime + decodeDuration;
-
-            MP42SampleBuffer *sample = [[MP42SampleBuffer alloc] init];
-            sample->data = sampleData;
-            sample->size = sampleDataSize;
-            sample->duration = decodeDuration;
-            sample->offset = displayOffset -minDisplayOffset;
-            sample->timestamp = demuxHelper->currentTime;
-            sample->isSync = !(sampleFlags & mediaSampleNotSync);
-            sample->trackId = track.sourceId;
-
-            [self enqueue:sample];
-            [sample release];
-
-            _progress = ((demuxHelper->currentSampleId / (CGFloat) demuxHelper->totalSampleNumber ) * 100 / tracksNumber) +
-            (tracksDone / (CGFloat) tracksNumber * 100);
+            demuxHelper = track.muxer_helper->demuxer_context;
+            demuxHelper->totalSampleNumber = GetMediaSampleCount(media);
         }
 
-        tracksDone++;
+        for (MP42Track * track in _inputTracks) {
+            if (_cancelled)
+                break;
 
+            muxer_helper *helper = track.muxer_helper;
+            Track qtcTrack = [[_sourceFile trackWithTrackID:[track sourceId]] quickTimeTrack];
+            Media media = GetTrackMedia(qtcTrack);
+            demuxHelper = helper->demuxer_context;
+
+            // Create a QTSampleTable which contains all the informatio of the track samples.
+            TimeValue64 sampleTableStartDecodeTime = 0;
+            QTMutableSampleTableRef sampleTable = NULL;
+            err = CopyMediaMutableSampleTable(media,
+                                              0,
+                                              &sampleTableStartDecodeTime,
+                                              0,
+                                              0,
+                                              &sampleTable);
+            require_noerr(err, bail);
+
+            TimeValue64 minDisplayOffset = 0;
+            err = QTSampleTableGetProperty(sampleTable,
+                                           kQTPropertyClass_SampleTable,
+                                           kQTSampleTablePropertyID_MinDisplayOffset,
+                                           sizeof(TimeValue64),
+                                           &minDisplayOffset,
+                                           NULL);
+            require_noerr(err, bail);
+
+            demuxHelper->minDisplayOffset = minDisplayOffset;
+
+            SInt64 sampleIndex, sampleCount;
+            sampleCount = QTSampleTableGetNumberOfSamples(sampleTable);
+
+            for (sampleIndex = 1; sampleIndex <= sampleCount && !_cancelled; sampleIndex++) {
+                TimeValue64 sampleDecodeTime = 0;
+                ByteCount sampleDataSize = 0;
+                MediaSampleFlags sampleFlags = 0;
+                UInt8 *sampleData = NULL;
+                TimeValue64 decodeDuration = QTSampleTableGetDecodeDuration(sampleTable, sampleIndex);
+                TimeValue64 displayOffset = QTSampleTableGetDisplayOffset(sampleTable, sampleIndex);
+                //uint32_t dflags = 0;
+
+                // Get the frame's data size and sample flags.
+                SampleNumToMediaDecodeTime( media, sampleIndex, &sampleDecodeTime, NULL);
+                sampleDataSize = QTSampleTableGetDataSizePerSample(sampleTable, sampleIndex);
+                sampleFlags = QTSampleTableGetSampleFlags(sampleTable, sampleIndex);
+                /*dflags |= (sampleFlags & mediaSampleHasRedundantCoding) ? MP4_SDT_HAS_REDUNDANT_CODING : 0;
+                 dflags |= (sampleFlags & mediaSampleHasNoRedundantCoding) ? MP4_SDT_HAS_NO_REDUNDANT_CODING : 0;
+                 dflags |= (sampleFlags & mediaSampleIsDependedOnByOthers) ? MP4_SDT_HAS_DEPENDENTS : 0;
+                 dflags |= (sampleFlags & mediaSampleIsNotDependedOnByOthers) ? MP4_SDT_HAS_NO_DEPENDENTS : 0;
+                 dflags |= (sampleFlags & mediaSampleDependsOnOthers) ? MP4_SDT_IS_DEPENDENT : 0;
+                 dflags |= (sampleFlags & mediaSampleDoesNotDependOnOthers) ? MP4_SDT_IS_INDEPENDENT : 0;
+                 dflags |= (sampleFlags & mediaSampleEarlierDisplayTimesAllowed) ? MP4_SDT_EARLIER_DISPLAY_TIMES_ALLOWED : 0;*/
+
+                // Load the frame.
+                sampleData = malloc(sampleDataSize);
+                GetMediaSample2(media, sampleData, sampleDataSize, NULL, sampleDecodeTime,
+                                NULL, NULL, NULL, NULL, NULL, 1, NULL, NULL);
+
+                demuxHelper->currentSampleId = demuxHelper->currentSampleId + 1;
+                demuxHelper->currentTime = demuxHelper->currentTime + decodeDuration;
+
+                MP42SampleBuffer *sample = [[MP42SampleBuffer alloc] init];
+                sample->data = sampleData;
+                sample->size = sampleDataSize;
+                sample->duration = decodeDuration;
+                sample->offset = displayOffset -minDisplayOffset;
+                sample->timestamp = demuxHelper->currentTime;
+                sample->isSync = !(sampleFlags & mediaSampleNotSync);
+                sample->trackId = track.sourceId;
+                
+                [self enqueue:sample];
+                [sample release];
+                
+                _progress = ((demuxHelper->currentSampleId / (CGFloat) demuxHelper->totalSampleNumber ) * 100 / tracksNumber) +
+                (tracksDone / (CGFloat) tracksNumber * 100);
+            }
+            
+            tracksDone++;
+            
         bail:
-        QTSampleTableRelease(sampleTable);
+            QTSampleTableRelease(sampleTable);
+        }
+        
+        [self setDone:YES];
     }
-
-    [self setDone:YES];
-    [pool release];
 }
 
 - (void)startReading
@@ -973,12 +972,14 @@
             editTrackDuration = (editTrackDuration / (double)GetMovieTimeScale([_sourceFile quickTimeMovie])) * MP4GetTimeScale(fileHandle);
             editDwell = GetTrackEditRate64(qtcTrack, editTrackStart);
 
-            if (demuxHelper->minDisplayOffset < 0 && editDisplayStart != -1)
+            if (demuxHelper->minDisplayOffset < 0 && editDisplayStart != -1) {
                 MP4AddTrackEdit(fileHandle, track.Id, MP4_INVALID_EDIT_ID, editDisplayStart - demuxHelper->minDisplayOffset,
                                 editTrackDuration, !Fix2X(editDwell));
-            else
+            }
+            else {
                 MP4AddTrackEdit(fileHandle, track.Id, MP4_INVALID_EDIT_ID, editDisplayStart,
                                 editTrackDuration, !Fix2X(editDwell));
+            }
 
             trackDuration += editTrackDuration;
             // Find the next edit
@@ -996,7 +997,7 @@
     return YES;
 }
 
-- (void) dealloc
+- (void)dealloc
 {
     [_sourceFile release];
 

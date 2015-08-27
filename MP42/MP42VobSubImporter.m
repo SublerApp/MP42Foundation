@@ -119,7 +119,7 @@ static NSString *getNextVobSubLine(NSEnumerator *lineEnum)
 	return line;
 }
 
-static NSArray* LoadVobSubSubtitles(NSURL *theDirectory, NSString *filename)
+static NSArray<SBVobSubTrack *> * LoadVobSubSubtitles(NSURL *theDirectory, NSString *filename)
 {
     @autoreleasepool {
         NSString *nsPath = [[theDirectory path] stringByAppendingPathComponent:filename];
@@ -144,7 +144,7 @@ static NSArray* LoadVobSubSubtitles(NSURL *theDirectory, NSString *filename)
             NSEnumerator *lineEnum = [lines objectEnumerator];
             NSString *line;
 
-            NSMutableArray *tracks = [NSMutableArray array];
+            NSMutableArray<SBVobSubTrack *> *tracks = [NSMutableArray array];
 
             while((line = getNextVobSubLine(lineEnum)) != NULL)
             {
@@ -225,8 +225,8 @@ static NSArray* LoadVobSubSubtitles(NSURL *theDirectory, NSString *filename)
         NSInteger count = 0;
         _fileURL = [fileURL retain];
 
-        _VobSubTracks = LoadVobSubSubtitles([_fileURL URLByDeletingLastPathComponent], [_fileURL lastPathComponent]);
-        _tracksArray = [[NSMutableArray alloc] initWithCapacity:[_VobSubTracks count]];
+        _VobSubTracks = LoadVobSubSubtitles(_fileURL.URLByDeletingLastPathComponent, _fileURL.lastPathComponent);
+        _tracksArray = [[NSMutableArray alloc] initWithCapacity:_VobSubTracks.count];
 
         for (SBVobSubTrack *track in _VobSubTracks) {
             MP42SubtitleTrack *newTrack = [[MP42SubtitleTrack alloc] init];
@@ -242,9 +242,10 @@ static NSArray* LoadVobSubSubtitles(NSURL *theDirectory, NSString *filename)
             [newTrack release];
         }
 
-        if (![_tracksArray count]) {
-            if (outError)
+        if (!_tracksArray.count) {
+            if (outError) {
                 *outError = MP42Error(@"The file could not be opened.", @"The file is not a idx file, or it does not contain any subtitles.", 100);
+            }
 
             [self release];
             return nil;
@@ -290,70 +291,84 @@ static NSArray* LoadVobSubSubtitles(NSURL *theDirectory, NSString *filename)
 
 - (void)demux:(id)sender
 {
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    NSURL *subFileURL = [[_fileURL URLByDeletingPathExtension] URLByAppendingPathExtension:@"sub"];
+    @autoreleasepool {
 
-    NSData *subFileData = [NSData dataWithContentsOfURL:subFileURL];
+        NSURL *subFileURL = [[_fileURL URLByDeletingPathExtension] URLByAppendingPathExtension:@"sub"];
 
-    NSInteger tracksNumber = [_inputTracks count];
-    NSInteger tracksDone = 0;
+        NSData *subFileData = [NSData dataWithContentsOfURL:subFileURL];
 
-    for (MP42Track *track in _inputTracks) {
-        SBVobSubTrack *vobTrack = [_VobSubTracks objectAtIndex:track.sourceId];
-        SBVobSubSample *firstSample = nil;
-        
-        uint32_t lastTime = 0;
-        int i, sampleCount = [vobTrack->samples count];
-        
-        for (i = 0; i < sampleCount && !_cancelled; i++) {
-            SBVobSubSample *currentSample = [vobTrack->samples objectAtIndex:i];
-            int offset = currentSample->fileOffset;
-            int nextOffset;
-            if (i == sampleCount - 1)
-                nextOffset = [subFileData length];
-            else
-                nextOffset = ((SBVobSubSample *)[vobTrack->samples objectAtIndex:i+1])->fileOffset;
-            int size = nextOffset - offset;
-            if (size < 0)
-                //Skip samples for which we cannot determine size
-                continue;
-            
-            NSData *subData = [subFileData subdataWithRange:NSMakeRange(offset, size)];
-            uint8_t *extracted = (uint8_t *)malloc(size);
-            //The index here likely should really be track->index, but I'm not sure we can really trust it.
-            int extractedSize = ExtractVobSubPacket(extracted, (UInt8 *)[subData bytes], size, &size, -1);
-            
-            uint16_t startTimestamp, endTimestamp;
-            uint8_t forced;
-            if (!ReadPacketTimes(extracted, extractedSize, &startTimestamp, &endTimestamp, &forced)) {
-                free(extracted);
-                continue;
-            }
-            
-            uint32_t startTime = currentSample->timeStamp + startTimestamp;
-            uint32_t endTime = currentSample->timeStamp + endTimestamp;
-            
-            int duration = endTimestamp - startTimestamp;
-            if (duration <= 0 && i < sampleCount - 1) {
-                //Sample with no end duration, use the duration of the next one
-                endTime = ((SBVobSubSample *)[vobTrack->samples objectAtIndex:i+1])->timeStamp;
-                duration = endTime - startTime;
-            }
-            if (duration <= 0) {
-                //Skip samples which are broken
-                free(extracted);
-                continue;
-            }
-            if (firstSample == nil) {
-                currentSample->timeStamp = startTime;
-                firstSample = currentSample;
-            }
-            if (lastTime != startTime) {
-                //insert a sample with no real data, to clear the subs
+        NSInteger tracksNumber = [_inputTracks count];
+        NSInteger tracksDone = 0;
+
+        for (MP42Track *track in _inputTracks) {
+            SBVobSubTrack *vobTrack = [_VobSubTracks objectAtIndex:track.sourceId];
+            SBVobSubSample *firstSample = nil;
+
+            uint32_t lastTime = 0;
+            int i, sampleCount = [vobTrack->samples count];
+
+            for (i = 0; i < sampleCount && !_cancelled; i++) {
+                SBVobSubSample *currentSample = [vobTrack->samples objectAtIndex:i];
+                int offset = currentSample->fileOffset;
+                int nextOffset;
+                if (i == sampleCount - 1)
+                    nextOffset = [subFileData length];
+                else
+                    nextOffset = ((SBVobSubSample *)[vobTrack->samples objectAtIndex:i+1])->fileOffset;
+                int size = nextOffset - offset;
+                if (size < 0)
+                    //Skip samples for which we cannot determine size
+                    continue;
+
+                NSData *subData = [subFileData subdataWithRange:NSMakeRange(offset, size)];
+                uint8_t *extracted = (uint8_t *)malloc(size);
+                //The index here likely should really be track->index, but I'm not sure we can really trust it.
+                int extractedSize = ExtractVobSubPacket(extracted, (UInt8 *)[subData bytes], size, &size, -1);
+
+                uint16_t startTimestamp, endTimestamp;
+                uint8_t forced;
+                if (!ReadPacketTimes(extracted, extractedSize, &startTimestamp, &endTimestamp, &forced)) {
+                    free(extracted);
+                    continue;
+                }
+
+                uint32_t startTime = currentSample->timeStamp + startTimestamp;
+                uint32_t endTime = currentSample->timeStamp + endTimestamp;
+
+                int duration = endTimestamp - startTimestamp;
+                if (duration <= 0 && i < sampleCount - 1) {
+                    //Sample with no end duration, use the duration of the next one
+                    endTime = ((SBVobSubSample *)[vobTrack->samples objectAtIndex:i+1])->timeStamp;
+                    duration = endTime - startTime;
+                }
+                if (duration <= 0) {
+                    //Skip samples which are broken
+                    free(extracted);
+                    continue;
+                }
+                if (firstSample == nil) {
+                    currentSample->timeStamp = startTime;
+                    firstSample = currentSample;
+                }
+                if (lastTime != startTime) {
+                    //insert a sample with no real data, to clear the subs
+                    MP42SampleBuffer *sample = [[MP42SampleBuffer alloc] init];
+                    sample->size = 2;
+                    sample->data = calloc(1, 2);
+                    sample->duration = startTime - lastTime;
+                    sample->offset = 0;
+                    sample->timestamp = startTime;
+                    sample->isSync = YES;
+                    sample->trackId = track.sourceId;
+
+                    [self enqueue:sample];
+                    [sample release];
+                }
+
                 MP42SampleBuffer *sample = [[MP42SampleBuffer alloc] init];
-                sample->size = 2;
-                sample->data = calloc(1, 2);
-                sample->duration = startTime - lastTime;
+                sample->data = extracted;
+                sample->size = size;
+                sample->duration = duration;
                 sample->offset = 0;
                 sample->timestamp = startTime;
                 sample->isSync = YES;
@@ -361,29 +376,16 @@ static NSArray* LoadVobSubSubtitles(NSURL *theDirectory, NSString *filename)
                 
                 [self enqueue:sample];
                 [sample release];
+                
+                lastTime = endTime;
+                
+                _progress = ((i / (CGFloat) sampleCount ) * 100 / tracksNumber) + (tracksDone / (CGFloat) tracksNumber * 100);
             }
-
-            MP42SampleBuffer *sample = [[MP42SampleBuffer alloc] init];
-            sample->data = extracted;
-            sample->size = size;
-            sample->duration = duration;
-            sample->offset = 0;
-            sample->timestamp = startTime;
-            sample->isSync = YES;
-            sample->trackId = track.sourceId;
-
-            [self enqueue:sample];
-            [sample release];
-
-            lastTime = endTime;
-
-            _progress = ((i / (CGFloat) sampleCount ) * 100 / tracksNumber) + (tracksDone / (CGFloat) tracksNumber * 100);
+            tracksDone++;
         }
-        tracksDone++;
+        
+        [self setDone:YES];
     }
-
-    [self setDone:YES];
-    [pool release];
 }
 
 - (void)startReading

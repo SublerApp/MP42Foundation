@@ -12,6 +12,8 @@
 
 #include <avcodec.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 @class MP42SampleBuffer;
 @class MP42SubtitleTrack;
 @class MP42OCRWrapper;
@@ -26,8 +28,8 @@
 	AVCodecContext          *avContext;
 	AVSubtitle              subtitle;
 
-    MP42Fifo    *_inputSamplesBuffer;
-    MP42Fifo    *_outputSamplesBuffer;
+    MP42Fifo<MP42SampleBuffer *> *_inputSamplesBuffer;
+    MP42Fifo<MP42SampleBuffer *> *_outputSamplesBuffer;
 
 	UInt32                  paletteG[16];
     NSData *srcMagicCookie;
@@ -43,7 +45,7 @@
 - (instancetype)initWithTrack:(MP42SubtitleTrack *)track error:(NSError **)outError;
 
 - (void)addSample:(MP42SampleBuffer *)sample;
-- (MP42SampleBuffer *)copyEncodedSample;
+- (nullable MP42SampleBuffer *)copyEncodedSample;
 
 - (void)cancel;
 
@@ -51,3 +53,5 @@
 - (void)setInputDone;
 
 @end
+
+NS_ASSUME_NONNULL_END

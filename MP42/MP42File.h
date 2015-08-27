@@ -117,7 +117,7 @@ typedef NS_ENUM(NSUInteger, MP42Status) {
  *
  *  @return An instance of MP42File
  */
-- (instancetype)initWithExistingFile:(NSURL *)URL andDelegate:(nullable id <MP42FileDelegate>)del;
+- (instancetype)initWithURL:(NSURL *)URL delegate:(nullable id <MP42FileDelegate>)del;
 
 /**
  * Provides the array of MP42Tracks contained by the mp4 file

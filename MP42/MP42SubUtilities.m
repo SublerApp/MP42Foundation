@@ -386,7 +386,7 @@ static int ParseForced(NSString *str)
 int LoadSRTFromPath(NSString *path, SBSubSerializer *ss, MP4Duration *duration)
 {
 	NSMutableString *srt = STStandardizeStringNewlines(STLoadFileWithUnknownEncoding(path));
-	if (!srt) return 0;
+	if (!srt.length) return 0;
 
 	if ([srt characterAtIndex:0] == 0xFEFF) [srt deleteCharactersInRange:NSMakeRange(0,1)];
 	if ([srt characterAtIndex:[srt length]-1] != '\n') [srt appendFormat:@"%c",'\n'];
