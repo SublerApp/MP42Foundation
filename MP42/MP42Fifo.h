@@ -26,8 +26,7 @@ NS_ASSUME_NONNULL_BEGIN
     dispatch_semaphore_t _empty;
 }
 
-- (instancetype)init;
-- (instancetype)initWithCapacity:(NSUInteger)numItems NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithCapacity:(NSUInteger)capacity NS_DESIGNATED_INITIALIZER;
 
 - (void)enqueue:(ObjectType)item;
 - (nullable ObjectType)deque NS_RETURNS_RETAINED;

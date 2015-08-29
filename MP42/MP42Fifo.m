@@ -15,10 +15,10 @@
     return self;
 }
 
-- (instancetype)initWithCapacity:(NSUInteger)numItems {
+- (instancetype)initWithCapacity:(NSUInteger)capacity {
     self = [super init];
     if (self) {
-        _size = (int32_t)numItems;
+        _size = (int32_t)capacity;
         _array = (id *) malloc(sizeof(id) * _size);
         _full = dispatch_semaphore_create(_size - 1);
         _empty = dispatch_semaphore_create(0);
@@ -40,11 +40,11 @@
         _tail = 0;
     }
 
-    OSAtomicIncrement32(&_count);
+    OSAtomicIncrement32Barrier(&_count);
     dispatch_semaphore_signal(_empty);
 }
 
-- (id)deque {
+- (nullable id)deque {
     if (!_count) return nil;
 
     id item = _array[_head++];
@@ -53,17 +53,17 @@
         _head = 0;
     }
 
-    OSAtomicDecrement32(&_count);
+    OSAtomicDecrement32Barrier(&_count);
     dispatch_semaphore_signal(_full);
 
     return item;
 }
 
-- (id)dequeAndWait {
+- (nullable id)dequeAndWait {
     id item = [self deque];
 
     if (!item) {
-        dispatch_time_t time = dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC/1000);
+        dispatch_time_t time = dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC / 1000);
         dispatch_semaphore_wait(_empty, time);
     }
 
