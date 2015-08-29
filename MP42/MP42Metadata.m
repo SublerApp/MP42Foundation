@@ -695,6 +695,21 @@ static const genreType_t genreType_strings[] = {
     return noErr;
 }
 
+- (id)objectForKeyedSubscript:(NSString *)key
+{
+    return [self.tagsDict objectForKey:key];
+}
+
+- (void)setObject:(id)obj forKeyedSubscript:(NSString *)key
+{
+    if (obj == nil) {
+        [self removeTagForKey:key];
+    }
+    else {
+        [self setTag:obj forKey:key];
+    }
+}
+
 #pragma mark - MP42Foundation/mp4v2 read/write mapping
 
 -(void) readMetaDataFromFileHandle:(MP4FileHandle)sourceHandle

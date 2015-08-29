@@ -46,6 +46,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void) removeTagForKey:(NSString *)aKey;
 - (BOOL) setTag:(id)value forKey:(NSString *)key;
+
+- (nullable id)objectForKeyedSubscript:(NSString *)key;
+- (void)setObject:(id)obj forKeyedSubscript:(NSString *)key;
+
 - (BOOL) setMediaKindFromString:(NSString *)mediaKindString;
 - (BOOL) setContentRatingFromString:(NSString *)contentRatingString;
 - (BOOL) setArtworkFromFilePath:(NSString *)imageFilePath;
