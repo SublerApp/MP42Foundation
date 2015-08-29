@@ -122,6 +122,16 @@
 	]
 },
 {
+	"country" : "México",
+	"ratings" : [
+        { "media" : "movie", "prefix" : "mx-movie", 	"itunes-code" : "AA", 	"itunes-value" : "000",  "description" : "AA" },
+        { "media" : "movie", "prefix" : "mx-movie", 	"itunes-code" : "A", 	"itunes-value" : "100",  "description" : "A" },
+        { "media" : "movie", "prefix" : "mx-movie", 	"itunes-code" : "B", 	"itunes-value" : "300",  "description" : "B" },
+        { "media" : "movie", "prefix" : "mx-movie", 	"itunes-code" : "B-15", "itunes-value" : "500",  "description" : "B-15" },
+        { "media" : "movie", "prefix" : "mx-movie", 	"itunes-code" : "C", 	"itunes-value" : "600",  "description" : "C" }
+    ]
+},
+{
 	"country" : "Nederland",
 	"ratings" : [
 	   { "media" : "movie & TV", "prefix" : "nl-movie", 	"itunes-code" : "AL/G", 	"itunes-value" : "000",  "description" : "AL/G" },
