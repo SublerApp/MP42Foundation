@@ -47,8 +47,9 @@
     if ((self = [super init])) {
         _fileURL = [fileURL retain];
 
-        NSDictionary *attrs = @{@"QTMovieOpenAsyncRequiredAttribute": @NO,
-                               @"QTMovieOpenAsyncOKAttribute": @NO};
+        NSDictionary *attrs = @{QTMovieURLAttribute : _fileURL,
+                                QTMovieOpenAsyncRequiredAttribute: @NO,
+                                QTMovieOpenAsyncOKAttribute: @NO};
 
         if (dispatch_get_current_queue() != dispatch_get_main_queue()) {
             dispatch_sync(dispatch_get_main_queue(), ^{
