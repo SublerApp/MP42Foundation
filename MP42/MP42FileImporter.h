@@ -10,11 +10,10 @@
 #import <AudioToolbox/AudioToolbox.h>
 
 #import "MP42MediaFormat.h"
-#import "MP42Sample.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-@class MP42Sample;
+@class MP42SampleBuffer;
 @class MP42Metadata;
 @class MP42Track;
 

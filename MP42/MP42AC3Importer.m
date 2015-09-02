@@ -11,6 +11,7 @@
 #import "MP42File.h"
 #import "MP42PrivateUtilities.h"
 #import "MP42Fifo.h"
+#import "MP42Sample.h"
 
 #include <sys/stat.h>
 

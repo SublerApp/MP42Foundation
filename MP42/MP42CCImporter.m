@@ -10,6 +10,7 @@
 #import "MP42SubUtilities.h"
 #import "MP42Languages.h"
 #import "MP42File.h"
+#import "MP42Sample.h"
 #import "RegexKitLite.h"
 
 
@@ -45,7 +46,7 @@
       return NSMakeSize([(MP42SubtitleTrack*)track trackWidth], [(MP42SubtitleTrack*) track trackHeight]);
 }
 
-- (NSData*)magicCookieForTrack:(MP42Track *)track
+- (NSData *)magicCookieForTrack:(MP42Track *)track
 {
     return nil;
 }
@@ -61,14 +62,16 @@ static unsigned ParseTimeCode(const char *time, unsigned secondScale, BOOL hasSi
 		time++;
 	}
 
-	if (sscanf(time,"%u:%u:%u%[,.:;]%u",&hour,&minute,&second,&separator,&frame) < 5)
+    if (sscanf(time,"%u:%u:%u%[,.:;]%u",&hour,&minute,&second,&separator,&frame) < 5) {
 		return 0;
+    }
 
 	timeval = (hour * 60 * 60 + minute * 60 + second) * 30 + frame;
 	//timeval = secondScale * timeval + frame;
 
-    if (separator == ';')
+    if (separator == ';') {
         *dropFrame = 1;
+    }
 
 	return timeval * sign;
 }
