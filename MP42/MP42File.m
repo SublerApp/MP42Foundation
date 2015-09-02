@@ -561,10 +561,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
         NSFileManager *fileManager = [[NSFileManager alloc] init];
 
         if (tempURL) {
-            NSNumber *tempValue;
-            [self.URL getResourceValue:&tempValue forKey:NSURLFileSizeKey error:NULL];
-
-            unsigned long long originalFileSize = tempValue.longLongValue;
+            unsigned long long originalFileSize = [[[fileManager attributesOfItemAtPath:self.URL.path error:nil] valueForKey:NSFileSize] unsignedLongLongValue];
 
             dispatch_async(dispatch_get_global_queue(0, 0), ^{
                 noErr = MP4Optimize(self.URL.path.fileSystemRepresentation, tempURL.path.fileSystemRepresentation);
@@ -573,8 +570,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 
             // Loop to check the progress
             while (!done) {
-                [tempURL getResourceValue:&tempValue forKey:NSURLFileSizeKey error:NULL];
-                unsigned long long fileSize = tempValue.longLongValue;
+                unsigned long long fileSize = [[[fileManager attributesOfItemAtPath:self.tempURL.path error:nil] valueForKey:NSFileSize] unsignedLongLongValue];
                 [self progressStatus:((CGFloat)fileSize / originalFileSize) * 100];
                 usleep(450000);
             }
