@@ -721,7 +721,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
     // Open the mp4 file
     if (![self startWriting]) {
         if (outError) {
-            *outError = MP42Error(@"The file could not be saved.", @"You may do not have sufficient permissions for this operation.", 101);
+            *outError = MP42Error(@"The file could not be saved.", @"You may do not have sufficient permissions for this operation, or the mp4 file is corrupted.", 101);
             [_logger writeErrorToLog:*outError];
         }
         return NO;
