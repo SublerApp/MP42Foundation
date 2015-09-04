@@ -22,9 +22,7 @@
 {
     if ((self = [super init])) {
         _fileURL = [fileURL retain];
-
-        NSInteger trackCount = 1;
-        _tracksArray = [[NSMutableArray alloc] initWithCapacity:trackCount];
+        _tracksArray = [[NSMutableArray alloc] init];
 
         NSInteger success = 0;
         MP4Duration duration = 0;
@@ -36,7 +34,9 @@
         newTrack.alternate_group = 2;
         newTrack.language = getFilenameLanguage((CFStringRef)[_fileURL path]);
 
-        if ([newTrack.language isEqualToString:@"Unknown"] && NSClassFromString(@"NSLinguisticTagger")) {
+        // Check if a 10.10 only class is available, NSLinguisticTagger crashes on 10.9
+        // if the string contains some characters.
+        if ([newTrack.language isEqualToString:@"Unknown"] && NSClassFromString(@"NSVisualEffectView")) {
 			// we couldn't deduce language from the fileURL
 			// -> Let's look into the file itself
 
@@ -45,19 +45,20 @@
 											 encoding:NSUTF8StringEncoding
 											 error:nil];
 			if (stringFromFileAtURL) { // try auto determining
-				NSArray *tagschemes = [NSArray arrayWithObjects:NSLinguisticTagSchemeLanguage, nil];
+                NSArray *tagschemes = @[NSLinguisticTagSchemeLanguage];
+                NSCountedSet *languagesSet = [NSCountedSet new];
 				NSLinguisticTagger *tagger = [[NSLinguisticTagger alloc] initWithTagSchemes:tagschemes options:0];
 
-				NSCountedSet *languagesSet = [NSCountedSet new];
-
 				[stringFromFileAtURL enumerateLinesUsingBlock:^(NSString *line, BOOL *stop) {
-					NSRange range = NSMakeRange(0, [line length]);
-					if (range.length > 1) {
+
+					if (line.length > 1) {
+
 						[tagger setString:line];
-						/*NSString *language = */
 						[tagger tagAtIndex:0 scheme:NSLinguisticTagSchemeLanguage tokenRange:NULL sentenceRange:NULL];
+
 						NSOrthography *ortho = [tagger orthographyAtIndex:0 effectiveRange:NULL];
-						if (ortho && ![ortho.dominantLanguage isEqualToString:@"und"]) {
+
+						if (![ortho.dominantLanguage isEqualToString:@"und"]) {
 							[languagesSet addObject:ortho.dominantLanguage];
 						}
 					}
@@ -68,16 +69,19 @@
 					NSUInteger m = [languagesSet countForObject:obj2];
 					return (n <= m)? (n < m)? NSOrderedAscending : NSOrderedSame : NSOrderedDescending;
 				}];
-				NSString *language = [sortedValues lastObject];
 
-				NSLocale *locale = [[NSLocale alloc] initWithLocaleIdentifier:@"en"];
-				NSString *languageName = [locale displayNameForKey:NSLocaleLanguageCode
+				NSString *language = sortedValues.lastObject;
+
+                if (language) {
+                    NSLocale *locale = [[NSLocale alloc] initWithLocaleIdentifier:@"en"];
+                    NSString *languageName = [locale displayNameForKey:NSLocaleLanguageCode
 															 value:language];
 
-                if (languageName) {
-                    newTrack.language = languageName;
+                    if (languageName) {
+                        newTrack.language = languageName;
+                    }
+                    [locale release];
                 }
-                [locale release];
 			}
 		}
 
