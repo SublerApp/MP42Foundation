@@ -189,7 +189,8 @@
     }
 }
 
-- (void)enqueue:(MP42SampleBuffer *)sample {
+- (void)enqueue:(MP42SampleBuffer *)sample
+{
     for (MP42Track *track in _outputsTracks) {
         if (track.sourceId == sample->trackId) {
             if (track.muxer_helper->converter) {
@@ -206,7 +207,8 @@
     return (_done > 0);
 }
 
-- (void)setDone:(BOOL)status {
+- (void)setDone
+{
     OSAtomicIncrement32(&_done);
     dispatch_semaphore_signal(_doneSem);
 }

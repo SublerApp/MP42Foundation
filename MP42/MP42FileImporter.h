@@ -57,7 +57,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (CGFloat)progress;
 
 - (BOOL)done;
-- (void)setDone:(BOOL)status;
+- (void)setDone;
 
 - (BOOL)cleanUp:(MP42FileHandle)fileHandle;
 

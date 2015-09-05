@@ -21,13 +21,6 @@
 #include "avcodec.h"
 #include "mp4v2.h"
 
-
-@interface MP42QTImporter(Private)
-    -(void) movieLoaded;
-    -(NSString *)formatForTrack: (QTTrack *)track;
-    -(NSString *)langForTrack: (QTTrack *)track;
-@end
-
 @interface MovDemuxHelper : NSObject {
 @public
     MP4SampleId     currentSampleId;
@@ -931,7 +924,7 @@
             QTSampleTableRelease(sampleTable);
         }
         
-        [self setDone:YES];
+        [self setDone];
     }
 }
 

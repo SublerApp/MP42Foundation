@@ -238,7 +238,7 @@ static int ParseByte(const char *string, UInt8 *byte, Boolean hex)
         }
         
         [sampleArray release];
-        [self setDone:YES];
+        [self setDone];
     }
 }
 

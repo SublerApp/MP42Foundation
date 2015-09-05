@@ -384,7 +384,7 @@ static NSArray<SBVobSubTrack *> * LoadVobSubSubtitles(NSURL *theDirectory, NSStr
             tracksDone++;
         }
         
-        [self setDone:YES];
+        [self setDone];
     }
 }
 

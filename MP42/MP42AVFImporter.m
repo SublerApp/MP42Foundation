@@ -898,7 +898,7 @@
     }
 
     [assetReader release];
-    [self setDone:YES];
+    [self setDone];
     [pool release];
 }
 
