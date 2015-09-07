@@ -7,8 +7,12 @@
 //
 
 #import "MP42H264Importer.h"
+#import "MP42FileImporter+Private.h"
+
 #import "MP42Languages.h"
 #import "MP42File.h"
+#import "MP42Track+Muxer.h"
+
 #include <sys/stat.h>
 
 //#define DEBUG_H264
@@ -1352,26 +1356,24 @@ NSData* H264Info(const char *filePath, uint32_t *pic_width, uint32_t *pic_height
 
 - (instancetype)initWithURL:(NSURL *)fileURL error:(NSError **)outError
 {
-    if ((self = [super init])) {
-        _fileURL = [fileURL retain];
-
-        _tracksArray = [[NSMutableArray alloc] initWithCapacity:1];
+    if ((self = [super initWithURL:fileURL])) {
 
         MP42VideoTrack *newTrack = [[MP42VideoTrack alloc] init];
 
         newTrack.format = MP42VideoFormatH264;
-        newTrack.sourceURL = _fileURL;
+        newTrack.sourceURL = self.fileURL;
 
-        if (!inFile)
-            inFile = fopen([[_fileURL path] fileSystemRepresentation], "rb");
+        if (!inFile) {
+            inFile = fopen(self.fileURL.path.fileSystemRepresentation, "rb");
+        }
 
         struct stat st;
-        stat([[_fileURL path] fileSystemRepresentation], &st);
+        stat(self.fileURL.path.fileSystemRepresentation, &st);
         _size = st.st_size;
 
         uint32_t tw, th;
         uint8_t profile, level;
-        if ((avcC = H264Info([[_fileURL path] cStringUsingEncoding:NSASCIIStringEncoding], &tw, &th, &profile, &level))) {
+        if ((avcC = H264Info([self.fileURL.path cStringUsingEncoding:NSASCIIStringEncoding], &tw, &th, &profile, &level))) {
             newTrack.width = newTrack.trackWidth = tw;
             newTrack.height = newTrack.trackHeight = th;
             newTrack.hSpacing = newTrack.vSpacing = 1;
@@ -1379,9 +1381,9 @@ NSData* H264Info(const char *filePath, uint32_t *pic_width, uint32_t *pic_height
             newTrack.origLevel = newTrack.newLevel = level;
         }
 
-        [newTrack setDataLength:[[[[NSFileManager defaultManager] attributesOfItemAtPath:[_fileURL path] error:nil] valueForKey:NSFileSize] unsignedLongLongValue]];
+        [newTrack setDataLength:[[[[NSFileManager defaultManager] attributesOfItemAtPath:self.fileURL.path error:nil] valueForKey:NSFileSize] unsignedLongLongValue]];
 
-        [_tracksArray addObject:newTrack];
+        [self addTrack:newTrack];
         [newTrack release];
     }
 
@@ -1412,15 +1414,15 @@ NSData* H264Info(const char *filePath, uint32_t *pic_width, uint32_t *pic_height
     return avcC;
 }
 
-- (void)demux:(id)sender
+- (void)demux
 {
     @autoreleasepool {
         if (!inFile) {
-            inFile = fopen([[_fileURL path] fileSystemRepresentation], "rb");
+            inFile = fopen(self.fileURL.path.fileSystemRepresentation, "rb");
         }
 
-        MP42Track *track = [_inputTracks lastObject];
-        MP4TrackId trackId = [track sourceId];
+        MP42Track *track = self.inputTracks.lastObject;
+        MP4TrackId trackId = track.sourceId;
 
         framerate_t * framerate;
         int64_t currentSize = 0;
@@ -1599,14 +1601,14 @@ NSData* H264Info(const char *filePath, uint32_t *pic_width, uint32_t *pic_height
         DpbFlush(&h264_dpb);
         free(nal_buffer);
         
-        [self setDone:YES];
+        [self setDone];
     }
 }
 
 - (BOOL)cleanUp:(MP4FileHandle)fileHandle
 {
-    MP42Track *track = [_inputTracks lastObject];
-    MP4TrackId trackId = [track Id];
+    MP42Track *track = self.inputTracks.lastObject;
+    MP4TrackId trackId = track.Id;
 
     if (h264_dpb.dpb.size_min > 0) {
         unsigned int ix;
@@ -1630,15 +1632,9 @@ NSData* H264Info(const char *filePath, uint32_t *pic_width, uint32_t *pic_height
     return YES;
 }
 
-- (void)startReading
+- (NSString *)description
 {
-    [super startReading];
-
-    if (!_demuxerThread && !_done) {
-        _demuxerThread = [[NSThread alloc] initWithTarget:self selector:@selector(demux:) object:self];
-        [_demuxerThread setName:@"H264 Demuxer"];
-        [_demuxerThread start];
-    }
+    return @"H264 demuxer";
 }
 
 - (void) dealloc

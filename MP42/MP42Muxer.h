@@ -15,7 +15,7 @@ NS_ASSUME_NONNULL_BEGIN
 @class MP42Track;
 
 @protocol MP42MuxerDelegate
-- (void)progressStatus:(CGFloat)progress;
+- (void)progressStatus:(double)progress;
 @end
 
 @interface MP42Muxer : NSObject {

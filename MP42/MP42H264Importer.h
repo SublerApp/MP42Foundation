@@ -10,16 +10,14 @@
 #import "MP42FileImporter.h"
 
 #import "mp4v2.h"
-#import "MP42PrivateUtilities.h"
-#import "MP42Track+Muxer.h"
 
 typedef struct framerate_t {
     uint32_t code;
     uint32_t timescale;
     uint32_t duration;
 } framerate_t;
-typedef struct
 
+typedef struct
 {
     struct
     {

@@ -7,6 +7,8 @@
 //
 
 #import "MP42VobSubImporter.h"
+#import "MP42FileImporter+Private.h"
+
 #import "MP42SubUtilities.h"
 #import "MP42Languages.h"
 #import "MP42File.h"
@@ -221,28 +223,26 @@ static NSArray<SBVobSubTrack *> * LoadVobSubSubtitles(NSURL *theDirectory, NSStr
 
 - (instancetype)initWithURL:(NSURL *)fileURL error:(NSError **)outError
 {
-    if ((self = [super init])) {
-        NSInteger count = 0;
-        _fileURL = [fileURL retain];
+    if ((self = [super initWithURL:fileURL])) {
 
-        _VobSubTracks = LoadVobSubSubtitles(_fileURL.URLByDeletingLastPathComponent, _fileURL.lastPathComponent);
-        _tracksArray = [[NSMutableArray alloc] initWithCapacity:_VobSubTracks.count];
+        NSInteger count = 0;
+        _VobSubTracks = LoadVobSubSubtitles(self.fileURL.URLByDeletingLastPathComponent, self.fileURL.lastPathComponent);
 
         for (SBVobSubTrack *track in _VobSubTracks) {
             MP42SubtitleTrack *newTrack = [[MP42SubtitleTrack alloc] init];
 
             newTrack.format = MP42SubtitleFormatVobSub;
-            newTrack.sourceURL = _fileURL;
+            newTrack.sourceURL = self.fileURL;
             newTrack.alternate_group = 2;
             newTrack.Id = count++;
             newTrack.language = [NSString stringWithFormat:@"%s", lang_for_code_s([track->language UTF8String])->eng_name];;
             newTrack.duration = track->duration;
 
-            [_tracksArray addObject:newTrack];
+            [self addTrack:newTrack];
             [newTrack release];
         }
 
-        if (!_tracksArray.count) {
+        if (!self.tracks.count) {
             if (outError) {
                 *outError = MP42Error(@"The file could not be opened.", @"The file is not a idx file, or it does not contain any subtitles.", 100);
             }
@@ -289,18 +289,18 @@ static NSArray<SBVobSubTrack *> * LoadVobSubSubtitles(NSURL *theDirectory, NSStr
     return magicCookie;
 }
 
-- (void)demux:(id)sender
+- (void)demux
 {
     @autoreleasepool {
 
-        NSURL *subFileURL = [[_fileURL URLByDeletingPathExtension] URLByAppendingPathExtension:@"sub"];
+        NSURL *subFileURL = [self.fileURL.URLByDeletingPathExtension URLByAppendingPathExtension:@"sub"];
 
         NSData *subFileData = [NSData dataWithContentsOfURL:subFileURL];
 
-        NSInteger tracksNumber = [_inputTracks count];
+        NSInteger tracksNumber = self.inputTracks.count;
         NSInteger tracksDone = 0;
 
-        for (MP42Track *track in _inputTracks) {
+        for (MP42Track *track in self.inputTracks) {
             SBVobSubTrack *vobTrack = [_VobSubTracks objectAtIndex:track.sourceId];
             SBVobSubSample *firstSample = nil;
 
@@ -388,15 +388,9 @@ static NSArray<SBVobSubTrack *> * LoadVobSubSubtitles(NSURL *theDirectory, NSStr
     }
 }
 
-- (void)startReading
+- (NSString *)description
 {
-    [super startReading];
-
-    if (!_demuxerThread && !_done) {
-        _demuxerThread = [[NSThread alloc] initWithTarget:self selector:@selector(demux:) object:self];
-        [_demuxerThread setName:@"VobSub Demuxer"];
-        [_demuxerThread start];
-    }
+    return @"VobSub demuxer";
 }
 
 - (void)dealloc

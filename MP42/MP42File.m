@@ -87,7 +87,6 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 @implementation MP42File
 
 @synthesize fileHandle = _fileHandle;
-@synthesize delegate = _delegate;
 @synthesize URL = _fileURL;
 
 @synthesize itracks = _tracks;
@@ -96,6 +95,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 @synthesize hasFileRepresentation = _hasFileRepresentation;
 
 @synthesize status = _status;
+@synthesize progressHandler = _progressHandler;
 @synthesize muxer = _muxer;
 
 + (void)initialize {
@@ -145,7 +145,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 
 #pragma mark - Inits
 
-- (id)init {
+- (instancetype)init {
     if ((self = [super init])) {
         _hasFileRepresentation = NO;
         _tracks = [[NSMutableArray alloc] init];
@@ -157,18 +157,9 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
     return self;
 }
 
-- (instancetype)initWithDelegate:(id <MP42FileDelegate>)del {
-    if ((self = [self init])) {
-        _delegate = del;
-    }
-
-    return self;
-}
-
-- (instancetype)initWithURL:(NSURL *)URL delegate:(nullable id <MP42FileDelegate>)del {
+- (instancetype)initWithURL:(NSURL *)URL {
     self = [super init];
     if (self) {
-        _delegate = del;
         _fileURL = [[URL fileReferenceURL] retain];
 
         // Open the file for reading
@@ -571,12 +562,12 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
             // Loop to check the progress
             while (!done) {
                 unsigned long long fileSize = [[[fileManager attributesOfItemAtPath:self.tempURL.path error:nil] valueForKey:NSFileSize] unsignedLongLongValue];
-                [self progressStatus:((CGFloat)fileSize / originalFileSize) * 100];
+                [self progressStatus:((double)fileSize / originalFileSize) * 100];
                 usleep(450000);
             }
 
             // Additional check to see if we can open the optimized file
-            if (noErr && [[[MP42File alloc] initWithURL:tempURL delegate:nil] autorelease]) {
+            if (noErr && [[[MP42File alloc] initWithURL:tempURL] autorelease]) {
                 // Replace the original file
                 NSURL *result = nil;
                 noErr = [fileManager replaceItemAtURL:self.URL
@@ -608,9 +599,10 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
     [self.muxer cancel];
 }
 
-- (void)progressStatus:(CGFloat)progress {
-    if ([_delegate respondsToSelector:@selector(progressStatus:)])
-        [_delegate progressStatus:progress];
+- (void)progressStatus:(double)progress {
+    if (_progressHandler) {
+        _progressHandler(progress);
+    }
 }
 
 - (BOOL)writeToUrl:(NSURL *)url withAttributes:(NSDictionary *)attributes error:(NSError **)outError {
@@ -642,7 +634,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 
             while (!done) {
                 unsigned long long fileSize = [[[fileManager attributesOfItemAtPath:[url path] error:NULL] valueForKey:NSFileSize] unsignedLongLongValue];
-                [self progressStatus:((CGFloat)fileSize / originalFileSize) * 100];
+                [self progressStatus:((double)fileSize / originalFileSize) * 100];
                 usleep(450000);
             }
             [fileManager release];
@@ -1077,6 +1069,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 }
 
 - (void)dealloc {
+    [_progressHandler release];
     [_fileURL release];
     [_tracks release];
     [_importers release];

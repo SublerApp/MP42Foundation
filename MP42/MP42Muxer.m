@@ -7,8 +7,11 @@
 //
 
 #import "MP42Muxer.h"
+
 #import "MP42File.h"
 #import "MP42FileImporter.h"
+#import "MP42FileImporter+Private.h"
+
 #import "MP42Sample.h"
 #import "MP42AudioConverter.h"
 #import "MP42BitmapSubConverter.h"

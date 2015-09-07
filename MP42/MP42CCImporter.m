@@ -7,6 +7,8 @@
 //
 
 #import "MP42CCImporter.h"
+#import "MP42FileImporter+Private.h"
+
 #import "MP42SubUtilities.h"
 #import "MP42Languages.h"
 #import "MP42File.h"
@@ -18,18 +20,14 @@
 
 - (instancetype)initWithURL:(NSURL *)fileURL error:(NSError **)outError
 {
-    if ((self = [super init])) {
-        _fileURL = [fileURL retain];
-
-        _tracksArray = [[NSMutableArray alloc] initWithCapacity:1];
-
+    if ((self = [super initWithURL:fileURL])) {
         MP42Track *newTrack = [[MP42ClosedCaptionTrack alloc] init];
 
         newTrack.name = @"Closed Caption Track";
         newTrack.format = MP42ClosedCaptionFormatCEA608;
-        newTrack.sourceURL = _fileURL;
+        newTrack.sourceURL = self.fileURL;
 
-        [_tracksArray addObject:newTrack];
+        [self addTrack:newTrack];
         [newTrack release];
     }
 
@@ -46,7 +44,7 @@
       return NSMakeSize([(MP42SubtitleTrack*)track trackWidth], [(MP42SubtitleTrack*) track trackHeight]);
 }
 
-- (NSData *)magicCookieForTrack:(MP42Track *)track
+- (nullable NSData *)magicCookieForTrack:(MP42Track *)track
 {
     return nil;
 }
@@ -107,12 +105,12 @@ static int ParseByte(const char *string, UInt8 *byte, Boolean hex)
 	return err;
 }
 
-- (void)demux:(id)sender
+- (void)demux
 {
     @autoreleasepool {
-        MP4TrackId trackId = [[_inputTracks lastObject] sourceId];
+        MP4TrackId trackId = self.inputTracks.lastObject.sourceId;
 
-        NSString *scc = STStandardizeStringNewlines(STLoadFileWithUnknownEncoding([_fileURL path]));
+        NSString *scc = STStandardizeStringNewlines(STLoadFileWithUnknownEncoding(self.fileURL.path));
         if (!scc) return;
 
         NSScanner *sc = [NSScanner scannerWithString:scc];
@@ -242,15 +240,9 @@ static int ParseByte(const char *string, UInt8 *byte, Boolean hex)
     }
 }
 
-- (void)startReading
+- (NSString *)description
 {
-    [super startReading];
-
-    if (!_demuxerThread && !_done) {
-        _demuxerThread = [[NSThread alloc] initWithTarget:self selector:@selector(demux:) object:self];
-        [_demuxerThread setName:@"Closed Caption Demuxer"];
-        [_demuxerThread start];
-    }
+    return @"CC demuxer";
 }
 
 @end

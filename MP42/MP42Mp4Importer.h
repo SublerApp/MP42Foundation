@@ -1,5 +1,5 @@
 //
-//  MP42MkvFileImporter.h
+//  MP42Mp4FileImporter.h
 //  Subler
 //
 //  Created by Damiano Galassi on 31/01/10.
@@ -9,11 +9,10 @@
 #import <Foundation/Foundation.h>
 #import "MP42FileImporter.h"
 #import "MP42File.h"
-#import "mp4v2.h"
 
-@interface MP42Mp4Importer : MP42FileImporter <MP42FileDelegate> {
+@interface MP42Mp4Importer : MP42FileImporter {
 @private
-    MP4FileHandle   _fileHandle;
+    MP42FileHandle   _fileHandle;
 }
 
 @end

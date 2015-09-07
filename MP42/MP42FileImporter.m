@@ -93,6 +93,16 @@
     return self;
 }
 
+- (instancetype)initWithURL:(NSURL *)fileURL
+{
+    self = [super init];
+    if (self) {
+        _fileURL = [fileURL retain];
+        _tracksArray = [[NSMutableArray alloc] init];
+    }
+    return self;
+}
+
 - (void)dealloc
 {
     for (MP42Track *track in _inputTracks) {
@@ -119,28 +129,72 @@
     [super dealloc];
 }
 
+- (NSURL *)fileURL
+{
+    return _fileURL;
+}
+
+- (void)addTrack:(MP42Track *)track
+{
+    [_tracksArray addObject:track];
+}
+
+- (void)addTracks:(NSArray<MP42Track *> *)tracks
+{
+    [_tracksArray addObjectsFromArray:tracks];
+}
+
+- (NSArray<MP42Track *> *)inputTracks
+{
+    return [[_inputTracks copy] autorelease];
+}
+
+- (NSArray<MP42Track *> *)outputsTracks
+{
+    return [[_outputsTracks copy] autorelease];
+}
+
 @synthesize metadata = _metadata;
 @synthesize tracks = _tracksArray;
 
 - (NSUInteger)timescaleForTrack:(MP42Track *)track
 {
-    return 0;
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
 }
 
 - (NSSize)sizeForTrack:(MP42Track *)track
 {
-    return NSMakeSize(0,0);
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
 }
 
 - (nullable NSData *)magicCookieForTrack:(MP42Track *)track
 {
-    return nil;
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
 }
 
 - (AudioStreamBasicDescription)audioDescriptionForTrack:(MP42Track *)track
 {
-    AudioStreamBasicDescription desc = {0,0,0,0,0,0,0,0,0};
-    return desc;
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+- (void)demux
+{
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+- (BOOL)cleanUp:(MP4FileHandle)fileHandle
+{
+    return YES;
 }
 
 - (void)setActiveTrack:(MP42Track *)track {
@@ -170,6 +224,18 @@
     }
 
     _doneSem = dispatch_semaphore_create(0);
+
+    if (!_demuxerThread && !_done) {
+        _demuxerThread = [[NSThread alloc] initWithTarget:self selector:@selector(demux) object:nil];
+        _demuxerThread.name = self.description;
+
+        // 10.10+
+        if ([_demuxerThread respondsToSelector:@selector(setQualityOfService:)]) {
+            _demuxerThread.qualityOfService = NSQualityOfServiceUtility;
+        }
+
+        [_demuxerThread start];
+    }
 }
 
 - (void)cancelReading
@@ -216,11 +282,6 @@
 - (CGFloat)progress
 {
     return _progress;
-}
-
-- (BOOL)cleanUp:(MP4FileHandle)fileHandle
-{
-    return YES;
 }
 
 - (BOOL)containsTrack:(MP42Track *)track

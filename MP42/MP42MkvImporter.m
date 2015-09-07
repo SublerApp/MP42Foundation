@@ -7,6 +7,7 @@
 //
 
 #import "MP42MkvImporter.h"
+#import "MP42FileImporter+Private.h"
 
 #import "MP42File.h"
 #import "MP42SubUtilities.h"
@@ -142,11 +143,9 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
 
 - (instancetype)initWithURL:(NSURL *)fileURL error:(NSError **)outError
 {
-    if ((self = [super init])) {
-        _fileURL = [fileURL retain];
-
+    if ((self = [super initWithURL:fileURL])) {
         _ioStream = calloc(1, sizeof(StdIoStream));
-        _matroskaFile = openMatroskaFile((char *)[[_fileURL path] UTF8String], _ioStream);
+        _matroskaFile = openMatroskaFile(self.fileURL.path.fileSystemRepresentation, _ioStream);
 
         if (!_matroskaFile) {
             if (outError) {
@@ -161,11 +160,8 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
         uint64_t *trackSizes = [self copyGuessedTrackDataLength];
 
         NSInteger trackCount = mkv_GetNumTracks(_matroskaFile);
-        _tracksArray = [[NSMutableArray alloc] initWithCapacity:trackCount];
 
-        NSInteger i;
-
-        for (i = 0; i < trackCount; i++) {
+        for (NSInteger i = 0; i < trackCount; i++) {
             TrackInfo *mkvTrack = mkv_GetTrackInfo(_matroskaFile, i);
             MP42Track *newTrack = nil;
 
@@ -202,7 +198,7 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
                 [(MP42AudioTrack*)newTrack setChannels:mkvTrack->AV.Audio.Channels];
                 [newTrack setAlternate_group:1];
 
-                for (MP42Track *audioTrack in _tracksArray) {
+                for (MP42Track *audioTrack in self.tracks) {
                     if ([audioTrack isMemberOfClass:[MP42AudioTrack class]])
                         newTrack.enabled = NO;
                 }
@@ -213,7 +209,7 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
                 newTrack = [[MP42SubtitleTrack alloc] init];
                 [newTrack setAlternate_group:2];
 
-                for (MP42Track *subtitleTrack in _tracksArray) {
+                for (MP42Track *subtitleTrack in self.tracks) {
                     if ([subtitleTrack isMemberOfClass:[MP42SubtitleTrack class]])
                         newTrack.enabled = NO;
                 }
@@ -222,7 +218,7 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
             if (newTrack) {
                 newTrack.format = [self matroskaCodecIDToHumanReadableName:mkvTrack];
                 newTrack.Id = i;
-                newTrack.sourceURL = _fileURL;
+                newTrack.sourceURL = self.fileURL;
                 newTrack.dataLength = trackSizes[i];
                 if (mkvTrack->Type == TT_AUDIO)
                     newTrack.startOffset = [self matroskaTrackStartTime:mkvTrack Id:i];
@@ -253,12 +249,12 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
                 iso639_lang_t *isoLanguage = lang_for_code2(mkvTrack->Language);
                 newTrack.language = [NSString stringWithUTF8String:isoLanguage->eng_name];
 
-                [_tracksArray addObject:newTrack];
+                [self addTrack:newTrack];
                 [newTrack release];
             }
         }
 
-        Chapter* chapters;
+        Chapter *chapters;
         unsigned count;
         mkv_GetChapters(_matroskaFile, &chapters, &count);
 
@@ -285,7 +281,7 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
                                     duration:timestamp];
                 }
             }
-            [_tracksArray addObject:newTrack];
+            [self addTrack:newTrack];
             [newTrack release];
         }
 
@@ -588,7 +584,9 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
     /* mask other tracks because we don't need them */
     unsigned int TrackMask = ~0;
 
-    for (MP42Track *track in _inputTracks) {
+    NSArray<MP42Track *> *inputTracks = self.inputTracks;
+
+    for (MP42Track *track in inputTracks) {
         TrackMask &= ~(1 << [track sourceId]);
         track.muxer_helper->demuxer_context = [[MatroskaDemuxHelper alloc] init];
     }
@@ -601,7 +599,7 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
 
         MP42Track *track = nil;
 
-        for (MP42Track *fTrack in _inputTracks){
+        for (MP42Track *fTrack in inputTracks){
             if (fTrack.sourceId == Track) {
                 helper = fTrack.muxer_helper;
                 demuxHelper = helper->demuxer_context;
@@ -818,7 +816,7 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
         }
     }
 
-    for (MP42Track *track in _inputTracks) {
+    for (MP42Track *track in inputTracks) {
         muxer_helper *helper = track.muxer_helper;
         demuxHelper = helper->demuxer_context;
 
@@ -942,20 +940,9 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
     [pool release];
 }
 
-- (void)startReading
-{
-    [super startReading];
-
-    if (!_demuxerThread && !_done) {
-        _demuxerThread = [[NSThread alloc] initWithTarget:self selector:@selector(demux) object:nil];
-        [_demuxerThread setName:@"Matroska Demuxer"];
-        [_demuxerThread start];
-    }
-}
-
 - (BOOL)cleanUp:(MP4FileHandle)fileHandle
 {
-    for (MP42Track *track in _outputsTracks) {
+    for (MP42Track *track in self.outputsTracks) {
         MP42Track *inputTrack = [self inputTrackWithTrackID:track.sourceId];
 
         MatroskaDemuxHelper *demuxHelper = inputTrack.muxer_helper->demuxer_context;
@@ -983,6 +970,11 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
     }
 
     return YES;
+}
+
+- (NSString *)description
+{
+    return @"Matroska demuxer";
 }
 
 - (void)dealloc

@@ -89,6 +89,8 @@
 		A9A0C9B31981593900A72763 /* MP42ComponentLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = A9A0C9B01981593900A72763 /* MP42ComponentLoader.m */; };
 		A9A0C9B41981593900A72763 /* MP42ComponentLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = A9A0C9B01981593900A72763 /* MP42ComponentLoader.m */; };
 		A9A268E2196D6367003AFF57 /* MP42EditListsReconstructor.m in Sources */ = {isa = PBXBuildFile; fileRef = A9DFBDCA1960174500410060 /* MP42EditListsReconstructor.m */; };
+		A9AEFE151B9B111B00771292 /* MP42FileImporter+Private.h in Headers */ = {isa = PBXBuildFile; fileRef = A9AEFE141B9B111B00771292 /* MP42FileImporter+Private.h */; settings = {ASSET_TAGS = (); }; };
+		A9AEFE161B9B111B00771292 /* MP42FileImporter+Private.h in Headers */ = {isa = PBXBuildFile; fileRef = A9AEFE141B9B111B00771292 /* MP42FileImporter+Private.h */; settings = {ASSET_TAGS = (); }; };
 		A9B9C1F1182391DF00416A4E /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9B9C1F0182391DF00416A4E /* Cocoa.framework */; };
 		A9B9C1FB182391DF00416A4E /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = A9B9C1F9182391DF00416A4E /* InfoPlist.strings */; };
 		A9B9C206182391DF00416A4E /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9B9C205182391DF00416A4E /* XCTest.framework */; };
@@ -280,6 +282,7 @@
 		A9A0C9A319814C9B00A72763 /* AudioUnit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioUnit.framework; path = System/Library/Frameworks/AudioUnit.framework; sourceTree = SDKROOT; };
 		A9A0C9AF1981593900A72763 /* MP42ComponentLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MP42ComponentLoader.h; sourceTree = "<group>"; };
 		A9A0C9B01981593900A72763 /* MP42ComponentLoader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MP42ComponentLoader.m; sourceTree = "<group>"; };
+		A9AEFE141B9B111B00771292 /* MP42FileImporter+Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "MP42FileImporter+Private.h"; sourceTree = "<group>"; };
 		A9B9C1ED182391DF00416A4E /* MP42Foundation.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = MP42Foundation.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		A9B9C1F0182391DF00416A4E /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		A9B9C1F3182391DF00416A4E /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -627,6 +630,7 @@
 				A9DFBDA0195FF5BA00410060 /* MP42Heap.m */,
 				A9B9C2321823923100416A4E /* MP42FileImporter.h */,
 				A9B9C2331823923100416A4E /* MP42FileImporter.m */,
+				A9AEFE141B9B111B00771292 /* MP42FileImporter+Private.h */,
 				A9B9C4A518239BE900416A4E /* converters */,
 				A9B9C4A318239B7600416A4E /* Importers */,
 				A9B9C25A1823923200416A4E /* others */,
@@ -723,6 +727,7 @@
 			files = (
 				A9A0C9B21981593900A72763 /* MP42ComponentLoader.h in Headers */,
 				A917286719FD2BCE00348DF8 /* MP42Logging.h in Headers */,
+				A9AEFE161B9B111B00771292 /* MP42FileImporter+Private.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -731,6 +736,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A917286619FD2BCE00348DF8 /* MP42Logging.h in Headers */,
+				A9B9C27D1823923200416A4E /* MP42FileImporter.h in Headers */,
 				A9B9C27B1823923200416A4E /* MP42File.h in Headers */,
 				A9DFBDCB1960174500410060 /* MP42EditListsReconstructor.h in Headers */,
 				A9B9C29B1823923200416A4E /* MP42Track.h in Headers */,
@@ -746,7 +752,6 @@
 				A9B9C2831823923200416A4E /* MP42Image.h in Headers */,
 				A9B9C2C41823957800416A4E /* MP42Languages.h in Headers */,
 				A9B9C2CF182396A100416A4E /* MP42Ratings.h in Headers */,
-				A9B9C27D1823923200416A4E /* MP42FileImporter.h in Headers */,
 				A925AAAF18379AF800BE84D4 /* MP42Utilities.h in Headers */,
 				A9B9C2CB1823968400416A4E /* RegexKitLite.h in Headers */,
 				A9B9C2D3182396C400416A4E /* JSONKit.h in Headers */,
@@ -757,6 +762,7 @@
 				A9B9C2AA1823923200416A4E /* MatroskaParser.h in Headers */,
 				A9B9C26E1823923200416A4E /* MP42AVFImporter.h in Headers */,
 				A9B9C2791823923200416A4E /* MP42Fifo.h in Headers */,
+				A9AEFE151B9B111B00771292 /* MP42FileImporter+Private.h in Headers */,
 				A9B9C2A31823923200416A4E /* MP42XMLReader.h in Headers */,
 				A9B9C28D1823923200416A4E /* MP42Muxer.h in Headers */,
 				A9B9C2AD1823923200416A4E /* mpeg4ip_bitstream.h in Headers */,

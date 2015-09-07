@@ -7,6 +7,7 @@
 //
 
 #import "MP42SrtImporter.h"
+#import "MP42FileImporter+Private.h"
 
 #import "MP42File.h"
 #import "MP42SubUtilities.h"
@@ -20,19 +21,16 @@
 
 - (instancetype)initWithURL:(NSURL *)fileURL error:(NSError **)outError
 {
-    if ((self = [super init])) {
-        _fileURL = [fileURL retain];
-        _tracksArray = [[NSMutableArray alloc] init];
-
+    if ((self = [super initWithURL:fileURL])) {
         NSInteger success = 0;
         MP4Duration duration = 0;
 
         MP42SubtitleTrack *newTrack = [[MP42SubtitleTrack alloc] init];
 
         newTrack.format = MP42SubtitleFormatTx3g;
-        newTrack.sourceURL = _fileURL;
+        newTrack.sourceURL = self.fileURL;
         newTrack.alternate_group = 2;
-        newTrack.language = getFilenameLanguage((CFStringRef)[_fileURL path]);
+        newTrack.language = getFilenameLanguage((CFStringRef)self.fileURL.path);
 
         // Check if a 10.10 only class is available, NSLinguisticTagger crashes on 10.9
         // if the string contains some characters.
@@ -86,10 +84,10 @@
 		}
 
         _ss = [[SBSubSerializer alloc] init];
-        if ([[_fileURL pathExtension] caseInsensitiveCompare: @"srt"] == NSOrderedSame) {
-            success = LoadSRTFromPath([_fileURL path], _ss, &duration);
-        } else if ([[_fileURL pathExtension] caseInsensitiveCompare: @"smi"] == NSOrderedSame) {
-            success = LoadSMIFromPath([_fileURL path], _ss, 1);
+        if ([self.fileURL.pathExtension caseInsensitiveCompare: @"srt"] == NSOrderedSame) {
+            success = LoadSRTFromPath(self.fileURL.path, _ss, &duration);
+        } else if ([self.fileURL.pathExtension caseInsensitiveCompare: @"smi"] == NSOrderedSame) {
+            success = LoadSMIFromPath(self.fileURL.path, _ss, 1);
         }
 
         [newTrack setDuration:duration];
@@ -115,11 +113,16 @@
             newTrack.someSamplesAreForced = YES;
         }
 
-        [_tracksArray addObject:newTrack];
+        [self addTrack:newTrack];
         [newTrack release];
     }
 
     return self;
+}
+
+- (nullable NSData *)magicCookieForTrack:(MP42Track *)track
+{
+    return nil;
 }
 
 - (NSUInteger)timescaleForTrack:(MP42Track *)track
@@ -132,12 +135,12 @@
       return NSMakeSize([(MP42SubtitleTrack*)track trackWidth], [(MP42SubtitleTrack*) track trackHeight]);
 }
 
-- (void)demux:(id)sender
+- (void)demux
 {
     @autoreleasepool {
         MP42SampleBuffer *sample;
 
-        for (MP42SubtitleTrack *track in _inputTracks) {
+        for (MP42SubtitleTrack *track in self.inputTracks) {
             CGSize trackSize;
             trackSize.width = track.trackWidth;
             trackSize.height = track.trackHeight;
@@ -164,15 +167,9 @@
     }
 }
 
-- (void)startReading
+- (NSString *)description
 {
-    [super startReading];
-    
-    if (!_demuxerThread && !_done) {
-        _demuxerThread = [[NSThread alloc] initWithTarget:self selector:@selector(demux:) object:self];
-        [_demuxerThread setName:@"Srt Demuxer"];
-        [_demuxerThread start];
-    }
+    return @"SRT demuxer";
 }
 
 - (void) dealloc

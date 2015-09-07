@@ -19,5 +19,5 @@ struct StdIoStream {
 
 typedef struct StdIoStream StdIoStream; 
 
-MatroskaFile *openMatroskaFile(char *filePath, StdIoStream *ioStream);
+MatroskaFile *openMatroskaFile(const char *filePath, StdIoStream *ioStream);
 void closeMatroskaFile(MatroskaFile *matroskaFile, StdIoStream *ioStream);

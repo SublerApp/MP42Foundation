@@ -6,9 +6,9 @@
 //  Copyright 2010 Damiano Galassi All rights reserved.
 //
 
-#if __MAC_OS_X_VERSION_MAX_ALLOWED > 1060
-
 #import "MP42AVFImporter.h"
+#import "MP42FileImporter+Private.h"
+
 #import "MP42Languages.h"
 #import "MP42File.h"
 #import "MP42Image.h"
@@ -171,14 +171,12 @@
 }
 
 - (instancetype)initWithURL:(NSURL *)fileURL error:(NSError **)outError {
-    if ((self = [super init])) {
+    if ((self = [super initWithURL:fileURL])) {
         NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 
-        _fileURL = [fileURL retain];
-        _localAsset = [[AVAsset assetWithURL:_fileURL] retain];
-        _tracksArray = [[NSMutableArray alloc] init];
+        _localAsset = [[AVAsset assetWithURL:self.fileURL] retain];
 
-        NSArray *tracks = [_localAsset tracks];
+        NSArray<AVAssetTrack *> *tracks = [_localAsset tracks];
 
         NSArray *availableChapter = [_localAsset availableChapterLocales];
         MP42ChapterTrack *chapters = nil;
@@ -291,7 +289,7 @@
             // Set the usual track properties
             newTrack.format = [self formatForTrack:track];
             newTrack.Id = [track trackID];
-            newTrack.sourceURL = _fileURL;
+            newTrack.sourceURL = self.fileURL;
             newTrack.dataLength = [track totalSampleDataLength];
 
             // "name" is undefined in AVMetadataFormat.h, so read the official track name "tnam", and then "name". On 10.7, "name" is returned as an NSData
@@ -311,7 +309,7 @@
             CMTimeRange timeRange = [track timeRange];
             newTrack.duration = timeRange.duration.value / timeRange.duration.timescale * 1000;
 
-            [_tracksArray addObject:newTrack];
+            [self addTrack:newTrack];
             [newTrack release];
         }
 
@@ -669,7 +667,7 @@
     return nil;
 }
 
-- (void)demux:(id)sender {
+- (void)demux {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 
 	BOOL success = YES;
@@ -684,7 +682,7 @@
 
 	success = (assetReader != nil);
 	if (success) {
-        for (MP42Track *track in _inputTracks) {
+        for (MP42Track *track in self.inputTracks) {
             AVAssetReaderOutput *assetReaderOutput = [AVAssetReaderTrackOutput assetReaderTrackOutputWithTrack:[_localAsset trackWithTrackID:track.sourceId]
                                                                                                 outputSettings:nil];
             if (![assetReader canAddOutput: assetReaderOutput])
@@ -707,7 +705,7 @@
 		localError = [assetReader error];
     }
 
-    for (MP42Track *track in _inputTracks) {
+    for (MP42Track *track in self.inputTracks) {
         demuxHelper = track.muxer_helper->demuxer_context;
         AVAssetReaderOutput *assetReaderOutput = demuxHelper->assetReaderOutput;
 
@@ -902,20 +900,10 @@
     [pool release];
 }
 
-- (void)startReading {
-    [super startReading];
-
-    if (!_demuxerThread && !_done) {
-        _demuxerThread = [[NSThread alloc] initWithTarget:self selector:@selector(demux:) object:self];
-        [_demuxerThread setName:@"AVFoundation Demuxer"];
-        [_demuxerThread start];
-    }
-}
-
 - (BOOL)cleanUp:(MP4FileHandle)fileHandle {
     uint32_t timescale = MP4GetTimeScale(fileHandle);
 
-    for (MP42Track *track in _inputTracks) {
+    for (MP42Track *track in self.outputsTracks) {
         MP4Duration trackDuration = 0;
         MP42Track *inputTrack = [self inputTrackWithTrackID:track.sourceId];
 
@@ -939,11 +927,14 @@
     return YES;
 }
 
+- (NSString *)description
+{
+    return @"AVFoundation demuxer";
+}
+
 - (void) dealloc {
     [_localAsset release];
     [super dealloc];
 }
 
 @end
-
-#endif

@@ -92,7 +92,7 @@ int StdIoProgress(StdIoStream *st, uint64_t cur, uint64_t max) {
 	return 1; 
 } 
 
-MatroskaFile *openMatroskaFile(char *filePath, StdIoStream *ioStream)
+MatroskaFile *openMatroskaFile(const char *filePath, StdIoStream *ioStream)
 {
 	char err_msg[256];
 

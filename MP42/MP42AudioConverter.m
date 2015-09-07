@@ -10,6 +10,7 @@
 #import "MP42Track.h"
 #import "MP42AudioTrack.h"
 #import "MP42FileImporter.h"
+#import "MP42FileImporter+Private.h"
 #import "MP42MediaFormat.h"
 #import "MP42Fifo.h"
 #import "MP42PrivateUtilities.h"

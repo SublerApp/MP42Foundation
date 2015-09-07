@@ -7,6 +7,8 @@
 //
 
 #import "MP42Mp4Importer.h"
+#import "MP42FileImporter+Private.h"
+
 #import "MP42Languages.h"
 #import "MP42Sample.h"
 
@@ -32,10 +34,8 @@
 
 - (instancetype)initWithURL:(NSURL *)fileURL error:(NSError **)outError;
 {
-    if ((self = [super init])) {
-        _fileURL = [fileURL retain];
-
-        MP42File *sourceFile = [[MP42File alloc] initWithURL:_fileURL delegate:self];
+    if ((self = [super initWithURL:fileURL])) {
+        MP42File *sourceFile = [[MP42File alloc] initWithURL:self.fileURL];
 
         if(!sourceFile) {
             if (outError) {
@@ -46,7 +46,7 @@
             return nil;
         }
 
-        _tracksArray = [sourceFile.tracks mutableCopy];
+        [self addTracks:sourceFile.tracks];
         _metadata = [sourceFile.metadata retain];
 
         [sourceFile release];
@@ -70,7 +70,7 @@
 - (NSData *)magicCookieForTrack:(MP42Track *)track
 {
     if (!_fileHandle) {
-        _fileHandle = MP4Read(_fileURL.path.fileSystemRepresentation);
+        _fileHandle = MP4Read(self.fileURL.path.fileSystemRepresentation);
     }
 
     NSData *magicCookie = nil;
@@ -216,10 +216,12 @@
     return nil;
 }
 
-- (void)demux:(id)sender
+- (void)demux
 {
     @autoreleasepool {
-        NSInteger tracksNumber = _inputTracks.count;
+        NSArray<MP42Track *> *inputTracks = self.inputTracks;
+
+        NSInteger tracksNumber = inputTracks.count;
         NSInteger tracksDone = 0;
         MP4DemuxHelper *demuxHelper;
 
@@ -227,7 +229,7 @@
             return;
         }
 
-        for (MP42Track *track in _inputTracks) {
+        for (MP42Track *track in inputTracks) {
             track.muxer_helper->demuxer_context = [[MP4DemuxHelper alloc] init];
             demuxHelper = track.muxer_helper->demuxer_context;
             demuxHelper->totalSampleNumber = MP4GetTrackNumberOfSamples(_fileHandle, track.sourceId);
@@ -244,7 +246,7 @@
                 break;
             }
 
-            for (MP42Track *track in _inputTracks) {
+            for (MP42Track *track in inputTracks) {
                 muxer_helper *helper = track.muxer_helper;
                 demuxHelper = helper->demuxer_context;
 
@@ -303,24 +305,9 @@
     }
 }
 
-- (void)startReading
-{
-    if (!_fileHandle) {
-        _fileHandle = MP4Read(_fileURL.path.fileSystemRepresentation);
-    }
-
-    [super startReading];
-
-    if (!_demuxerThread && !_done) {
-        _demuxerThread = [[NSThread alloc] initWithTarget:self selector:@selector(demux:) object:self];
-        [_demuxerThread setName:@"MP4 Demuxer"];
-        [_demuxerThread start];
-    }
-}
-
 - (BOOL)cleanUp:(MP4FileHandle)dstFileHandle
 {
-    for (MP42Track *track in _outputsTracks) {
+    for (MP42Track *track in self.outputsTracks) {
         MP4TrackId srcTrackId = track.sourceId;
         MP4TrackId dstTrackId = track.Id;
 
@@ -354,6 +341,11 @@
     }
 
     return YES;
+}
+
+- (NSString *)description
+{
+    return @"MP4 demuxer";
 }
 
 - (void)dealloc

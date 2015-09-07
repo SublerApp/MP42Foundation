@@ -8,6 +8,8 @@
 
 #if !__LP64__
 #import "MP42QTImporter.h"
+#import "MP42FileImporter+Private.h"
+
 #import "MP42File.h"
 #import "MP42Image.h"
 #import "MP42Languages.h"
@@ -37,10 +39,8 @@
 
 - (instancetype)initWithURL:(NSURL *)fileURL error:(NSError **)outError
 {
-    if ((self = [super init])) {
-        _fileURL = [fileURL retain];
-
-        NSDictionary *attrs = @{QTMovieURLAttribute : _fileURL,
+    if ((self = [super initWithURL:fileURL])) {
+        NSDictionary *attrs = @{QTMovieURLAttribute : self.fileURL,
                                 QTMovieOpenAsyncRequiredAttribute: @NO,
                                 QTMovieOpenAsyncOKAttribute: @NO};
 
@@ -74,8 +74,6 @@
             _chapterId = [[track attributeForKey:QTTrackIDAttribute] integerValue];
         }
     }
-
-    _tracksArray = [[NSMutableArray alloc] init];
 
     [self convertMetadata];
 
@@ -231,14 +229,14 @@
         if (newTrack) {
             newTrack.format = [self formatForTrack:track];
             newTrack.Id = [[track attributeForKey:QTTrackIDAttribute] integerValue];
-            newTrack.sourceURL = _fileURL;
+            newTrack.sourceURL = self.fileURL;
             newTrack.name = [track attributeForKey:QTTrackDisplayNameAttribute];
             newTrack.language = [self langForTrack:track];
 
             TimeValue64 duration = GetMediaDisplayDuration(media) / GetMediaTimeScale(media) * 1000;
             newTrack.duration = duration;
 
-            [_tracksArray addObject:newTrack];
+            [self addTrack:newTrack];
             [newTrack release];
         }
     }
@@ -819,17 +817,17 @@
     return [super audioDescriptionForTrack:track];
 }
 
-- (void)demux:(id)sender
+- (void)demux
 {
     @autoreleasepool {
         OSStatus err = noErr;
 
-        NSInteger tracksNumber = [_inputTracks count];
+        NSInteger tracksNumber = self.inputTracks.count;
         NSInteger tracksDone = 0;
 
         MovDemuxHelper *demuxHelper = nil;
 
-        for (MP42Track *track in _inputTracks) {
+        for (MP42Track *track in self.inputTracks) {
             track.muxer_helper->demuxer_context = [[MovDemuxHelper alloc] init];
 
             Track qtcTrack = [[_sourceFile trackWithTrackID:[track sourceId]] quickTimeTrack];
@@ -839,7 +837,7 @@
             demuxHelper->totalSampleNumber = GetMediaSampleCount(media);
         }
 
-        for (MP42Track * track in _inputTracks) {
+        for (MP42Track * track in self.inputTracks) {
             if (_cancelled)
                 break;
 
@@ -928,21 +926,10 @@
     }
 }
 
-- (void)startReading
-{
-    [super startReading];
-
-    if (!_demuxerThread && !_done) {
-        _demuxerThread = [[NSThread alloc] initWithTarget:self selector:@selector(demux:) object:self];
-        [_demuxerThread setName:@"QuickTime Demuxer"];
-        [_demuxerThread start];
-    }
-}
-
 - (BOOL)cleanUp:(MP4FileHandle)fileHandle
 {
-    for (MP42Track *track in _outputsTracks) {
-        Track qtcTrack = [[_sourceFile trackWithTrackID:[track sourceId]] quickTimeTrack];
+    for (MP42Track *track in self.outputsTracks) {
+        Track qtcTrack = [[_sourceFile trackWithTrackID:track.sourceId] quickTimeTrack];
         MP42Track *inputTrack = [self inputTrackWithTrackID:track.sourceId];
 
         TimeValue editTrackStart, editTrackDuration;
@@ -989,6 +976,11 @@
     }
     
     return YES;
+}
+
+- (NSString *)description
+{
+    return @"QuickTime demuxer";
 }
 
 - (void)dealloc

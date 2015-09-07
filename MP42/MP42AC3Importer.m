@@ -7,6 +7,8 @@
 //
 
 #import "MP42AC3Importer.h"
+#import "MP42FileImporter+Private.h"
+
 #import "MP42Languages.h"
 #import "MP42File.h"
 #import "MP42PrivateUtilities.h"
@@ -256,21 +258,19 @@ static bool GetFirstHeader(FILE* inFile)
 
 - (instancetype)initWithURL:(NSURL *)fileURL error:(NSError **)outError
 {
-    if ((self = [super init])) {
-        _fileURL = [fileURL retain];
-
-        _tracksArray = [[NSMutableArray alloc] initWithCapacity:1];
+    if ((self = [super initWithURL:fileURL])) {
 
         MP42AudioTrack *newTrack = [[MP42AudioTrack alloc] init];
 
         newTrack.format = MP42AudioFormatAC3;
-        newTrack.sourceURL = _fileURL;
+        newTrack.sourceURL = self.fileURL;
 
-        if (!inFile)
-            inFile = fopen([[_fileURL path] fileSystemRepresentation], "rb");
+        if (!inFile) {
+            inFile = fopen(self.fileURL.path.fileSystemRepresentation, "rb");
+        }
 
         struct stat st;
-        stat([[_fileURL path] fileSystemRepresentation], &st);
+        stat(self.fileURL.path.fileSystemRepresentation, &st);
         size = st.st_size * 8;
 
         // collect all the necessary meta information
@@ -313,9 +313,9 @@ static bool GetFirstHeader(FILE* inFile)
         [ac3Info appendBytes:&lfeon length:sizeof(uint64_t)];
         [ac3Info appendBytes:&frmsizecod length:sizeof(uint64_t)];
 
-        [newTrack setDataLength:[[[[NSFileManager defaultManager] attributesOfItemAtPath:[_fileURL path] error:nil] valueForKey:NSFileSize] unsignedLongLongValue]];
+        [newTrack setDataLength:[[[[NSFileManager defaultManager] attributesOfItemAtPath:self.fileURL.path error:nil] valueForKey:NSFileSize] unsignedLongLongValue]];
         
-        [_tracksArray addObject:newTrack];
+        [self addTrack:newTrack];
         [newTrack release];
     }
 
@@ -337,14 +337,14 @@ static bool GetFirstHeader(FILE* inFile)
     return ac3Info;
 }
 
-- (void)demux:(id)sender
+- (void)demux
 {
     @autoreleasepool {
         if (!inFile) {
-            inFile = fopen(_fileURL.path.fileSystemRepresentation, "rb");
+            inFile = fopen(self.fileURL.path.fileSystemRepresentation, "rb");
         }
 
-        MP4TrackId trackId = [[_inputTracks lastObject] sourceId];
+        MP4TrackId trackId = self.inputTracks.lastObject.sourceId;
 
         // parse the Ac3 frames, and write the MP4 samples
         u_int8_t sampleBuffer[8 * 1024];
@@ -381,15 +381,9 @@ static bool GetFirstHeader(FILE* inFile)
     }
 }
 
-- (void)startReading
+- (NSString *)description
 {
-    [super startReading];
-
-    if (!_demuxerThread && !_done) {
-        _demuxerThread = [[NSThread alloc] initWithTarget:self selector:@selector(demux:) object:self];
-        [_demuxerThread setName:@"AC-3 Demuxer"];
-        [_demuxerThread start];
-    }
+    return @"AC-3 demuxer";
 }
 
 - (void) dealloc

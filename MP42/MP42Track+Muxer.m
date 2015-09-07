@@ -7,6 +7,7 @@
 //
 
 #import "MP42Track+Muxer.h"
+#import "MP42FileImporter+Private.h"
 
 @implementation MP42Track (MP42TrackMuxerExtentions)
 

@@ -10,6 +10,8 @@
 #import "MP42BitmapSubConverter.h"
 
 #import "MP42FileImporter.h"
+#import "MP42FileImporter+Private.h"
+
 #import "MP42Sample.h"
 
 #import "MP42PrivateUtilities.h"

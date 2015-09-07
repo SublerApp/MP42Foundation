@@ -36,16 +36,10 @@ typedef NS_ENUM(NSUInteger, MP42Status) {
     MP42StatusWriting
 };
 
-/**
- *  MP42FileDelegate
- */
-@protocol MP42FileDelegate <NSObject>
-@optional
-- (void)progressStatus:(CGFloat)progress;
-@end
-
 @class MP42Muxer;
 @class MP42FileImporter;
+
+typedef void (^MP42FileProgressHandler)(double progress);
 
 /**
  *  A MP42File object is an object that represents a mp4 file.
@@ -55,10 +49,10 @@ typedef NS_ENUM(NSUInteger, MP42Status) {
     MP42FileHandle   _fileHandle;
     NSURL           *_fileURL;
 
-    id <MP42FileDelegate> _delegate;
-
     MP42Status  _status;
     BOOL        _cancelled;
+
+    MP42FileProgressHandler _progressHandler;
 
     NSMutableArray<__kindof MP42Track *>  *_tracks;
     NSMutableArray<MP42Track *>  *_tracksToBeDeleted;
@@ -71,8 +65,6 @@ typedef NS_ENUM(NSUInteger, MP42Status) {
 }
 
 + (void)setGlobalLogger:(id <MP42Logging>)logger;
-
-@property(nonatomic, readwrite, assign) id <MP42FileDelegate> delegate;
 
 /**
  * indicates the URL with which the instance of MP42File was initialized.
@@ -100,24 +92,21 @@ typedef NS_ENUM(NSUInteger, MP42Status) {
 @property(nonatomic, readonly) uint64_t dataSize;
 
 /**
- *  Creates a MP42File instance.
- *
- *  @param del the object delegate
+ *  Creates a empty MP42File instance.
  *
  *  @return An instance of MP42File
  */
 
-- (instancetype)initWithDelegate:(id <MP42FileDelegate>)del;
+- (instancetype)init;
 
 /**
  *  Creates a MP42File instance from the passed URL.
  *
  *  @param URL an instance of NSURL that references a mp4 file.
- *  @param del the object delegate
  *
  *  @return An instance of MP42File
  */
-- (instancetype)initWithURL:(NSURL *)URL delegate:(nullable id <MP42FileDelegate>)del;
+- (instancetype)initWithURL:(NSURL *)URL;
 
 /**
  * Provides the array of MP42Tracks contained by the mp4 file
@@ -188,6 +177,8 @@ typedef NS_ENUM(NSUInteger, MP42Status) {
  * a disabled chapter track, and a video track with no alternate group
  */
 - (void)organizeAlternateGroups;
+
+@property (nonatomic, readwrite, copy, nullable) MP42FileProgressHandler progressHandler;
 
 /**
  *  Reads an existing mp4 file and writes a new version of the file with the two important changes:
