@@ -50,6 +50,7 @@ NSString *const MP42AudioFormatVorbis = @"Vorbis";
 NSString *const MP42AudioFormatFLAC = @"FLAC";
 NSString *const MP42AudioFormatALAC = @"ALAC";
 NSString *const MP42AudioFormatAC3 = @"AC-3";
+NSString *const MP42AudioFormatEAC3 = @"E-AC-3";
 NSString *const MP42AudioFormatDTS = @"DTS";
 NSString *const MP42AudioFormatTrueHD = @"True HD";
 NSString *const MP42AudioFormatAMR = @"AMR Narrow Band";
@@ -58,6 +59,7 @@ NSString *const MP42AudioFormatFairPlay = @"FairPlay Sound";
 
 
 // Subtitle Format
+NSString *const MP42SubtitleFormatWebVTT = @"WebVTT";
 NSString *const MP42SubtitleFormatTx3g = @"Tx3g";
 NSString *const MP42SubtitleFormatText = @"Text";
 NSString *const MP42SubtitleFormatVobSub = @"VobSub";
