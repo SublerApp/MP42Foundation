@@ -228,12 +228,16 @@ NSString* getHumanReadableTrackMediaDataName(MP4FileHandle fileHandle, MP4TrackI
             return MP42AudioFormatALAC;
         else if (!strcmp(dataName, "ac-3"))
             return MP42AudioFormatAC3;
+        else if (!strcmp(dataName, "ec-3"))
+            return MP42AudioFormatEAC3;
         else if (!strcmp(dataName, "mp4v"))
             return MP42VideoFormatMPEG4Visual;
         else if (!strcmp(dataName, "text"))
             return MP42SubtitleFormatText;
         else if (!strcmp(dataName, "tx3g"))
             return MP42SubtitleFormatTx3g;
+        else if (!strcmp(dataName, "wvtt"))
+            return MP42SubtitleFormatWebVTT;
         else if (!strcmp(dataName, "c608"))
             return MP42ClosedCaptionFormatCEA608;
         else if (!strcmp(dataName, "c708"))
