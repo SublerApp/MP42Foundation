@@ -56,6 +56,7 @@ extern NSString *const MP42AudioFormatVorbis;
 extern NSString *const MP42AudioFormatFLAC;
 extern NSString *const MP42AudioFormatALAC;
 extern NSString *const MP42AudioFormatAC3;
+extern NSString *const MP42AudioFormatEAC3;
 extern NSString *const MP42AudioFormatDTS;
 extern NSString *const MP42AudioFormatTrueHD;
 extern NSString *const MP42AudioFormatAMR;
@@ -64,6 +65,7 @@ extern NSString *const MP42AudioFormatFairPlay;
 
 
 // Subtitle Format
+extern NSString *const MP42SubtitleFormatWebVTT;
 extern NSString *const MP42SubtitleFormatTx3g;
 extern NSString *const MP42SubtitleFormatText;
 extern NSString *const MP42SubtitleFormatVobSub;

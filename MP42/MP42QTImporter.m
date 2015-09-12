@@ -210,7 +210,7 @@
         }
 
         // Subtitle
-        else if([mediaType isEqualToString:@"sbtl"]) {
+        else if ([mediaType isEqualToString:@"sbtl"]) {
             newTrack = [[MP42SubtitleTrack alloc] init];
             NSSize dimension = [track apertureModeDimensionsForMode:QTMovieApertureModeClean];
             [(MP42SubtitleTrack*)newTrack setTrackWidth: dimension.width];
@@ -220,11 +220,13 @@
         }
 
         // Closed Caption
-        else if([mediaType isEqualToString:@"clcp"])
+        else if ([mediaType isEqualToString:@"clcp"]) {
             newTrack = [[MP42ClosedCaptionTrack alloc] init];
+        }
 
-        else
+        else {
             newTrack = [[MP42Track alloc] init];
+        }
 
         if (newTrack) {
             newTrack.format = [self formatForTrack:track];
@@ -242,9 +244,9 @@
     }
 }
 
-- (NSString*)formatForTrack: (QTTrack *)track;
+- (NSString *)formatForTrack:(QTTrack *)track;
 {
-    NSString* result = @"";
+    NSString *result = @"";
 
     ImageDescriptionHandle idh = (ImageDescriptionHandle) NewHandleClear(sizeof(ImageDescription));
     GetMediaSampleDescription([[track media] quickTimeMedia], 1,
@@ -347,7 +349,7 @@
     return result;
 }
 
-- (NSString*)langForTrack: (QTTrack *)track
+- (NSString *)langForTrack:(QTTrack *)track
 {
     long data = [[track attributeForKey:QTTrackLanguageAttribute] longValue];
     char code[4];
