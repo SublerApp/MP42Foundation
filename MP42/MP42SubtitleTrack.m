@@ -102,8 +102,9 @@
 
         return _Id;
     }
-    else
+    else {
         [super writeToFile:fileHandle error:outError];
+    }
 
     if (![_format isEqualToString:MP42SubtitleFormatVobSub]) {
         MP4SetTrackIntegerProperty(fileHandle, _Id, "mdia.minf.stbl.stsd.tx3g.defTextBoxBottom", trackHeight);
