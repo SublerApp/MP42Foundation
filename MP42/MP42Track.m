@@ -23,6 +23,7 @@
     if ((self = [super init])) {
         _enabled = YES;
         _updatedProperty = [[NSMutableDictionary alloc] init];
+        _mediaCharacteristicTags = [[NSSet alloc] init];
         _name = @"Unknown Track";
     }
     return self;
@@ -42,10 +43,14 @@
             _name = [getTrackName(fileHandle, _Id) retain];
             _language = [getHumanReadableTrackLanguage(fileHandle, _Id) retain];
 
-            const char *elng;
-            if (MP4GetTrackStringProperty(fileHandle, _Id, "mdia.elng", &elng)) {
-                _extendedLanguageTag = [[NSString stringWithCString:elng encoding:NSASCIIStringEncoding] retain];
+            // Extended language tag
+            if (MP4HaveTrackAtom(fileHandle, _Id, "mdia.elng")) {
+                const char *elng;
+                if (MP4GetTrackStringProperty(fileHandle, _Id, "mdia.elng", &elng)) {
+                    _extendedLanguageTag = [[NSString stringWithCString:elng encoding:NSASCIIStringEncoding] retain];
+                }
             }
+
             _bitrate = MP4GetTrackBitRate(fileHandle, _Id);
             _duration = MP4ConvertFromTrackDuration(fileHandle, _Id,
                                                    MP4GetTrackDuration(fileHandle, _Id),
@@ -55,11 +60,51 @@
 
             _size = getTrackSize(fileHandle, _Id);
 
+            // Track flags
             uint64_t temp;
             MP4GetTrackIntegerProperty(fileHandle, _Id, "tkhd.flags", &temp);
-            if (temp & TRACK_ENABLED) _enabled = YES;
-            else _enabled = NO;
+            if (temp & TRACK_ENABLED) {
+                _enabled = YES;
+            }
+            else {
+                _enabled = NO;
+            }
+
             MP4GetTrackIntegerProperty(fileHandle, _Id, "tkhd.alternate_group", &_alternate_group);
+
+            // Media characteristic tags
+            NSMutableSet *mediaCharacteristicTags = [[NSMutableSet alloc] init];
+
+            BOOL found = YES;
+            NSUInteger count = 0;
+
+            while (found) {
+                NSString *atomName = [NSString stringWithFormat:@"udta.tagc[%d]", count];
+
+                if (MP4HaveTrackAtom(fileHandle, _Id, atomName.UTF8String)) {
+                    uint8_t   *ppValue;
+                    uint32_t  pValueSize;
+                    NSString *propertyName = [atomName stringByAppendingString:@".tag"];
+
+                    MP4GetTrackBytesProperty(fileHandle, _Id, propertyName.UTF8String, &ppValue, &pValueSize);
+
+                    if (pValueSize) {
+                        NSString *tag = [[NSString alloc] initWithBytes:ppValue length:pValueSize encoding:NSASCIIStringEncoding];
+                        if (tag) {
+                            [mediaCharacteristicTags addObject:tag];
+                        }
+                        [tag release];
+                    }
+
+                    count++;
+                }
+                else {
+                    found = NO;
+                }
+            }
+
+            _mediaCharacteristicTags = [mediaCharacteristicTags copy];
+            [mediaCharacteristicTags release];
         }
 	}
 
@@ -93,6 +138,8 @@
         [copy->_updatedProperty release];
         copy->_updatedProperty = [_updatedProperty mutableCopy];
 
+        copy->_mediaCharacteristicTags = [_mediaCharacteristicTags copy];
+
         if (_helper) {
             copy->_helper = calloc(1, sizeof(muxer_helper));
             ((muxer_helper *)copy->_helper)->importer = ((muxer_helper *)_helper)->importer;
@@ -124,11 +171,15 @@
             ![_name isEqualToString:@"Closed Caption Track"] &&
             ![_name isEqualToString:@"Unknown Track"] &&
             _name != nil) {
+
             const char *cString = [_name cStringUsingEncoding: NSMacOSRomanStringEncoding];
-            if (cString)
-                if (!MP4SetTrackName(fileHandle, _Id, cString))
-                    NSLog(@"Unable to set the track name");
-        } else {
+
+            if (cString) {
+                MP4SetTrackName(fileHandle, _Id, cString);
+            }
+
+        }
+        else {
             MP4SetTrackName(fileHandle, _Id, "\0");
         }
     }
@@ -143,6 +194,14 @@
     if ([_updatedProperty valueForKey:@"enabled"] || !_muxed) {
         if (_enabled) MP4SetTrackEnabled(fileHandle, _Id);
         else MP4SetTrackDisabled(fileHandle, _Id);
+    }
+
+    if (_updatedProperty[@"mediaCharacteristicTags"]) {
+        MP4RemoveAllMediaCharacteristicTags(fileHandle, _Id);
+
+        for (NSString *tag in _mediaCharacteristicTags) {
+            MP4AddMediaCharacteristicTag(fileHandle, _Id, tag.UTF8String);
+        }
     }
 
     return success;
@@ -205,6 +264,14 @@
     _extendedLanguageTag = [newExtendedLanguageTag retain];
     self.isEdited = YES;
     _updatedProperty[@"extendedLanguageTag"] = @YES;
+}
+
+- (void)setMediaCharacteristicTags:(NSSet<NSString *> *)mediaCharacteristicTags
+{
+    [_mediaCharacteristicTags autorelease];
+    _mediaCharacteristicTags = [mediaCharacteristicTags copy];
+    self.isEdited = YES;
+    _updatedProperty[@"mediaCharacteristicTags"] = @YES;
 }
 
 - (void)setEnabled:(BOOL)newState
@@ -297,6 +364,7 @@
     [coder encodeInt64:_size forKey:@"dataLength"];
 
     [coder encodeObject:_updatedProperty forKey:@"updatedProperty"];
+    [coder encodeObject:_mediaCharacteristicTags forKey:@"mediaCharacteristicTags"];
 }
 
 - (id)initWithCoder:(NSCoder *)decoder
@@ -345,6 +413,7 @@
         _size = [decoder decodeInt64ForKey:@"dataLength"];
 
     _updatedProperty = [[decoder decodeObjectForKey:@"updatedProperty"] retain];
+    _mediaCharacteristicTags = [[decoder decodeObjectForKey:@"mediaCharacteristicTags"] retain];
 
     return self;
 }
@@ -361,11 +430,13 @@
 @synthesize needConversion = _needConversion;
 @synthesize dataLength = _size;
 @synthesize mediaType = _mediaType;
+@synthesize mediaCharacteristicTags = _mediaCharacteristicTags;
 
 - (void)dealloc {
     free(_helper);
 
     [_updatedProperty release];
+    [_mediaCharacteristicTags release];
     [_format release];
     [_sourceURL release];
     [_name release];

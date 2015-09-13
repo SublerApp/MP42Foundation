@@ -28,6 +28,8 @@ NS_ASSUME_NONNULL_BEGIN
     NSString    *_language;
     NSString    *_extendedLanguageTag;
 
+    NSSet<NSString *> *_mediaCharacteristicTags;
+
     BOOL        _enabled;
     uint64_t    _alternate_group;
     int64_t     _startOffset;
@@ -64,6 +66,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property(nonatomic, readwrite, copy) NSString *name;
 @property(nonatomic, readwrite, copy) NSString *language;
 @property(nonatomic, readwrite, copy) NSString *extendedLanguageTag;
+
+@property(nonatomic, readwrite, copy) NSSet<NSString *> *mediaCharacteristicTags;
 
 @property(nonatomic, readwrite, getter=isEnabled) BOOL enabled;
 @property(nonatomic, readwrite) uint64_t alternate_group;
