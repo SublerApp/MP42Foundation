@@ -25,9 +25,7 @@
 @interface AVFDemuxHelper : NSObject {
 @public
     int64_t              currentTime;
-    int64_t              delta;
     AVAssetReaderOutput *assetReaderOutput;
-
     MP42EditListsReconstructor *editsConstructor;
 }
 
@@ -46,11 +44,7 @@
 
 - (NSString *)formatForTrack:(AVAssetTrack *)track {
     NSString *result = @"";
-
-    CMFormatDescriptionRef formatDescription = NULL;
-    NSArray *formatDescriptions = track.formatDescriptions;
-    if ([formatDescriptions count] > 0)
-        formatDescription = (CMFormatDescriptionRef)[formatDescriptions objectAtIndex:0];
+    CMFormatDescriptionRef formatDescription = (CMFormatDescriptionRef)track.formatDescriptions.firstObject;
 
     if (formatDescription) {
         FourCharCode code = CMFormatDescriptionGetMediaSubType(formatDescription);
@@ -114,6 +108,9 @@
             case kCMTextFormatType_3GText:
                 result = MP42SubtitleFormatTx3g;
                 break;
+            case kCMSubtitleFormatType_WebVTT:
+                result = MP42SubtitleFormatWebVTT;
+                break;
             case 'SRT ':
                 result = MP42SubtitleFormatText;
                 break;
@@ -172,8 +169,6 @@
 
 - (instancetype)initWithURL:(NSURL *)fileURL error:(NSError **)outError {
     if ((self = [super initWithURL:fileURL])) {
-        NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-
         _localAsset = [[AVAsset assetWithURL:self.fileURL] retain];
 
         NSArray<AVAssetTrack *> *tracks = [_localAsset tracks];
@@ -197,18 +192,18 @@
 
         // Converts the tracks to the MP42File types
         for (AVAssetTrack *track in tracks) {
+
             MP42Track *newTrack = nil;
 
             // Retrieves the formatDescription
-            CMFormatDescriptionRef formatDescription = NULL;
             NSArray *formatDescriptions = track.formatDescriptions;
-			if ([formatDescriptions count] > 0)
-				formatDescription = (CMFormatDescriptionRef)[formatDescriptions objectAtIndex:0];
+            CMFormatDescriptionRef formatDescription = (CMFormatDescriptionRef)formatDescriptions.firstObject;
 
-            if ([[track mediaType] isEqualToString:AVMediaTypeVideo]) {
+            if ([track.mediaType isEqualToString:AVMediaTypeVideo]) {
+
                 // Video type, do the usual video things
                 MP42VideoTrack *videoTrack = [[MP42VideoTrack alloc] init];
-                CGSize naturalSize = [track naturalSize];
+                CGSize naturalSize = track.naturalSize;
 
                 videoTrack.trackWidth = naturalSize.width;
                 videoTrack.trackHeight = naturalSize.height;
@@ -217,12 +212,14 @@
                 videoTrack.height = naturalSize.height;
 
                 if (formatDescription) {
+
                     CMVideoDimensions dimensions = CMVideoFormatDescriptionGetDimensions(formatDescription);
                     videoTrack.width = dimensions.width;
                     videoTrack.height = dimensions.height;
 
                     // Reads the pixel aspect ratio information
                     CFDictionaryRef pixelAspectRatioFromCMFormatDescription = CMFormatDescriptionGetExtension(formatDescription, kCMFormatDescriptionExtension_PixelAspectRatio);
+
                     if (pixelAspectRatioFromCMFormatDescription) {
                         NSInteger hSpacing, vSpacing;
                         CFNumberGetValue(CFDictionaryGetValue(pixelAspectRatioFromCMFormatDescription, kCMFormatDescriptionKey_PixelAspectRatioHorizontalSpacing), kCFNumberIntType, &hSpacing);
@@ -230,8 +227,10 @@
                         videoTrack.hSpacing = hSpacing;
                         videoTrack.vSpacing = vSpacing;
                     }
+
                     // Reads the clean aperture information
                     CFDictionaryRef cleanApertureFromCMFormatDescription = CMFormatDescriptionGetExtension(formatDescription, kCMFormatDescriptionExtension_CleanAperture);
+
                     if (cleanApertureFromCMFormatDescription) {
                         double cleanApertureWidth, cleanApertureHeight;
                         double cleanApertureHorizontalOffset, cleanApertureVerticalOffset;
@@ -255,7 +254,10 @@
                     }
                 }
                 newTrack = videoTrack;
-            } else if ([[track mediaType] isEqualToString:AVMediaTypeAudio]) {
+
+            }
+            else if ([track.mediaType isEqualToString:AVMediaTypeAudio]) {
+
                 // Audio type, check the channel layout and channels number
                 MP42AudioTrack *audioTrack = [[MP42AudioTrack alloc] init];
 
@@ -266,47 +268,84 @@
                     if (layoutSize) {
                         audioTrack.channels = AudioChannelLayoutTag_GetNumberOfChannels(layout->mChannelLayoutTag);
                         audioTrack.channelLayoutTag = layout->mChannelLayoutTag;
-                    } else {
+                    }
+                    else {
                         audioTrack.channels = 1;
                     }
                 }
                 newTrack = audioTrack;
-            } else if ([[track mediaType] isEqualToString:AVMediaTypeSubtitle]) {
+
+            }
+            else if ([track.mediaType isEqualToString:AVMediaTypeSubtitle]) {
+
                 // Subtitle type, nothing interesting here
                 newTrack = [[MP42SubtitleTrack alloc] init];
-            } else if ([[track mediaType] isEqualToString:AVMediaTypeText]) {
+
+            }
+            else if ([track.mediaType isEqualToString:AVMediaTypeText]) {
+
                 // It looks like there is no way to know what text track is used for chapters in the original file.
                 if (chapters) {
                     newTrack = chapters;
-                } else {
+                }
+                else {
                     newTrack = [[MP42ChapterTrack alloc] init];
                 }
-            } else {
+            }
+            else {
                 // Unknown type
                 newTrack = [[MP42Track alloc] init];
             }
 
             // Set the usual track properties
             newTrack.format = [self formatForTrack:track];
-            newTrack.Id = [track trackID];
+            newTrack.Id = track.trackID;
             newTrack.sourceURL = self.fileURL;
-            newTrack.dataLength = [track totalSampleDataLength];
+            newTrack.dataLength = track.totalSampleDataLength;
+
+            NSArray<AVMetadataItem *> *trackMetadata = [track metadataForFormat:AVMetadataFormatQuickTimeUserData];
 
             // "name" is undefined in AVMetadataFormat.h, so read the official track name "tnam", and then "name". On 10.7, "name" is returned as an NSData
-            NSArray *trackMetadata = [track metadataForFormat:AVMetadataFormatQuickTimeUserData];
-            id trackName = [[[AVMetadataItem metadataItemsFromArray:trackMetadata withKey:AVMetadataQuickTimeUserDataKeyTrackName keySpace:nil] lastObject] value];
-            id trackName_oldFormat = [[[AVMetadataItem metadataItemsFromArray:trackMetadata withKey:@"name" keySpace:nil] lastObject] value];
-            if (trackName && [trackName isKindOfClass:[NSString class]]) {
+            NSString *trackName = [[[AVMetadataItem metadataItemsFromArray:trackMetadata
+                                                            withKey:AVMetadataQuickTimeUserDataKeyTrackName
+                                                                  keySpace:nil] firstObject] stringValue];
+
+            if (trackName.length) {
                 newTrack.name = trackName;
-            } else if (trackName_oldFormat && [trackName_oldFormat isKindOfClass:[NSString class]]) {
-                newTrack.name = trackName_oldFormat;
-            } else if (trackName_oldFormat && [trackName_oldFormat isKindOfClass:[NSData class]]) {
-                newTrack.name = [NSString stringWithCString:[trackName_oldFormat bytes] encoding:NSMacOSRomanStringEncoding];
+            }
+            else {
+                id trackName_oldFormat = [[[AVMetadataItem metadataItemsFromArray:trackMetadata
+                                                                          withKey:@"name"
+                                                                         keySpace:nil] firstObject] value];
+
+                if ([trackName_oldFormat isKindOfClass:[NSString class]]) {
+                    newTrack.name = trackName_oldFormat;
+                }
+                else if ([trackName_oldFormat isKindOfClass:[NSData class]]) {
+                    newTrack.name = [NSString stringWithCString:[trackName_oldFormat bytes]
+                                                       encoding:NSMacOSRomanStringEncoding];
+                }
             }
 
             newTrack.language = [self langForTrack:track];
 
-            CMTimeRange timeRange = [track timeRange];
+            // Media characteristic tags, requires 10.10 or later
+            if ([[AVMetadataItem class] respondsToSelector:@selector(metadataItemsFromArray:filteredByIdentifier:)]) {
+
+                NSArray<AVMetadataItem *> *mediaTags = [AVMetadataItem metadataItemsFromArray:trackMetadata
+                                                                     filteredByIdentifier:AVMetadataIdentifierQuickTimeUserDataTaggedCharacteristic];
+
+                if (mediaTags.count) {
+                    NSMutableSet<NSString *> *tags = [NSMutableSet set];
+
+                    for (AVMetadataItem *tag in mediaTags) {
+                        [tags addObject:tag.stringValue];
+                    }
+                    newTrack.mediaCharacteristicTags = tags;
+                }
+            }
+
+            CMTimeRange timeRange = track.timeRange;
             newTrack.duration = timeRange.duration.value / timeRange.duration.timescale * 1000;
 
             [self addTrack:newTrack];
@@ -314,16 +353,13 @@
         }
 
         [self convertMetadata];
-
-        [pool release];
     }
 
     return self;
 }
 
-
 /**
- *  Converts the AVAsset metadata to the MP42File format
+ *  Converts the AVAsset metadata to the MP42Metadata format
  */
 - (void)convertMetadata {
     NSDictionary *commonItemsDict = [NSDictionary dictionaryWithObjectsAndKeys:@"Name", AVMetadataCommonKeyTitle,
@@ -354,15 +390,22 @@
     _metadata = [[MP42Metadata alloc] init];
 
     for (NSString *commonKey in commonItemsDict.allKeys) {
-        NSArray<AVMetadataItem *> *items = [AVMetadataItem metadataItemsFromArray:_localAsset.commonMetadata withKey:commonKey keySpace:AVMetadataKeySpaceCommon];
-        if ([items count]) {
-            [_metadata setTag:[[items lastObject] value] forKey:[commonItemsDict objectForKey:commonKey]];
+        NSArray<AVMetadataItem *> *items = [AVMetadataItem metadataItemsFromArray:_localAsset.commonMetadata
+                                                                          withKey:commonKey
+                                                                         keySpace:AVMetadataKeySpaceCommon];
+        if (items.count) {
+            [_metadata setTag:items.lastObject.value forKey:commonItemsDict[commonKey]];
         }
     }
 
-    NSArray<AVMetadataItem *> *items = [AVMetadataItem metadataItemsFromArray:_localAsset.commonMetadata withKey:AVMetadataCommonKeyArtwork keySpace:AVMetadataKeySpaceCommon];
-    if ([items count]) {
-        id artworkData = [[items lastObject] value];
+    // Copy the artowrks
+    NSArray<AVMetadataItem *> *items = [AVMetadataItem metadataItemsFromArray:_localAsset.commonMetadata
+                                                                      withKey:AVMetadataCommonKeyArtwork
+                                                                     keySpace:AVMetadataKeySpaceCommon];
+
+    for (AVMetadataItem *item in items) {
+        NSData *artworkData = item.dataValue;
+
         if ([artworkData isKindOfClass:[NSData class]]) {
             NSImage *image = [[NSImage alloc] initWithData:artworkData];
             [_metadata.artworks addObject:[[[MP42Image alloc] initWithImage:image] autorelease]];
@@ -373,7 +416,7 @@
     NSArray<NSString *> *availableMetadataFormats = [_localAsset availableMetadataFormats];
 
     if ([availableMetadataFormats containsObject:AVMetadataFormatiTunesMetadata]) {
-        NSArray *itunesMetadata = [_localAsset metadataForFormat:AVMetadataFormatiTunesMetadata];
+        NSArray<AVMetadataItem *> *itunesMetadata = [_localAsset metadataForFormat:AVMetadataFormatiTunesMetadata];
         
         NSDictionary *itunesMetadataDict = [NSDictionary dictionaryWithObjectsAndKeys:
                                             @"Album",               AVMetadataiTunesMetadataKeyAlbum,
@@ -446,10 +489,10 @@
                                             @"Executive Producer",  AVMetadataiTunesMetadataKeyExecProducer,
                                             nil];
 
-        for (NSString *itunesKey in [itunesMetadataDict allKeys]) {
+        for (NSString *itunesKey in itunesMetadataDict.allKeys) {
             items = [AVMetadataItem metadataItemsFromArray:itunesMetadata withKey:itunesKey keySpace:AVMetadataKeySpaceiTunes];
             if (items.count) {
-                [_metadata setTag:[[items lastObject] value] forKey:[itunesMetadataDict objectForKey:itunesKey]];
+                [_metadata setTag:items.lastObject.value forKey:itunesMetadataDict[itunesKey]];
             }
         }
 
@@ -495,7 +538,7 @@
         for (NSString *qtKey in quicktimeMetadataDict.allKeys) {
             items = [AVMetadataItem metadataItemsFromArray:quicktimeMetadata withKey:qtKey keySpace:AVMetadataKeySpaceQuickTimeUserData];
             if (items.count) {
-                [_metadata setTag:[[items lastObject] value] forKey:[quicktimeMetadataDict objectForKey:qtKey]];
+                [_metadata setTag:items.lastObject.value forKey:quicktimeMetadataDict[qtKey]];
             }
         }
     }
@@ -528,7 +571,7 @@
         for (NSString *qtUserDataKey in quicktimeUserDataMetadataDict.allKeys) {
             items = [AVMetadataItem metadataItemsFromArray:quicktimeUserDataMetadata withKey:qtUserDataKey keySpace:AVMetadataKeySpaceQuickTimeUserData];
             if (items.count) {
-                [_metadata setTag:[[items lastObject] value] forKey:[quicktimeUserDataMetadataDict objectForKey:qtUserDataKey]];
+                [_metadata setTag:items.lastObject.value forKey:quicktimeUserDataMetadataDict[qtUserDataKey]];
             }
         }
     }
@@ -920,8 +963,9 @@
 
         }
 
-        if (trackDuration)
+        if (trackDuration) {
             MP4SetTrackIntegerProperty(fileHandle, track.Id, "tkhd.duration", trackDuration);
+        }
 
     }
     return YES;
