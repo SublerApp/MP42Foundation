@@ -612,9 +612,9 @@ iso639_lang_t * lang_for_english( const char * english )
 }
 
 - (NSArray<NSString *> *)commonLanguages {
-    return @[@"Unknown", @"English", @"French", @"German", @"Italian", @"Dutch",
+    return @[@"Unknown", @"English", @"French", @"German", @"Japanese", @"Italian", @"Dutch",
              @"Swedish" , @"Spanish" , @"Danish" , @"Portuguese", @"Norwegian", @"Hebrew",
-             @"Japanese", @"Arabic", @"Finnish", @"Modern Greek", @"Icelandic", @"Maltese", @"Turkish",
+             @"Arabic", @"Finnish", @"Modern Greek", @"Icelandic", @"Maltese", @"Turkish",
              @"Croatian", @"Chinese", @"Urdu", @"Hindi", @"Thai", @"Korean", @"Lithuanian", @"Polish",
              @"Hungarian", @"Estonian", @"Latvian", @"Northern Sami", @"Faroese", @"Persian", @"Romanian", @"Russian",
              @"Irish", @"Serbian", @"Albanian", @"Bulgarian", @"Czech", @"Slovak", @"Slovenian"];
