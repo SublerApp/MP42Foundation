@@ -20,8 +20,7 @@ extern u_int8_t MP4AV_AacConfigGetChannels(u_int8_t* pConfig);
         MP4GetTrackFloatProperty(fileHandle, _Id, "tkhd.volume", &_volume);
         _mediaType = MP42MediaTypeAudio;
 
-        u_int8_t audioType = 
-		MP4GetTrackEsdsObjectTypeId(fileHandle, _Id);
+        u_int8_t audioType = MP4GetTrackEsdsObjectTypeId(fileHandle, _Id);
 
         if (audioType != MP4_INVALID_AUDIO_TYPE) {
             if (MP4_IS_AAC_AUDIO_TYPE(audioType)) {
@@ -36,8 +35,10 @@ extern u_int8_t MP4AV_AacConfigGetChannels(u_int8_t* pConfig);
                         _channels = MP4AV_AacConfigGetChannels(pAacConfig);
                         free(pAacConfig);
                     }
-            } else if ((audioType == MP4_PCM16_LITTLE_ENDIAN_AUDIO_TYPE) ||
-                       (audioType == MP4_PCM16_BIG_ENDIAN_AUDIO_TYPE)) {
+            }
+            else if ((audioType == MP4_PCM16_LITTLE_ENDIAN_AUDIO_TYPE) ||
+                     (audioType == MP4_PCM16_BIG_ENDIAN_AUDIO_TYPE)) {
+
                 u_int32_t samplesPerFrame =
                 MP4GetSampleSize(fileHandle, _Id, 1) / 2;
 
@@ -50,6 +51,7 @@ extern u_int8_t MP4AV_AacConfigGetChannels(u_int8_t* pConfig);
                 }
             }
         }
+
         if (audioType == 0xA9) {
             uint64_t channels_count = 0;
             MP4GetTrackIntegerProperty(fileHandle, _Id, "mdia.minf.stbl.stsd.mp4a.channels", &channels_count);
@@ -63,6 +65,9 @@ extern u_int8_t MP4AV_AacConfigGetChannels(u_int8_t* pConfig);
 
             readAC3Config(acmod, lfeon, &_channels, &_channelLayoutTag);
         }
+        else if (MP4HaveTrackAtom(fileHandle, _Id, "mdia.minf.stbl.stsd.ac-3.dec3")) {
+            // TODO
+        }
         else if (MP4HaveTrackAtom(fileHandle, _Id, "mdia.minf.stbl.stsd.alac")) {
             uint64_t channels_count = 0;
             MP4GetTrackIntegerProperty(fileHandle, _Id, "mdia.minf.stbl.stsd.alac.channels", &channels_count);
@@ -74,7 +79,7 @@ extern u_int8_t MP4AV_AacConfigGetChannels(u_int8_t* pConfig);
             MP4GetTrackIntegerProperty(fileHandle, _Id, "tref.fall.entries.trackId", &fallbackId);
             _fallbackTrackId = (MP4TrackId) fallbackId;
         }
-        
+
         if (MP4HaveTrackAtom(fileHandle, _Id, "tref.folw")) {
             uint64_t followsId = 0;
             MP4GetTrackIntegerProperty(fileHandle, _Id, "tref.folw.entries.trackId", &followsId);
