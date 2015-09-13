@@ -392,6 +392,8 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
             return MP42AudioFormatAAC;
         else if (!strcmp(track->CodecID, "A_AC3"))
             return MP42AudioFormatAC3;
+        else if (!strcmp(track->CodecID, "A_EAC3"))
+            return MP42AudioFormatEAC3;
         else if (!strcmp(track->CodecID, "V_MPEG4/ISO/SP"))
             return MP42VideoFormatMPEG4Visual;
         else if (!strcmp(track->CodecID, "V_MPEG4/ISO/ASP"))
