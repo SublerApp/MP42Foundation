@@ -457,8 +457,9 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
     id track = [[self.itracks objectAtIndex:index] retain];
 
     [self.itracks removeObjectAtIndex:index];
-    if (newIndex > [self.itracks count] || newIndex > index)
+    if (newIndex > [self.itracks count] || newIndex > index) {
         newIndex--;
+    }
     [self.itracks insertObject:track atIndex:newIndex];
     [track release];
 }
@@ -605,7 +606,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
     }
 }
 
-- (BOOL)writeToUrl:(NSURL *)url withAttributes:(NSDictionary *)attributes error:(NSError **)outError {
+- (BOOL)writeToUrl:(NSURL *)url options:(nullable NSDictionary<NSString *, id> *)options error:(NSError **)outError {
     BOOL success = YES;
 
     if (!url) {
@@ -616,7 +617,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
         return NO;
     }
 
-    if ([self hasFileRepresentation]) {
+    if (self.hasFileRepresentation) {
         __block BOOL noErr = YES;
 
         if (![self.URL isEqualTo:url]) {
@@ -642,7 +643,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 
         if (noErr) {
             self.URL = url;
-            success = [self updateMP4FileWithAttributes:attributes error:outError];
+            success = [self updateMP4FileWithOptions:options error:outError];
         } else {
             success = NO;
             [*outError autorelease];
@@ -650,16 +651,16 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
     } else {
         self.URL = url;
 
-        NSString *fileExtension = [self.URL pathExtension];
+        NSString *fileExtension = self.URL.pathExtension;
         char *majorBrand = "mp42";
         char *supportedBrands[4];
         uint32_t supportedBrandsCount = 0;
         uint32_t flags = 0;
 
-        if ([[attributes valueForKey:MP4264BitData] boolValue])
+        if ([options[MP4264BitData] boolValue])
             flags += 0x01;
 
-        if ([[attributes valueForKey:MP4264BitTime] boolValue])
+        if ([options[MP4264BitTime] boolValue])
             flags += 0x02;
 
         if ([fileExtension isEqualToString:MP42FileTypeM4V]) {
@@ -683,7 +684,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
             supportedBrandsCount = 2;
         }
 
-        self.fileHandle = MP4CreateEx([[self.URL path] fileSystemRepresentation],
+        self.fileHandle = MP4CreateEx(self.URL.path.fileSystemRepresentation,
                                  flags, 1, 1,
                                  majorBrand, 0,
                                  supportedBrands, supportedBrandsCount);
@@ -691,7 +692,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
             MP4SetTimeScale(self.fileHandle, 600);
             [self stopWriting];
 
-            success = [self updateMP4FileWithAttributes:attributes error:outError];
+            success = [self updateMP4FileWithOptions:options error:outError];
         } else {
             success = NO;
             if (outError) {
@@ -704,9 +705,9 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
     return success;
 }
 
-- (BOOL)updateMP4FileWithAttributes:(NSDictionary *)attributes error:(NSError **)outError {
+- (BOOL)updateMP4FileWithOptions:(nullable NSDictionary<NSString *, id> *)options error:(NSError **)outError {
     // Organize the alternate groups
-    if ([[attributes valueForKey:MP42OrganizeAlternateGroups] boolValue]) {
+    if ([options[MP42OrganizeAlternateGroups] boolValue]) {
         [self organizeAlternateGroups];
     }
 
@@ -820,9 +821,9 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
     }
 
     // Generate previews images for chapters
-    if ([attributes[MP42GenerateChaptersPreviewTrack] boolValue] && [self.itracks count]) {
+    if ([options[MP42GenerateChaptersPreviewTrack] boolValue] && self.itracks.count) {
         [self createChaptersPreview];
-    } else if ([attributes[MP42CustomChaptersPreviewTrack] boolValue] && [self.itracks count]) {
+    } else if ([options[MP42CustomChaptersPreviewTrack] boolValue] && self.itracks.count) {
         [self customChaptersPreview];
     }
 

@@ -152,6 +152,7 @@
 - (BOOL)writeToFile:(MP4FileHandle)fileHandle error:(NSError **)outError
 {
     BOOL success = YES;
+
     if (!fileHandle || !_Id) {
         if ( outError != NULL) {
             *outError = MP42Error(@"Failed to modify track",
@@ -162,7 +163,7 @@
         }
     }
 
-    if ([_updatedProperty valueForKey:@"name"] || !_muxed) {
+    if (_updatedProperty[@"name"] || !_muxed) {
         if (![_name isEqualToString:@"Video Track"] &&
             ![_name isEqualToString:@"Sound Track"] &&
             ![_name isEqualToString:@"Subtitle Track"] &&
@@ -172,7 +173,7 @@
             ![_name isEqualToString:@"Unknown Track"] &&
             _name != nil) {
 
-            const char *cString = [_name cStringUsingEncoding: NSMacOSRomanStringEncoding];
+            const char *cString = [_name cStringUsingEncoding:NSMacOSRomanStringEncoding];
 
             if (cString) {
                 MP4SetTrackName(fileHandle, _Id, cString);
@@ -183,20 +184,29 @@
             MP4SetTrackName(fileHandle, _Id, "\0");
         }
     }
-    if ([_updatedProperty valueForKey:@"alternate_group"] || !_muxed)
+
+    if (_updatedProperty[@"alternate_group"] || !_muxed) {
         MP4SetTrackIntegerProperty(fileHandle, _Id, "tkhd.alternate_group", _alternate_group);
-    if ([_updatedProperty valueForKey:@"start_offset"])
-        setTrackStartOffset(fileHandle, _Id, _startOffset);
-    if ([_updatedProperty valueForKey:@"language"] || !_muxed)
-        MP4SetTrackLanguage(fileHandle, _Id, lang_for_english([_language UTF8String])->iso639_2);
-    if ([_updatedProperty valueForKey:@"extendedLanguageTag"] || !_muxed)
-        MP4SetTrackStringProperty(fileHandle, _Id, "mdia.elng", [_extendedLanguageTag cStringUsingEncoding:NSASCIIStringEncoding]);
-    if ([_updatedProperty valueForKey:@"enabled"] || !_muxed) {
-        if (_enabled) MP4SetTrackEnabled(fileHandle, _Id);
-        else MP4SetTrackDisabled(fileHandle, _Id);
     }
 
-    if (_updatedProperty[@"mediaCharacteristicTags"]) {
+    if (_updatedProperty[@"start_offset"]) {
+        setTrackStartOffset(fileHandle, _Id, _startOffset);
+    }
+
+    if (_updatedProperty[@"language"] || !_muxed) {
+        MP4SetTrackLanguage(fileHandle, _Id, lang_for_english([_language UTF8String])->iso639_2);
+    }
+
+    if (_updatedProperty[@"extendedLanguageTag"] || !_muxed) {
+        MP4SetTrackStringProperty(fileHandle, _Id, "mdia.elng", [_extendedLanguageTag cStringUsingEncoding:NSASCIIStringEncoding]);
+    }
+
+    if (_updatedProperty[@"enabled"] || !_muxed) {
+        if (_enabled) { MP4SetTrackEnabled(fileHandle, _Id); }
+        else { MP4SetTrackDisabled(fileHandle, _Id); }
+    }
+
+    if (_updatedProperty[@"mediaCharacteristicTags"] || !_muxed) {
         MP4RemoveAllMediaCharacteristicTags(fileHandle, _Id);
 
         for (NSString *tag in _mediaCharacteristicTags) {

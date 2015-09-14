@@ -61,7 +61,6 @@ typedef void (^MP42FileProgressHandler)(double progress);
     NSMutableDictionary<NSString *, MP42FileImporter *> *_importers;
 
     BOOL        _hasFileRepresentation;
-
 }
 
 + (void)setGlobalLogger:(id <MP42Logging>)logger;
@@ -201,22 +200,22 @@ typedef void (^MP42FileProgressHandler)(double progress);
  *  Exports a MP42File object.
  *
  *  @param url        An NSURL object that specifies a url to a file.
- *  @param attributes An NSDictionary object that specifies the desired operation and its options,
+ *  @param options An NSDictionary object that specifies the desired operation and its options,
  *  @param outError   A pointer to an NSError object; if the operation fails, an NSError object is returned in this location.
  *
  *  @return YES if the movie file was successfully created, NO otherwise.
  */
-- (BOOL)writeToUrl:(NSURL *)url withAttributes:(NSDictionary *)attributes error:(NSError **)outError;
+- (BOOL)writeToUrl:(NSURL *)url options:(nullable NSDictionary<NSString *, id> *)options error:(NSError **)outError;
 
 /**
  *  Updates a MP42File object.
  *
- *  @param attributes An NSDictionary object that specifies the desired operation and its options.
+ *  @param options An NSDictionary object that specifies the desired operation and its options.
  *  @param outError   A pointer to an NSError object; if the operation fails, an NSError object is returned in this location.
  *
  *  @return YES if the movie file was successfully created, NO otherwise.
  */
-- (BOOL)updateMP4FileWithAttributes:(NSDictionary *)attributes error:(NSError **)outError;
+- (BOOL)updateMP4FileWithOptions:(nullable NSDictionary<NSString *, id> *)options error:(NSError **)outError;
 
 /**
  *  Cancels a write/update operation.

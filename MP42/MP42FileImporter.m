@@ -70,9 +70,9 @@
         self = [MP42VobSubImporter alloc];
     }
 #if !__LP64__
-    else if ([pathExtension caseInsensitiveCompare: @"mov"] == NSOrderedSame) {
+    /*else if ([pathExtension caseInsensitiveCompare: @"mov"] == NSOrderedSame) {
         self = [MP42QTImporter alloc];
-    }
+    }*/
 #endif
     else if ([pathExtension caseInsensitiveCompare: @"m2ts"] == NSOrderedSame ||
              [pathExtension caseInsensitiveCompare: @"ts"] == NSOrderedSame ||
