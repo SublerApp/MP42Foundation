@@ -15,29 +15,37 @@
 
 - (instancetype)initWithSourceURL:(NSURL *)URL trackID:(NSInteger)trackID fileHandle:(MP4FileHandle)fileHandle
 {
-    if ((self = [super initWithSourceURL:URL trackID:trackID fileHandle:fileHandle])) {
+    self = [super initWithSourceURL:URL trackID:trackID fileHandle:fileHandle];
+
+    if (self) {
+
         _mediaType = MP42MediaTypeSubtitle;
 
         if (![_format isEqualToString:MP42SubtitleFormatVobSub]) {
 
-            MP4GetTrackIntegerProperty(fileHandle, _Id, "mdia.minf.stbl.stsd.tx3g.defTextBoxBottom", &height);
-            MP4GetTrackIntegerProperty(fileHandle, _Id, "mdia.minf.stbl.stsd.tx3g.defTextBoxRight", &width);
+            MP4GetTrackIntegerProperty(fileHandle, _trackId, "mdia.minf.stbl.stsd.tx3g.defTextBoxBottom", &height);
+            MP4GetTrackIntegerProperty(fileHandle, _trackId, "mdia.minf.stbl.stsd.tx3g.defTextBoxRight", &width);
 
             uint64_t displayFlags = 0;
-            MP4GetTrackIntegerProperty(fileHandle, _Id, "mdia.minf.stbl.stsd.tx3g.displayFlags", &displayFlags);
+            MP4GetTrackIntegerProperty(fileHandle, _trackId, "mdia.minf.stbl.stsd.tx3g.displayFlags", &displayFlags);
 
             if (displayFlags) {
-                if ((displayFlags & 0x20000000) == 0x20000000)
+                if ((displayFlags & 0x20000000) == 0x20000000) {
                     _verticalPlacement = YES;
-                if ((displayFlags & 0x40000000) == 0x40000000)
+                }
+
+                if ((displayFlags & 0x40000000) == 0x40000000) {
                     _someSamplesAreForced = YES;
-                if ((displayFlags & 0x80000000) == 0x80000000)
+                }
+
+                if ((displayFlags & 0x80000000) == 0x80000000) {
                     _allSamplesAreForced = YES;
+                }
             }
 
-            if (MP4HaveTrackAtom(fileHandle, _Id, "tref.forc")) {
+            if (MP4HaveTrackAtom(fileHandle, _trackId, "tref.forc")) {
                 uint64_t forcedId = 0;
-                MP4GetTrackIntegerProperty(fileHandle, _Id, "tref.forc.entries.trackId", &forcedId);
+                MP4GetTrackIntegerProperty(fileHandle, _trackId, "tref.forc.entries.trackId", &forcedId);
                 _forcedTrackId = (MP4TrackId) forcedId;
             }
         }
@@ -59,7 +67,7 @@
 
 - (BOOL)writeToFile:(MP4FileHandle)fileHandle error:(NSError **)outError
 {
-    if (!fileHandle || !_Id) {
+    if (!fileHandle || !_trackId) {
         if ( outError != NULL) {
             *outError = MP42Error(@"Error: couldn't mux subtitle track",
                                   nil,
@@ -69,30 +77,33 @@
         }
     }
 
-    if ([_updatedProperty valueForKey:@"forced"] || !_muxed) {
-        if (_forcedTrack)
-            _forcedTrackId = _forcedTrack.Id;
+    if (_updatedProperty[@"forced"] || !_muxed) {
 
-        if (MP4HaveTrackAtom(fileHandle, _Id, "tref.forc") && (_forcedTrackId == 0)) {
-            MP4RemoveAllTrackReferences(fileHandle, "tref.forc", _Id);
+        if (_forcedTrack) {
+            _forcedTrackId = _forcedTrack.trackId;
         }
-        else if (MP4HaveTrackAtom(fileHandle, _Id, "tref.forc") && (_forcedTrackId)) {
-            MP4SetTrackIntegerProperty(fileHandle, _Id, "tref.forc.entries.trackId", _forcedTrackId);
+
+        if (MP4HaveTrackAtom(fileHandle, _trackId, "tref.forc") && (_forcedTrackId == 0)) {
+            MP4RemoveAllTrackReferences(fileHandle, "tref.forc", _trackId);
         }
-        else if (_forcedTrackId)
-            MP4AddTrackReference(fileHandle, "tref.forc", _forcedTrackId, _Id);
+        else if (MP4HaveTrackAtom(fileHandle, _trackId, "tref.forc") && (_forcedTrackId)) {
+            MP4SetTrackIntegerProperty(fileHandle, _trackId, "tref.forc.entries.trackId", _forcedTrackId);
+        }
+        else if (_forcedTrackId) {
+            MP4AddTrackReference(fileHandle, "tref.forc", _forcedTrackId, _trackId);
+        }
     }
 
     if (_isEdited && !_muxed) {
-        MP4GetTrackFloatProperty(fileHandle, _Id, "tkhd.width", &trackWidth);
-        MP4GetTrackFloatProperty(fileHandle, _Id, "tkhd.height", &trackHeight);
+        MP4GetTrackFloatProperty(fileHandle, _trackId, "tkhd.width", &trackWidth);
+        MP4GetTrackFloatProperty(fileHandle, _trackId, "tkhd.height", &trackHeight);
 
         uint8_t *val;
         uint8_t nval[36];
         uint32_t *ptr32 = (uint32_t*) nval;
         uint32_t size;
 
-        MP4GetTrackBytesProperty(fileHandle ,_Id, "tkhd.matrix", &val, &size);
+        MP4GetTrackBytesProperty(fileHandle ,_trackId, "tkhd.matrix", &val, &size);
         memcpy(nval, val, size);
         offsetX = CFSwapInt32BigToHost(ptr32[6]) / 0x10000;
         offsetY = CFSwapInt32BigToHost(ptr32[7]) / 0x10000;
@@ -100,15 +111,15 @@
 
         [super writeToFile:fileHandle error:outError];
 
-        return _Id;
+        return _trackId;
     }
     else {
         [super writeToFile:fileHandle error:outError];
     }
 
     if (![_format isEqualToString:MP42SubtitleFormatVobSub]) {
-        MP4SetTrackIntegerProperty(fileHandle, _Id, "mdia.minf.stbl.stsd.tx3g.defTextBoxBottom", trackHeight);
-        MP4SetTrackIntegerProperty(fileHandle, _Id, "mdia.minf.stbl.stsd.tx3g.defTextBoxRight", trackWidth);
+        MP4SetTrackIntegerProperty(fileHandle, _trackId, "mdia.minf.stbl.stsd.tx3g.defTextBoxBottom", trackHeight);
+        MP4SetTrackIntegerProperty(fileHandle, _trackId, "mdia.minf.stbl.stsd.tx3g.defTextBoxRight", trackWidth);
 
         uint32_t displayFlags = 0;
         if (_verticalPlacement)
@@ -118,7 +129,7 @@
         if (_allSamplesAreForced)
             displayFlags |= 0x80000000;
 
-        MP4SetTrackIntegerProperty(fileHandle, _Id, "mdia.minf.stbl.stsd.tx3g.displayFlags", displayFlags);
+        MP4SetTrackIntegerProperty(fileHandle, _trackId, "mdia.minf.stbl.stsd.tx3g.displayFlags", displayFlags);
     }
 
     return YES;
@@ -227,7 +238,7 @@ static void insertTagsFromStyleRecord(style_record record, NSMutableString *samp
     if (!fileHandle)
         return NO;
 
-    MP4TrackId srcTrackId = _Id;
+    MP4TrackId srcTrackId = _trackId;
 
     MP4SampleId sampleId = 1;
     NSUInteger srtSampleNumber = 1;

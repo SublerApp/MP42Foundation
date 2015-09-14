@@ -220,9 +220,11 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
         [self reconnectReferences];
 
         // Ugly hack to check for the previews track
-        for (MP42Track *track in _tracks)
-            if ([track.format isEqualToString:MP42VideoFormatJPEG])
-                previewsId = track.Id;
+        for (MP42Track *track in _tracks) {
+            if ([track.format isEqualToString:MP42VideoFormatJPEG]) {
+                previewsId = track.trackId;
+            }
+        }
 
         // Load the previews images
         [self loadPreviewsFromTrackID:previewsId];
@@ -271,7 +273,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 - (void)loadPreviewsFromTrackID:(MP4TrackId)trackID {
     MP42Track *track = [self trackWithTrackID:trackID];
     if (track) {
-        MP4SampleId sampleNum = MP4GetTrackNumberOfSamples(self.fileHandle, track.Id);
+        MP4SampleId sampleNum = MP4GetTrackNumberOfSamples(self.fileHandle, track.trackId);
 
         for (MP4SampleId currentSampleNum = 1; currentSampleNum <= sampleNum; currentSampleNum++) {
             uint8_t *pBytes = NULL;
@@ -282,7 +284,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
             bool isSyncSample;
 
             if (!MP4ReadSample(self.fileHandle,
-                               track.Id,
+                               track.trackId,
                                currentSampleNum,
                                &pBytes, &numBytes,
                                &pStartTime, &duration, &renderingOffset,
@@ -343,8 +345,9 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 
 - (id)trackWithTrackID:(NSUInteger)trackID {
     for (MP42Track *track in self.itracks) {
-        if (track.Id == trackID)
+        if (track.trackId == trackID) {
             return track;
+        }
     }
 
     return nil;
@@ -367,8 +370,8 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
     NSAssert(self.status != MP42StatusWriting, @"Unsupported operation: trying to add a track while the file is open for writing");
     NSAssert(![self.itracks containsObject:track], @"Unsupported operation: trying to add a track that is already present.");
 
-    track.sourceId = track.Id;
-    track.Id = 0;
+    track.sourceId = track.trackId;
+    track.trackId = 0;
     track.muxed = NO;
     track.isEdited = YES;
 
@@ -514,11 +517,11 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 
     // We have to handle a few special cases here.
     if ([track isMemberOfClass:[MP42ChapterTrack class]]) {
-        MP4ChapterType err = MP4DeleteChapters(self.fileHandle, MP4ChapterTypeAny, track.Id);
+        MP4ChapterType err = MP4DeleteChapters(self.fileHandle, MP4ChapterTypeAny, track.trackId);
         if (err == 0)
-            MP4DeleteTrack(self.fileHandle, track.Id);
+            MP4DeleteTrack(self.fileHandle, track.trackId);
     } else {
-        MP4DeleteTrack(self.fileHandle, track.Id);
+        MP4DeleteTrack(self.fileHandle, track.trackId);
     }
 
     updateTracksCount(self.fileHandle);
@@ -850,7 +853,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
         MP4DeleteTrack(self.fileHandle, jpegTrack);
     }
 
-    jpegTrack = MP4AddJpegVideoTrack(self.fileHandle, MP4GetTrackTimeScale(self.fileHandle, [chapterTrack Id]),
+    jpegTrack = MP4AddJpegVideoTrack(self.fileHandle, MP4GetTrackTimeScale(self.fileHandle, chapterTrack.trackId),
                                          MP4_INVALID_DURATION, imageSize.width, imageSize.height);
 
     MP4SetTrackLanguage(self.fileHandle, jpegTrack, lang_for_english([videoTrack.language UTF8String])->iso639_2);
@@ -860,7 +863,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
     NSUInteger idx = 1;
 
     for (MP42TextSample *chapterT in chapterTrack.chapters) {
-        MP4Duration duration = MP4GetSampleDuration(self.fileHandle, chapterTrack.Id, idx++);
+        MP4Duration duration = MP4GetSampleDuration(self.fileHandle, chapterTrack.trackId, idx++);
 
         NSData *imageData = chapterT.image.data;
 
@@ -901,10 +904,10 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
                        true);
     }
 
-    MP4RemoveAllTrackReferences(self.fileHandle, "tref.chap", videoTrack.Id);
-    MP4AddTrackReference(self.fileHandle, "tref.chap", chapterTrack.Id, videoTrack.Id);
-    MP4AddTrackReference(self.fileHandle, "tref.chap", jpegTrack, videoTrack.Id);
-    copyTrackEditLists(self.fileHandle, chapterTrack.Id, jpegTrack);
+    MP4RemoveAllTrackReferences(self.fileHandle, "tref.chap", videoTrack.trackId);
+    MP4AddTrackReference(self.fileHandle, "tref.chap", chapterTrack.trackId, videoTrack.trackId);
+    MP4AddTrackReference(self.fileHandle, "tref.chap", jpegTrack, videoTrack.trackId);
+    copyTrackEditLists(self.fileHandle, chapterTrack.trackId, jpegTrack);
 
     [self stopWriting];
 
@@ -926,7 +929,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
             refTrack = (MP42VideoTrack *)track;
 
         if ([track.format isEqualToString:MP42VideoFormatJPEG] && !jpegTrack)
-            jpegTrack = track.Id;
+            jpegTrack = track.trackId;
     }
 
     if (!refTrack)
@@ -955,7 +958,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
         }
 
         if ([track.format isEqualToString:MP42VideoFormatJPEG] && !jpegTrack) {
-            jpegTrack = track.Id;
+            jpegTrack = track.trackId;
         }
 
         if ([track.format isEqualToString:MP42VideoFormatH264]) {
@@ -995,9 +998,9 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
             return NO;
         }
 
-        MP4RemoveAllTrackReferences(self.fileHandle, "tref.chap", refTrack.Id);
-        MP4AddTrackReference(self.fileHandle, "tref.chap", chapterTrack.Id, refTrack.Id);
-        MP4AddTrackReference(self.fileHandle, "tref.chap", jpegTrack, refTrack.Id);
+        MP4RemoveAllTrackReferences(self.fileHandle, "tref.chap", refTrack.trackId);
+        MP4AddTrackReference(self.fileHandle, "tref.chap", chapterTrack.trackId, refTrack.trackId);
+        MP4AddTrackReference(self.fileHandle, "tref.chap", jpegTrack, refTrack.trackId);
 
         [self stopWriting];
     }

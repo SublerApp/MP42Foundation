@@ -1608,7 +1608,7 @@ NSData* H264Info(const char *filePath, uint32_t *pic_width, uint32_t *pic_height
 - (BOOL)cleanUp:(MP4FileHandle)fileHandle
 {
     MP42Track *track = self.inputTracks.lastObject;
-    MP4TrackId trackId = track.Id;
+    MP4TrackId trackId = track.trackId;
 
     if (h264_dpb.dpb.size_min > 0) {
         unsigned int ix;

@@ -13,7 +13,9 @@
 
 - (instancetype)initWithSourceURL:(NSURL *)URL trackID:(NSInteger)trackID fileHandle:(MP42FileHandle)fileHandle
 {
-    if (self = [super initWithSourceURL:URL trackID:trackID fileHandle:fileHandle]) {
+    self = [super initWithSourceURL:URL trackID:trackID fileHandle:fileHandle];
+
+    if (self) {
         _mediaType = MP42MediaTypeClosedCaption;
     }
 
@@ -33,12 +35,13 @@
 
 - (BOOL)writeToFile:(MP42FileHandle)fileHandle error:(NSError **)outError
 {
-    if (_isEdited && !_muxed)
+    if (_isEdited && !_muxed) {
         _muxed = YES;
+    }
 
     [super writeToFile:fileHandle error:outError];
 
-    return _Id;
+    return (_trackId > 0);
 }
 
 - (NSString *)defaultName {

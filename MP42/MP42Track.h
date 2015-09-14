@@ -16,7 +16,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @interface MP42Track : NSObject <NSCoding, NSCopying> {
 @protected
-    MP42TrackId  _Id;
+    MP42TrackId  _trackId;
     MP42TrackId  _sourceId;
 
     NSURL       *_sourceURL;
@@ -28,11 +28,7 @@ NS_ASSUME_NONNULL_BEGIN
     NSString    *_language;
     NSString    *_extendedLanguageTag;
 
-    NSSet<NSString *> *_mediaCharacteristicTags;
-
     BOOL        _enabled;
-    uint64_t    _alternate_group;
-    int64_t     _startOffset;
 
     BOOL    _isEdited;
     BOOL    _muxed;
@@ -45,6 +41,12 @@ NS_ASSUME_NONNULL_BEGIN
 
     NSMutableDictionary<NSString *, NSNumber *> *_updatedProperty;
 
+    @private
+    NSSet<NSString *> *_mediaCharacteristicTags;
+
+    uint64_t    _alternate_group;
+    int64_t     _startOffset;
+
     void *_helper;
 }
 
@@ -52,10 +54,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (BOOL)writeToFile:(MP42FileHandle)fileHandle error:(NSError **)outError;
 
-- (NSString *)timeString;
-- (NSString *)formatSummary;
-
-@property(nonatomic, readwrite) MP42TrackId Id;
+@property(nonatomic, readwrite) MP42TrackId trackId;
 @property(nonatomic, readwrite) MP42TrackId sourceId;
 
 @property(nonatomic, readwrite, copy) NSURL *sourceURL;
@@ -82,6 +81,9 @@ NS_ASSUME_NONNULL_BEGIN
 @property(nonatomic, readwrite) BOOL needConversion;
 
 @property(nonatomic, readwrite) uint64_t dataLength;
+
+@property (nonatomic, readonly) NSString *timeString;
+@property (nonatomic, readonly) NSString *formatSummary;
 
 @end
 

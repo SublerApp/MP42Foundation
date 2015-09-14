@@ -230,7 +230,7 @@
 
         if (newTrack) {
             newTrack.format = [self formatForTrack:track];
-            newTrack.Id = [[track attributeForKey:QTTrackIDAttribute] integerValue];
+            newTrack.trackId = [[track attributeForKey:QTTrackIDAttribute] integerValue];
             newTrack.sourceURL = self.fileURL;
             newTrack.name = [track attributeForKey:QTTrackDisplayNameAttribute];
             newTrack.language = [self langForTrack:track];
@@ -956,11 +956,11 @@
             editDwell = GetTrackEditRate64(qtcTrack, editTrackStart);
 
             if (demuxHelper->minDisplayOffset < 0 && editDisplayStart != -1) {
-                MP4AddTrackEdit(fileHandle, track.Id, MP4_INVALID_EDIT_ID, editDisplayStart - demuxHelper->minDisplayOffset,
+                MP4AddTrackEdit(fileHandle, track.trackId, MP4_INVALID_EDIT_ID, editDisplayStart - demuxHelper->minDisplayOffset,
                                 editTrackDuration, !Fix2X(editDwell));
             }
             else {
-                MP4AddTrackEdit(fileHandle, track.Id, MP4_INVALID_EDIT_ID, editDisplayStart,
+                MP4AddTrackEdit(fileHandle, track.trackId, MP4_INVALID_EDIT_ID, editDisplayStart,
                                 editTrackDuration, !Fix2X(editDwell));
             }
 
@@ -974,7 +974,7 @@
                                         &editTrackDuration);
         }
 
-        MP4SetTrackIntegerProperty(fileHandle, track.Id, "tkhd.duration", trackDuration);
+        MP4SetTrackIntegerProperty(fileHandle, track.trackId, "tkhd.duration", trackDuration);
     }
     
     return YES;

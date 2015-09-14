@@ -234,7 +234,7 @@ static NSArray<SBVobSubTrack *> * LoadVobSubSubtitles(NSURL *theDirectory, NSStr
             newTrack.format = MP42SubtitleFormatVobSub;
             newTrack.sourceURL = self.fileURL;
             newTrack.alternate_group = 2;
-            newTrack.Id = count++;
+            newTrack.trackId = count++;
             newTrack.language = [NSString stringWithFormat:@"%s", lang_for_code_s([track->language UTF8String])->eng_name];;
             newTrack.duration = track->duration;
 

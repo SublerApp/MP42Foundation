@@ -393,7 +393,7 @@
 
         if (dstTrackId) {
             MP4SetTrackDurationPerChunk(_fileHandle, dstTrackId, timeScale / 8);
-            track.Id = dstTrackId;
+            track.trackId = dstTrackId;
         }
     }
 
@@ -436,7 +436,7 @@
                 MP42SampleBuffer *sampleBuffer = nil;
 
                 for (int i = 0; i < 100 && (sampleBuffer = [track copyNextSample]) != nil; i++) {
-                    if (!MP4WriteSample(_fileHandle, track.Id,
+                    if (!MP4WriteSample(_fileHandle, track.trackId,
                                         sampleBuffer->data, sampleBuffer->size,
                                         sampleBuffer->duration, sampleBuffer->offset,
                                         sampleBuffer->isSync)) {
@@ -478,9 +478,9 @@
     for (MP42Track *track in _workingTracks) {
         if(track.muxer_helper->converter && track.needConversion && [track isMemberOfClass:[MP42AudioTrack class]]) {
             NSData *magicCookie = [track.muxer_helper->converter magicCookie];
-            MP4SetTrackESConfiguration(_fileHandle, track.Id,
-                                       [magicCookie bytes],
-                                       [magicCookie length]);
+            MP4SetTrackESConfiguration(_fileHandle, track.trackId,
+                                       magicCookie.bytes,
+                                       magicCookie.length);
         }
     }
 

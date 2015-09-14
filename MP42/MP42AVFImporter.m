@@ -299,7 +299,7 @@
 
             // Set the usual track properties
             newTrack.format = [self formatForTrack:track];
-            newTrack.Id = track.trackID;
+            newTrack.trackId = track.trackID;
             newTrack.sourceURL = self.fileURL;
             newTrack.dataLength = track.totalSampleDataLength;
 
@@ -958,13 +958,13 @@
 
             trackDuration += duration.value;
 
-            MP4AddTrackEdit(fileHandle, track.Id, MP4_INVALID_EDIT_ID, timeRange.start.value,
+            MP4AddTrackEdit(fileHandle, track.trackId, MP4_INVALID_EDIT_ID, timeRange.start.value,
                             duration.value, 0);
 
         }
 
         if (trackDuration) {
-            MP4SetTrackIntegerProperty(fileHandle, track.Id, "tkhd.duration", trackDuration);
+            MP4SetTrackIntegerProperty(fileHandle, track.trackId, "tkhd.duration", trackDuration);
         }
 
     }

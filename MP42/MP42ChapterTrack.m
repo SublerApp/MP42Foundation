@@ -32,11 +32,17 @@
 
 - (instancetype)initWithSourceURL:(NSURL *)URL trackID:(NSInteger)trackID fileHandle:(MP4FileHandle)fileHandle
 {
-    if ((self = [super initWithSourceURL:URL trackID:trackID fileHandle:fileHandle])) {
-        if (!_name || [_name isEqualToString:@"Text Track"])
+    self = [super initWithSourceURL:URL trackID:trackID fileHandle:fileHandle];
+
+    if (self) {
+
+        if (!_name || [_name isEqualToString:@"Text Track"]) {
             _name = [self defaultName];
-        if (!_format)
+        }
+
+        if (!_format) {
             _format = MP42SubtitleFormatText;
+        }
 
         _mediaType = MP42MediaTypeText;
         chapters = [[NSMutableArray alloc] init];
@@ -183,7 +189,7 @@
         // get the list of chapters
         MP4GetChapters(fileHandle, &fileChapters, &chapterCount, MP4ChapterTypeQt);
 
-        MP4DeleteChapters(fileHandle, MP4ChapterTypeAny, _Id);
+        MP4DeleteChapters(fileHandle, MP4ChapterTypeAny, _trackId);
         updateTracksCount(fileHandle);
 
         MP4TrackId refTrack = findFirstVideoTrack(fileHandle);
@@ -239,7 +245,7 @@
             MP4SetChapters(fileHandle, fileChapters, i, MP4ChapterTypeQt);
 
             free(fileChapters);
-            success = _Id = findChapterTrackId(fileHandle);
+            success = _trackId = findChapterTrackId(fileHandle);
         }
     }
 
@@ -250,7 +256,7 @@
                                   120);
 
         return success;
-    } else if (_Id) {
+    } else if (_trackId) {
         success = [super writeToFile:fileHandle error:outError];
     }
 

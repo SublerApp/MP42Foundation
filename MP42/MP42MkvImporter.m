@@ -217,7 +217,7 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
 
             if (newTrack) {
                 newTrack.format = [self matroskaCodecIDToHumanReadableName:mkvTrack];
-                newTrack.Id = i;
+                newTrack.trackId = i;
                 newTrack.sourceURL = self.fileURL;
                 newTrack.dataLength = trackSizes[i];
                 if (mkvTrack->Type == TT_AUDIO)
@@ -948,7 +948,7 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
         MP42Track *inputTrack = [self inputTrackWithTrackID:track.sourceId];
 
         MatroskaDemuxHelper *demuxHelper = inputTrack.muxer_helper->demuxer_context;
-        MP4TrackId trackId = track.Id;
+        MP4TrackId trackId = track.trackId;
 
         if (demuxHelper->minDisplayOffset != 0) {
 
