@@ -10,8 +10,9 @@
 #import "MP42PrivateUtilities.h"
 #import "MP42XMLReader.h"
 #import "MP42Image.h"
-#import "RegexKitLite.h"
 #import "MP42Ratings.h"
+
+#import "NSString+MP42Additions.h"
 
 typedef struct mediaKind_t {
     uint8_t stik;
@@ -427,7 +428,7 @@ static const genreType_t genreType_strings[] = {
 - (NSArray *) dictArrayFromString:(NSString *)data
 {
     NSString *splitElements  = @",\\s*+";
-    NSArray *stringArray = [data componentsSeparatedByRegex:splitElements];
+    NSArray *stringArray = [data MP42_componentsSeparatedByRegex:splitElements];
     NSMutableArray *dictElements = [[[NSMutableArray alloc] init] autorelease];
     for (NSString *name in stringArray) {
         [dictElements addObject:[NSDictionary dictionaryWithObject:name forKey:@"name"]];
@@ -579,7 +580,7 @@ static const genreType_t genreType_strings[] = {
     if ([key isEqualToString:@"HD Video"]) {
         if ([value isKindOfClass:[NSNumber class]]) {
             hdVideo = [value integerValue];
-        } else if ([value isKindOfClass:[NSString class]] && [value length] > 0 && [value isMatchedByRegex:regexPositive]) {
+        } else if ([value isKindOfClass:[NSString class]] && [value length] > 0 && [value MP42_isMatchedByRegex:regexPositive]) {
             hdVideo = [value integerValue];
         } else {
             hdVideo = 0;
@@ -614,7 +615,7 @@ static const genreType_t genreType_strings[] = {
             gapless = [value integerValue];
             isEdited = YES;
         }
-        else if ([value isKindOfClass:[NSString class]] && [value length] > 0 && [value isMatchedByRegex:regexPositive]) {
+        else if ([value isKindOfClass:[NSString class]] && [value length] > 0 && [value MP42_isMatchedByRegex:regexPositive]) {
             gapless = 1;
             isEdited = YES;
         } else {
@@ -1007,10 +1008,10 @@ static const genreType_t genreType_strings[] = {
                 MP4ItmfData* data = &item->dataList.elements[j];
                 NSString *ratingString = [[NSString alloc] initWithBytes:data->value length: data->valueSize encoding:NSUTF8StringEncoding];
                 NSString *splitElements  = @"\\|";
-                NSArray *ratingItems = [ratingString componentsSeparatedByRegex:splitElements];
+                NSArray *ratingItems = [ratingString MP42_componentsSeparatedByRegex:splitElements];
                 [ratingString release];
-                if ([ratingItems count] > 2) {
-                    ratingiTunesCode = [[NSString stringWithFormat:@"%@|%@|%@|",[ratingItems objectAtIndex:0], [ratingItems objectAtIndex:1], [ratingItems objectAtIndex:2]] retain];
+                if (ratingItems.count > 2) {
+                    ratingiTunesCode = [[NSString stringWithFormat:@"%@|%@|%@|",ratingItems[0], ratingItems[1], ratingItems[2]] retain];
                 } else {
                     ratingiTunesCode = nil;
                 }

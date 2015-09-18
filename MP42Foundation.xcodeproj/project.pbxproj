@@ -26,7 +26,6 @@
 		A910B5E418394EB20064028F /* MP42SubUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C24F1823923100416A4E /* MP42SubUtilities.m */; };
 		A910B5E618394EB20064028F /* MP42XMLReader.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2591823923200416A4E /* MP42XMLReader.m */; };
 		A910B5E818394EB20064028F /* MP42HtmlParser.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2371823923100416A4E /* MP42HtmlParser.m */; };
-		A910B5EA18394EB20064028F /* RegexKitLite.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2CA1823968400416A4E /* RegexKitLite.m */; settings = {COMPILER_FLAGS = "-w -Xanalyzer -analyzer-disable-checker"; }; };
 		A910B5F118394EB20064028F /* MP42Muxer.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2431823923100416A4E /* MP42Muxer.m */; };
 		A910B5F418394EB20064028F /* MP42Sample.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2491823923100416A4E /* MP42Sample.m */; };
 		A910B5F718394EB20064028F /* MP42Fifo.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C22F1823923100416A4E /* MP42Fifo.m */; };
@@ -75,6 +74,11 @@
 		A925AABE1837A1A100BE84D4 /* QuickTime.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A925AABD1837A1A100BE84D4 /* QuickTime.framework */; };
 		A947BA9B1824F0B3004C734B /* Ratings.json in Resources */ = {isa = PBXBuildFile; fileRef = A947BA9A1824F0B3004C734B /* Ratings.json */; };
 		A94BFB30184C865C00810224 /* eng.traineddata in CopyFiles */ = {isa = PBXBuildFile; fileRef = A94BFB2C184C862A00810224 /* eng.traineddata */; };
+		A96523451BAC315900E994E0 /* NSString+MP42Additions.h in Headers */ = {isa = PBXBuildFile; fileRef = A96523431BAC315900E994E0 /* NSString+MP42Additions.h */; settings = {ASSET_TAGS = (); }; };
+		A96523461BAC315900E994E0 /* NSString+MP42Additions.h in Headers */ = {isa = PBXBuildFile; fileRef = A96523431BAC315900E994E0 /* NSString+MP42Additions.h */; settings = {ASSET_TAGS = (); }; };
+		A96523471BAC315900E994E0 /* NSString+MP42Additions.m in Sources */ = {isa = PBXBuildFile; fileRef = A96523441BAC315900E994E0 /* NSString+MP42Additions.m */; settings = {ASSET_TAGS = (); }; };
+		A96523481BAC315900E994E0 /* NSString+MP42Additions.m in Sources */ = {isa = PBXBuildFile; fileRef = A96523441BAC315900E994E0 /* NSString+MP42Additions.m */; settings = {ASSET_TAGS = (); }; };
+		A96523491BAC315900E994E0 /* NSString+MP42Additions.m in Sources */ = {isa = PBXBuildFile; fileRef = A96523441BAC315900E994E0 /* NSString+MP42Additions.m */; settings = {ASSET_TAGS = (); }; };
 		A989F1001823AB2E0070AD8C /* MP42Track+Muxer.h in Headers */ = {isa = PBXBuildFile; fileRef = A989F0FF1823AB2E0070AD8C /* MP42Track+Muxer.h */; };
 		A989F10F1823B3B40070AD8C /* MP42TextSample.h in Headers */ = {isa = PBXBuildFile; fileRef = A989F10D1823B3B40070AD8C /* MP42TextSample.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A989F1101823B3B40070AD8C /* MP42TextSample.m in Sources */ = {isa = PBXBuildFile; fileRef = A989F10E1823B3B40070AD8C /* MP42TextSample.m */; };
@@ -173,7 +177,6 @@
 		A9B9C2C41823957800416A4E /* MP42Languages.h in Headers */ = {isa = PBXBuildFile; fileRef = A9B9C2C21823957800416A4E /* MP42Languages.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A9B9C2C51823957800416A4E /* MP42Languages.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2C31823957800416A4E /* MP42Languages.m */; };
 		A9B9C2C81823962600416A4E /* UniversalDetector.h in Headers */ = {isa = PBXBuildFile; fileRef = A9B9C2C71823962600416A4E /* UniversalDetector.h */; };
-		A9B9C2CC1823968400416A4E /* RegexKitLite.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2CA1823968400416A4E /* RegexKitLite.m */; settings = {COMPILER_FLAGS = "-w"; }; };
 		A9B9C2CF182396A100416A4E /* MP42Ratings.h in Headers */ = {isa = PBXBuildFile; fileRef = A9B9C2CD182396A100416A4E /* MP42Ratings.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A9B9C2D0182396A100416A4E /* MP42Ratings.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2CE182396A100416A4E /* MP42Ratings.m */; };
 		A9B9C2D6182396FB00416A4E /* baseapi.h in Headers */ = {isa = PBXBuildFile; fileRef = A9B9C2D5182396FB00416A4E /* baseapi.h */; };
@@ -184,7 +187,6 @@
 		A9B9C2E0182397D400416A4E /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = A9B9C2DF182397D400416A4E /* libz.dylib */; };
 		A9B9C2E2182397DD00416A4E /* libbz2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = A9B9C2E1182397DD00416A4E /* libbz2.dylib */; };
 		A9B9C2E3182397E700416A4E /* libuniversaldetector.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A9B9C2C11823944700416A4E /* libuniversaldetector.a */; };
-		A9B9C2E5182397F100416A4E /* libicucore.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = A9B9C2E4182397F100416A4E /* libicucore.dylib */; };
 		A9B9C4931823986200416A4E /* Quartz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9B9C4921823986200416A4E /* Quartz.framework */; };
 		A9B9C4981823989300416A4E /* libavcodec.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A9B9C4941823989200416A4E /* libavcodec.a */; };
 		A9B9C4991823989300416A4E /* libavdevice.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A9B9C4951823989200416A4E /* libavdevice.a */; };
@@ -270,6 +272,8 @@
 		A925AABD1837A1A100BE84D4 /* QuickTime.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuickTime.framework; path = System/Library/Frameworks/QuickTime.framework; sourceTree = SDKROOT; };
 		A947BA9A1824F0B3004C734B /* Ratings.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = Ratings.json; sourceTree = "<group>"; };
 		A94BFB2C184C862A00810224 /* eng.traineddata */ = {isa = PBXFileReference; lastKnownFileType = file; name = eng.traineddata; path = Tesseract/share/tessdata/eng.traineddata; sourceTree = SOURCE_ROOT; };
+		A96523431BAC315900E994E0 /* NSString+MP42Additions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+MP42Additions.h"; sourceTree = "<group>"; };
+		A96523441BAC315900E994E0 /* NSString+MP42Additions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+MP42Additions.m"; sourceTree = "<group>"; };
 		A989F0FF1823AB2E0070AD8C /* MP42Track+Muxer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "MP42Track+Muxer.h"; sourceTree = "<group>"; };
 		A989F10D1823B3B40070AD8C /* MP42TextSample.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MP42TextSample.h; sourceTree = "<group>"; };
 		A989F10E1823B3B40070AD8C /* MP42TextSample.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MP42TextSample.m; sourceTree = "<group>"; };
@@ -371,8 +375,6 @@
 		A9B9C2C21823957800416A4E /* MP42Languages.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MP42Languages.h; sourceTree = "<group>"; };
 		A9B9C2C31823957800416A4E /* MP42Languages.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MP42Languages.m; sourceTree = "<group>"; };
 		A9B9C2C71823962600416A4E /* UniversalDetector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = UniversalDetector.h; path = UniversalDetector/UniversalDetector.h; sourceTree = SOURCE_ROOT; };
-		A9B9C2C91823968400416A4E /* RegexKitLite.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RegexKitLite.h; sourceTree = "<group>"; };
-		A9B9C2CA1823968400416A4E /* RegexKitLite.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RegexKitLite.m; sourceTree = "<group>"; };
 		A9B9C2CD182396A100416A4E /* MP42Ratings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MP42Ratings.h; sourceTree = "<group>"; };
 		A9B9C2CE182396A100416A4E /* MP42Ratings.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MP42Ratings.m; sourceTree = "<group>"; };
 		A9B9C2D5182396FB00416A4E /* baseapi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = baseapi.h; path = Tesseract/include/tesseract/baseapi.h; sourceTree = SOURCE_ROOT; };
@@ -382,7 +384,6 @@
 		A9B9C2DD1823973200416A4E /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
 		A9B9C2DF182397D400416A4E /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
 		A9B9C2E1182397DD00416A4E /* libbz2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libbz2.dylib; path = usr/lib/libbz2.dylib; sourceTree = SDKROOT; };
-		A9B9C2E4182397F100416A4E /* libicucore.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libicucore.dylib; path = usr/lib/libicucore.dylib; sourceTree = SDKROOT; };
 		A9B9C4921823986200416A4E /* Quartz.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Quartz.framework; path = System/Library/Frameworks/Quartz.framework; sourceTree = SDKROOT; };
 		A9B9C4941823989200416A4E /* libavcodec.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavcodec.a; path = ffmpeg/lib/libavcodec.a; sourceTree = "<group>"; };
 		A9B9C4951823989200416A4E /* libavdevice.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavdevice.a; path = ffmpeg/lib/libavdevice.a; sourceTree = "<group>"; };
@@ -433,7 +434,6 @@
 				A9B9C49A1823989300416A4E /* libavformat.a in Frameworks */,
 				A9B9C49B1823989300416A4E /* libavutil.a in Frameworks */,
 				A9B9C4931823986200416A4E /* Quartz.framework in Frameworks */,
-				A9B9C2E5182397F100416A4E /* libicucore.dylib in Frameworks */,
 				A9B9C2E3182397E700416A4E /* libuniversaldetector.a in Frameworks */,
 				A9B9C2E2182397DD00416A4E /* libbz2.dylib in Frameworks */,
 				A9B9C2E0182397D400416A4E /* libz.dylib in Frameworks */,
@@ -494,7 +494,6 @@
 				A9B9C4951823989200416A4E /* libavdevice.a */,
 				A9B9C4961823989300416A4E /* libavformat.a */,
 				A9B9C4971823989300416A4E /* libavutil.a */,
-				A9B9C2E4182397F100416A4E /* libicucore.dylib */,
 				A9B9C2E1182397DD00416A4E /* libbz2.dylib */,
 				A9B9C2DF182397D400416A4E /* libz.dylib */,
 				A925AABD1837A1A100BE84D4 /* QuickTime.framework */,
@@ -684,8 +683,8 @@
 				A9B9C2591823923200416A4E /* MP42XMLReader.m */,
 				A9B9C2361823923100416A4E /* MP42HtmlParser.h */,
 				A9B9C2371823923100416A4E /* MP42HtmlParser.m */,
-				A9B9C2C91823968400416A4E /* RegexKitLite.h */,
-				A9B9C2CA1823968400416A4E /* RegexKitLite.m */,
+				A96523431BAC315900E994E0 /* NSString+MP42Additions.h */,
+				A96523441BAC315900E994E0 /* NSString+MP42Additions.m */,
 				A9B9C2D5182396FB00416A4E /* baseapi.h */,
 				A925AABB1837A16500BE84D4 /* QTKitDecrap.h */,
 				A9B9C2C71823962600416A4E /* UniversalDetector.h */,
@@ -720,6 +719,7 @@
 				A9A0C9B21981593900A72763 /* MP42ComponentLoader.h in Headers */,
 				A917286719FD2BCE00348DF8 /* MP42Logging.h in Headers */,
 				A9AEFE161B9B111B00771292 /* MP42FileImporter+Private.h in Headers */,
+				A96523461BAC315900E994E0 /* NSString+MP42Additions.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -767,6 +767,7 @@
 				A9B9C2AF1823923200416A4E /* sfifo.h in Headers */,
 				A9B9C2C81823962600416A4E /* UniversalDetector.h in Headers */,
 				A9B9C27F1823923200416A4E /* MP42H264Importer.h in Headers */,
+				A96523451BAC315900E994E0 /* NSString+MP42Additions.h in Headers */,
 				A9B9C29D1823923200416A4E /* MP42PrivateUtilities.h in Headers */,
 				A9DFBDA1195FF5BA00410060 /* MP42Heap.h in Headers */,
 				A9B9C2661823923200416A4E /* MP42AACImporter.h in Headers */,
@@ -950,10 +951,10 @@
 				A910B5E618394EB20064028F /* MP42XMLReader.m in Sources */,
 				A9A0C9B41981593900A72763 /* MP42ComponentLoader.m in Sources */,
 				A910B5E818394EB20064028F /* MP42HtmlParser.m in Sources */,
-				A910B5EA18394EB20064028F /* RegexKitLite.m in Sources */,
 				A910B5F118394EB20064028F /* MP42Muxer.m in Sources */,
 				A910B5F418394EB20064028F /* MP42Sample.m in Sources */,
 				A910B5F718394EB20064028F /* MP42Fifo.m in Sources */,
+				A96523491BAC315900E994E0 /* NSString+MP42Additions.m in Sources */,
 				A910B5F918394EB20064028F /* MP42FileImporter.m in Sources */,
 				A910B5FA18394EB20064028F /* sfifo.c in Sources */,
 				A910B5FD18394EB20064028F /* MP42OCRWrapper.mm in Sources */,
@@ -1003,10 +1004,10 @@
 				A9A0C9B31981593900A72763 /* MP42ComponentLoader.m in Sources */,
 				A9B9C2A51823923200416A4E /* downmix.c in Sources */,
 				A9B9C2671823923200416A4E /* MP42AACImporter.mm in Sources */,
-				A9B9C2CC1823968400416A4E /* RegexKitLite.m in Sources */,
 				A9B9C2821823923200416A4E /* MP42HtmlParser.m in Sources */,
 				A9B9C2861823923200416A4E /* MP42MediaFormat.m in Sources */,
 				A9B9C2A41823923200416A4E /* MP42XMLReader.m in Sources */,
+				A96523471BAC315900E994E0 /* NSString+MP42Additions.m in Sources */,
 				A9DFBDCC1960174500410060 /* MP42EditListsReconstructor.m in Sources */,
 				A989F1101823B3B40070AD8C /* MP42TextSample.m in Sources */,
 				A9B9C2751823923200416A4E /* MP42ChapterTrack.m in Sources */,
@@ -1035,6 +1036,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A96523481BAC315900E994E0 /* NSString+MP42Additions.m in Sources */,
 				A9DFBDA4195FF5BA00410060 /* MP42Heap.m in Sources */,
 				A991714D195AAAEF005AD68E /* MP42Track+Muxer.m in Sources */,
 				A9B9C212182391DF00416A4E /* MP42Tests.m in Sources */,

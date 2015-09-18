@@ -26,8 +26,11 @@
 #import "MP42AudioConverter.h"
 #import "MP42Track+Muxer.h"
 
+/// The available subclasses
 static NSArray<Class> *_fileImporters;
-static NSArray<Class> *_supportedFileFormats;
+
+/// The supporter file extentions.
+static NSArray<NSString *> *_supportedFileFormats;
 
 @implementation MP42FileImporter
 
@@ -44,7 +47,7 @@ static NSArray<Class> *_supportedFileFormats;
 #endif
                         [MP42AVFImporter class]] retain];
 
-    NSMutableArray *formats = [[NSMutableArray alloc] init];
+    NSMutableArray<NSString *> *formats = [[NSMutableArray alloc] init];
 
     for (Class c in _fileImporters) {
         [formats addObjectsFromArray:[c supportedFileFormats]];

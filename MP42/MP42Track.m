@@ -197,7 +197,7 @@
         MP4SetTrackLanguage(fileHandle, _trackId, lang_for_english([_language UTF8String])->iso639_2);
     }
 
-    if (_updatedProperty[@"extendedLanguageTag"] || !_muxed) {
+    if ((_updatedProperty[@"extendedLanguageTag"] || !_muxed) && _extendedLanguageTag) {
         MP4SetTrackStringProperty(fileHandle, _trackId, "mdia.elng", [_extendedLanguageTag cStringUsingEncoding:NSASCIIStringEncoding]);
     }
 
@@ -232,7 +232,7 @@
 @synthesize extendedLanguageTag = _extendedLanguageTag;
 
 - (NSString *)name {
-    return [[_name retain] autorelease];
+    return [[_name copy] autorelease];
 }
 
 - (NSString *)defaultName {
@@ -242,10 +242,14 @@
 - (void)setName:(NSString *)newName
 {
     [_name autorelease];
-    if ([newName length])
-        _name = [newName retain];
-    else
+
+    if (newName.length) {
+        _name = [newName copy];
+    }
+    else {
         _name = [self defaultName];
+    }
+
     self.isEdited = YES;
     _updatedProperty[@"name"] = @YES;
 
@@ -258,20 +262,20 @@
 - (void)setLanguage:(NSString *)newLang
 {
     [_language autorelease];
-    _language = [newLang retain];
+    _language = [newLang copy];
     self.isEdited = YES;
     _updatedProperty[@"language"] = @YES;
 
 }
 
 - (NSString *)extendedLanguageTag {
-    return [[_extendedLanguageTag retain] autorelease];
+    return [[_extendedLanguageTag copy] autorelease];
 }
 
 - (void)setExtendedLanguageTag:(NSString *)newExtendedLanguageTag
 {
     [_extendedLanguageTag autorelease];
-    _extendedLanguageTag = [newExtendedLanguageTag retain];
+    _extendedLanguageTag = [newExtendedLanguageTag copy];
     self.isEdited = YES;
     _updatedProperty[@"extendedLanguageTag"] = @YES;
 }

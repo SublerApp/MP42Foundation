@@ -31,7 +31,7 @@
         NSData *data = [NSData dataWithContentsOfFile:ratingsJSON];
 
         if (data) {
-            ratingsDictionary = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil];
+            ratingsDictionary = [[NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil] retain];
         } else {
             ratingsDictionary = [[NSMutableArray alloc] init];
         }

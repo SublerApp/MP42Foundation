@@ -13,7 +13,7 @@
 #import "MP42Languages.h"
 #import "MP42File.h"
 #import "MP42Sample.h"
-#import "RegexKitLite.h"
+#import "NSString+MP42Additions.h"
 
 
 @implementation MP42CCImporter
@@ -133,7 +133,7 @@ static int ParseByte(const char *string, UInt8 *byte, Boolean hex)
         NSArray  *fileArray   = nil;
         NSUInteger i = 0;
 
-        fileArray = [scc componentsSeparatedByRegex:splitLine];
+        fileArray = [scc MP42_componentsSeparatedByRegex:splitLine];
 
         NSMutableArray *sampleArray = [[NSMutableArray alloc] initWithCapacity:[fileArray count]];
 
@@ -142,7 +142,7 @@ static int ParseByte(const char *string, UInt8 *byte, Boolean hex)
         uint64_t minutesDrop = 0;
 
         for (NSString *line in fileArray) {
-            NSArray *lineArray = [line componentsSeparatedByRegex:splitTimestamp];
+            NSArray *lineArray = [line MP42_componentsSeparatedByRegex:splitTimestamp];
 
             if ([lineArray count] < 2)
                 continue;
@@ -161,7 +161,7 @@ static int ParseByte(const char *string, UInt8 *byte, Boolean hex)
 
             NSArray  *bytesArray   = nil;
             MP4Duration sampleDuration = 0;
-            bytesArray = [ccSample.title componentsSeparatedByRegex:splitBytes];
+            bytesArray = [ccSample.title MP42_componentsSeparatedByRegex:splitBytes];
 
             NSUInteger byteCount = [bytesArray count] *2;
             UInt8 *bytes = malloc(sizeof(UInt8)*byteCount*2 + (sizeof(UInt8)*8));
