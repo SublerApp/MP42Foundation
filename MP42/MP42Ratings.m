@@ -8,8 +8,6 @@
 
 #import "MP42Ratings.h"
 
-#import "JSONKit.h"
-
 @implementation MP42Ratings
 
 @synthesize ratings;
@@ -30,8 +28,13 @@
             return nil;
         }
 
-		JSONDecoder *jsonDecoder = [JSONDecoder decoder];
-		ratingsDictionary = [[jsonDecoder objectWithData:[NSData dataWithContentsOfFile:ratingsJSON]] retain];
+        NSData *data = [NSData dataWithContentsOfFile:ratingsJSON];
+
+        if (data) {
+            ratingsDictionary = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil];
+        } else {
+            ratingsDictionary = [[NSMutableArray alloc] init];
+        }
 
 		// construct movie ratings
 		ratings = [[NSMutableArray alloc] init];
