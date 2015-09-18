@@ -15,32 +15,51 @@
 #import "MP42AACImporter.h"
 #import "MP42H264Importer.h"
 #import "MP42VobSubImporter.h"
-#import "MP42Track.h"
-#import "MP42Fifo.h"
-
+#import "MP42AVFImporter.h"
 #if !__LP64__
 #import "MP42QTImporter.h"
 #endif
 
-#import "MP42AVFImporter.h"
+#import "MP42Track.h"
+#import "MP42Fifo.h"
 
 #import "MP42AudioConverter.h"
-
-#import "mp4v2.h"
-#import "MP42PrivateUtilities.h"
 #import "MP42Track+Muxer.h"
+
+static NSArray<Class> *_fileImporters;
+static NSArray<Class> *_supportedFileFormats;
 
 @implementation MP42FileImporter
 
++ (void)initialize {
+    _fileImporters = [@[[MP42MkvImporter class],
+                        [MP42Mp4Importer class],
+                        [MP42SrtImporter class],
+                        [MP42CCImporter class],
+                        [MP42AC3Importer class],
+                        [MP42H264Importer class],
+                        [MP42VobSubImporter class],
+#if !__LP64__
+                        [MP42QTImporter class],
+#endif
+                        [MP42AVFImporter class]] retain];
+
+    NSMutableArray *formats = [[NSMutableArray alloc] init];
+
+    for (Class c in _fileImporters) {
+        [formats addObjectsFromArray:[c supportedFileFormats]];
+    }
+
+    _supportedFileFormats = [formats copy];
+    [formats release];
+}
+
 + (NSArray<NSString *> *)supportedFileFormats {
-    return @[@"scc", @"smi",  @"txt", @"m4v", @"mp4",
-             @"m4a", @"m4a", @"mov", @"ts", @"mts",
-             @"m2ts", @"mkv", @"mka", @"mks", @"h264",
-             @"264", @"idx", @"aac", @"ac3", @"eac3", @"srt"];
+    return _supportedFileFormats;
 }
 
 + (BOOL)canInitWithFileType:(NSString *)fileType {
-    return [[MP42FileImporter supportedFileFormats] containsObject:fileType.lowercaseString];
+    return [[self supportedFileFormats] containsObject:fileType.lowercaseString];
 }
 
 - (instancetype)initWithURL:(NSURL *)fileURL error:(NSError **)error;
@@ -48,57 +67,16 @@
     [self release];
     self = nil;
 
-    NSString *pathExtension = fileURL.pathExtension;
-
-    if ([pathExtension caseInsensitiveCompare: @"mkv"] == NSOrderedSame ||
-        [pathExtension caseInsensitiveCompare: @"mka"] == NSOrderedSame ||
-        [pathExtension caseInsensitiveCompare: @"mks"] == NSOrderedSame) {
-        self = [MP42MkvImporter alloc];
-    }
-    else if ([pathExtension caseInsensitiveCompare: @"mp4"] == NSOrderedSame ||
-             [pathExtension caseInsensitiveCompare: @"m4v"] == NSOrderedSame ||
-             [pathExtension caseInsensitiveCompare: @"m4a"] == NSOrderedSame) {
-        self = [MP42Mp4Importer alloc];
-    }
-    else if ([pathExtension caseInsensitiveCompare: @"srt"] == NSOrderedSame) {
-        self = [MP42SrtImporter alloc];
-    }
-    else if ([pathExtension caseInsensitiveCompare: @"scc"] == NSOrderedSame) {
-        self = [MP42CCImporter alloc];
-    }
-    else if ([pathExtension caseInsensitiveCompare: @"ac3"] == NSOrderedSame) {
-        self = [MP42AC3Importer alloc];
-    }
-    else if ([pathExtension caseInsensitiveCompare: @"aac"] == NSOrderedSame) {
-        self = [MP42AACImporter alloc];
-    }
-    else if ([pathExtension caseInsensitiveCompare: @"264"] == NSOrderedSame ||
-             [pathExtension caseInsensitiveCompare: @"h264"] == NSOrderedSame) {
-        self = [MP42H264Importer alloc];
-    }
-    else if ([pathExtension caseInsensitiveCompare: @"idx"] == NSOrderedSame ||
-             [pathExtension caseInsensitiveCompare: @"idx"] == NSOrderedSame) {
-        self = [MP42VobSubImporter alloc];
-    }
-#if !__LP64__
-    /*else if ([pathExtension caseInsensitiveCompare: @"mov"] == NSOrderedSame) {
-        self = [MP42QTImporter alloc];
-    }*/
-#endif
-    else if ([pathExtension caseInsensitiveCompare: @"m2ts"] == NSOrderedSame ||
-             [pathExtension caseInsensitiveCompare: @"ts"] == NSOrderedSame ||
-             [pathExtension caseInsensitiveCompare: @"mts"] == NSOrderedSame ||
-             [pathExtension caseInsensitiveCompare: @"mov"] == NSOrderedSame ||
-             [pathExtension caseInsensitiveCompare: @"eac3"] == NSOrderedSame) {
-        self = [MP42AVFImporter alloc];
-    }
-
-    if (self) {
-        self = [self initWithURL:fileURL error:error];
-
-        if (self) {
-            for (MP42Track *track in _tracksArray)
-                track.muxer_helper->importer = self;
+    // Initialize the right file importer subclass
+    for (Class c in _fileImporters) {
+        if ([c canInitWithFileType:fileURL.pathExtension]) {
+            self = [[c alloc] initWithURL:fileURL error:error];
+            if (self) {
+                for (MP42Track *track in _tracksArray) {
+                    track.muxer_helper->importer = self;
+                }
+            }
+            return self;
         }
     }
 

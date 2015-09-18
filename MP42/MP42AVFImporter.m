@@ -42,6 +42,10 @@
 
 @implementation MP42AVFImporter
 
++ (NSArray<NSString *> *)supportedFileFormats {
+    return @[@"mov", @"m2ts", @"ts", @"mts", @"eac3"];
+}
+
 - (NSString *)formatForTrack:(AVAssetTrack *)track {
     NSString *result = @"";
     CMFormatDescriptionRef formatDescription = (CMFormatDescriptionRef)track.formatDescriptions.firstObject;
@@ -606,38 +610,46 @@
 }
 
 - (NSData *)magicCookieForTrack:(MP42Track *)track {
-    AVAssetTrack *assetTrack = [_localAsset trackWithTrackID:[track sourceId]];
 
-    CMFormatDescriptionRef formatDescription = NULL;
-    NSArray *formatDescriptions = assetTrack.formatDescriptions;
-    if ([formatDescriptions count] > 0)
-        formatDescription = (CMFormatDescriptionRef)[formatDescriptions objectAtIndex:0];
+    AVAssetTrack *assetTrack = [_localAsset trackWithTrackID:track.sourceId];
+    CMFormatDescriptionRef formatDescription = (CMFormatDescriptionRef)assetTrack.formatDescriptions.firstObject;
 
     if (formatDescription) {
+
         FourCharCode code = CMFormatDescriptionGetMediaSubType(formatDescription);
-        if ([[assetTrack mediaType] isEqualToString:AVMediaTypeVideo]) {
+
+        if ([assetTrack.mediaType isEqualToString:AVMediaTypeVideo]) {
+
             CFDictionaryRef extentions = CMFormatDescriptionGetExtensions(formatDescription);
             CFDictionaryRef atoms = CFDictionaryGetValue(extentions, kCMFormatDescriptionExtension_SampleDescriptionExtensionAtoms);
             CFDataRef magicCookie = NULL;
 
-            if (code == kCMVideoCodecType_H264) 
+            if (code == kCMVideoCodecType_H264) {
                 magicCookie = CFDictionaryGetValue(atoms, @"avcC");
-            else if (code == kCMVideoCodecType_MPEG4Video)
+            }
+            else if (code == kCMVideoCodecType_MPEG4Video) {
                 magicCookie = CFDictionaryGetValue(atoms, @"esds");
+            }
 
             return (NSData *)magicCookie;
-        } else if ([[assetTrack mediaType] isEqualToString:AVMediaTypeAudio]) {
+
+        } else if ([assetTrack.mediaType isEqualToString:AVMediaTypeAudio]) {
+
             size_t cookieSizeOut;
             const void *magicCookie = CMAudioFormatDescriptionGetMagicCookie(formatDescription, &cookieSizeOut);
 
             if (code == kAudioFormatMPEG4AAC || code == kAudioFormatMPEG4AAC_HE || code == kAudioFormatMPEG4AAC_HE_V2) {
+
                 // Extract DecoderSpecific info
                 UInt8 *buffer;
                 int size;
                 ReadESDSDescExt((void*)magicCookie, &buffer, &size, 0);
 
                 return [NSData dataWithBytes:buffer length:size];
-            } else if (code == kAudioFormatAppleLossless) {
+
+            }
+            else if (code == kAudioFormatAppleLossless) {
+
                 if (cookieSizeOut > 48) {
                     // Remove unneeded parts of the cookie, as describred in ALACMagicCookieDescription.txt
                     magicCookie += 24;
@@ -645,7 +657,18 @@
                 }
 
                 return [NSData dataWithBytes:magicCookie length:cookieSizeOut];
-            } else if (code == kAudioFormatAC3) {
+
+            }
+
+            else if (code == kAudioFormatEnhancedAC3) {
+                magicCookie += 2;
+                cookieSizeOut = cookieSizeOut - 2;
+
+                return [NSData dataWithBytes:magicCookie length:cookieSizeOut];
+            }
+
+            else if (code == kAudioFormatAC3) {
+
                 OSStatus err = noErr;
                 size_t channelLayoutSize = 0;
                 const AudioStreamBasicDescription *asbd = CMAudioFormatDescriptionGetStreamBasicDescription(formatDescription);

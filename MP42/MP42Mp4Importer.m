@@ -32,6 +32,10 @@
 
 @implementation MP42Mp4Importer
 
++ (NSArray<NSString *> *)supportedFileFormats {
+    return @[@"mp4", @"m4v", @"m4a", @"m4r"];
+}
+
 - (instancetype)initWithURL:(NSURL *)fileURL error:(NSError **)outError;
 {
     if ((self = [super initWithURL:fileURL])) {

@@ -141,6 +141,10 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
 
 @implementation MP42MkvImporter
 
++ (NSArray<NSString *> *)supportedFileFormats {
+    return @[@"mkv", @"mka", @"mks"];
+}
+
 - (instancetype)initWithURL:(NSURL *)fileURL error:(NSError **)outError
 {
     if ((self = [super initWithURL:fileURL])) {
@@ -479,10 +483,7 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
 
 - (NSData *)magicCookieForTrack:(MP42Track *)track
 {
-    if (!_matroskaFile)
-        return nil;
-
-    TrackInfo *trackInfo = mkv_GetTrackInfo(_matroskaFile, [track sourceId]);
+    TrackInfo *trackInfo = mkv_GetTrackInfo(_matroskaFile, track.sourceId);
 
     if ((!strcmp(trackInfo->CodecID, "A_AAC/MPEG4/LC") ||
         !strcmp(trackInfo->CodecID, "A_AAC/MPEG2/LC")) && !trackInfo->CodecPrivateSize) {
@@ -493,8 +494,9 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
 
         [magicCookie appendBytes:aac length:2];
         return [magicCookie autorelease];
-    } else if (!strcmp(trackInfo->CodecID, "A_AC3")) {
-        mkv_SetTrackMask(_matroskaFile, ~(1 << [track sourceId]));
+    }
+    else if (!strcmp(trackInfo->CodecID, "A_AC3") || !strcmp(trackInfo->CodecID, "A_EAC3")) {
+        mkv_SetTrackMask(_matroskaFile, ~(1 << track.sourceId));
 
         uint64_t        StartTime, EndTime, FilePos;
         uint32_t        rt, FrameSize, FrameFlags;
@@ -502,47 +504,92 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
 
 		// read first header to create track
 		int firstFrame = mkv_ReadFrame(_matroskaFile, 0, &rt, &StartTime, &EndTime, &FilePos, &FrameSize, &FrameFlags);
-		if (firstFrame != 0)
+
+        if (firstFrame != 0) {
 			return nil;
+        }
         
         if (readMkvPacket(_ioStream, trackInfo, FilePos, &frame, &FrameSize)) {
-            // parse AC3 header
-            // collect all the necessary meta information
-            uint64_t fscod, frmsizecod, bsid, bsmod, acmod, lfeon;
-            uint32_t lfe_offset = 4;
+            NSMutableData *magicCookie = nil;
 
-            fscod = (*(frame+4) >> 6) & 0x3;
-            frmsizecod = (*(frame+4) & 0x3f) >> 1;
-            bsid =  (*(frame+5) >> 3) & 0x1f;
-            bsmod = (*(frame+5) & 0xf);
-            acmod = (*(frame+6) >> 5) & 0x7;
-            if (acmod == 2)
-                lfe_offset -= 2;
-            else {
-                if ((acmod & 1) && acmod != 1)
+            if (!strcmp(trackInfo->CodecID, "A_AC3")) {
+                // parse AC3 header
+                // collect all the necessary meta information
+                uint64_t fscod, frmsizecod, bsid, bsmod, acmod, lfeon;
+                uint32_t lfe_offset = 4;
+
+                fscod = (*(frame+4) >> 6) & 0x3;
+                frmsizecod = (*(frame+4) & 0x3f) >> 1;
+                bsid =  (*(frame+5) >> 3) & 0x1f;
+                bsmod = (*(frame+5) & 0xf);
+                acmod = (*(frame+6) >> 5) & 0x7;
+                if (acmod == 2) {
                     lfe_offset -= 2;
-                if (acmod & 4)
-                    lfe_offset -= 2;
+                }
+                else {
+                    if ((acmod & 1) && acmod != 1) {
+                        lfe_offset -= 2;
+                    }
+                    if (acmod & 4) {
+                        lfe_offset -= 2;
+                    }
+                }
+                lfeon = (*(frame+6) >> lfe_offset) & 0x1;
+
+
+                magicCookie = [[NSMutableData alloc] init];
+                [magicCookie appendBytes:&fscod length:sizeof(uint64_t)];
+                [magicCookie appendBytes:&bsid length:sizeof(uint64_t)];
+                [magicCookie appendBytes:&bsmod length:sizeof(uint64_t)];
+                [magicCookie appendBytes:&acmod length:sizeof(uint64_t)];
+                [magicCookie appendBytes:&lfeon length:sizeof(uint64_t)];
+                [magicCookie appendBytes:&frmsizecod length:sizeof(uint64_t)];
             }
-            lfeon = (*(frame+6) >> lfe_offset) & 0x1;
+            else if (!strcmp(trackInfo->CodecID, "A_EAC3")) {
+                // parse EAC3 header
+
+                uint64_t strmtyp, substreamid;
+                uint64_t frmsiz, fscod, bsid, bsmod, acmod, lfeon;
+
+                strmtyp = (*(frame+2) >> 6) & 0x3;
+                substreamid = (*(frame+2) >> 3) & 0x7;
+
+                frmsiz = (*(frame+2) & 0x7) << 8;
+                frmsiz += *(frame+3);
+
+                fscod = (*(frame+4) >> 6) & 0x3;
+
+                if (fscod == 0x3) {
+
+                }
+                else {
+
+                }
+
+                acmod = (*(frame+4) & 0xe) >> 1;
+                lfeon = (*(frame+4) & 0x1);
+                bsid = (*(frame+5) >> 3) & 0x1f;
+                bsmod = 0;
+
+                if (acmod == 0x0) { /* if 1+1 mode (dual mono, so some items need a second value) */
+
+                }
+
+                if (strmtyp == 0x1) { /* if dependent stream */
+
+                }
+            }
 
             mkv_Seek(_matroskaFile, 0, 0);
-
-            NSMutableData *ac3Info = [[NSMutableData alloc] init];
-            [ac3Info appendBytes:&fscod length:sizeof(uint64_t)];
-            [ac3Info appendBytes:&bsid length:sizeof(uint64_t)];
-            [ac3Info appendBytes:&bsmod length:sizeof(uint64_t)];
-            [ac3Info appendBytes:&acmod length:sizeof(uint64_t)];
-            [ac3Info appendBytes:&lfeon length:sizeof(uint64_t)];
-            [ac3Info appendBytes:&frmsizecod length:sizeof(uint64_t)];
-
             free(frame);
 
-            return [ac3Info autorelease];
+            return [magicCookie autorelease];
         }
-        else
+        else {
             return nil;
-    } else if (!strcmp(trackInfo->CodecID, "S_VOBSUB")) {
+        }
+    }
+    else if (!strcmp(trackInfo->CodecID, "S_VOBSUB")) {
         char *string = (char *) trackInfo->CodecPrivate;
         char *palette = strnstr(string, "palette:", trackInfo->CodecPrivateSize);
 
@@ -558,14 +605,11 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
         return [NSData dataWithBytes:colorPalette length:sizeof(UInt32)*16];
     }
 
-    NSData *magicCookie = [NSData dataWithBytes:trackInfo->CodecPrivate length:trackInfo->CodecPrivateSize];
+    if (trackInfo->CodecPrivate && trackInfo->CodecPrivateSize) {
+        return [NSData dataWithBytes:trackInfo->CodecPrivate length:trackInfo->CodecPrivateSize];
+    }
 
-    if (magicCookie) {
-        return magicCookie;
-    }
-    else {
-        return nil;
-    }
+    return nil;
 }
 
 // Methods to extract all the samples from the active tracks at the same time

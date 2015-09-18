@@ -18,6 +18,10 @@
 
 @implementation MP42CCImporter
 
++ (NSArray<NSString *> *)supportedFileFormats {
+    return @[@"scc"];
+}
+
 - (instancetype)initWithURL:(NSURL *)fileURL error:(NSError **)outError
 {
     if ((self = [super initWithURL:fileURL])) {

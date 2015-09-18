@@ -1354,6 +1354,10 @@ NSData* H264Info(const char *filePath, uint32_t *pic_width, uint32_t *pic_height
 
 @implementation MP42H264Importer
 
++ (NSArray<NSString *> *)supportedFileFormats {
+    return @[@"264", @"h264"];
+}
+
 - (instancetype)initWithURL:(NSURL *)fileURL error:(NSError **)outError
 {
     if ((self = [super initWithURL:fileURL])) {

@@ -710,6 +710,10 @@ static bool GetFirstHeader(FILE* inFile)
 	return true;
 }
 
++ (NSArray<NSString *> *)supportedFileFormats {
+    return @[@"aac"];
+}
+
 - (instancetype)initWithURL:(NSURL *)fileURL error:(NSError **)outError
 {
     if ((self = [super initWithURL:fileURL])) {

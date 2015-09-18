@@ -37,6 +37,10 @@
 
 @implementation MP42QTImporter
 
++ (NSArray<NSString *> *)supportedFileFormats {
+    return @[@"mov"];
+}
+
 - (instancetype)initWithURL:(NSURL *)fileURL error:(NSError **)outError
 {
     if ((self = [super initWithURL:fileURL])) {

@@ -255,6 +255,9 @@ static bool GetFirstHeader(FILE* inFile)
 	return true;
 }
 
++ (NSArray<NSString *> *)supportedFileFormats {
+    return @[@"ac3"];
+}
 
 - (instancetype)initWithURL:(NSURL *)fileURL error:(NSError **)outError
 {

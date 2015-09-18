@@ -19,6 +19,10 @@
 
 @implementation MP42SrtImporter
 
++ (NSArray<NSString *> *)supportedFileFormats {
+    return @[@"srt"];
+}
+
 - (instancetype)initWithURL:(NSURL *)fileURL error:(NSError **)outError
 {
     if ((self = [super initWithURL:fileURL])) {
