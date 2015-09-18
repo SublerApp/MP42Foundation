@@ -65,15 +65,17 @@
     NSMutableArray<MP42Track *> *unsupportedTracks = [[NSMutableArray alloc] init];;
 
     for (MP42Track *track in _workingTracks) {
+
         MP4TrackId dstTrackId = 0;
-        NSData *magicCookie = nil;;
+        NSData *magicCookie = nil;
         NSInteger timeScale = 0;
         muxer_helper *helper = track.muxer_helper;
 
         if (helper) {
             magicCookie = [helper->importer magicCookieForTrack:track];
             timeScale = [helper->importer timescaleForTrack:track];
-        } else {
+        }
+        else {
             [unsupportedTracks addObject:track];
             continue;
         }
@@ -224,6 +226,11 @@
                                              ac3Info[5]);
 
             [helper->importer setActiveTrack:track];
+        }
+
+        // EAC-3 audio tack
+        else if ([track isMemberOfClass:[MP42AudioTrack class]] && [track.format isEqualToString:MP42AudioFormatEAC3]) {
+
         }
 
         // ALAC audio track

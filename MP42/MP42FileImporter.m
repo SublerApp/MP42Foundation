@@ -32,6 +32,17 @@
 
 @implementation MP42FileImporter
 
++ (NSArray<NSString *> *)supportedFileFormats {
+    return @[@"scc", @"smi",  @"txt", @"m4v", @"mp4",
+             @"m4a", @"m4a", @"mov", @"ts", @"mts",
+             @"m2ts", @"mkv", @"mka", @"mks", @"h264",
+             @"264", @"idx", @"aac", @"ac3", @"eac3", @"srt"];
+}
+
++ (BOOL)canInitWithFileType:(NSString *)fileType {
+    return [[MP42FileImporter supportedFileFormats] containsObject:fileType.lowercaseString];
+}
+
 - (instancetype)initWithURL:(NSURL *)fileURL error:(NSError **)error;
 {
     [self release];
@@ -77,7 +88,8 @@
     else if ([pathExtension caseInsensitiveCompare: @"m2ts"] == NSOrderedSame ||
              [pathExtension caseInsensitiveCompare: @"ts"] == NSOrderedSame ||
              [pathExtension caseInsensitiveCompare: @"mts"] == NSOrderedSame ||
-             [pathExtension caseInsensitiveCompare: @"mov"] == NSOrderedSame) {
+             [pathExtension caseInsensitiveCompare: @"mov"] == NSOrderedSame ||
+             [pathExtension caseInsensitiveCompare: @"eac3"] == NSOrderedSame) {
         self = [MP42AVFImporter alloc];
     }
 

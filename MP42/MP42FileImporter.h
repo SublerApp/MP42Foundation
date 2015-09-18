@@ -36,6 +36,9 @@ NS_ASSUME_NONNULL_BEGIN
     dispatch_semaphore_t _doneSem;
 }
 
++ (NSArray<NSString *> *)supportedFileFormats;
++ (BOOL)canInitWithFileType:(NSString *)fileType;
+
 - (instancetype)initWithURL:(NSURL *)fileURL error:(NSError **)error;
 
 @property(nonatomic, readonly) NSURL *fileURL;
