@@ -8,13 +8,14 @@
 
 #import "MP42MediaFormat.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 NSString * StringFromTime(long long time, long timeScale);
 MP42Duration TimeFromString(NSString *SMPTE_string, MP42Duration timeScale);
-
-NSArray *supportedFileFormat();
-BOOL isFileFormatSupported(NSString *fileExt);
 
 BOOL isTrackMuxable(NSString * formatName);
 BOOL trackNeedConversion(NSString * formatName);
 
 int isHdVideo(uint64_t width, uint64_t height);
+
+NS_ASSUME_NONNULL_END

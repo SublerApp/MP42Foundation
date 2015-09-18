@@ -43,26 +43,10 @@ MP42Duration TimeFromString(NSString *time_string, MP42Duration timeScale)
     return timeval;
 }
 
-NSArray *supportedFileFormat()
-{
-    return [NSArray arrayWithObjects:@"scc", @"smi",  @"txt", @"m4v", @"mp4", @"m4a", @"m4a", @"mov", @"ts", @"mts", @"m2ts",
-            @"mkv", @"mka", @"mks", @"h264", @"264", @"idx", @"aac", @"ac3", @"srt", nil];
-}
-
-BOOL isFileFormatSupported(NSString * fileExt) {
-    NSArray *supportedFormat = supportedFileFormat();
-
-    for (NSString *type in supportedFormat)
-        if ([fileExt caseInsensitiveCompare:type] == NSOrderedSame)
-            return YES;
-
-    return NO;
-}
-
 BOOL isTrackMuxable(NSString *formatName)
 {
     NSArray *supportedFormats = @[MP42VideoFormatH264, MP42VideoFormatMPEG4Visual, MP42AudioFormatAAC, MP42AudioFormatALAC,
-                                  MP42AudioFormatAC3, MP42AudioFormatDTS, MP42SubtitleFormatTx3g, MP42SubtitleFormatText,
+                                  MP42AudioFormatAC3, MP42AudioFormatEAC3, MP42AudioFormatDTS, MP42SubtitleFormatTx3g, MP42SubtitleFormatText,
                                   MP42ClosedCaptionFormatCEA608, MP42VideoFormatJPEG, MP42SubtitleFormatVobSub];
 
     return [supportedFormats containsObject:formatName];
