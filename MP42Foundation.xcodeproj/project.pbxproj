@@ -27,7 +27,6 @@
 		A910B5E618394EB20064028F /* MP42XMLReader.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2591823923200416A4E /* MP42XMLReader.m */; };
 		A910B5E818394EB20064028F /* MP42HtmlParser.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2371823923100416A4E /* MP42HtmlParser.m */; };
 		A910B5EA18394EB20064028F /* RegexKitLite.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2CA1823968400416A4E /* RegexKitLite.m */; settings = {COMPILER_FLAGS = "-w -Xanalyzer -analyzer-disable-checker"; }; };
-		A910B5EC18394EB20064028F /* JSONKit.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2D2182396C400416A4E /* JSONKit.m */; settings = {COMPILER_FLAGS = "-w -Xanalyzer -analyzer-disable-checker"; }; };
 		A910B5F118394EB20064028F /* MP42Muxer.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2431823923100416A4E /* MP42Muxer.m */; };
 		A910B5F418394EB20064028F /* MP42Sample.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2491823923100416A4E /* MP42Sample.m */; };
 		A910B5F718394EB20064028F /* MP42Fifo.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C22F1823923100416A4E /* MP42Fifo.m */; };
@@ -174,12 +173,9 @@
 		A9B9C2C41823957800416A4E /* MP42Languages.h in Headers */ = {isa = PBXBuildFile; fileRef = A9B9C2C21823957800416A4E /* MP42Languages.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A9B9C2C51823957800416A4E /* MP42Languages.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2C31823957800416A4E /* MP42Languages.m */; };
 		A9B9C2C81823962600416A4E /* UniversalDetector.h in Headers */ = {isa = PBXBuildFile; fileRef = A9B9C2C71823962600416A4E /* UniversalDetector.h */; };
-		A9B9C2CB1823968400416A4E /* RegexKitLite.h in Headers */ = {isa = PBXBuildFile; fileRef = A9B9C2C91823968400416A4E /* RegexKitLite.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A9B9C2CC1823968400416A4E /* RegexKitLite.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2CA1823968400416A4E /* RegexKitLite.m */; settings = {COMPILER_FLAGS = "-w"; }; };
 		A9B9C2CF182396A100416A4E /* MP42Ratings.h in Headers */ = {isa = PBXBuildFile; fileRef = A9B9C2CD182396A100416A4E /* MP42Ratings.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A9B9C2D0182396A100416A4E /* MP42Ratings.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2CE182396A100416A4E /* MP42Ratings.m */; };
-		A9B9C2D3182396C400416A4E /* JSONKit.h in Headers */ = {isa = PBXBuildFile; fileRef = A9B9C2D1182396C400416A4E /* JSONKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		A9B9C2D4182396C400416A4E /* JSONKit.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2D2182396C400416A4E /* JSONKit.m */; settings = {COMPILER_FLAGS = "-w"; }; };
 		A9B9C2D6182396FB00416A4E /* baseapi.h in Headers */ = {isa = PBXBuildFile; fileRef = A9B9C2D5182396FB00416A4E /* baseapi.h */; };
 		A9B9C2D81823970E00416A4E /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9B9C2D71823970E00416A4E /* AVFoundation.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		A9B9C2DA1823971F00416A4E /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9B9C2D91823971F00416A4E /* AudioToolbox.framework */; };
@@ -379,8 +375,6 @@
 		A9B9C2CA1823968400416A4E /* RegexKitLite.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RegexKitLite.m; sourceTree = "<group>"; };
 		A9B9C2CD182396A100416A4E /* MP42Ratings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MP42Ratings.h; sourceTree = "<group>"; };
 		A9B9C2CE182396A100416A4E /* MP42Ratings.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MP42Ratings.m; sourceTree = "<group>"; };
-		A9B9C2D1182396C400416A4E /* JSONKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JSONKit.h; sourceTree = "<group>"; };
-		A9B9C2D2182396C400416A4E /* JSONKit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JSONKit.m; sourceTree = "<group>"; };
 		A9B9C2D5182396FB00416A4E /* baseapi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = baseapi.h; path = Tesseract/include/tesseract/baseapi.h; sourceTree = SOURCE_ROOT; };
 		A9B9C2D71823970E00416A4E /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		A9B9C2D91823971F00416A4E /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
@@ -692,8 +686,6 @@
 				A9B9C2371823923100416A4E /* MP42HtmlParser.m */,
 				A9B9C2C91823968400416A4E /* RegexKitLite.h */,
 				A9B9C2CA1823968400416A4E /* RegexKitLite.m */,
-				A9B9C2D1182396C400416A4E /* JSONKit.h */,
-				A9B9C2D2182396C400416A4E /* JSONKit.m */,
 				A9B9C2D5182396FB00416A4E /* baseapi.h */,
 				A925AABB1837A16500BE84D4 /* QTKitDecrap.h */,
 				A9B9C2C71823962600416A4E /* UniversalDetector.h */,
@@ -753,8 +745,6 @@
 				A9B9C2C41823957800416A4E /* MP42Languages.h in Headers */,
 				A9B9C2CF182396A100416A4E /* MP42Ratings.h in Headers */,
 				A925AAAF18379AF800BE84D4 /* MP42Utilities.h in Headers */,
-				A9B9C2CB1823968400416A4E /* RegexKitLite.h in Headers */,
-				A9B9C2D3182396C400416A4E /* JSONKit.h in Headers */,
 				A9B9C2911823923200416A4E /* MP42QTImporter.h in Headers */,
 				A9B9C28F1823923200416A4E /* MP42OCRWrapper.h in Headers */,
 				A9B9C2811823923200416A4E /* MP42HtmlParser.h in Headers */,
@@ -961,7 +951,6 @@
 				A9A0C9B41981593900A72763 /* MP42ComponentLoader.m in Sources */,
 				A910B5E818394EB20064028F /* MP42HtmlParser.m in Sources */,
 				A910B5EA18394EB20064028F /* RegexKitLite.m in Sources */,
-				A910B5EC18394EB20064028F /* JSONKit.m in Sources */,
 				A910B5F118394EB20064028F /* MP42Muxer.m in Sources */,
 				A910B5F418394EB20064028F /* MP42Sample.m in Sources */,
 				A910B5F718394EB20064028F /* MP42Fifo.m in Sources */,
@@ -1009,7 +998,6 @@
 				A9B9C2D0182396A100416A4E /* MP42Ratings.m in Sources */,
 				A9B9C2691823923200416A4E /* MP42AC3Importer.m in Sources */,
 				A9B9C26F1823923200416A4E /* MP42AVFImporter.m in Sources */,
-				A9B9C2D4182396C400416A4E /* JSONKit.m in Sources */,
 				A9B9C27C1823923200416A4E /* MP42File.m in Sources */,
 				A9B9C2771823923200416A4E /* MP42ClosedCaptionTrack.m in Sources */,
 				A9A0C9B31981593900A72763 /* MP42ComponentLoader.m in Sources */,
