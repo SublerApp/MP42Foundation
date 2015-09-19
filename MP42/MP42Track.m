@@ -79,7 +79,7 @@
             NSUInteger count = 0;
 
             while (found) {
-                NSString *atomName = [NSString stringWithFormat:@"udta.tagc[%d]", count];
+                NSString *atomName = [NSString stringWithFormat:@"udta.tagc[%lu]", (unsigned long)count];
 
                 if (MP4HaveTrackAtom(fileHandle, _trackId, atomName.UTF8String)) {
                     uint8_t   *ppValue;
