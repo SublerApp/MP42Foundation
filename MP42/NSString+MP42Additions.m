@@ -11,6 +11,9 @@
 @implementation NSString (MP42Additions)
 
 - (NSArray<NSString *> *)MP42_componentsSeparatedByRegex:(NSString *)regex {
+
+    NSParameterAssert(regex);
+
     NSMutableArray<NSString *> *results = [NSMutableArray array];
     __block NSRange start = NSMakeRange(0, 0);
 
@@ -40,6 +43,9 @@
 }
 
 - (BOOL)MP42_isMatchedByRegex:(NSString *)regex {
+
+    NSParameterAssert(regex);
+
     NSRegularExpression *r = [NSRegularExpression regularExpressionWithPattern:regex
                                                                        options:NSRegularExpressionCaseInsensitive
                                                                          error:nil];

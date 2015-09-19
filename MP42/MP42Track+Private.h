@@ -6,8 +6,13 @@
 //  Copyright © 2015 Damiano Galassi. All rights reserved.
 //
 
-#ifndef MP42Track_Private_h
-#define MP42Track_Private_h
+NS_ASSUME_NONNULL_BEGIN
 
+@interface MP42Track (Private)
 
-#endif /* MP42Track_Private_h */
+- (instancetype)initWithSourceURL:(NSURL *)URL trackID:(NSInteger)trackID fileHandle:(MP42FileHandle)fileHandle;
+- (BOOL)writeToFile:(MP42FileHandle)fileHandle error:(NSError **)outError;
+
+@end
+
+NS_ASSUME_NONNULL_END

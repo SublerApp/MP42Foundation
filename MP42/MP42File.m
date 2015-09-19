@@ -13,7 +13,9 @@
 #import "MP42PrivateUtilities.h"
 #import "MP42Languages.h"
 #import "MP42Track+Muxer.h"
+#import "MP42Track+Private.h"
 #import "MP42PreviewGenerator.h"
+#import "MP42Metadata+Private.h"
 
 #import "mp4v2.h"
 
@@ -99,8 +101,10 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 @synthesize muxer = _muxer;
 
 + (void)initialize {
-    MP4SetLogCallback(logCallback);
-    MP4LogSetLevel(MP4_LOG_INFO);
+    if (self == [MP42File class]) {
+        MP4SetLogCallback(logCallback);
+        MP4LogSetLevel(MP4_LOG_INFO);
+    }
 }
 
 + (void)setGlobalLogger:(id<MP42Logging>)logger

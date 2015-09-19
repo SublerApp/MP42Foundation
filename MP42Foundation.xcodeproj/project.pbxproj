@@ -79,12 +79,16 @@
 		A96523471BAC315900E994E0 /* NSString+MP42Additions.m in Sources */ = {isa = PBXBuildFile; fileRef = A96523441BAC315900E994E0 /* NSString+MP42Additions.m */; settings = {ASSET_TAGS = (); }; };
 		A96523481BAC315900E994E0 /* NSString+MP42Additions.m in Sources */ = {isa = PBXBuildFile; fileRef = A96523441BAC315900E994E0 /* NSString+MP42Additions.m */; settings = {ASSET_TAGS = (); }; };
 		A96523491BAC315900E994E0 /* NSString+MP42Additions.m in Sources */ = {isa = PBXBuildFile; fileRef = A96523441BAC315900E994E0 /* NSString+MP42Additions.m */; settings = {ASSET_TAGS = (); }; };
+		A96D28931BAD390400403327 /* MP42Metadata+Private.h in Headers */ = {isa = PBXBuildFile; fileRef = A96D28921BAD390400403327 /* MP42Metadata+Private.h */; settings = {ASSET_TAGS = (); }; };
+		A96D28941BAD390400403327 /* MP42Metadata+Private.h in Headers */ = {isa = PBXBuildFile; fileRef = A96D28921BAD390400403327 /* MP42Metadata+Private.h */; settings = {ASSET_TAGS = (); }; };
 		A989F1001823AB2E0070AD8C /* MP42Track+Muxer.h in Headers */ = {isa = PBXBuildFile; fileRef = A989F0FF1823AB2E0070AD8C /* MP42Track+Muxer.h */; };
 		A989F10F1823B3B40070AD8C /* MP42TextSample.h in Headers */ = {isa = PBXBuildFile; fileRef = A989F10D1823B3B40070AD8C /* MP42TextSample.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A989F1101823B3B40070AD8C /* MP42TextSample.m in Sources */ = {isa = PBXBuildFile; fileRef = A989F10E1823B3B40070AD8C /* MP42TextSample.m */; };
 		A991714C195AAAEF005AD68E /* MP42Track+Muxer.m in Sources */ = {isa = PBXBuildFile; fileRef = A991714B195AAAEF005AD68E /* MP42Track+Muxer.m */; };
 		A991714D195AAAEF005AD68E /* MP42Track+Muxer.m in Sources */ = {isa = PBXBuildFile; fileRef = A991714B195AAAEF005AD68E /* MP42Track+Muxer.m */; };
 		A991714E195AAAEF005AD68E /* MP42Track+Muxer.m in Sources */ = {isa = PBXBuildFile; fileRef = A991714B195AAAEF005AD68E /* MP42Track+Muxer.m */; };
+		A99FCBC41BAD65EF0058E27A /* MP42Track+Private.h in Headers */ = {isa = PBXBuildFile; fileRef = A99FCBC31BAD65EF0058E27A /* MP42Track+Private.h */; settings = {ASSET_TAGS = (); }; };
+		A99FCBC51BAD65EF0058E27A /* MP42Track+Private.h in Headers */ = {isa = PBXBuildFile; fileRef = A99FCBC31BAD65EF0058E27A /* MP42Track+Private.h */; settings = {ASSET_TAGS = (); }; };
 		A9A0C99C19814B0800A72763 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9A0C99B19814B0800A72763 /* CoreAudio.framework */; };
 		A9A0C9A419814C9B00A72763 /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9A0C9A319814C9B00A72763 /* AudioUnit.framework */; };
 		A9A0C9B11981593900A72763 /* MP42ComponentLoader.h in Headers */ = {isa = PBXBuildFile; fileRef = A9A0C9AF1981593900A72763 /* MP42ComponentLoader.h */; };
@@ -274,10 +278,12 @@
 		A94BFB2C184C862A00810224 /* eng.traineddata */ = {isa = PBXFileReference; lastKnownFileType = file; name = eng.traineddata; path = Tesseract/share/tessdata/eng.traineddata; sourceTree = SOURCE_ROOT; };
 		A96523431BAC315900E994E0 /* NSString+MP42Additions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+MP42Additions.h"; sourceTree = "<group>"; };
 		A96523441BAC315900E994E0 /* NSString+MP42Additions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+MP42Additions.m"; sourceTree = "<group>"; };
+		A96D28921BAD390400403327 /* MP42Metadata+Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "MP42Metadata+Private.h"; sourceTree = "<group>"; };
 		A989F0FF1823AB2E0070AD8C /* MP42Track+Muxer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "MP42Track+Muxer.h"; sourceTree = "<group>"; };
 		A989F10D1823B3B40070AD8C /* MP42TextSample.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MP42TextSample.h; sourceTree = "<group>"; };
 		A989F10E1823B3B40070AD8C /* MP42TextSample.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MP42TextSample.m; sourceTree = "<group>"; };
 		A991714B195AAAEF005AD68E /* MP42Track+Muxer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "MP42Track+Muxer.m"; sourceTree = "<group>"; };
+		A99FCBC31BAD65EF0058E27A /* MP42Track+Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "MP42Track+Private.h"; sourceTree = "<group>"; };
 		A9A0C99B19814B0800A72763 /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
 		A9A0C9A319814C9B00A72763 /* AudioUnit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioUnit.framework; path = System/Library/Frameworks/AudioUnit.framework; sourceTree = SDKROOT; };
 		A9A0C9AF1981593900A72763 /* MP42ComponentLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MP42ComponentLoader.h; sourceTree = "<group>"; };
@@ -528,6 +534,7 @@
 				A9B9C2311823923100416A4E /* MP42File.m */,
 				A9B9C2501823923100416A4E /* MP42Track.h */,
 				A9B9C2511823923100416A4E /* MP42Track.m */,
+				A99FCBC31BAD65EF0058E27A /* MP42Track+Private.h */,
 				A9B9C2541823923100416A4E /* MP42VideoTrack.h */,
 				A9B9C2551823923100416A4E /* MP42VideoTrack.m */,
 				A9B9C2211823923100416A4E /* MP42AudioTrack.h */,
@@ -540,6 +547,7 @@
 				A9B9C22C1823923100416A4E /* MP42ClosedCaptionTrack.m */,
 				A9B9C23C1823923100416A4E /* MP42Metadata.h */,
 				A9B9C23D1823923100416A4E /* MP42Metadata.m */,
+				A96D28921BAD390400403327 /* MP42Metadata+Private.h */,
 				A9B9C23A1823923100416A4E /* MP42MediaFormat.h */,
 				A9B9C23B1823923100416A4E /* MP42MediaFormat.m */,
 				A917286519FD2BCE00348DF8 /* MP42Logging.h */,
@@ -717,7 +725,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				A9A0C9B21981593900A72763 /* MP42ComponentLoader.h in Headers */,
+				A96D28941BAD390400403327 /* MP42Metadata+Private.h in Headers */,
 				A917286719FD2BCE00348DF8 /* MP42Logging.h in Headers */,
+				A99FCBC51BAD65EF0058E27A /* MP42Track+Private.h in Headers */,
 				A9AEFE161B9B111B00771292 /* MP42FileImporter+Private.h in Headers */,
 				A96523461BAC315900E994E0 /* NSString+MP42Additions.h in Headers */,
 			);
@@ -744,6 +754,7 @@
 				A9B9C2831823923200416A4E /* MP42Image.h in Headers */,
 				A9B9C2C41823957800416A4E /* MP42Languages.h in Headers */,
 				A9B9C2CF182396A100416A4E /* MP42Ratings.h in Headers */,
+				A99FCBC41BAD65EF0058E27A /* MP42Track+Private.h in Headers */,
 				A925AAAF18379AF800BE84D4 /* MP42Utilities.h in Headers */,
 				A9B9C2911823923200416A4E /* MP42QTImporter.h in Headers */,
 				A9B9C28F1823923200416A4E /* MP42OCRWrapper.h in Headers */,
@@ -777,6 +788,7 @@
 				A9B9C2A11823923200416A4E /* MP42VobSubImporter.h in Headers */,
 				A9B9C2AC1823923200416A4E /* mbs.h in Headers */,
 				A9B9C2891823923200416A4E /* MP42MkvImporter.h in Headers */,
+				A96D28931BAD390400403327 /* MP42Metadata+Private.h in Headers */,
 				A925AABC1837A16500BE84D4 /* QTKitDecrap.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -97,8 +97,8 @@ static NSMutableDictionary *_loadedComponents;
 - (BOOL)componentLoadedForFormat:(OSType)format {
     BOOL loaded = NO;
 
-    if ([_loadedComponents valueForKey:@(FourCC2Str(format))]) {
-        loaded = YES;;
+    if (_loadedComponents[@(FourCC2Str(format))]) {
+        loaded = YES;
     } else {
         AudioComponentDescription acd = { 0 };
         acd.componentType = kAudioDecoderComponentType;
@@ -137,7 +137,7 @@ static NSMutableDictionary *_loadedComponents;
 {
     OSType err = 1;
 
-    if ([_loadedComponents valueForKey:@(FourCC2Str(format))]) {
+    if (_loadedComponents[@(FourCC2Str(format))]) {
         return noErr;
     }
 
@@ -172,7 +172,7 @@ static NSMutableDictionary *_loadedComponents;
 {
     OSType err = 1;
 
-    if ([_loadedComponents valueForKey:@(FourCC2Str(format))]) {
+    if (_loadedComponents[@(FourCC2Str(format))]) {
         return noErr;
     }
 

@@ -23,7 +23,6 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, copy) NSArray<MP42Track *> *inputTracks;
 @property (nonatomic, copy) NSArray<MP42Track *> *outputsTracks;
 
-- (BOOL)containsTrack:(MP42Track *)track;
 - (MP42Track *)inputTrackWithTrackID:(MP42TrackId)trackId;
 
 - (void)setActiveTrack:(MP42Track *)track;
@@ -33,7 +32,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)enqueue:(MP42SampleBuffer *)sample;
 
-- (CGFloat)progress;
+- (double)progress;
 
 - (BOOL)done;
 - (void)setDone;

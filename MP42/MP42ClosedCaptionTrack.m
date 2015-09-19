@@ -7,6 +7,7 @@
 //
 
 #import "MP42ClosedCaptionTrack.h"
+#import "MP42Track+Private.h"
 #import "MP42MediaFormat.h"
 
 @implementation MP42ClosedCaptionTrack

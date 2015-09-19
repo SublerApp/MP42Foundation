@@ -7,6 +7,7 @@
 //
 
 #import "MP42AudioTrack.h"
+#import "MP42Track+Private.h"
 #import "MP42PrivateUtilities.h"
 #import "MP42MediaFormat.h"
 

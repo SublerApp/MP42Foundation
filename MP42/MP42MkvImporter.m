@@ -548,7 +548,7 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
             else if (!strcmp(trackInfo->CodecID, "A_EAC3")) {
                 // parse EAC3 header
 
-                uint64_t strmtyp, substreamid;
+                /*uint64_t strmtyp, substreamid;
                 uint64_t frmsiz, fscod, bsid, bsmod, acmod, lfeon;
 
                 strmtyp = (*(frame+2) >> 6) & 0x3;
@@ -571,13 +571,13 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
                 bsid = (*(frame+5) >> 3) & 0x1f;
                 bsmod = 0;
 
-                if (acmod == 0x0) { /* if 1+1 mode (dual mono, so some items need a second value) */
+                if (acmod == 0x0) { // if 1+1 mode (dual mono, so some items need a second value)
 
                 }
 
-                if (strmtyp == 0x1) { /* if dependent stream */
+                if (strmtyp == 0x1) { // if dependent stream
 
-                }
+                }*/
             }
 
             mkv_Seek(_matroskaFile, 0, 0);

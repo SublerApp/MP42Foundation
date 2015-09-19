@@ -6,8 +6,13 @@
 //  Copyright © 2015 Damiano Galassi. All rights reserved.
 //
 
-#ifndef MP42Metadata_Private_h
-#define MP42Metadata_Private_h
+NS_ASSUME_NONNULL_BEGIN
 
+@interface MP42Metadata (Private)
 
-#endif /* MP42Metadata_Private_h */
+- (instancetype) initWithFileHandle:(MP42FileHandle)fileHandle;
+- (BOOL) writeMetadataWithFileHandle: (MP42FileHandle) fileHandle;
+
+@end
+
+NS_ASSUME_NONNULL_END
