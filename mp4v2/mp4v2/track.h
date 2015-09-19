@@ -491,6 +491,17 @@ bool MP4AddTrackReference(
     MP4TrackId    refTrackId );
 
 MP4V2_EXPORT
+bool MP4AddMediaCharacteristicTag(
+    MP4FileHandle hFile,
+    MP4TrackId    trackId,
+    const char*   tag);
+
+MP4V2_EXPORT
+bool MP4RemoveAllMediaCharacteristicTags(
+    MP4FileHandle hFile,
+    MP4TrackId    trackId);
+
+MP4V2_EXPORT
 bool MP4RemoveAllTrackReferences(
     MP4FileHandle hFile,
     const char*   trefName,
