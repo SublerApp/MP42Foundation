@@ -35,26 +35,28 @@ static NSArray<NSString *> *_supportedFileFormats;
 @implementation MP42FileImporter
 
 + (void)initialize {
-    _fileImporters = [@[[MP42MkvImporter class],
-                        [MP42Mp4Importer class],
-                        [MP42SrtImporter class],
-                        [MP42CCImporter class],
-                        [MP42AC3Importer class],
-                        [MP42H264Importer class],
-                        [MP42VobSubImporter class],
+    if (self == [MP42FileImporter class]) {
+        _fileImporters = [@[[MP42MkvImporter class],
+                            [MP42Mp4Importer class],
+                            [MP42SrtImporter class],
+                            [MP42CCImporter class],
+                            [MP42AC3Importer class],
+                            [MP42H264Importer class],
+                            [MP42VobSubImporter class],
 #if !__LP64__
-                        [MP42QTImporter class],
+                            [MP42QTImporter class],
 #endif
-                        [MP42AVFImporter class]] retain];
+                            [MP42AVFImporter class]] retain];
 
-    NSMutableArray<NSString *> *formats = [[NSMutableArray alloc] init];
+        NSMutableArray<NSString *> *formats = [[NSMutableArray alloc] init];
 
-    for (Class c in _fileImporters) {
-        [formats addObjectsFromArray:[c supportedFileFormats]];
+        for (Class c in _fileImporters) {
+            [formats addObjectsFromArray:[c supportedFileFormats]];
+        }
+
+        _supportedFileFormats = [formats copy];
+        [formats release];
     }
-
-    _supportedFileFormats = [formats copy];
-    [formats release];
 }
 
 + (NSArray<NSString *> *)supportedFileFormats {
@@ -272,14 +274,9 @@ static NSArray<NSString *> *_supportedFileFormats;
     dispatch_semaphore_signal(_doneSem);
 }
 
-- (CGFloat)progress
+- (double)progress
 {
     return _progress;
-}
-
-- (BOOL)containsTrack:(MP42Track *)track
-{
-    return [_tracksArray containsObject:track];
 }
 
 - (MP42Track *)inputTrackWithTrackID:(MP4TrackId)trackId

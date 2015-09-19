@@ -19,7 +19,7 @@ NS_ASSUME_NONNULL_BEGIN
     NSInteger       _chapterId;
     MP42Metadata   *_metadata;
 
-    CGFloat       _progress;
+    double        _progress;
     int32_t       _cancelled;
 
 @private
