@@ -36,29 +36,55 @@ NS_ASSUME_NONNULL_BEGIN
     BOOL isArtworkEdited;
 }
 
-- (instancetype) initWithFileHandle:(MP42FileHandle)fileHandle;
-- (instancetype) initWithFileURL:(NSURL *)URL;
+/**
+ *  Initializes a new metadata instance by a given URL
+ *
+ *  @param URL An URL that identifies an xml file.
+ *
+ *  @return The receiver, initialized with the resource specified by URL.
+ */
+- (instancetype)initWithFileURL:(NSURL *)URL;
 
+/**
+ *  Returns the complete list of available metadata.
+ */
 - (NSArray<NSString *> *) availableMetadata;
+
+/**
+ *  Returns the complete list of writable metadata.
+ */
 - (NSArray<NSString *> *) writableMetadata;
 
+/**
+ *  Returns the list of the available genres.
+ */
 - (NSArray<NSString *> *) availableGenres;
 
-- (void) removeTagForKey:(NSString *)aKey;
-- (BOOL) setTag:(id)value forKey:(NSString *)key;
+
+- (void)removeTagForKey:(NSString *)aKey;
+- (BOOL)setTag:(id)value forKey:(NSString *)key;
 
 - (nullable id)objectForKeyedSubscript:(NSString *)key;
 - (void)setObject:(id)obj forKeyedSubscript:(NSString *)key;
 
-- (BOOL) setMediaKindFromString:(NSString *)mediaKindString;
-- (BOOL) setContentRatingFromString:(NSString *)contentRatingString;
-- (BOOL) setArtworkFromFilePath:(NSString *)imageFilePath;
-
-- (BOOL) writeMetadataWithFileHandle: (MP42FileHandle) fileHandle;
-
-- (BOOL) mergeMetadata: (MP42Metadata *) newMetadata;
-
 @property(nonatomic, readonly) NSMutableDictionary<NSString *, id> *tagsDict;
+
+/**
+ *  Merges the tags of the passed MP42Metadata instance.
+ *
+ *  @param metadata the instance to marge.
+ */
+- (void)mergeMetadata:(MP42Metadata *)metadata;
+
+
+@property(nonatomic, readwrite) uint8_t    mediaKind;
+@property(nonatomic, readwrite) uint8_t    contentRating;
+@property(nonatomic, readwrite) uint8_t    hdVideo;
+@property(nonatomic, readwrite) uint8_t    gapless;
+@property(nonatomic, readwrite) uint8_t    podcast;
+
+@property(nonatomic, readwrite) BOOL       isEdited;
+@property(nonatomic, readwrite) BOOL       isArtworkEdited;
 
 @property(nonatomic, readwrite, copy) NSString *presetName;
 
@@ -67,14 +93,6 @@ NS_ASSUME_NONNULL_BEGIN
 @property(nonatomic, readwrite, retain, nullable) NSArray<NSURL *> *artworkThumbURLs;
 @property(nonatomic, readwrite, retain, nullable) NSArray<NSURL *> *artworkFullsizeURLs;
 @property(nonatomic ,readwrite, retain, nullable) NSArray<NSString *> *artworkProviderNames;
-
-@property(nonatomic, readwrite) uint8_t    mediaKind;
-@property(nonatomic, readwrite) uint8_t    contentRating;
-@property(nonatomic, readwrite) uint8_t    hdVideo;
-@property(nonatomic, readwrite) uint8_t    gapless;
-@property(nonatomic, readwrite) uint8_t    podcast;
-@property(nonatomic, readwrite) BOOL       isEdited;
-@property(nonatomic, readwrite) BOOL       isArtworkEdited;
 
 @end
 

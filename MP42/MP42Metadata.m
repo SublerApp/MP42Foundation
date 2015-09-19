@@ -185,11 +185,6 @@ static const genreType_t genreType_strings[] = {
     {0, "undefined" } // must be last
 };
 
-@interface MP42Metadata ()
-
-- (void)readMetaDataFromFileHandle:(MP4FileHandle)fileHandle;
-
-@end
 
 @implementation MP42Metadata
 
@@ -246,7 +241,7 @@ static const genreType_t genreType_strings[] = {
     return self;
 }
 
--(void) dealloc
+-(void)dealloc
 {
     [presetName release];
 
@@ -414,49 +409,78 @@ static const genreType_t genreType_strings[] = {
 
 #pragma mark - Array conversion
 
-- (NSString *)stringFromArray:(NSArray *)array
-{
-    NSString *result = [NSString string];
-    for (NSDictionary* name in array) {
-        if ([result length])
-            result = [result stringByAppendingString:@", "];
-        result = [result stringByAppendingString:[name valueForKey:@"name"]];
+/**
+ *  Converts an array of NSDictionary to a single string
+ *  with the components separated by ", ".
+ *
+ *  @param array the array of strings.
+ *
+ *  @return a concatenated string.
+ */
+- (NSString *)stringFromArray:(NSArray<NSDictionary *> *)array key:(id)key {
+    NSMutableString *result = [NSMutableString string];
+
+    for (NSDictionary *name in array) {
+
+        if (result.length) {
+            [result appendString:@", "];
+        }
+
+        [result appendString:name[key]];
     }
-    return result;
+
+    return [[result copy] autorelease];
 }
 
-- (NSArray *) dictArrayFromString:(NSString *)data
-{
+/**
+ *  Splits a string into components separated by ",".
+ *
+ *  @param string to separate
+ *
+ *  @return an array of separated components.
+ */
+- (NSArray<NSDictionary *> *)dictArrayFromString:(NSString *)string key:(id)key {
     NSString *splitElements  = @",\\s*+";
-    NSArray *stringArray = [data MP42_componentsSeparatedByRegex:splitElements];
-    NSMutableArray *dictElements = [[[NSMutableArray alloc] init] autorelease];
+    NSArray *stringArray = [string MP42_componentsSeparatedByRegex:splitElements];
+
+    NSMutableArray *arrayElements = [NSMutableArray array];
+
     for (NSString *name in stringArray) {
-        [dictElements addObject:[NSDictionary dictionaryWithObject:name forKey:@"name"]];
+        [arrayElements addObject: @{ key: name}];
     }
-    return dictElements;
+
+    return arrayElements;
 }
 
 #pragma mark - Metadata conversion helpers
 
-- (NSString *) stringFromMetadata:(const char*)cString {
-    NSString *string;
+/**
+ *  Trys to create a NSString using various encoding.
+ *
+ *  @param cString the input string
+ *
+ *  @return a instances of NSString.
+ */
+- (NSString *)stringFromMetadata:(const char *)cString {
+    NSString *string = nil;
 
-    if ((string = [NSString stringWithCString:cString encoding: NSUTF8StringEncoding]))
+    if ((string = [NSString stringWithCString:cString encoding: NSUTF8StringEncoding])) {
         return string;
+    }
 
-    if ((string = [NSString stringWithCString:cString encoding: NSASCIIStringEncoding]))
+    if ((string = [NSString stringWithCString:cString encoding: NSASCIIStringEncoding])) {
         return string;
+    }
 
-    if ((string = [NSString stringWithCString:cString encoding: NSUTF16StringEncoding]))
+    if ((string = [NSString stringWithCString:cString encoding: NSUTF16StringEncoding])) {
         return string;
+    }
 
     return @"";
 }
 
-- (BOOL) setMediaKindFromString:(NSString *)mediaKindString;
-{
-    mediaKind_t *mediaKindList;
-    for (mediaKindList = (mediaKind_t*) mediaKind_strings; mediaKindList->english_name; mediaKindList++) {
+- (BOOL)setMediaKindFromString:(NSString *)mediaKindString {
+    for (mediaKind_t * mediaKindList = (mediaKind_t*) mediaKind_strings; mediaKindList->english_name; mediaKindList++) {
         if ([mediaKindString isEqualToString:mediaKindList->english_name]) {
             mediaKind = mediaKindList->stik;
             return YES;      
@@ -465,10 +489,8 @@ static const genreType_t genreType_strings[] = {
     return NO;
 }
 
-- (BOOL) setContentRatingFromString:(NSString *)contentRatingString;
-{
-    contentRating_t *contentRatingList;
-    for ( contentRatingList = (contentRating_t*) contentRating_strings; contentRatingList->english_name; contentRatingList++) {
+- (BOOL)setContentRatingFromString:(NSString *)contentRatingString {
+    for (contentRating_t *contentRatingList = (contentRating_t*) contentRating_strings; contentRatingList->english_name; contentRatingList++) {
         if ([contentRatingString isEqualToString:contentRatingList->english_name]) {
             contentRating = contentRatingList->rtng;
             return YES;      
@@ -477,12 +499,12 @@ static const genreType_t genreType_strings[] = {
     return NO;
 }
 
-- (BOOL) setArtworkFromFilePath:(NSString *)imageFilePath;
-{
-    if(imageFilePath != nil && [imageFilePath length] > 0) {
+- (BOOL)setArtworkFromFilePath:(NSString *)imageFilePath {
+    if (imageFilePath != nil && imageFilePath.length) {
         NSImage *artworkImage = nil;
         artworkImage = [[NSImage alloc] initByReferencingFile:imageFilePath];
-        if([artworkImage isValid]) {
+
+        if (artworkImage.isValid) {
             MP42Image *artwork = [[MP42Image alloc] initWithImage:artworkImage];
             [artworks addObject:artwork];
             [artworkImage release];
@@ -490,7 +512,8 @@ static const genreType_t genreType_strings[] = {
             isEdited =YES;
             isArtworkEdited = YES;
             return YES;
-        } else {
+        }
+        else {
             [artworkImage release];
             return NO;
         }
@@ -503,7 +526,7 @@ static const genreType_t genreType_strings[] = {
     }
 }
 
-- (NSString *) genreFromIndex: (NSInteger)index {
+- (NSString *)genreFromIndex:(NSInteger)index {
     if ((index >= 0 && index < 127) || index == 255) {
         genreType_t *genre = (genreType_t*) genreType_strings;
         genre += index - 1;
@@ -512,7 +535,7 @@ static const genreType_t genreType_strings[] = {
     else return nil;
 }
 
-- (NSInteger) genreIndexFromString: (NSString *)genreString {
+- (NSInteger)genreIndexFromString:(NSString *)genreString {
     NSInteger genreIndex = 0;
     genreType_t *genreList;
     NSInteger k = 0;
@@ -523,8 +546,7 @@ static const genreType_t genreType_strings[] = {
     return genreIndex;
 }
 
-- (NSArray<NSString *> *) availableGenres
-{
+- (NSArray<NSString *> *)availableGenres {
     return [NSArray arrayWithObjects:  @"Animation", @"Classic TV", @"Comedy", @"Drama", 
             @"Fitness & Workout", @"Kids", @"Non-Fiction", @"Reality TV", @"Sci-Fi & Fantasy",
             @"Sports", nil];
@@ -532,43 +554,38 @@ static const genreType_t genreType_strings[] = {
 
 #pragma mark - Mutators
 
-- (BOOL) mergeMetadata: (MP42Metadata *)newMetadata
-{
+- (void)mergeMetadata:(MP42Metadata *)metadata {
     NSString *tagValue;
 
-    [newMetadata retain];
+    [metadata retain];
 
     for (NSString *key in [self writableMetadata]) {
-        if ((tagValue = [newMetadata.tagsDict valueForKey:key])) {
+        if ((tagValue = metadata.tagsDict[key])) {
             [tagsDict setObject:tagValue forKey:key];
         }
     }
 
-    for (MP42Image *artwork in newMetadata.artworks) {
+    for (MP42Image *artwork in metadata.artworks) {
         isArtworkEdited = YES;
         [artworks addObject:artwork];
     }
 
-    mediaKind = newMetadata.mediaKind;
-    contentRating = newMetadata.contentRating;
-    gapless = newMetadata.gapless;
-    hdVideo = newMetadata.hdVideo;
+    mediaKind = metadata.mediaKind;
+    contentRating = metadata.contentRating;
+    gapless = metadata.gapless;
+    hdVideo = metadata.hdVideo;
 
     isEdited = YES;
 
-    [newMetadata release];
-    
-    return YES;
+    [metadata release];
 }
 
-- (void) removeTagForKey:(NSString *)aKey
-{
+- (void)removeTagForKey:(NSString *)aKey {
     [tagsDict removeObjectForKey:aKey];
     isEdited = YES;
 }
 
-- (BOOL) setTag:(id)value forKey:(NSString *)key;
-{
+- (BOOL)setTag:(id)value forKey:(NSString *)key {
     BOOL noErr = YES;
     NSString *regexPositive = @"YES|Yes|yes|1|2";
 
@@ -685,7 +702,7 @@ static const genreType_t genreType_strings[] = {
     } else if ([key isEqualToString:@"Artwork"]) {
         [self setArtworkFromFilePath:value];
 
-	} else if (![[tagsDict valueForKey:key] isEqualTo:value]) {
+	} else if (![tagsDict[key] isEqualTo:value]) {
         [tagsDict setValue:value forKey:key];
         isEdited = YES;
 
@@ -696,13 +713,11 @@ static const genreType_t genreType_strings[] = {
     return noErr;
 }
 
-- (id)objectForKeyedSubscript:(NSString *)key
-{
+- (id)objectForKeyedSubscript:(NSString *)key {
     return [self.tagsDict objectForKey:key];
 }
 
-- (void)setObject:(id)obj forKeyedSubscript:(NSString *)key
-{
+- (void)setObject:(id)obj forKeyedSubscript:(NSString *)key {
     if (obj == nil) {
         [self removeTagForKey:key];
     }
@@ -713,8 +728,7 @@ static const genreType_t genreType_strings[] = {
 
 #pragma mark - MP42Foundation/mp4v2 read/write mapping
 
--(void) readMetaDataFromFileHandle:(MP4FileHandle)sourceHandle
-{
+- (void)readMetaDataFromFileHandle:(MP4FileHandle)sourceHandle {
     const MP4Tags *tags = MP4TagsAlloc();
     MP4TagsFetch (tags, sourceHandle);
 
@@ -987,8 +1001,7 @@ static const genreType_t genreType_strings[] = {
                      forKey:@"Category"];
 
     if (tags->artwork) {
-        uint32_t i;
-        for (i = 0; i < tags->artworkCount; i++) {
+        for (uint32_t i = 0; i < tags->artworkCount; i++) {
             MP42Image *artwork = [[MP42Image alloc] initWithBytes:tags->artwork[i].data length:tags->artwork[i].size type:tags->artwork[i].type];
             [artworks addObject:artwork];
             [artwork release];
@@ -997,41 +1010,53 @@ static const genreType_t genreType_strings[] = {
 
     MP4TagsFree(tags);
 
-    /* read the remaining iTMF items */
-    MP4ItmfItemList* list = MP4ItmfGetItemsByMeaning(sourceHandle, "com.apple.iTunes", "iTunEXTC");
+    // read the remaining iTMF items
+    MP4ItmfItemList *list = MP4ItmfGetItemsByMeaning(sourceHandle, "com.apple.iTunes", "iTunEXTC");
     if (list) {
-        uint32_t i;
-        for (i = 0; i < list->size; i++) {
-            MP4ItmfItem* item = &list->elements[i];
-            uint32_t j;
-            for (j = 0; j < item->dataList.size; j++) {
-                MP4ItmfData* data = &item->dataList.elements[j];
+
+        for (uint32_t i = 0; i < list->size; i++) {
+
+            MP4ItmfItem *item = &list->elements[i];
+
+            for (uint32_t j = 0; j < item->dataList.size; j++) {
+
+                MP4ItmfData *data = &item->dataList.elements[j];
+
                 NSString *ratingString = [[NSString alloc] initWithBytes:data->value length: data->valueSize encoding:NSUTF8StringEncoding];
+
                 NSString *splitElements  = @"\\|";
                 NSArray *ratingItems = [ratingString MP42_componentsSeparatedByRegex:splitElements];
+
                 [ratingString release];
+
                 if (ratingItems.count > 2) {
                     ratingiTunesCode = [[NSString stringWithFormat:@"%@|%@|%@|",ratingItems[0], ratingItems[1], ratingItems[2]] retain];
-                } else {
+                }
+                else {
                     ratingiTunesCode = nil;
                 }
 
 				[tagsDict setObject:[NSNumber numberWithUnsignedInteger:[[MP42Ratings defaultManager] ratingIndexForiTunesCode:ratingiTunesCode]] forKey:@"Rating"];
-                if ([ratingItems count] >= 4)
-                    [tagsDict setObject:[ratingItems objectAtIndex:3] forKey:@"Rating Annotation"];
+
+                if (ratingItems.count >= 4) {
+                    tagsDict[@"Rating Annotation"] = ratingItems[3];
+                }
             }
         }
+
         MP4ItmfItemListFree(list);
     }
 
     list = MP4ItmfGetItemsByMeaning(sourceHandle, "com.apple.iTunes", "iTunMOVI");
     if (list) {
-        uint32_t i;
-        for (i = 0; i < list->size; i++) {
-            MP4ItmfItem* item = &list->elements[i];
-            uint32_t j;
-            for(j = 0; j < item->dataList.size; j++) {
-                MP4ItmfData* data = &item->dataList.elements[j];
+
+        for (uint32_t i = 0; i < list->size; i++) {
+
+            MP4ItmfItem *item = &list->elements[i];
+
+            for (uint32_t j = 0; j < item->dataList.size; j++) {
+
+                MP4ItmfData *data = &item->dataList.elements[j];
                 NSData *xmlData = [NSData dataWithBytes:data->value length:data->valueSize];
                 NSDictionary *dma = (NSDictionary *)[NSPropertyListSerialization
                                                          propertyListFromData:xmlData
@@ -1039,299 +1064,295 @@ static const genreType_t genreType_strings[] = {
                                                          format:nil
                                                          errorDescription:nil];
                 
-                NSString *tag;
-                if ([tag = [self stringFromArray:[dma valueForKey:@"cast"]] length])
-                    [tagsDict setObject:tag forKey:@"Cast"];
-                if ([tag = [self stringFromArray:[dma valueForKey:@"directors"]] length])
-                    [tagsDict setObject:tag forKey:@"Director"];
-                if ([tag = [self stringFromArray:[dma valueForKey:@"codirectors"]] length])
-                    [tagsDict setObject:tag forKey:@"Codirector"];
-                if ([tag = [self stringFromArray:[dma valueForKey:@"producers"]] length])
-                    [tagsDict setObject:tag forKey:@"Producers"];
-                if ([tag = [self stringFromArray:[dma valueForKey:@"screenwriters"]] length])
-                    [tagsDict setObject:tag forKey:@"Screenwriters"];
-                if ([tag = [dma valueForKey:@"studio"] length])
-                    [tagsDict setObject:tag forKey:@"Studio"];
+                NSString *tag = nil;
+
+                if ([tag = [self stringFromArray:dma[@"cast"] key:@"name"] length]) {
+                    tagsDict[@"Cast"] = tag;
+                }
+
+                if ([tag = [self stringFromArray:dma[@"directors"] key:@"name"] length]) {
+                    tagsDict[@"Director"] = tag;
+                }
+
+                if ([tag = [self stringFromArray:dma[@"codirectors"] key:@"name"] length]) {
+                    tagsDict[@"Codirector"] = tag;
+                }
+
+                if ([tag = [self stringFromArray:dma[@"producers"] key:@"name"] length]) {
+                    tagsDict[@"Producers"] = tag;
+                }
+
+                if ([tag = [self stringFromArray:dma[@"screenwriters"] key:@"name"] length]) {
+                    tagsDict[@"Screenwriters"] = tag;
+                }
+
+                if ([tag = dma[@"studio"] length]) {
+                    tagsDict[@"Studio"] = tag;
+                }
             }
         }
+
         MP4ItmfItemListFree(list);
     }
 }
 
-- (BOOL) writeMetadataWithFileHandle: (MP4FileHandle)fileHandle
+- (BOOL)writeMetadataWithFileHandle:(MP4FileHandle)fileHandle
 {
-    if (!fileHandle)
-        return NO;
+    NSParameterAssert(fileHandle);
 
     const MP4Tags *tags = MP4TagsAlloc();
-
     MP4TagsFetch(tags, fileHandle);
 
-    MP4TagsSetName(tags, [[tagsDict valueForKey:@"Name"] UTF8String]);
+    MP4TagsSetName          (tags, [tagsDict[@"Name"] UTF8String]);
+    MP4TagsSetArtist        (tags, [tagsDict[@"Artist"] UTF8String]);
+    MP4TagsSetAlbumArtist   (tags, [tagsDict[@"Album Artist"] UTF8String]);
+    MP4TagsSetAlbum         (tags, [tagsDict[@"Album"] UTF8String]);
+    MP4TagsSetGrouping      (tags, [tagsDict[@"Grouping"] UTF8String]);
+    MP4TagsSetComposer      (tags, [tagsDict[@"Composer"] UTF8String]);
+    MP4TagsSetComments      (tags, [tagsDict[@"Comments"] UTF8String]);
 
-    MP4TagsSetArtist(tags, [[tagsDict valueForKey:@"Artist"] UTF8String]);
-
-    MP4TagsSetAlbumArtist(tags, [[tagsDict valueForKey:@"Album Artist"] UTF8String]);
-
-    MP4TagsSetAlbum(tags, [[tagsDict valueForKey:@"Album"] UTF8String]);
-
-    MP4TagsSetGrouping(tags, [[tagsDict valueForKey:@"Grouping"] UTF8String]);
-
-    MP4TagsSetComposer(tags, [[tagsDict valueForKey:@"Composer"] UTF8String]);
-
-    MP4TagsSetComments(tags, [[tagsDict valueForKey:@"Comments"] UTF8String]);
-
-    uint16_t genreType = [self genreIndexFromString:[tagsDict valueForKey:@"Genre"]];
+    uint16_t genreType = [self genreIndexFromString:tagsDict[@"Genre"]];
     if (genreType) {
         MP4TagsSetGenre(tags, NULL);
         MP4TagsSetGenreType(tags, &genreType);
     }
     else {
         MP4TagsSetGenreType(tags, NULL);
-        MP4TagsSetGenre(tags, [[tagsDict valueForKey:@"Genre"] UTF8String]);
+        MP4TagsSetGenre(tags, [tagsDict[@"Genre"] UTF8String]);
     }
 
-    MP4TagsSetReleaseDate(tags, [[tagsDict valueForKey:@"Release Date"] UTF8String]);
+    MP4TagsSetReleaseDate(tags, [tagsDict[@"Release Date"] UTF8String]);
 
-    if ([tagsDict valueForKey:@"Track #"]) {
+    if (tagsDict[@"Track #"]) {
         MP4TagTrack dtrack; int trackNum = 0, totalTrackNum = 0;
         char separator[3];
-        sscanf([[tagsDict valueForKey:@"Track #"] UTF8String],"%u%[/- ]%u", &trackNum, separator, &totalTrackNum);
+
+        sscanf([tagsDict[@"Track #"] UTF8String],"%u%[/- ]%u", &trackNum, separator, &totalTrackNum);
         dtrack.index = trackNum;
         dtrack.total = totalTrackNum;
+
         MP4TagsSetTrack(tags, &dtrack);
     }
-    else
+    else {
         MP4TagsSetTrack(tags, NULL);
+    }
     
-    if ([tagsDict valueForKey:@"Disk #"]) {
+    if (tagsDict[@"Disk #"]) {
         MP4TagDisk ddisk; int diskNum = 0, totalDiskNum = 0;
         char separator[3];
-        sscanf([[tagsDict valueForKey:@"Disk #"] UTF8String],"%u%[/- ]%u", &diskNum, separator, &totalDiskNum);
+
+        sscanf([tagsDict[@"Disk #"] UTF8String],"%u%[/- ]%u", &diskNum, separator, &totalDiskNum);
         ddisk.index = diskNum;
         ddisk.total = totalDiskNum;
+
         MP4TagsSetDisk(tags, &ddisk);
     }
-    else
-        MP4TagsSetDisk(tags, NULL);    
+    else {
+        MP4TagsSetDisk(tags, NULL);
+    }
     
-    if ([tagsDict valueForKey:@"Tempo"]) {
-        const uint16_t i = [[tagsDict valueForKey:@"Tempo"] integerValue];
+    if (tagsDict[@"Tempo"]) {
+        const uint16_t i = [tagsDict[@"Tempo"] integerValue];
         MP4TagsSetTempo(tags, &i);
     }
-    else
+    else {
         MP4TagsSetTempo(tags, NULL);
+    }
 
-    MP4TagsSetTrackSubTitle(tags, [[tagsDict valueForKey:@"Track Sub-Title"] UTF8String]);
+    MP4TagsSetTrackSubTitle    (tags, [tagsDict[@"Track Sub-Title"] UTF8String]);
+    MP4TagsSetSongDescription  (tags, [tagsDict[@"Song Description"] UTF8String]);
+    MP4TagsSetArtDirector      (tags, [tagsDict[@"Art Director"] UTF8String]);
+    MP4TagsSetArranger         (tags, [tagsDict[@"Arranger"] UTF8String]);
+    MP4TagsSetLyricist         (tags, [tagsDict[@"Lyricist"] UTF8String]);
+    MP4TagsSetAcknowledgement  (tags, [tagsDict[@"Acknowledgement"] UTF8String]);
+    MP4TagsSetConductor        (tags, [tagsDict[@"Conductor"] UTF8String]);
+    MP4TagsSetLinearNotes      (tags, [tagsDict[@"Linear Notes"] UTF8String]);
+    MP4TagsSetRecordCompany    (tags, [tagsDict[@"Record Company"] UTF8String]);
+    MP4TagsSetOriginalArtist   (tags, [tagsDict[@"Original Artist"] UTF8String]);
+    MP4TagsSetPhonogramRights  (tags, [tagsDict[@"Phonogram Rights"] UTF8String]);
+    MP4TagsSetProducer         (tags, [tagsDict[@"Producer"] UTF8String]);
+    MP4TagsSetPerformer        (tags, [tagsDict[@"Performer"] UTF8String]);
+    MP4TagsSetPublisher        (tags, [tagsDict[@"Publisher"] UTF8String]);
+    MP4TagsSetSoundEngineer    (tags, [tagsDict[@"Sound Engineer"] UTF8String]);
+    MP4TagsSetSoloist          (tags, [tagsDict[@"Soloist"] UTF8String]);
+    MP4TagsSetCredits          (tags, [tagsDict[@"Credits"] UTF8String]);
+    MP4TagsSetThanks           (tags, [tagsDict[@"Thanks"] UTF8String]);
+    MP4TagsSetOnlineExtras     (tags, [tagsDict[@"Online Extras"] UTF8String]);
+    MP4TagsSetExecutiveProducer(tags, [tagsDict[@"Executive Producer"] UTF8String]);
+    MP4TagsSetTVShow           (tags, [tagsDict[@"TV Show"] UTF8String]);
+    MP4TagsSetTVNetwork        (tags, [tagsDict[@"TV Network"] UTF8String]);
+    MP4TagsSetTVEpisodeID      (tags, [tagsDict[@"TV Episode ID"] UTF8String]);
 
-    MP4TagsSetSongDescription(tags, [[tagsDict valueForKey:@"Song Description"] UTF8String]);
-
-    MP4TagsSetArtDirector(tags, [[tagsDict valueForKey:@"Art Director"] UTF8String]);
-
-    MP4TagsSetArranger(tags, [[tagsDict valueForKey:@"Arranger"] UTF8String]);
-
-    MP4TagsSetLyricist(tags, [[tagsDict valueForKey:@"Lyricist"] UTF8String]);
-
-    MP4TagsSetAcknowledgement(tags, [[tagsDict valueForKey:@"Acknowledgement"] UTF8String]);
-
-    MP4TagsSetConductor(tags, [[tagsDict valueForKey:@"Conductor"] UTF8String]);
-
-    MP4TagsSetLinearNotes(tags, [[tagsDict valueForKey:@"Linear Notes"] UTF8String]);
-
-    MP4TagsSetRecordCompany(tags, [[tagsDict valueForKey:@"Record Company"] UTF8String]);
-
-    MP4TagsSetOriginalArtist(tags, [[tagsDict valueForKey:@"Original Artist"] UTF8String]);
-
-    MP4TagsSetPhonogramRights(tags, [[tagsDict valueForKey:@"Phonogram Rights"] UTF8String]);
-
-    MP4TagsSetProducer(tags, [[tagsDict valueForKey:@"Producer"] UTF8String]);
-
-    MP4TagsSetPerformer(tags, [[tagsDict valueForKey:@"Performer"] UTF8String]);
-
-    MP4TagsSetPublisher(tags, [[tagsDict valueForKey:@"Publisher"] UTF8String]);
-
-    MP4TagsSetSoundEngineer(tags, [[tagsDict valueForKey:@"Sound Engineer"] UTF8String]);
-
-    MP4TagsSetSoloist(tags, [[tagsDict valueForKey:@"Soloist"] UTF8String]);
-
-    MP4TagsSetCredits(tags, [[tagsDict valueForKey:@"Credits"] UTF8String]);
-
-    MP4TagsSetThanks(tags, [[tagsDict valueForKey:@"Thanks"] UTF8String]);
-
-    MP4TagsSetOnlineExtras(tags, [[tagsDict valueForKey:@"Online Extras"] UTF8String]);
-
-    MP4TagsSetExecutiveProducer(tags, [[tagsDict valueForKey:@"Executive Producer"] UTF8String]);
-
-    MP4TagsSetTVShow(tags, [[tagsDict valueForKey:@"TV Show"] UTF8String]);
-
-    MP4TagsSetTVNetwork(tags, [[tagsDict valueForKey:@"TV Network"] UTF8String]);
-
-    MP4TagsSetTVEpisodeID(tags, [[tagsDict valueForKey:@"TV Episode ID"] UTF8String]);
-
-    if ([tagsDict valueForKey:@"TV Season"]) {
-        const uint32_t i = [[tagsDict valueForKey:@"TV Season"] intValue];
+    if (tagsDict[@"TV Season"]) {
+        const uint32_t i = [tagsDict[@"TV Season"] intValue];
         MP4TagsSetTVSeason(tags, &i);
     }
-    else
+    else {
         MP4TagsSetTVSeason(tags, NULL);
+    }
 
-    if ([tagsDict valueForKey:@"TV Episode #"]) {
-        const uint32_t i = [[tagsDict valueForKey:@"TV Episode #"] intValue];
+    if (tagsDict[@"TV Episode #"]) {
+        const uint32_t i = [tagsDict[@"TV Episode #"] intValue];
         MP4TagsSetTVEpisode(tags, &i);
     }
-    else
+    else {
         MP4TagsSetTVEpisode(tags, NULL);
+    }
 
-    MP4TagsSetDescription(tags, [[tagsDict valueForKey:@"Description"] UTF8String]);
+    MP4TagsSetDescription       (tags, [tagsDict[@"Description"] UTF8String]);
+    MP4TagsSetLongDescription   (tags, [tagsDict[@"Long Description"] UTF8String]);
+    MP4TagsSetSeriesDescription (tags, [tagsDict[@"Series Description"] UTF8String]);
+    MP4TagsSetLyrics            (tags, [tagsDict[@"Lyrics"] UTF8String]);
+    MP4TagsSetCopyright         (tags, [tagsDict[@"Copyright"] UTF8String]);
+    MP4TagsSetEncodingTool      (tags, [tagsDict[@"Encoding Tool"] UTF8String]);
+    MP4TagsSetEncodedBy         (tags, [tagsDict[@"Encoded By"] UTF8String]);
+    MP4TagsSetPurchaseDate      (tags, [tagsDict[@"Purchase Date"] UTF8String]);
+    MP4TagsSetITunesAccount     (tags, [tagsDict[@"iTunes Account"] UTF8String]);
 
-    MP4TagsSetLongDescription(tags, [[tagsDict valueForKey:@"Long Description"] UTF8String]);
-    
-    MP4TagsSetSeriesDescription(tags, [[tagsDict valueForKey:@"Series Description"] UTF8String]);
-
-    MP4TagsSetLyrics(tags, [[tagsDict valueForKey:@"Lyrics"] UTF8String]);
-
-    MP4TagsSetCopyright(tags, [[tagsDict valueForKey:@"Copyright"] UTF8String]);
-
-    MP4TagsSetEncodingTool(tags, [[tagsDict valueForKey:@"Encoding Tool"] UTF8String]);
-
-    MP4TagsSetEncodedBy(tags, [[tagsDict valueForKey:@"Encoded By"] UTF8String]);
-
-    MP4TagsSetPurchaseDate(tags, [[tagsDict valueForKey:@"Purchase Date"] UTF8String]);
-
-    MP4TagsSetITunesAccount(tags, [[tagsDict valueForKey:@"iTunes Account"] UTF8String]);
-
-    if (mediaKind != 0)
+    if (mediaKind != 0) {
         MP4TagsSetMediaType(tags, &mediaKind);
-    else
+    }
+    else {
         MP4TagsSetMediaType(tags, NULL);
+    }
 
     if (mediaKind == 21) {
         const uint8_t n = 1;
         MP4TagsSetPodcast(tags, &n);
     }
-    else
+    else {
         MP4TagsSetPodcast(tags, NULL);
+    }
 
     if (mediaKind == 23) {
         const uint8_t n = 1;
         MP4TagsSetITunesU(tags, &n);
     }
-    else
+    else {
         MP4TagsSetITunesU(tags, NULL);
+    }
 
-    if(hdVideo)
+    if (hdVideo) {
         MP4TagsSetHDVideo(tags, &hdVideo);
-    else
+    }
+    else {
         MP4TagsSetHDVideo(tags, NULL);
+    }
     
-    if(gapless)
+    if (gapless) {
         MP4TagsSetGapless(tags, &gapless);
-    else
+    }
+    else {
         MP4TagsSetGapless(tags, NULL);
+    }
     
-    if(podcast)
+    if (podcast) {
         MP4TagsSetPodcast(tags, &podcast);
-    else
+    }
+    else {
         MP4TagsSetPodcast(tags, NULL);
+    }
 
-    MP4TagsSetKeywords(tags, [[tagsDict valueForKey:@"Keywords"] UTF8String]);
-
-    MP4TagsSetCategory(tags, [[tagsDict valueForKey:@"Category"] UTF8String]);
+    MP4TagsSetKeywords(tags, [tagsDict[@"Keywords"] UTF8String]);
+    MP4TagsSetCategory(tags, [tagsDict[@"Category"] UTF8String]);
 
     MP4TagsSetContentRating(tags, &contentRating);
 
-    if ([tagsDict valueForKey:@"iTunes Country"]) {
-        const uint32_t i = [[tagsDict valueForKey:@"iTunes Country"] integerValue];
+    if (tagsDict[@"iTunes Country"]) {
+        const uint32_t i = [tagsDict[@"iTunes Country"] integerValue];
         MP4TagsSetITunesCountry(tags, &i);
     }
-    else
-        MP4TagsSetITunesCountry(tags, NULL);    
+    else {
+        MP4TagsSetITunesCountry(tags, NULL);
+    }
 
-    if ([tagsDict valueForKey:@"contentID"]) {
-        const uint32_t i = [[tagsDict valueForKey:@"contentID"] integerValue];
+    if (tagsDict[@"contentID"]) {
+        const uint32_t i = [tagsDict[@"contentID"] integerValue];
         MP4TagsSetContentID(tags, &i);
     }
-    else
+    else {
         MP4TagsSetContentID(tags, NULL);
+    }
 
-    if ([tagsDict valueForKey:@"genreID"]) {
-        const uint32_t i = [[tagsDict valueForKey:@"genreID"] integerValue];
+    if (tagsDict[@"genreID"]) {
+        const uint32_t i = [tagsDict[@"genreID"] integerValue];
         MP4TagsSetGenreID(tags, &i);
     }
-    else
+    else {
         MP4TagsSetGenreID(tags, NULL);
+    }
 
-    if ([tagsDict valueForKey:@"artistID"]) {
-        const uint32_t i = [[tagsDict valueForKey:@"artistID"] integerValue];
+    if (tagsDict[@"artistID"]) {
+        const uint32_t i = [tagsDict[@"artistID"] integerValue];
         MP4TagsSetArtistID(tags, &i);
     }
-    else
+    else {
         MP4TagsSetArtistID(tags, NULL);
+    }
 
-    if ([tagsDict valueForKey:@"playlistID"]) {
-        const uint64_t i = [[tagsDict valueForKey:@"playlistID"] integerValue];
+    if (tagsDict[@"playlistID"]) {
+        const uint64_t i = [tagsDict[@"playlistID"] integerValue];
         MP4TagsSetPlaylistID(tags, &i);
     }
-    else
+    else {
         MP4TagsSetPlaylistID(tags, NULL);
+    }
 
-    if ([tagsDict valueForKey:@"composerID"]) {
-        const uint32_t i = [[tagsDict valueForKey:@"composerID"] integerValue];
+    if (tagsDict[@"composerID"]) {
+        const uint32_t i = [tagsDict[@"composerID"] integerValue];
         MP4TagsSetComposerID(tags, &i);
     }
-    else
+    else {
         MP4TagsSetComposerID(tags, NULL);
+    }
 
-    MP4TagsSetXID(tags, [[tagsDict valueForKey:@"XID"] UTF8String]);
+    MP4TagsSetXID            (tags, [tagsDict[@"XID"] UTF8String]);
+    MP4TagsSetSortName       (tags, [tagsDict[@"Sort Name"] UTF8String]);
+    MP4TagsSetSortArtist     (tags, [tagsDict[@"Sort Artist"] UTF8String]);
+    MP4TagsSetSortAlbumArtist(tags, [tagsDict[@"Sort Album Artist"] UTF8String]);
+    MP4TagsSetSortAlbum      (tags, [tagsDict[@"Sort Album"] UTF8String]);
+    MP4TagsSetSortComposer   (tags, [tagsDict[@"Sort Composer"] UTF8String]);
+    MP4TagsSetSortTVShow     (tags, [tagsDict[@"Sort TV Show"] UTF8String]);
 
-    MP4TagsSetSortName(tags, [[tagsDict valueForKey:@"Sort Name"] UTF8String]);
-
-    MP4TagsSetSortArtist(tags, [[tagsDict valueForKey:@"Sort Artist"] UTF8String]);
-
-    MP4TagsSetSortAlbumArtist(tags, [[tagsDict valueForKey:@"Sort Album Artist"] UTF8String]);
-
-    MP4TagsSetSortAlbum(tags, [[tagsDict valueForKey:@"Sort Album"] UTF8String]);
-
-    MP4TagsSetSortComposer(tags, [[tagsDict valueForKey:@"Sort Composer"] UTF8String]);
-
-    MP4TagsSetSortTVShow(tags, [[tagsDict valueForKey:@"Sort TV Show"] UTF8String]);
-
-    
     if (isArtworkEdited) {
-        uint32_t j;
-        for (j = 0; j < tags->artworkCount; j++)
+
+        for (uint32_t j = 0; j < tags->artworkCount; j++) {
             MP4TagsRemoveArtwork(tags, j);
-        
-        if ([artworks count]) {
-            uint32_t i;
-            for (i = 0; i < [artworks count]; i++) {
-                MP42Image *artwork;
-                MP4TagArtwork newArtwork;
+        }
 
-                artwork = [artworks objectAtIndex:i];
-                if (artwork.data) {
-                    newArtwork.data = (void *)[artwork.data bytes];
-                    newArtwork.size = [artwork.data length];
-                    newArtwork.type = artwork.type;
-                }
-                else {
-                    NSArray *representations = [artwork.image representations];
-                    if (representations.count) {
-                        NSData *bitmapData = [NSBitmapImageRep representationOfImageRepsInArray:representations
-                                                                                      usingType:NSPNGFileType properties:@{}];
+        for (uint32_t i = 0; i < artworks.count; i++) {
+            MP42Image *artwork;
+            MP4TagArtwork newArtwork;
 
-                        if (bitmapData) {
-                            newArtwork.data = (void *)[bitmapData bytes];
-                            newArtwork.size = [bitmapData length];
-                            newArtwork.type = MP4_ART_PNG;
-                        }
+            artwork = artworks[i];
+
+            if (artwork.data) {
+
+                newArtwork.data = (void *)artwork.data.bytes;
+                newArtwork.size = artwork.data.length;
+                newArtwork.type = artwork.type;
+            }
+            else {
+
+                NSArray<NSImageRep *> *representations = artwork.image.representations;
+
+                if (representations.count) {
+                    NSData *bitmapData = [NSBitmapImageRep representationOfImageRepsInArray:representations
+                                                                                  usingType:NSPNGFileType properties:@{}];
+
+                    if (bitmapData) {
+                        newArtwork.data = (void *)bitmapData.bytes;
+                        newArtwork.size = bitmapData.length;
+                        newArtwork.type = MP4_ART_PNG;
                     }
                 }
-                
-                if (tags->artworkCount > i)
-                    MP4TagsSetArtwork(tags, i, &newArtwork);
-                else
-                    MP4TagsAddArtwork(tags, &newArtwork);
+            }
+
+            if (tags->artworkCount > i) {
+                MP4TagsSetArtwork(tags, i, &newArtwork);
+            }
+            else {
+                MP4TagsAddArtwork(tags, &newArtwork);
             }
         }
     }
@@ -1339,10 +1360,11 @@ static const genreType_t genreType_strings[] = {
     MP4TagsStore(tags, fileHandle);
     MP4TagsFree(tags);
 
-    /* Rewrite extended metadata using the generic iTMF api */
+    // Rewrite extended metadata using the generic iTMF api
 
-    if ([tagsDict valueForKey:@"Rating"]) {
-        MP4ItmfItemList  *list = MP4ItmfGetItemsByMeaning(fileHandle, "com.apple.iTunes", "iTunEXTC");
+    if (tagsDict[@"Rating"]) {
+
+        MP4ItmfItemList *list = MP4ItmfGetItemsByMeaning(fileHandle, "com.apple.iTunes", "iTunEXTC");
         if (list) {
             for (uint32_t i = 0; i < list->size; i++) {
                 MP4ItmfItem *item = &list->elements[i];
@@ -1361,20 +1383,20 @@ static const genreType_t genreType_strings[] = {
         NSArray *iTunesCodes = [[MP42Ratings defaultManager] iTunesCodes];
 
         // This whole thing is extremely convoluted and wrong in some cases.
-        if (![[tagsDict valueForKey:@"Rating"] isKindOfClass:[NSNumber class]] ||
-            [[tagsDict valueForKey:@"Rating"] unsignedIntegerValue] == [[MP42Ratings defaultManager] unknownIndex]) {
+        if (![tagsDict[@"Rating"] isKindOfClass:[NSNumber class]] ||
+            [tagsDict[@"Rating"] unsignedIntegerValue] == [[MP42Ratings defaultManager] unknownIndex]) {
             if (!ratingString) {
                 ratingString = [iTunesCodes objectAtIndex:[[MP42Ratings defaultManager] unknownIndex]];
             }
         } else {
-            NSUInteger index = [[tagsDict valueForKey:@"Rating"] unsignedIntegerValue];
+            NSUInteger index = [tagsDict[@"Rating"] unsignedIntegerValue];
             if (iTunesCodes.count > index) {
-                ratingString = [iTunesCodes objectAtIndex:[[tagsDict valueForKey:@"Rating"] unsignedIntegerValue]];
+                ratingString = [iTunesCodes objectAtIndex:[tagsDict[@"Rating"] unsignedIntegerValue]];
             }
         }
 
-        if ([[tagsDict valueForKey:@"Rating Annotation"] length] && [ratingString length]) {
-			ratingString = [NSString stringWithFormat:@"%@%@", ratingString, [tagsDict valueForKey:@"Rating Annotation"]];
+        if ([tagsDict[@"Rating Annotation"] length] && [ratingString length]) {
+			ratingString = [NSString stringWithFormat:@"%@%@", ratingString, tagsDict[@"Rating Annotation"]];
 		}
 
         if (ratingString) {
@@ -1423,35 +1445,47 @@ static const genreType_t genreType_strings[] = {
     }
 
     if (iTunMovi) {
-        if ([tagsDict valueForKey:@"Cast"])
-            [iTunMovi setObject:[self dictArrayFromString:[tagsDict valueForKey:@"Cast"]] forKey:@"cast"];
-        else
+        if (tagsDict[@"Cast"]) {
+            [iTunMovi setObject:[self dictArrayFromString:tagsDict[@"Cast"] key:@"name"] forKey:@"cast"];
+        }
+        else {
             [iTunMovi removeObjectForKey:@"cast"];
+        }
 
-        if ([tagsDict valueForKey:@"Director"])
-            [iTunMovi setObject:[self dictArrayFromString:[tagsDict valueForKey:@"Director"]] forKey:@"directors"];
-        else
+        if (tagsDict[@"Director"]) {
+            [iTunMovi setObject:[self dictArrayFromString:tagsDict[@"Director"] key:@"name"] forKey:@"directors"];
+        }
+        else {
             [iTunMovi removeObjectForKey:@"directors"];
+        }
 
-        if ([tagsDict valueForKey:@"Codirector"])
-            [iTunMovi setObject:[self dictArrayFromString:[tagsDict valueForKey:@"Codirector"]] forKey:@"codirectors"];
-        else
+        if (tagsDict[@"Codirector"]) {
+            [iTunMovi setObject:[self dictArrayFromString:tagsDict[@"Codirector"] key:@"name"] forKey:@"codirectors"];
+        }
+        else {
             [iTunMovi removeObjectForKey:@"codirectors"];
+        }
 
-        if ([tagsDict valueForKey:@"Producers"])
-            [iTunMovi setObject:[self dictArrayFromString:[tagsDict valueForKey:@"Producers"]] forKey:@"producers"];
-        else
+        if (tagsDict[@"Producers"]) {
+            [iTunMovi setObject:[self dictArrayFromString:tagsDict[@"Producers"] key:@"name"] forKey:@"producers"];
+        }
+        else {
             [iTunMovi removeObjectForKey:@"producers"];
+        }
 
-        if ([tagsDict valueForKey:@"Screenwriters"])
-            [iTunMovi setObject:[self dictArrayFromString:[tagsDict valueForKey:@"Screenwriters"]] forKey:@"screenwriters"];
-        else
+        if (tagsDict[@"Screenwriters"]) {
+            [iTunMovi setObject:[self dictArrayFromString:tagsDict[@"Screenwriters"] key:@"name"] forKey:@"screenwriters"];
+        }
+        else {
             [iTunMovi removeObjectForKey:@"screenwriters"];
+        }
 
-        if ([tagsDict valueForKey:@"Studio"])
-            [iTunMovi setObject:[tagsDict valueForKey:@"Studio"] forKey:@"studio"];
-        else
+        if (tagsDict[@"Studio"]) {
+            [iTunMovi setObject:tagsDict[@"Studio"] forKey:@"studio"];
+        }
+        else {
             [iTunMovi removeObjectForKey:@"studio"];
+        }
 
         NSData *serializedPlist = [NSPropertyListSerialization
                                         dataFromPropertyList:iTunMovi
@@ -1560,8 +1594,9 @@ static const genreType_t genreType_strings[] = {
 {
     MP42Metadata *newObject = [[MP42Metadata allocWithZone:zone] init];
 
-    if (presetName)
+    if (presetName) {
         newObject.presetName = presetName;
+    }
 
     [newObject mergeMetadata:self];
 
