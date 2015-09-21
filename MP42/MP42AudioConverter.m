@@ -342,9 +342,6 @@ OSStatus DecoderDataProc(AudioConverterRef              inAudioConverter,
     // Set up our fifo
     int ringbuffer_len = sampleRate * FIFO_DURATION * 4 * 23;
     sfifo_init(&fifo, ringbuffer_len );
-    bufferSize = ringbuffer_len >> 1;
-    buffer = (unsigned char *)malloc(bufferSize);
-
     decoderData.fifo = &fifo;
 
     // Check if we need to do any downmix

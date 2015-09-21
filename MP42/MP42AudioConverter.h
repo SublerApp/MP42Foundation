@@ -53,8 +53,6 @@ struct AudioFileIO
     NSThread *decoderThread;
     NSThread *encoderThread;
 
-    unsigned char *buffer;
-    int bufferSize;
     sfifo_t fifo;
 
     BOOL readerDone;
@@ -69,10 +67,10 @@ struct AudioFileIO
     NSUInteger  layout;
     hb_chan_map_t *ichanmap;
 
-    MP42Fifo<MP42SampleBuffer *>    *_inputSamplesBuffer;
-    MP42Fifo<MP42SampleBuffer *>    *_outputSamplesBuffer;
+    MP42Fifo<MP42SampleBuffer *> *_inputSamplesBuffer;
+    MP42Fifo<MP42SampleBuffer *> *_outputSamplesBuffer;
 
-    NSData * outputMagicCookie;
+    NSData *outputMagicCookie;
 
     struct AudioFileIO decoderData;
     struct AudioFileIO encoderData;
