@@ -593,7 +593,7 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
         char *string = (char *) trackInfo->CodecPrivate;
         char *palette = strnstr(string, "palette:", trackInfo->CodecPrivateSize);
 
-        UInt32 colorPalette[16];
+        UInt32 colorPalette[32];
 
         if (palette != NULL) {
             sscanf(palette, "palette: %lx, %lx, %lx, %lx, %lx, %lx, %lx, %lx, %lx, %lx, %lx, %lx, %lx, %lx, %lx, %lx", 
