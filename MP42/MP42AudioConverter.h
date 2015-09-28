@@ -61,8 +61,9 @@ struct AudioFileIO
     int32_t       _cancelled;
 
     Float64     sampleRate;
-    UInt32  inputChannelsCount;
-    UInt32  outputChannelCount;
+    UInt32      inputChannelsCount;
+    UInt32      outputChannelCount;
+
     NSUInteger  downmixType;
     NSUInteger  layout;
     hb_chan_map_t *ichanmap;
@@ -76,7 +77,7 @@ struct AudioFileIO
     struct AudioFileIO encoderData;
 }
 
-- (instancetype)initWithTrack:(MP42AudioTrack *)track andMixdownType:(NSString *)mixdownType error:(NSError **)outError;
+- (instancetype)initWithTrack:(MP42AudioTrack *)track andMixdownType:(NSString *)mixdownType error:(NSError **)error;
 
 - (void)addSample:(MP42SampleBuffer *)sample;
 - (nullable MP42SampleBuffer *)copyEncodedSample;

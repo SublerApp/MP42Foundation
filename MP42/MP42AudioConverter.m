@@ -23,6 +23,8 @@
 
 @implementation MP42AudioConverter
 
+#pragma mark - Encoder
+
 OSStatus EncoderDataProc(AudioConverterRef              inAudioConverter, 
                          UInt32*                        ioNumberDataPackets,
                          AudioBufferList*				ioData,
@@ -33,7 +35,8 @@ OSStatus EncoderDataProc(AudioConverterRef              inAudioConverter,
 
 	// figure out how much to read
     if (*ioNumberDataPackets > afio->numPacketsPerRead) {
-        *ioNumberDataPackets = afio->numPacketsPerRead;}
+        *ioNumberDataPackets = afio->numPacketsPerRead;
+    }
 
     // read from the fifo    
 	UInt32 outNumBytes;
@@ -73,7 +76,7 @@ OSStatus EncoderDataProc(AudioConverterRef              inAudioConverter,
 	return err;
 }
 
-- (void)EncoderThreadMainRoutine:(id)sender
+- (void)encoderThreadMainRoutine
 {
     @autoreleasepool {
         encoderDone = NO;
@@ -258,9 +261,10 @@ OSStatus EncoderDataProc(AudioConverterRef              inAudioConverter,
     return;
 }
 
+#pragma mark - Decoder
 // decoder input data proc callback
 
-OSStatus DecoderDataProc(AudioConverterRef              inAudioConverter, 
+OSStatus DecoderDataProc(AudioConverterRef              inAudioConverter,
                          UInt32*                        ioNumberDataPackets,
                          AudioBufferList*				ioData,
                          AudioStreamPacketDescription**	outDataPacketDescription,
@@ -274,9 +278,9 @@ OSStatus DecoderDataProc(AudioConverterRef              inAudioConverter,
     }
 
     // figure out how much to read
-	if (*ioNumberDataPackets > afio->numPacketsPerRead) *ioNumberDataPackets = afio->numPacketsPerRead;
+    if (*ioNumberDataPackets > afio->numPacketsPerRead) *ioNumberDataPackets = afio->numPacketsPerRead;
 
-    // read from the buffer    
+    // read from the buffer
     while ([afio->inputSamplesBuffer isEmpty] && !afio->fileReaderDone) {
         usleep(250);
     }
@@ -290,164 +294,171 @@ OSStatus DecoderDataProc(AudioConverterRef              inAudioConverter,
     }
 
     // advance input file packet position
-	afio->pos += *ioNumberDataPackets;
+    afio->pos += *ioNumberDataPackets;
 
     // put the data pointer into the buffer list
-	ioData->mBuffers[0].mData = afio->sample->data;
-	ioData->mBuffers[0].mDataByteSize = afio->sample->size;
-	ioData->mBuffers[0].mNumberChannels = afio->srcFormat.mChannelsPerFrame;
+    ioData->mBuffers[0].mData = afio->sample->data;
+    ioData->mBuffers[0].mDataByteSize = afio->sample->size;
+    ioData->mBuffers[0].mNumberChannels = afio->srcFormat.mChannelsPerFrame;
 
-	if (outDataPacketDescription) {
-		if (afio->pktDescs) {
+    if (outDataPacketDescription) {
+        if (afio->pktDescs) {
             afio->pktDescs->mStartOffset = 0;
             afio->pktDescs->mVariableFramesInPacket = *ioNumberDataPackets;
             afio->pktDescs->mDataByteSize = afio->sample->size;
-			*outDataPacketDescription = afio->pktDescs;
+            *outDataPacketDescription = afio->pktDescs;
         }
         else {
-			*outDataPacketDescription = NULL;
+            *outDataPacketDescription = NULL;
         }
-	}
+    }
 
-	return err;
+    return err;
 }
 
-- (void)DecoderThreadMainRoutine:(id)sender
-{
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    OSStatus err;
+- (void)decoderThreadMainRoutine {
+    @autoreleasepool {
+        OSStatus err;
 
-    // set up buffers and data proc info struct
-	decoderData.srcBufferSize = 32768;
-	decoderData.srcBuffer = (char *)malloc( decoderData.srcBufferSize );
-	decoderData.pos = 0;
-	decoderData.srcFormat = decoderData.inputFormat;    
-    decoderData.numPacketsPerRead = 1;
-    decoderData.pktDescs = (AudioStreamPacketDescription *)malloc(decoderData.numPacketsPerRead * sizeof(AudioStreamPacketDescription));
-    decoderData.inputSamplesBuffer = _inputSamplesBuffer;
+        // set up buffers and data proc info struct
+        decoderData.srcBufferSize = 32768;
+        decoderData.srcBuffer = (char *)malloc( decoderData.srcBufferSize );
+        decoderData.pos = 0;
+        decoderData.srcFormat = decoderData.inputFormat;
+        decoderData.numPacketsPerRead = 1;
+        decoderData.pktDescs = (AudioStreamPacketDescription *)malloc(decoderData.numPacketsPerRead * sizeof(AudioStreamPacketDescription));
+        decoderData.inputSamplesBuffer = _inputSamplesBuffer;
 
-    // set up our output buffers
-	AudioStreamPacketDescription* outputPktDescs = NULL;
-	int outputSizePerPacket = decoderData.outputFormat.mBytesPerPacket; // this will be non-zero if the format is CBR
-	UInt32 theOutputBufSize = 32768;
-	char *outputBuffer = (char *)malloc(theOutputBufSize);
+        // set up our output buffers
+        AudioStreamPacketDescription* outputPktDescs = NULL;
+        int outputSizePerPacket = decoderData.outputFormat.mBytesPerPacket; // this will be non-zero if the format is CBR
+        UInt32 theOutputBufSize = 32768;
+        char *outputBuffer = (char *)malloc(theOutputBufSize);
 
-	UInt32 numOutputPackets = theOutputBufSize / outputSizePerPacket;
+        UInt32 numOutputPackets = theOutputBufSize / outputSizePerPacket;
 
-    // Launch the encoder thread
-    encoderThread = [[NSThread alloc] initWithTarget:self selector:@selector(EncoderThreadMainRoutine:) object:self];
-    [encoderThread setName:@"AAC Encoder"];
-    [encoderThread start];
+        // Launch the encoder thread
+        encoderThread = [[NSThread alloc] initWithTarget:self selector:@selector(encoderThreadMainRoutine) object:nil];
+        [encoderThread setName:@"AAC Encoder"];
+        [encoderThread start];
 
-    // Set up our fifo
-    int ringbuffer_len = sampleRate * FIFO_DURATION * 4 * 23;
-    sfifo_init(&fifo, ringbuffer_len );
-    decoderData.fifo = &fifo;
+        // Set up our fifo
+        int ringbuffer_len = sampleRate * FIFO_DURATION * 4 * 23;
+        sfifo_init(&fifo, ringbuffer_len );
+        decoderData.fifo = &fifo;
 
-    // Check if we need to do any downmix
-    hb_downmix_t    *downmix = NULL;
-    hb_sample_t     *downmix_buffer = NULL;
+        // Check if we need to do any downmix
+        hb_downmix_t    *downmix = NULL;
+        hb_sample_t     *downmix_buffer = NULL;
 
-    if (downmixType && inputChannelsCount == 6) {
-        downmix = hb_downmix_init(HB_INPUT_CH_LAYOUT_3F2R | HB_INPUT_CH_LAYOUT_HAS_LFE, 
-                                  downmixType);
-    }
-    else if (downmixType && inputChannelsCount == 5) {
-        downmix = hb_downmix_init(HB_INPUT_CH_LAYOUT_3F2R, 
-                                  downmixType);
-    }
-    else if (downmixType && inputChannelsCount == 4) {
-        downmix = hb_downmix_init(HB_INPUT_CH_LAYOUT_3F1R, 
-                                  downmixType);
-    }
-    else if (downmixType && inputChannelsCount == 3) {
-        downmix = hb_downmix_init(HB_INPUT_CH_LAYOUT_STEREO | HB_INPUT_CH_LAYOUT_HAS_LFE, 
-                                  downmixType);
-    }
-    else if (downmixType && inputChannelsCount == 2) {
-        downmix = hb_downmix_init(HB_INPUT_CH_LAYOUT_STEREO, 
-                                  downmixType);
-    }
-
-    // loop to convert data
-	while (1) {
-		// set up output buffer list
-		AudioBufferList fillBufList;
-		fillBufList.mNumberBuffers = 1;
-		fillBufList.mBuffers[0].mNumberChannels = decoderData.inputFormat.mChannelsPerFrame;
-		fillBufList.mBuffers[0].mDataByteSize = theOutputBufSize;
-		fillBufList.mBuffers[0].mData = outputBuffer;
-
-        // convert data
-		UInt32 ioOutputDataPackets = numOutputPackets;
-		err = AudioConverterFillComplexBuffer(decoderData.converter, DecoderDataProc, &decoderData, &ioOutputDataPackets,
-                                              &fillBufList, outputPktDescs);
-        if (err)
-        {
-            //NSLog(@"Error converterDec %ld", (long)err);
+        if (downmixType && inputChannelsCount == 6) {
+            downmix = hb_downmix_init(HB_INPUT_CH_LAYOUT_3F2R | HB_INPUT_CH_LAYOUT_HAS_LFE,
+                                      downmixType);
         }
-        if (ioOutputDataPackets == 0) {
-			// this is the EOF conditon
-			break;
-		}
+        else if (downmixType && inputChannelsCount == 5) {
+            downmix = hb_downmix_init(HB_INPUT_CH_LAYOUT_3F2R,
+                                      downmixType);
+        }
+        else if (downmixType && inputChannelsCount == 4) {
+            downmix = hb_downmix_init(HB_INPUT_CH_LAYOUT_3F1R,
+                                      downmixType);
+        }
+        else if (downmixType && inputChannelsCount == 3) {
+            downmix = hb_downmix_init(HB_INPUT_CH_LAYOUT_STEREO | HB_INPUT_CH_LAYOUT_HAS_LFE,
+                                      downmixType);
+        }
+        else if (downmixType && inputChannelsCount == 2) {
+            downmix = hb_downmix_init(HB_INPUT_CH_LAYOUT_STEREO,
+                                      downmixType);
+        }
 
+        // loop to convert data
+        while (1) {
+            // set up output buffer list
+            AudioBufferList fillBufList;
+            fillBufList.mNumberBuffers = 1;
+            fillBufList.mBuffers[0].mNumberChannels = decoderData.inputFormat.mChannelsPerFrame;
+            fillBufList.mBuffers[0].mDataByteSize = theOutputBufSize;
+            fillBufList.mBuffers[0].mData = outputBuffer;
+
+            // convert data
+            UInt32 ioOutputDataPackets = numOutputPackets;
+            err = AudioConverterFillComplexBuffer(decoderData.converter, DecoderDataProc, &decoderData, &ioOutputDataPackets,
+                                                  &fillBufList, outputPktDescs);
+            if (err)
+            {
+                //NSLog(@"Error converterDec %ld", (long)err);
+            }
+            if (ioOutputDataPackets == 0) {
+                // this is the EOF conditon
+                break;
+            }
+
+
+            if (ichanmap != &hb_qt_chan_map )  {
+                hb_layout_remap( ichanmap, &hb_qt_chan_map, layout,
+                                (float *)outputBuffer,
+                                ioOutputDataPackets );
+            }
+            // Dowmnix the audio if needed
+            if (downmix) {
+                size_t samplesBufferSize = ioOutputDataPackets * outputChannelCount * sizeof(float);
+                downmix_buffer = (float *)outputBuffer;
+
+                hb_sample_t *samples = (hb_sample_t *)malloc(samplesBufferSize);
+                hb_downmix(downmix, samples, downmix_buffer, ioOutputDataPackets);
+
+                while (sfifo_space(&fifo) < (samplesBufferSize)) {
+                    usleep(5000);
+                }
+                
+                sfifo_write(&fifo, samples, samplesBufferSize);
+                free(samples);
+            }
+            else {
+                UInt32 inNumBytes = fillBufList.mBuffers[0].mDataByteSize;
+                
+                while (sfifo_space(&fifo) < inNumBytes) {
+                    usleep(5000);
+                }
+                
+                sfifo_write(&fifo, outputBuffer, inNumBytes);
+            }
+        }
+        readerDone = YES;
         
-        if( ichanmap != &hb_qt_chan_map )  { 
-            hb_layout_remap( ichanmap, &hb_qt_chan_map, layout, 
-                            (float*)outputBuffer, 
-                            ioOutputDataPackets ); 
-        } 
-        // Dowmnix the audio if needed
+        free(outputBuffer);
+        
         if (downmix) {
-            size_t samplesBufferSize = ioOutputDataPackets * outputChannelCount * sizeof(float);
-            downmix_buffer = (float *)outputBuffer;
-
-            hb_sample_t *samples = (hb_sample_t *)malloc(samplesBufferSize);
-            hb_downmix(downmix, samples, downmix_buffer, ioOutputDataPackets);
-
-            while (sfifo_space(&fifo) < (samplesBufferSize)) {
-                usleep(5000);
-            }
-
-            sfifo_write(&fifo, samples, samplesBufferSize);
-            free(samples);
+            hb_downmix_close(&downmix);
         }
-        else {
-            UInt32 inNumBytes = fillBufList.mBuffers[0].mDataByteSize;
-
-            while (sfifo_space(&fifo) < inNumBytes) {
-                usleep(5000);
-            }
-
-            sfifo_write(&fifo, outputBuffer, inNumBytes);
-        }
+        
+        AudioConverterDispose(decoderData.converter);
+        
     }
-    readerDone = YES;
-
-    free(outputBuffer);
-
-    if (downmix) {
-        hb_downmix_close(&downmix);
-    }
-
-    AudioConverterDispose(decoderData.converter);
-
-    [pool drain];
     return;
 }
 
-- (instancetype)initWithTrack:(MP42AudioTrack *)track andMixdownType:(NSString *)mixdownType error:(NSError **)outError
-{
-    if ((self = [super init])) {
+#pragma mark - Init
+
+- (instancetype)initWithTrack:(MP42AudioTrack *)track andMixdownType:(NSString *)mixdownType error:(NSError **)error {
+
+    self = [super init];
+
+    if (self) {
         OSStatus err;
 
         // Load the decoders
         [[MP42ComponentLoader sharedLoader] loadBundledComponents];
 
+        // Init the FIFO
+        _outputSamplesBuffer = [[MP42Fifo alloc] init];
+        _inputSamplesBuffer = [[MP42Fifo alloc] init];
+
         // Set the right mixdown to use
         sampleRate = [track.muxer_helper->importer timescaleForTrack:track];
-        inputChannelsCount = [track sourceChannels];
-        outputChannelCount = [track channels];
+        inputChannelsCount = track.sourceChannels;
+        outputChannelCount = track.channels;
 
         if (inputChannelsCount == 0 || outputChannelCount == 0 || sampleRate == 0) {
             [self release];
@@ -475,16 +486,15 @@ OSStatus DecoderDataProc(AudioConverterRef              inAudioConverter,
             outputChannelCount = 2;
         }
 
-        if (([track.sourceFormat isEqualToString:@"True HD"] || [track.sourceFormat isEqualToString:MP42AudioFormatAC3]) && inputChannelsCount == 6 ) {
+        if (([track.sourceFormat isEqualToString:MP42AudioFormatTrueHD] ||
+             [track.sourceFormat isEqualToString:MP42AudioFormatAC3]) && inputChannelsCount == 6 ) {
+
             ichanmap = &hb_smpte_chan_map;
             layout = HB_INPUT_CH_LAYOUT_3F2R | HB_INPUT_CH_LAYOUT_HAS_LFE;
         }
         else {
             ichanmap = &hb_qt_chan_map;
         }
-
-        _outputSamplesBuffer = [[MP42Fifo alloc] init];
-        _inputSamplesBuffer = [[MP42Fifo alloc] init];
 
         // Decoder initialization
         CFDataRef magicCookie = NULL;
@@ -500,7 +510,7 @@ OSStatus DecoderDataProc(AudioConverterRef              inAudioConverter,
                 inputFormat.mFormatID = kAudioFormatMPEG4AAC;
 
                 size_t cookieSize;
-                uint8_t * cookie = CreateEsdsFromSetupData((uint8_t *)[srcMagicCookie bytes], [srcMagicCookie length], &cookieSize, 1, true, false);
+                uint8_t *cookie = CreateEsdsFromSetupData((uint8_t *)srcMagicCookie.bytes, srcMagicCookie.length, &cookieSize, 1, true, false);
                 magicCookie = (CFDataRef) [[NSData dataWithBytes:cookie length:cookieSize] retain];
             }
             else if ([track.sourceFormat isEqualToString:MP42AudioFormatALAC]) {
@@ -511,16 +521,19 @@ OSStatus DecoderDataProc(AudioConverterRef              inAudioConverter,
             else if ([track.sourceFormat isEqualToString:MP42AudioFormatVorbis]) {
                 inputFormat.mFormatID = 'XiVs';
 
-                magicCookie = createDescExt_XiphVorbis([srcMagicCookie length], [srcMagicCookie bytes]);
+                magicCookie = createDescExt_XiphVorbis(srcMagicCookie.length, srcMagicCookie.bytes);
             }
             else if ([track.sourceFormat isEqualToString:MP42AudioFormatFLAC]) {
                 inputFormat.mFormatID = 'XiFL';
 
-                magicCookie = createDescExt_XiphFLAC([srcMagicCookie length], [srcMagicCookie bytes]);
+                magicCookie = createDescExt_XiphFLAC(srcMagicCookie.length, srcMagicCookie.bytes);
             }
             else if ([track.sourceFormat isEqualToString:MP42AudioFormatAC3]) {
                 inputFormat.mFormatID = kAudioFormatAC3;
                 inputFormat.mFramesPerPacket = 1536;
+            }
+            else if ([track.sourceFormat isEqualToString:MP42AudioFormatEAC3]) {
+                // TODO
             }
             else if ([track.sourceFormat isEqualToString:MP42AudioFormatDTS]) {
                 inputFormat.mFormatID = 'DTS ';
@@ -529,7 +542,7 @@ OSStatus DecoderDataProc(AudioConverterRef              inAudioConverter,
                 inputFormat.mFormatID = kAudioFormatMPEGLayer3;
                 inputFormat.mFramesPerPacket = 1152;
             }
-            else if ([track.sourceFormat isEqualToString:@"True HD"]) {
+            else if ([track.sourceFormat isEqualToString:MP42AudioFormatTrueHD]) {
                 inputFormat.mFormatID = 'trhd';
             }
             else if ([track.sourceFormat isEqualToString:MP42AudioFormatPCM]) {
@@ -541,9 +554,18 @@ OSStatus DecoderDataProc(AudioConverterRef              inAudioConverter,
                     inputFormat.mFormatID = kAudioFormatLinearPCM;
                 }
             }
+            else {
+                if (error) {
+                    *error = MP42Error(@"Audio Converter Error.",
+                                       @"Unsupported input format.",
+                                       130);
+                }
+                [self release];
+                return nil;
+            }
         }
 
-        bzero( &outputFormat, sizeof( AudioStreamBasicDescription ) );
+        bzero(&outputFormat, sizeof(AudioStreamBasicDescription));
         outputFormat.mSampleRate = sampleRate;
         outputFormat.mFormatID = kAudioFormatLinearPCM ;
         outputFormat.mFormatFlags =  kLinearPCMFormatFlagIsFloat | kAudioFormatFlagsNativeEndian | kAudioFormatFlagIsPacked;
@@ -553,11 +575,11 @@ OSStatus DecoderDataProc(AudioConverterRef              inAudioConverter,
         outputFormat.mChannelsPerFrame = track.sourceChannels;
         outputFormat.mBitsPerChannel = 32;
 
-        // initialize the decoder
+        // Initialize the decoder.
         err = AudioConverterNew( &inputFormat, &outputFormat, &decoderData.converter );
         if (err != noErr) {
-            if (outError) {
-                    *outError = MP42Error(@"Audio Converter Error.",
+            if (error) {
+                    *error = MP42Error(@"Audio Converter Error.",
                                           @"The Audio Converter can not be initialized",
                                           130);
             }
@@ -572,8 +594,9 @@ OSStatus DecoderDataProc(AudioConverterRef              inAudioConverter,
         if (magicCookie) {
             err = AudioConverterSetProperty(decoderData.converter, kAudioConverterDecompressionMagicCookie,
                                             CFDataGetLength(magicCookie) , CFDataGetBytePtr(magicCookie) );
-            if( err != noErr)
+            if( err != noErr) {
                 NSLog(@"Boom Magic Cookie %ld",(long)err);
+            }
             CFRelease(magicCookie);
         }
 
@@ -593,8 +616,9 @@ OSStatus DecoderDataProc(AudioConverterRef              inAudioConverter,
                 bzero( newLayout, sizeof( AudioChannelLayout ) );
                 newLayout->mChannelLayoutTag = kAudioChannelLayoutTag_MPEG_5_1_D;
                 err = AudioConverterSetProperty(decoderData.converter, kAudioConverterInputChannelLayout, sizeof(AudioChannelLayout), newLayout);
-                if(err)
+                if (err) {
                     NSLog(@"Unable to set the new channel layout %ld",(long)err);
+                }
                 free(newLayout);
             }
             free(layout);
@@ -626,32 +650,28 @@ OSStatus DecoderDataProc(AudioConverterRef              inAudioConverter,
         decoderData.outputFormat = outputFormat;
 
         // Launch the decoder thread.
-        decoderThread = [[NSThread alloc] initWithTarget:self selector:@selector(DecoderThreadMainRoutine:) object:self];
-        [decoderThread setName:@"Audio Decoder"];
+        decoderThread = [[NSThread alloc] initWithTarget:self selector:@selector(decoderThreadMainRoutine) object:nil];
+        [decoderThread setName:[NSString stringWithFormat:@"%@ Decoder", track.sourceFormat]];
         [decoderThread start];
     }
 
     return self;
 }
 
-- (void)addSample:(MP42SampleBuffer *)sample
-{
+- (void)addSample:(MP42SampleBuffer *)sample {
     [_inputSamplesBuffer enqueue:sample];
 }
 
-- (MP42SampleBuffer *)copyEncodedSample
-{
+- (MP42SampleBuffer *)copyEncodedSample {
     return [_outputSamplesBuffer deque];
 }
 
-- (void)setInputDone
-{
+- (void)setInputDone {
     decoderData.fileReaderDone = YES;
     encoderData.fileReaderDone = YES;
 }
 
-- (void)cancel
-{
+- (void)cancel {
     OSAtomicIncrement32(&_cancelled);
 
     decoderData.fileReaderDone = YES;
@@ -665,18 +685,15 @@ OSStatus DecoderDataProc(AudioConverterRef              inAudioConverter,
     }
 }
 
-- (BOOL)encoderDone
-{
+- (BOOL)encoderDone {
     return encoderDone && [_outputSamplesBuffer isEmpty];
 }
 
-- (NSData *)magicCookie
-{
+- (NSData *)magicCookie {
     return [[outputMagicCookie retain] autorelease];
 }
 
-- (void)dealloc
-{
+- (void)dealloc {
     sfifo_close(&fifo);
 
     free(decoderData.srcBuffer);
