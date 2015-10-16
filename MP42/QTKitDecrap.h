@@ -12,7 +12,7 @@ extern NSString * const QTTrackLanguageAttribute;	// NSNumber (long)
 
 @interface QTMovie (QTMovieSublerExtras)
 
-- (QTTrack*) trackWithTrackID:(NSInteger)trackID;
+- (QTTrack *)trackWithTrackID:(NSInteger)trackID;
 
 @end
 

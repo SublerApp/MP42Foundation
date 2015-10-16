@@ -84,6 +84,7 @@ typedef struct
 // Map Indicies are mode, lfe, channel respectively
 extern hb_chan_map_t hb_smpte_chan_map;
 extern hb_chan_map_t hb_ac3_chan_map;
+extern hb_chan_map_t hb_ac3_2_chan_map;
 extern hb_chan_map_t hb_qt_chan_map;
 
 hb_downmix_t * hb_downmix_init(int layout, int mixdown);

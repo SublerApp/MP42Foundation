@@ -278,8 +278,8 @@ static bool GetFirstHeader(FILE* inFile)
 
         // collect all the necessary meta information
         UInt32 channels = 0, channelLayoutTag = 0;
-        uint32_t fscod, frmsizecod, bsid, bsmod, acmod, lfeon;
-        uint32_t lfe_offset = 4;
+        uint64_t fscod, frmsizecod, bsid, bsmod, acmod, lfeon;
+        uint64_t lfe_offset = 4;
 
         if (!GetFirstHeader(inFile)) {
             fprintf(stderr,	

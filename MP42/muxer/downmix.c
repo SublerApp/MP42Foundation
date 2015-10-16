@@ -1138,6 +1138,73 @@ hb_chan_map_t hb_ac3_chan_map =
 }
 };
 
+hb_chan_map_t hb_ac3_2_chan_map =
+{
+{
+    {{ CH_C,                                                     },
+     { CH_C, CH_LFE,                                             }}, // MONO
+
+    {{ CH_L, CH_R,                                               },
+     { CH_L, CH_R, CH_LFE,                                       }}, // STEREO
+
+    {{ CH_L, CH_C, CH_R,                                         },
+     { CH_L, CH_C, CH_R, CH_LFE,                                 }}, // 3F
+
+    {{ CH_L, CH_R, CH_CS,                                        },
+     { CH_L, CH_R, CH_CS, CH_LFE,                                }}, // 2F1R
+
+    {{ CH_L, CH_C, CH_R, CH_CS,                                  },
+     { CH_L, CH_C, CH_R, CH_CS, CH_LFE,                          }}, // 3F1R
+
+    {{ CH_L, CH_R, CH_LS, CH_RS,                                 },
+     { CH_L, CH_R, CH_LS, CH_RS, CH_LFE,                         }}, // 2F2R
+
+    {{ CH_L, CH_C, CH_R, CH_LS, CH_RS,                           },
+     { CH_L, CH_C, CH_R, CH_LS, CH_RS, CH_LFE,                   }}, // 3F2R
+
+    {{ CH_L, CH_C, CH_R, CH_LS, CH_RS,  CH_Rls,  CH_Rrs,         },
+     { CH_L, CH_C, CH_R, CH_LS, CH_RS,  CH_Rls,  CH_Rrs, CH_LFE, }}, // 3F4R
+
+    {{ CH_L, CH_R,                                               },
+     { CH_L, CH_R,                                               }}, // DOLBY
+
+    {{ CH_L, CH_R,                                               },
+     { CH_L, CH_R,                                               }}  // DPLII
+},
+{
+    // CH_C  CH_L  CH_R  CH_LS/CS  CH_RS   CH_Rls   CH_Rrs   CH_LFE
+    {{ 0,    0,    0,    0,        0,      0,       0,       0   },
+     { 0,    0,    0,    0,        0,      0,       0,       1   }}, // MONO
+
+    {{ 0,    0,    1,    0,        0,      0,       0,       0   },
+     { 0,    0,    1,    0,        0,      0,       0,       2   }}, // STEREO
+
+    {{ 1,    0,    2,    0,        0,      0,       0,       0   },
+     { 1,    0,    2,    0,        0,      0,       0,       3   }}, // 3F
+
+    {{ 0,    0,    1,    2,        0,      0,       0,       0   },
+     { 0,    0,    1,    2,        0,      0,       0,       3   }}, // 2F1R
+
+    {{ 1,    0,    2,    3,        0,      0,       0,       0   },
+     { 1,    0,    2,    3,        0,      0,       0,       4   }}, // 3F1R
+
+    {{ 0,    0,    1,    2,        3,      0,       0,       0   },
+     { 0,    0,    1,    2,        3,      0,       0,       4   }}, // 2F2R
+
+    {{ 1,    0,    2,    3,        4,      0,       0,       0   },
+     { 1,    0,    2,    3,        4,      0,       0,       5   }}, // 3F2R
+
+    {{ 1,    0,    2,    3,        4,      5,       6,       0   },
+     { 1,    0,    2,    3,        4,      5,       6,       7   }}, // 3F4R
+
+    {{ 0,    0,    1,    0,        0,      0,       0,       0   },
+     { 0,    0,    1,    0,        0,      0,       0,       0   }}, // DOLBY
+
+    {{ 0,    0,    1,    0,        0,      0,       0,       0   },
+     { 0,    0,    1,    0,        0,      0,       0,       0   }}  // DPLII
+}
+};
+
 static const uint8_t nchans_tbl[] = {1, 2, 3, 3, 4, 4, 5, 7, 2, 2};
 
 // Takes a set of samples and remaps the channel layout

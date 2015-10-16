@@ -43,7 +43,7 @@
 @implementation MP42AVFImporter
 
 + (NSArray<NSString *> *)supportedFileFormats {
-    return @[@"mov", @"m2ts", @"ts", @"mts", @"eac3"];
+    return @[@"mov", @"m2ts", @"ts", @"mts", @"ac3", @"eac3"];
 }
 
 - (NSString *)formatForTrack:(AVAssetTrack *)track {
@@ -672,15 +672,16 @@
                 OSStatus err = noErr;
                 size_t channelLayoutSize = 0;
                 const AudioStreamBasicDescription *asbd = CMAudioFormatDescriptionGetStreamBasicDescription(formatDescription);
-                const AudioChannelLayout* channelLayout = CMAudioFormatDescriptionGetChannelLayout(formatDescription, &channelLayoutSize);
+                const AudioChannelLayout *channelLayout = CMAudioFormatDescriptionGetChannelLayout(formatDescription, &channelLayoutSize);
 
                 UInt32 bitmapSize = sizeof(UInt32);
                 UInt32 channelBitmap;
                 err = AudioFormatGetProperty(kAudioFormatProperty_BitmapForLayoutTag,
                                                sizeof(AudioChannelLayoutTag), &channelLayout->mChannelLayoutTag,
                                                &bitmapSize, &channelBitmap);
-                if (err && AudioChannelLayoutTag_GetNumberOfChannels(channelLayout->mChannelLayoutTag) == 6)
+                if (err && AudioChannelLayoutTag_GetNumberOfChannels(channelLayout->mChannelLayoutTag) == 6) {
                     channelBitmap = 0x3F;
+                }
 
                 uint64_t fscod = 0;
                 uint64_t bsid = 8;
@@ -841,27 +842,31 @@
                     CMItemCount timingArrayEntries = 0;
                     CMItemCount timingArrayEntriesNeededOut = 0;
                     err = CMSampleBufferGetSampleTimingInfoArray(sampleBuffer, timingArrayEntries, NULL, &timingArrayEntriesNeededOut);
-                    if (err)
+                    if (err) {
                         continue;
+                    }
 
                     CMSampleTimingInfo *timingArrayOut = malloc(sizeof(CMSampleTimingInfo) * timingArrayEntriesNeededOut);
                     timingArrayEntries = timingArrayEntriesNeededOut;
                     err = CMSampleBufferGetSampleTimingInfoArray(sampleBuffer, timingArrayEntries, timingArrayOut, &timingArrayEntriesNeededOut);
-                    if (err)
+                    if (err) {
                         continue;
+                    }
 
                     // Then the array with the size of each sample
                     CMItemCount sizeArrayEntries = 0;
                     CMItemCount sizeArrayEntriesNeededOut = 0;
                     err = CMSampleBufferGetSampleSizeArray(sampleBuffer, sizeArrayEntries, NULL, &sizeArrayEntriesNeededOut);
-                    if (err)
+                    if (err) {
                         continue;
+                    }
 
                     size_t *sizeArrayOut = malloc(sizeof(size_t) * sizeArrayEntriesNeededOut);
                     sizeArrayEntries = sizeArrayEntriesNeededOut;
                     err = CMSampleBufferGetSampleSizeArray(sampleBuffer, sizeArrayEntries, sizeArrayOut, &sizeArrayEntriesNeededOut);
-                    if (err)
+                    if (err) {
                         continue;
+                    }
 
                     // Get CMBlockBufferRef to extract the actual data later
                     CMBlockBufferRef buffer = CMSampleBufferGetDataBuffer(sampleBuffer);
@@ -944,10 +949,9 @@
                         currentDataLength += sampleSize;
                     }
 
-                    if (timingArrayOut)
-                        free(timingArrayOut);
-                    if (sizeArrayOut)
-                        free(sizeArrayOut);
+                    free(timingArrayOut);
+                    free(sizeArrayOut);
+
                 }
                 CFRelease(sampleBuffer);
 

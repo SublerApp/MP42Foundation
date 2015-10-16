@@ -395,10 +395,10 @@ OSStatus DecoderDataProc(AudioConverterRef              inAudioConverter,
             }
 
 
-            if (ichanmap != &hb_qt_chan_map )  {
+            if (ichanmap != &hb_qt_chan_map ) {
                 hb_layout_remap( ichanmap, &hb_qt_chan_map, layout,
                                 (float *)outputBuffer,
-                                ioOutputDataPackets );
+                                ioOutputDataPackets);
             }
             // Dowmnix the audio if needed
             if (downmix) {
@@ -489,7 +489,13 @@ OSStatus DecoderDataProc(AudioConverterRef              inAudioConverter,
         if (([track.sourceFormat isEqualToString:MP42AudioFormatTrueHD] ||
              [track.sourceFormat isEqualToString:MP42AudioFormatAC3]) && inputChannelsCount == 6 ) {
 
-            ichanmap = &hb_smpte_chan_map;
+            if (NSAppKitVersionNumber <= NSAppKitVersionNumber10_10_Max) {
+                ichanmap = &hb_smpte_chan_map;
+            }
+            else
+            {
+                ichanmap = &hb_ac3_2_chan_map;
+            }
             layout = HB_INPUT_CH_LAYOUT_3F2R | HB_INPUT_CH_LAYOUT_HAS_LFE;
         }
         else {
