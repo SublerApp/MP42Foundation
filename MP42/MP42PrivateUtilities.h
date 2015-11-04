@@ -51,6 +51,7 @@ CFDataRef createDescExt_XiphVorbis(UInt32 codecPrivateSize, const void * codecPr
 CFDataRef createDescExt_XiphFLAC(UInt32 codecPrivateSize, const void * codecPrivate);
 
 int readAC3Config(uint64_t acmod, uint64_t lfeon, UInt32 *channelsCount, UInt32 *channelLayoutTag);
+int readEAC3Config(const uint8_t *cookie, uint32_t cookieLen, UInt32 *channelsCount, UInt32 *channelLayoutTag);
 
 int64_t getTrackStartOffset(MP4FileHandle fileHandle, MP4TrackId Id);
 void setTrackStartOffset(MP4FileHandle fileHandle, MP4TrackId Id, int64_t offset);

@@ -214,7 +214,7 @@
             if ([magicCookie length] < sizeof(uint64_t) * 6)
                 continue;
 
-            const uint64_t * ac3Info = (const uint64_t *)[magicCookie bytes];
+            const uint64_t *ac3Info = (const uint64_t *)[magicCookie bytes];
 
             dstTrackId = MP4AddAC3AudioTrack(_fileHandle,
                                              timeScale,
@@ -230,7 +230,9 @@
 
         // EAC-3 audio tack
         else if ([track isMemberOfClass:[MP42AudioTrack class]] && [track.format isEqualToString:MP42AudioFormatEAC3]) {
+            dstTrackId = MP4AddEAC3AudioTrack(_fileHandle, timeScale, magicCookie.bytes, magicCookie.length);
 
+            [helper->importer setActiveTrack:track];
         }
 
         // ALAC audio track

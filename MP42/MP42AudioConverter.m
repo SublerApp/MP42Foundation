@@ -539,7 +539,8 @@ OSStatus DecoderDataProc(AudioConverterRef              inAudioConverter,
                 inputFormat.mFramesPerPacket = 1536;
             }
             else if ([track.sourceFormat isEqualToString:MP42AudioFormatEAC3]) {
-                // TODO
+                inputFormat.mFormatID = kAudioFormatEnhancedAC3;
+                inputFormat.mFramesPerPacket = 1536;
             }
             else if ([track.sourceFormat isEqualToString:MP42AudioFormatDTS]) {
                 inputFormat.mFormatID = 'DTS ';

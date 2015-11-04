@@ -106,10 +106,18 @@
             return [ac3Info autorelease];
 
         }
+        else if (!strcmp(media_data_name, "ec-3")) {
+            if (MP4HaveTrackAtom(_fileHandle, srcTrackId, "mdia.minf.stbl.stsd.ec-3.dec3")) {
+                uint8_t    *ppValue;
+                uint32_t    pValueSize;
+                MP4GetTrackBytesProperty(_fileHandle, srcTrackId, "mdia.minf.stbl.stsd.ec-3.dec3.content", &ppValue, &pValueSize);
+                magicCookie = [NSData dataWithBytes:ppValue length:pValueSize];
+            }
+        }
         else if (!strcmp(media_data_name, "alac")) {
             if (MP4HaveTrackAtom(_fileHandle, srcTrackId, "mdia.minf.stbl.stsd.alac.alac")) {
-                uint8_t*     ppValue;
-                uint32_t     pValueSize;
+                uint8_t    *ppValue;
+                uint32_t    pValueSize;
                 MP4GetTrackBytesProperty(_fileHandle, srcTrackId, "mdia.minf.stbl.stsd.alac.alac.AppleLosslessMagicCookie", &ppValue, &pValueSize);
                 magicCookie = [NSData dataWithBytes:ppValue length:pValueSize];
             }

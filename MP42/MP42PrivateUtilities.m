@@ -657,6 +657,110 @@ int readAC3Config(uint64_t acmod, uint64_t lfeon, UInt32 *channelsCount, UInt32 
     return 1;
 }
 
+static const int eac3_layout_no_lfe[8] = {
+    kAudioChannelLayoutTag_Stereo,
+    kAudioChannelLayoutTag_Mono,
+    kAudioChannelLayoutTag_Stereo,
+    kAudioChannelLayoutTag_AC3_3_0,
+    kAudioChannelLayoutTag_DVD_2,
+    kAudioChannelLayoutTag_AC3_3_1,
+    kAudioChannelLayoutTag_DVD_3,
+    kAudioChannelLayoutTag_MPEG_5_0_C};
+
+static const int eac3_layout_lfe[8] = {
+    kAudioChannelLayoutTag_DVD_4,
+    kAudioChannelLayoutTag_AC3_1_0_1,
+    kAudioChannelLayoutTag_DVD_4,
+    kAudioChannelLayoutTag_AC3_3_0_1,
+    kAudioChannelLayoutTag_AC3_2_1_1,
+    kAudioChannelLayoutTag_AC3_3_1_1,
+    kAudioChannelLayoutTag_DVD_18,
+    kAudioChannelLayoutTag_MPEG_5_1_C,
+};
+
+int readEAC3Config(const uint8_t *cookie, uint32_t cookieLen, UInt32 *channelsCount, UInt32 *channelLayoutTag)
+{
+    if (cookieLen < 5) {
+        return 0;
+    }
+
+    uint32_t data_rate, num_ind_sub;
+
+    data_rate = *cookie << 5;
+    data_rate += (*(cookie + 1) & 0xf8) >> 3;
+
+    num_ind_sub = *(cookie + 1) & 0x7;
+    num_ind_sub += 1;
+
+    // we support only one independent substream
+    for (int i = 0; i < 1; i++)
+    {
+        uint32_t fscod, bsid, asvc, bsmod, acmod, lfeon;
+
+        fscod = (*(cookie + 2) & 0xc0) >> 6;
+        bsid = (*(cookie + 2) & 0x3e) >> 1;
+
+        asvc = (*(cookie + 3) & 0x80) >> 7;
+
+        bsmod = (*(cookie + 3) & 0x70) >> 4;
+        acmod = (*(cookie + 3) & 0xe) >> 1;
+
+        lfeon = *(cookie + 3) & 0x1;
+
+        uint32_t num_dep_sub = 0;
+        uint32_t chan_loc = 0;
+        num_dep_sub = (*(cookie + 4) & 0x1e) >> 1;
+
+        if (num_dep_sub > 0 && cookieLen > 5) {
+            chan_loc = (*(cookie + 4) & 0x1) << 8;
+            chan_loc += *(cookie + 5);
+        }
+
+        if (acmod == 7 && lfeon && chan_loc != 0) {
+            // TODO: complete the list
+            if (chan_loc & 0x1) {
+                *channelLayoutTag = kAudioChannelLayoutTag_EAC3_7_1_B;
+            }
+            else if (chan_loc & 0x2) {
+                *channelLayoutTag = kAudioChannelLayoutTag_EAC3_7_1_A;
+            }
+            else if (chan_loc & 0x3) {
+                *channelLayoutTag = kAudioChannelLayoutTag_EAC3_6_1_A;
+            }
+            else if (chan_loc & 0x4) {
+                *channelLayoutTag = kAudioChannelLayoutTag_EAC3_6_1_B;
+            }
+            else if (chan_loc & 0x5) {
+                *channelLayoutTag = kAudioChannelLayoutTag_EAC3_7_1_C;
+            }
+            else if (chan_loc & 0x6) {
+                *channelLayoutTag = kAudioChannelLayoutTag_EAC3_7_1_D;
+            }
+            else if (chan_loc & 0x7) {
+                *channelLayoutTag = kAudioChannelLayoutTag_EAC3_7_1_E;
+            }
+            else if (chan_loc & 0x8) {
+                *channelLayoutTag = kAudioChannelLayoutTag_EAC3_6_1_C;
+            }
+            else if (chan_loc & 0x9) {
+                *channelLayoutTag = kAudioChannelLayoutTag_EAC3_7_1_A;
+            }
+        }
+        else {
+            if (lfeon) {
+                *channelLayoutTag = eac3_layout_lfe[acmod];
+            }
+            else {
+                *channelLayoutTag = eac3_layout_no_lfe[acmod];
+            }
+        }
+
+        *channelsCount = AudioChannelLayoutTag_GetNumberOfChannels(*channelLayoutTag);
+    }
+
+    return 1;
+}
+
 int64_t getTrackStartOffset(MP4FileHandle fileHandle, MP4TrackId Id)
 {
     int64_t offset = 0;
