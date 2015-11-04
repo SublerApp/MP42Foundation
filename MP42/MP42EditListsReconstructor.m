@@ -16,7 +16,7 @@
 - (instancetype)init {
     self = [super init];
     if (self) {
-        _queue = [[MP42Heap alloc] initWithCapacity:32 andComparator:^NSComparisonResult(id obj1, id obj2) {
+        _priorityQueue = [[MP42Heap alloc] initWithCapacity:32 andComparator:^NSComparisonResult(id obj1, id obj2) {
             return ((MP42SampleBuffer *)obj2)->presentationTimestamp - ((MP42SampleBuffer *)obj1)->presentationTimestamp;
         }];
         _count = 1;
@@ -26,15 +26,13 @@
 
 - (void)addSample:(MP42SampleBuffer *)sample {
     [sample retain];
-    [_queue insert:sample];
+    [_priorityQueue insert:sample];
 
-    if ([_queue isFull]) {
-        MP42SampleBuffer *extractedSample = [_queue extract];
+    if ([_priorityQueue isFull]) {
+        MP42SampleBuffer *extractedSample = [_priorityQueue extract];
 
         if (_timescale == 0) {
             _timescale = extractedSample->timescale;
-            [self startEditListAtTime:CMTimeMake(extractedSample->presentationTimestamp - extractedSample->timestamp, _timescale)];
-            _currentTime += extractedSample->presentationTimestamp - extractedSample->timestamp;
         }
 
         [self analyzeSample:extractedSample];
@@ -43,8 +41,8 @@
 }
 
 - (void)done {
-    while (![_queue isEmpty]) {
-        MP42SampleBuffer *extractedSample = [_queue extract];
+    while (![_priorityQueue isEmpty]) {
+        MP42SampleBuffer *extractedSample = [_priorityQueue extract];
         if (_timescale == 0) {
             _timescale = extractedSample->timescale;
             [self startEditListAtTime:CMTimeMake(extractedSample->presentationTimestamp - extractedSample->timestamp, _timescale)];
@@ -71,9 +69,11 @@
     if (sample->attachments) {
         // Check if we have to trim the start or end of a sample
         // If so it means we need to start/end an edit
-        if ((trimStart = CFDictionaryGetValue(sample->attachments, kCMSampleBufferAttachmentKey_TrimDurationAtStart))) {
-            if ([self isEditListOpen])
+        if ((trimStart = CFDictionaryGetValue(sample->attachments, kCMSampleBufferAttachmentKey_TrimDurationAtStart)) ||
+            (sample->doNotDisplay == NO && [self isEditListOpen] == NO)) {
+            if ([self isEditListOpen]) {
                 [self endEditListAtTime:CMTimeMake(_currentTime, _timescale) empty:NO];
+            }
 
             CMTime trimStartTime = CMTimeMakeFromDictionary(trimStart);
 
@@ -89,7 +89,8 @@
     _delta = sample->presentationTimestamp - sample->timestamp;
 
     if (sample->attachments) {
-        if ((trimEnd = CFDictionaryGetValue(sample->attachments, kCMSampleBufferAttachmentKey_TrimDurationAtEnd))) {
+        if ((trimEnd = CFDictionaryGetValue(sample->attachments, kCMSampleBufferAttachmentKey_TrimDurationAtEnd)) ||
+            (sample->doNotDisplay == YES && [self isEditListOpen] == YES)) {
             CMTime trimEndTime = CMTimeMakeFromDictionary(trimEnd);
             trimEndTime = CMTimeConvertScale(trimEndTime, _timescale, kCMTimeRoundingMethod_Default);
             CMTime editEnd = CMTimeMake(_currentTime - trimEndTime.value, _timescale);
@@ -119,14 +120,16 @@
  * Closes a opened edit
  */
 - (void)endEditListAtTime:(CMTime)time empty:(BOOL)type {
-    if (!editOpen)
+    if (!editOpen) {
         return;
+    }
 
     time.value -= edits[editsCount].start.value;
     edits[editsCount].duration = time;
 
-    if (type)
+    if (type) {
         edits[editsCount].start.value = -1;
+    }
 
     if (edits[editsCount].duration.value > 0) {
         editsCount++;
@@ -142,7 +145,7 @@
 }
 
 - (void)dealloc {
-    [_queue release];
+    [_priorityQueue release];
     [super dealloc];
 }
 

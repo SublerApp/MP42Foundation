@@ -30,6 +30,7 @@ typedef NS_OPTIONS(NSUInteger, MP42SampleBufferFlag) {
 
     BOOL        isSync;
     BOOL        isForced;
+    BOOL        doNotDisplay;
 
     void        *attachments;
     uint16_t    flags;

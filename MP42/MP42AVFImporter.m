@@ -43,7 +43,7 @@
 @implementation MP42AVFImporter
 
 + (NSArray<NSString *> *)supportedFileFormats {
-    return @[@"mov", @"m2ts", @"ts", @"mts", @"ac3", @"eac3"];
+    return @[@"mov", @"m2ts", @"ts", @"mts", @"ac3", @"eac3", @"ec3"];
 }
 
 - (NSString *)formatForTrack:(AVAssetTrack *)track {
@@ -94,6 +94,9 @@
             case kAudioFormatAC3:
             case 'ms \0':
                 result = MP42AudioFormatAC3;
+                break;
+            case kAudioFormatEnhancedAC3:
+                result = MP42AudioFormatEAC3;
                 break;
             case kAudioFormatMPEGLayer1:
             case kAudioFormatMPEGLayer2:
@@ -651,7 +654,7 @@
             else if (code == kAudioFormatAppleLossless) {
 
                 if (cookieSizeOut > 48) {
-                    // Remove unneeded parts of the cookie, as describred in ALACMagicCookieDescription.txt
+                    // Remove unneeded parts of the cookie, as described in ALACMagicCookieDescription.txt
                     magicCookie += 24;
                     cookieSizeOut = cookieSizeOut - 24 - 8;
                 }
@@ -661,8 +664,10 @@
             }
 
             else if (code == kAudioFormatEnhancedAC3) {
-                magicCookie += 2;
-                cookieSizeOut = cookieSizeOut - 2;
+                // dec3 atom
+                // remove the atom header
+                magicCookie += 8;
+                cookieSizeOut = cookieSizeOut - 8;
 
                 return [NSData dataWithBytes:magicCookie length:cookieSizeOut];
             }
@@ -793,12 +798,17 @@
                     CMBlockBufferCopyDataBytes(buffer, 0, sampleSize, sampleData);
 
                     // Read sample attachment, sync to mark the frame as sync
-                    BOOL sync = 1;
+                    BOOL sync = YES;
+                    BOOL doNotDisplay = NO;
                     CFArrayRef attachmentsArray = CMSampleBufferGetSampleAttachmentsArray(sampleBuffer, NO);
                     if (attachmentsArray) {
                         for (NSDictionary *dict in (NSArray *)attachmentsArray) {
-                            if ([dict valueForKey:(NSString *)kCMSampleAttachmentKey_NotSync])
-                                sync = 0;
+                            if ([dict valueForKey:(NSString *)kCMSampleAttachmentKey_NotSync]) {
+                                sync = NO;
+                            }
+                            if ([dict valueForKey:(NSString*)kCMSampleAttachmentKey_DoNotDisplay]) {
+                                doNotDisplay = YES;
+                            }
                         }
                     }
 
@@ -824,6 +834,7 @@
                     sample->isSync = sync;
                     sample->trackId = track.sourceId;
                     sample->attachments = (void *)attachments;
+                    sample->doNotDisplay = doNotDisplay;
 
                     [demuxHelper->editsConstructor addSample:sample];
                     [self enqueue:sample];
@@ -886,7 +897,7 @@
                             sampleTimingInfo = timingArrayOut[0];
                             decodeTimeStamp = sampleTimingInfo.decodeTimeStamp;
                             decodeTimeStamp.value = decodeTimeStamp.value + ( sampleTimingInfo.duration.value * i);
-                            
+
                             presentationTimeStamp = sampleTimingInfo.presentationTimeStamp;
                             presentationTimeStamp.value = presentationTimeStamp.value + ( sampleTimingInfo.duration.value * i);
                         } else {
@@ -905,8 +916,9 @@
                             sampleSize = sizeArrayOut[i];
                         }
 
-                        if (!sampleSize)
+                        if (!sampleSize) {
                             continue;
+                        }
 
                         void *sampleData = malloc(sampleSize);
 
@@ -934,7 +946,8 @@
                         sample->data = sampleData;
                         sample->size = sampleSize;
                         sample->duration = sampleTimingInfo.duration.value;
-                        sample->offset = -decodeTimeStamp.value + presentationTimeStamp.value;
+                        // FIXME
+                        //sample->offset = -decodeTimeStamp.value + presentationTimeStamp.value;
                         sample->timestamp = sampleTimingInfo.presentationTimeStamp.value;
                         sample->presentationTimestamp = presentationTimeStamp.value;
                         sample->timescale = sampleTimingInfo.duration.timescale;
