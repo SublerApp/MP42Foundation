@@ -785,9 +785,13 @@
         AVAssetReaderOutput *assetReaderOutput = demuxHelper->assetReaderOutput;
 
         while (!_cancelled) {
+
             CMSampleBufferRef sampleBuffer = [assetReaderOutput copyNextSampleBuffer];
+
             if (sampleBuffer) {
+
                 CMItemCount samplesNum = CMSampleBufferGetNumSamples(sampleBuffer);
+
                 if (samplesNum == 1) {
                     // We have only a sample
                     CMTime duration = CMSampleBufferGetDuration(sampleBuffer);
@@ -816,7 +820,6 @@
                     }
 
                     CMTime currentOutputTimeStamp = CMTimeConvertScale(presentationOutputTimeStamp, duration.timescale, kCMTimeRoundingMethod_Default);
-
                     CFDictionaryRef attachments = CMCopyDictionaryOfAttachments(NULL, sampleBuffer, kCMAttachmentMode_ShouldPropagate);
 
 #ifdef SB_AVF_DEBUG
@@ -832,7 +835,7 @@
                     sample->duration = duration.value;
                     sample->offset = -decodeTimeStamp.value + presentationTimeStamp.value;
                     sample->presentationTimestamp = presentationTimeStamp.value;
-                    sample->timestamp = currentOutputTimeStamp.value;
+                    sample->presentationOutputTimestamp = currentOutputTimeStamp.value;
                     sample->timescale = duration.timescale;
                     sample->isSync = sync;
                     sample->trackId = track.sourceId;
@@ -964,11 +967,12 @@
                         sample->duration = sampleTimingInfo.duration.value;
                         // FIXME
                         //sample->offset = -decodeTimeStamp.value + presentationTimeStamp.value;
-                        sample->timestamp = sampleTimingInfo.presentationTimeStamp.value;
                         sample->presentationTimestamp = presentationTimeStamp.value;
+                        sample->presentationOutputTimestamp = presentationTimeStamp.value;
                         sample->timescale = sampleTimingInfo.duration.timescale;
                         sample->isSync = sync;
                         sample->trackId = track.sourceId;
+                        sample->doNotDisplay = doNotDisplay;
 
                         if (attachmentsSent == NO) {
                             sample->attachments = (void *)attachments;

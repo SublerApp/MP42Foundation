@@ -23,7 +23,8 @@ typedef NS_OPTIONS(NSUInteger, MP42SampleBufferFlag) {
     uint64_t    duration;
     int64_t     offset;
 
-    uint64_t    presentationTimestamp;
+    int64_t     presentationTimestamp;
+    int64_t     presentationOutputTimestamp;
     uint64_t    timestamp;
 
     uint32_t    trackId;

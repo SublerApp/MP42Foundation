@@ -21,15 +21,15 @@
 @private
     MP42Heap *_priorityQueue;
 
-    uint64_t              _currentTime;
-    int64_t              _delta;
-    CMTimeScale          _timescale;
-    int64_t              _count;
+    uint64_t        _currentTime;
+    CMTimeScale     _timescale;
 
-    CMTimeRange         *_edits;
-    uint64_t             _editsCount;
-    uint64_t             _editsSize;
-    BOOL                 _editOpen;
+    int64_t     _delta;
+
+    CMTimeRange     *_edits;
+    uint64_t        _editsCount;
+    uint64_t        _editsSize;
+    BOOL        _editOpen;
 }
 
 - (void)addSample:(MP42SampleBuffer *)sample;

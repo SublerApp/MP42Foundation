@@ -16,23 +16,31 @@
 - (instancetype)init {
     self = [super init];
     if (self) {
-        _priorityQueue = [[MP42Heap alloc] initWithCapacity:32 andComparator:^NSComparisonResult(id obj1, id obj2) {
-            return ((MP42SampleBuffer *)obj2)->presentationTimestamp - ((MP42SampleBuffer *)obj1)->presentationTimestamp;
+        _priorityQueue = [[MP42Heap alloc] initWithCapacity:32 andComparator:^NSComparisonResult(MP42SampleBuffer * obj1, MP42SampleBuffer * obj2) {
+            return obj2->presentationTimestamp - obj1->presentationTimestamp;
         }];
-        _count = 1;
     }
     return self;
 }
 
 - (void)addSample:(MP42SampleBuffer *)sample {
     [sample retain];
+
+    if (sample->attachments) {
+        // Flush the current queue, because pts time is going to be reset
+        CFBooleanRef resetDecoderBeforeDecoding = CFDictionaryGetValue(sample->attachments, kCMSampleBufferAttachmentKey_ResetDecoderBeforeDecoding);
+        if (resetDecoderBeforeDecoding && CFBooleanGetValue(resetDecoderBeforeDecoding) == 1 && _priorityQueue.count) {
+            [self flush];
+        }
+    }
+
     [_priorityQueue insert:sample];
 
     if (_timescale == 0) {
         _timescale = sample->timescale;
         // Re-align things if the first sample pts is not 0
-        if (sample->offset != 0) {
-            _currentTime += sample->offset - sample->timestamp;
+        if (sample->presentationTimestamp != 0) {
+            _currentTime += sample->presentationTimestamp;
         }
     }
 
@@ -43,49 +51,53 @@
     }
 }
 
-- (void)done {
-    while (![_priorityQueue isEmpty]) {
+- (void)flush
+{
+    while (!_priorityQueue.isEmpty) {
         MP42SampleBuffer *extractedSample = [_priorityQueue extract];
-
-        if (_timescale == 0) {
-            _timescale = extractedSample->timescale;
-            [self startEditListAtTime:CMTimeMake(extractedSample->presentationTimestamp - extractedSample->timestamp, _timescale)];
-        }
-
         [self analyzeSample:extractedSample];
         [extractedSample release];
     }
 
-    if (_editOpen) {
+    if (_editOpen == YES) {
         [self endEditListAtTime:CMTimeMake(_currentTime, _timescale) empty:NO];
     }
 }
 
-- (void)analyzeSample:(MP42SampleBuffer *)sample {
-    if (sample->attachments) {
-#ifdef AVF_DEBUG
-        NSLog(@"Attachments found: %@", sample->attachments);
-#endif
-    }
+- (void)done {
+    [self flush];
+}
 
-    CFDictionaryRef trimStart = NULL, trimEnd = NULL, emptyMedia = NULL;
+- (void)analyzeSample:(MP42SampleBuffer *)sample {
+    CFDictionaryRef trimStart = NULL, trimEnd = NULL;
     if (sample->attachments) {
         trimStart = CFDictionaryGetValue(sample->attachments, kCMSampleBufferAttachmentKey_TrimDurationAtStart);
         trimEnd = CFDictionaryGetValue(sample->attachments, kCMSampleBufferAttachmentKey_TrimDurationAtEnd);
-        emptyMedia = CFDictionaryGetValue(sample->attachments, kCMSampleBufferAttachmentKey_EmptyMedia);
     }
 
-    if (emptyMedia) {
 #ifdef AVF_DEBUG
-        NSLog(@"Empty edit");
+    NSLog(@"T: %llu, P: %llu, PO: %llu", _currentTime, sample->presentationTimestamp, sample->presentationOutputTimestamp);
 #endif
+
+    if (sample->presentationOutputTimestamp > sample->presentationTimestamp + _delta) {
+        _delta = sample->presentationOutputTimestamp - sample->presentationTimestamp;
+
+        if (_editOpen == YES) {
+            [self endEditListAtTime:CMTimeMake(_currentTime, _timescale) empty:NO];
+        }
+
+        // Add an empty edit list
+        CMTime editStart = CMTimeMake(_currentTime, _timescale);
+        [self startEditListAtTime:editStart];
+        CMTime editEnd = CMTimeMake(_currentTime + _delta, _timescale);
+        [self endEditListAtTime:editEnd empty:YES];
     }
 
     BOOL shouldStartNewEdit = trimStart || (sample->doNotDisplay == NO && _editOpen == NO);
 
     if (shouldStartNewEdit) {
         // Close the current edit list
-        if (_editOpen) {
+        if (_editOpen == YES) {
             [self endEditListAtTime:CMTimeMake(_currentTime, _timescale) empty:NO];
         }
 
@@ -116,16 +128,14 @@
 
         [self endEditListAtTime:editEnd empty:NO];
     }
-
-#ifdef AVF_DEBUG
-    NSLog(@"%llu, T: %llu, C: %llu, O: %llu", _count++, _currentTime, sample->timestamp, sample->offset);
-#endif
 }
 
 /**
  * Starts a new edit
  */
 - (void)startEditListAtTime:(CMTime)time {
+    NSAssert(!_editOpen, @"Trying to open an edit list when one is already open.");
+
     if (_editsSize <= _editsCount) {
         _editsSize += 20;
         _edits = (CMTimeRange *) realloc(_edits, sizeof(CMTimeRange) * _editsSize);
@@ -135,12 +145,10 @@
 }
 
 /**
- * Closes a opened edit
+ * Closes a open edit
  */
 - (void)endEditListAtTime:(CMTime)time empty:(BOOL)type {
-    if (!_editOpen) {
-        return;
-    }
+    NSAssert(_editOpen, @"Trying to close an edit list when there isn't a open one");
 
     time.value -= _edits[_editsCount].start.value;
     _edits[_editsCount].duration = time;
@@ -159,6 +167,5 @@
     [_priorityQueue release];
     [super dealloc];
 }
-
 
 @end
