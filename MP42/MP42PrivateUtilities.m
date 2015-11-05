@@ -684,25 +684,26 @@ int readEAC3Config(const uint8_t *cookie, uint32_t cookieLen, UInt32 *channelsCo
         return 0;
     }
 
-    uint32_t data_rate, num_ind_sub;
+    //uint32_t data_rate, num_ind_sub;
 
-    data_rate = *cookie << 5;
-    data_rate += (*(cookie + 1) & 0xf8) >> 3;
+    //data_rate = *cookie << 5;
+    //data_rate += (*(cookie + 1) & 0xf8) >> 3;
 
-    num_ind_sub = *(cookie + 1) & 0x7;
-    num_ind_sub += 1;
+    //num_ind_sub = *(cookie + 1) & 0x7;
+    //num_ind_sub += 1;
 
     // we support only one independent substream
     for (int i = 0; i < 1; i++)
     {
-        uint32_t fscod, bsid, asvc, bsmod, acmod, lfeon;
+        //uint32_t fscod, bsid, asvc, bsmod;
+        uint32_t acmod, lfeon;
 
-        fscod = (*(cookie + 2) & 0xc0) >> 6;
-        bsid = (*(cookie + 2) & 0x3e) >> 1;
+        //fscod = (*(cookie + 2) & 0xc0) >> 6;
+        //bsid = (*(cookie + 2) & 0x3e) >> 1;
 
-        asvc = (*(cookie + 3) & 0x80) >> 7;
+        //asvc = (*(cookie + 3) & 0x80) >> 7;
 
-        bsmod = (*(cookie + 3) & 0x70) >> 4;
+        //bsmod = (*(cookie + 3) & 0x70) >> 4;
         acmod = (*(cookie + 3) & 0xe) >> 1;
 
         lfeon = *(cookie + 3) & 0x1;
