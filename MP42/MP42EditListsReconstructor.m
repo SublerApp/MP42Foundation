@@ -33,6 +33,7 @@
 
         if (_timescale == 0) {
             _timescale = extractedSample->timescale;
+            _currentTime += extractedSample->offset;
         }
 
         [self analyzeSample:extractedSample];
