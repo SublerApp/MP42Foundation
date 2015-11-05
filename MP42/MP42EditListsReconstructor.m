@@ -10,8 +10,8 @@
 
 @implementation MP42EditListsReconstructor
 
-@synthesize edits;
-@synthesize editsCount;
+@synthesize edits = _edits;
+@synthesize editsCount = _editsCount;
 
 - (instancetype)init {
     self = [super init];
@@ -28,14 +28,16 @@
     [sample retain];
     [_priorityQueue insert:sample];
 
+    if (_timescale == 0) {
+        _timescale = sample->timescale;
+        // Re-align things if the first sample pts is not 0
+        if (sample->offset != 0) {
+            _currentTime += sample->offset - sample->timestamp;
+        }
+    }
+
     if ([_priorityQueue isFull]) {
         MP42SampleBuffer *extractedSample = [_priorityQueue extract];
-
-        if (_timescale == 0) {
-            _timescale = extractedSample->timescale;
-            _currentTime += extractedSample->offset;
-        }
-
         [self analyzeSample:extractedSample];
         [extractedSample release];
     }
@@ -44,6 +46,7 @@
 - (void)done {
     while (![_priorityQueue isEmpty]) {
         MP42SampleBuffer *extractedSample = [_priorityQueue extract];
+
         if (_timescale == 0) {
             _timescale = extractedSample->timescale;
             [self startEditListAtTime:CMTimeMake(extractedSample->presentationTimestamp - extractedSample->timestamp, _timescale)];
@@ -53,7 +56,7 @@
         [extractedSample release];
     }
 
-    if ([self isEditListOpen]) {
+    if (_editOpen) {
         [self endEditListAtTime:CMTimeMake(_currentTime, _timescale) empty:NO];
     }
 }
@@ -65,43 +68,57 @@
 #endif
     }
 
-    CFDictionaryRef trimStart = NULL, trimEnd = NULL;
-
+    CFDictionaryRef trimStart = NULL, trimEnd = NULL, emptyMedia = NULL;
     if (sample->attachments) {
-        // Check if we have to trim the start or end of a sample
-        // If so it means we need to start/end an edit
-        if ((trimStart = CFDictionaryGetValue(sample->attachments, kCMSampleBufferAttachmentKey_TrimDurationAtStart)) ||
-            (sample->doNotDisplay == NO && [self isEditListOpen] == NO)) {
-            if ([self isEditListOpen]) {
-                [self endEditListAtTime:CMTimeMake(_currentTime, _timescale) empty:NO];
-            }
+        trimStart = CFDictionaryGetValue(sample->attachments, kCMSampleBufferAttachmentKey_TrimDurationAtStart);
+        trimEnd = CFDictionaryGetValue(sample->attachments, kCMSampleBufferAttachmentKey_TrimDurationAtEnd);
+        emptyMedia = CFDictionaryGetValue(sample->attachments, kCMSampleBufferAttachmentKey_EmptyMedia);
+    }
 
-            CMTime trimStartTime = CMTimeMakeFromDictionary(trimStart);
+    if (emptyMedia) {
+#ifdef AVF_DEBUG
+        NSLog(@"Empty edit");
+#endif
+    }
 
-            trimStartTime = CMTimeConvertScale(trimStartTime, _timescale, kCMTimeRoundingMethod_Default);
-            CMTime editStart = CMTimeMake(_currentTime, _timescale);
-            editStart.value += trimStartTime.value;
+    BOOL shouldStartNewEdit = trimStart || (sample->doNotDisplay == NO && _editOpen == NO);
 
-            [self startEditListAtTime:editStart];
+    if (shouldStartNewEdit) {
+        // Close the current edit list
+        if (_editOpen) {
+            [self endEditListAtTime:CMTimeMake(_currentTime, _timescale) empty:NO];
         }
+
+        // Calculate the new edit start
+        CMTime editStart = CMTimeMake(_currentTime, _timescale);
+
+        if (trimStart) {
+            CMTime trimStartTime = CMTimeMakeFromDictionary(trimStart);
+            trimStartTime = CMTimeConvertScale(trimStartTime, _timescale, kCMTimeRoundingMethod_Default);
+            editStart.value += trimStartTime.value;
+        }
+
+        [self startEditListAtTime:editStart];
     }
 
     _currentTime += sample->duration;
-    _delta = sample->presentationTimestamp - sample->timestamp;
 
-    if (sample->attachments) {
-        if ((trimEnd = CFDictionaryGetValue(sample->attachments, kCMSampleBufferAttachmentKey_TrimDurationAtEnd)) ||
-            (sample->doNotDisplay == YES && [self isEditListOpen] == YES)) {
+    BOOL shouldEndEdit = trimEnd || (sample->doNotDisplay == YES && _editOpen == YES);
+
+    if (shouldEndEdit) {
+        CMTime editEnd = CMTimeMake(_currentTime, _timescale);
+
+        if (trimEnd) {
             CMTime trimEndTime = CMTimeMakeFromDictionary(trimEnd);
             trimEndTime = CMTimeConvertScale(trimEndTime, _timescale, kCMTimeRoundingMethod_Default);
-            CMTime editEnd = CMTimeMake(_currentTime - trimEndTime.value, _timescale);
-
-            [self endEditListAtTime:editEnd empty:NO];
+            editEnd.value -= trimEndTime.value;
         }
+
+        [self endEditListAtTime:editEnd empty:NO];
     }
 
 #ifdef AVF_DEBUG
-    NSLog(@"%llu, %llu, %llu, %llu", _count++, _delta, _currentTime, sample->timestamp);
+    NSLog(@"%llu, T: %llu, C: %llu, O: %llu", _count++, _currentTime, sample->timestamp, sample->offset);
 #endif
 }
 
@@ -109,40 +126,33 @@
  * Starts a new edit
  */
 - (void)startEditListAtTime:(CMTime)time {
-    if (editsSize <= editsCount) {
-        editsSize += 20;
-        edits = (CMTimeRange *) realloc(edits, sizeof(CMTimeRange) * editsSize);
+    if (_editsSize <= _editsCount) {
+        _editsSize += 20;
+        _edits = (CMTimeRange *) realloc(_edits, sizeof(CMTimeRange) * _editsSize);
     }
-    edits[editsCount] = CMTimeRangeMake(time, kCMTimeInvalid);
-    editOpen = YES;
+    _edits[_editsCount] = CMTimeRangeMake(time, kCMTimeInvalid);
+    _editOpen = YES;
 }
 
 /**
  * Closes a opened edit
  */
 - (void)endEditListAtTime:(CMTime)time empty:(BOOL)type {
-    if (!editOpen) {
+    if (!_editOpen) {
         return;
     }
 
-    time.value -= edits[editsCount].start.value;
-    edits[editsCount].duration = time;
+    time.value -= _edits[_editsCount].start.value;
+    _edits[_editsCount].duration = time;
 
     if (type) {
-        edits[editsCount].start.value = -1;
+        _edits[_editsCount].start.value = -1;
     }
 
-    if (edits[editsCount].duration.value > 0) {
-        editsCount++;
+    if (_edits[_editsCount].duration.value > 0) {
+        _editsCount++;
     }
-    editOpen = NO;
-}
-
-/**
- * Returns if there is an open edit list
- */
-- (BOOL)isEditListOpen {
-    return editOpen;
+    _editOpen = NO;
 }
 
 - (void)dealloc {

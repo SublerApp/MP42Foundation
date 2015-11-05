@@ -759,8 +759,9 @@
         for (MP42Track *track in self.inputTracks) {
             AVAssetReaderOutput *assetReaderOutput = [AVAssetReaderTrackOutput assetReaderTrackOutputWithTrack:[_localAsset trackWithTrackID:track.sourceId]
                                                                                                 outputSettings:nil];
-            if (![assetReader canAddOutput: assetReaderOutput])
+            if (![assetReader canAddOutput: assetReaderOutput]) {
                 NSLog(@"Unable to add the output to assetReader!");
+            }
 
             [assetReader addOutput:assetReaderOutput];
 
@@ -885,6 +886,9 @@
                         continue;
                     }
 
+                    BOOL attachmentsSent = NO;
+                    CFDictionaryRef attachments = CMCopyDictionaryOfAttachments(NULL, sampleBuffer, kCMAttachmentMode_ShouldPropagate);
+
                     // Get CMBlockBufferRef to extract the actual data later
                     CMBlockBufferRef buffer = CMSampleBufferGetDataBuffer(sampleBuffer);
                     size_t bufferSize = CMBlockBufferGetDataLength(buffer);
@@ -935,11 +939,17 @@
 
                         // Read sample attachment, sync to mark the frame as sync
                         BOOL sync = 1;
+                        BOOL doNotDisplay = NO;
                         CFArrayRef attachmentsArray = CMSampleBufferGetSampleAttachmentsArray(sampleBuffer, NO);
                         if (attachmentsArray) {
                             for (NSDictionary *dict in (NSArray *)attachmentsArray) {
-                                if ([dict valueForKey:(NSString *)kCMSampleAttachmentKey_NotSync])
+                                if ([dict valueForKey:(NSString *)kCMSampleAttachmentKey_NotSync]) {
                                     sync = 0;
+                                }
+                                if ([dict valueForKey:(NSString*)kCMSampleAttachmentKey_DoNotDisplay]) {
+                                    doNotDisplay = YES;
+                                }
+
                             }
                         }
 
@@ -959,6 +969,11 @@
                         sample->timescale = sampleTimingInfo.duration.timescale;
                         sample->isSync = sync;
                         sample->trackId = track.sourceId;
+
+                        if (attachmentsSent == NO) {
+                            sample->attachments = (void *)attachments;
+                            attachmentsSent = YES;
+                        }
 
                         [demuxHelper->editsConstructor addSample:sample];
                         [self enqueue:sample];
