@@ -768,7 +768,7 @@
             track.muxer_helper->demuxer_context = [[AVFDemuxHelper alloc] init];
             demuxHelper = track.muxer_helper->demuxer_context;
             demuxHelper->assetReaderOutput = assetReaderOutput;
-            demuxHelper->editsConstructor = [[MP42EditListsReconstructor alloc] init];
+            demuxHelper->editsConstructor = [[MP42EditListsReconstructor alloc] initWithMediaFormat:track.format];
 
             totalDataLength += [track dataLength];
         }
@@ -819,7 +819,7 @@
                         }
                     }
 
-                    CMTime currentOutputTimeStamp = CMTimeConvertScale(presentationOutputTimeStamp, duration.timescale, kCMTimeRoundingMethod_Default);
+                    CMTime currentOutputTimeStamp = CMTimeConvertScale(presentationOutputTimeStamp, duration.timescale, kCMTimeRoundingMethod_QuickTime);
                     CFDictionaryRef attachments = CMCopyDictionaryOfAttachments(NULL, sampleBuffer, kCMAttachmentMode_ShouldPropagate);
 
 #ifdef SB_AVF_DEBUG
@@ -1033,11 +1033,12 @@
         // Add back the new constructed edit lists.
         for (uint64_t i = 0; i < helper->editsConstructor.editsCount; i++) {
             CMTimeRange timeRange = helper->editsConstructor.edits[i];
-            CMTime duration = CMTimeConvertScale(timeRange.duration, timescale, kCMTimeRoundingMethod_Default);
+            CMTime duration = CMTimeConvertScale(timeRange.duration, timescale, kCMTimeRoundingMethod_QuickTime);
 
             trackDuration += duration.value;
 
-            MP4AddTrackEdit(fileHandle, trackId, MP4_INVALID_EDIT_ID, timeRange.start.value - helper->minDisplayOffset,
+            MP4AddTrackEdit(fileHandle, trackId, MP4_INVALID_EDIT_ID,
+                            timeRange.start.value - helper->minDisplayOffset,
                             duration.value, 0);
 
         }

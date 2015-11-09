@@ -26,11 +26,18 @@
 
     int64_t     _delta;
 
-    CMTimeRange     *_edits;
-    uint64_t        _editsCount;
-    uint64_t        _editsSize;
+    CMTimeRange *_edits;
+    uint64_t    _editsCount;
+    uint64_t    _editsSize;
+
     BOOL        _editOpen;
+
+    FourCharCode _format;
+    uint64_t     _priming;
+    BOOL         _primingUsed;
 }
+
+- (instancetype)initWithMediaFormat:(NSString *)format;
 
 - (void)addSample:(MP42SampleBuffer *)sample;
 - (void)done;

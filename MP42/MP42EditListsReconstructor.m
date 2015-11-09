@@ -7,6 +7,7 @@
 //
 
 #import "MP42EditListsReconstructor.h"
+#import "MP42MediaFormat.h"
 
 @implementation MP42EditListsReconstructor
 
@@ -14,11 +15,25 @@
 @synthesize editsCount = _editsCount;
 
 - (instancetype)init {
+    self = [self initWithMediaFormat:0];
+    return self;
+}
+
+- (instancetype)initWithMediaFormat:(NSString *)format {
     self = [super init];
     if (self) {
         _priorityQueue = [[MP42Heap alloc] initWithCapacity:32 andComparator:^NSComparisonResult(MP42SampleBuffer * obj1, MP42SampleBuffer * obj2) {
             return obj2->presentationTimestamp - obj1->presentationTimestamp;
         }];
+
+
+        if ([format isEqualToString:MP42AudioFormatAAC]) {
+            _priming = 2112;
+        }
+        else if ([format isEqualToString:MP42AudioFormatHEAAC])
+        {
+            _priming = 4224;
+        }
     }
     return self;
 }
@@ -36,14 +51,6 @@
 
     [_priorityQueue insert:sample];
 
-    if (_timescale == 0) {
-        _timescale = sample->timescale;
-        // Re-align things if the first sample pts is not 0
-        if (sample->presentationTimestamp != 0) {
-            _currentTime += sample->presentationTimestamp;
-        }
-    }
-
     if ([_priorityQueue isFull]) {
         MP42SampleBuffer *extractedSample = [_priorityQueue extract];
         [self analyzeSample:extractedSample];
@@ -60,7 +67,8 @@
     }
 
     if (_editOpen == YES) {
-        [self endEditListAtTime:CMTimeMake(_currentTime, _timescale) empty:NO];
+        CMTime editEnd = CMTimeMake(_currentTime, _timescale);
+        [self endEditListAtTime:editEnd empty:NO];
     }
 }
 
@@ -69,16 +77,26 @@
 }
 
 - (void)analyzeSample:(MP42SampleBuffer *)sample {
+
+#ifdef AVF_DEBUG
+    NSLog(@"T: %llu, P: %lld, PO: %lld O: %lld", _currentTime, sample->presentationTimestamp, sample->presentationOutputTimestamp, sample->offset);
+#endif
+
+    if (_timescale == 0) {
+        _timescale = sample->timescale;
+        // Re-align things if the first sample pts is not 0
+        if (sample->presentationTimestamp != 0) {
+            _currentTime += sample->presentationTimestamp;
+        }
+    }
+
     CFDictionaryRef trimStart = NULL, trimEnd = NULL;
     if (sample->attachments) {
         trimStart = CFDictionaryGetValue(sample->attachments, kCMSampleBufferAttachmentKey_TrimDurationAtStart);
         trimEnd = CFDictionaryGetValue(sample->attachments, kCMSampleBufferAttachmentKey_TrimDurationAtEnd);
     }
 
-#ifdef AVF_DEBUG
-    NSLog(@"T: %llu, P: %llu, PO: %llu", _currentTime, sample->presentationTimestamp, sample->presentationOutputTimestamp);
-#endif
-
+    // Check if we need to add an empty edit list.
     if (sample->presentationOutputTimestamp > sample->presentationTimestamp + _delta) {
         _delta = sample->presentationOutputTimestamp - sample->presentationTimestamp;
 
@@ -106,8 +124,13 @@
 
         if (trimStart) {
             CMTime trimStartTime = CMTimeMakeFromDictionary(trimStart);
-            trimStartTime = CMTimeConvertScale(trimStartTime, _timescale, kCMTimeRoundingMethod_Default);
+            trimStartTime = CMTimeConvertScale(trimStartTime, _timescale, kCMTimeRoundingMethod_QuickTime);
             editStart.value += trimStartTime.value;
+        }
+
+        if (_priming && _primingUsed == NO) {
+            editStart.value -= _priming;
+            _primingUsed = YES;
         }
 
         [self startEditListAtTime:editStart];
@@ -122,7 +145,7 @@
 
         if (trimEnd) {
             CMTime trimEndTime = CMTimeMakeFromDictionary(trimEnd);
-            trimEndTime = CMTimeConvertScale(trimEndTime, _timescale, kCMTimeRoundingMethod_Default);
+            trimEndTime = CMTimeConvertScale(trimEndTime, _timescale, kCMTimeRoundingMethod_QuickTime);
             editEnd.value -= trimEndTime.value;
         }
 
