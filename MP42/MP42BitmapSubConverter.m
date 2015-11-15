@@ -320,6 +320,8 @@ void FFInitFFmpeg() {
 
                 for (unsigned i = 0; i < subtitle.num_rects; i++) {
                     AVSubtitleRect *rect = subtitle.rects[i];
+                    if (rect->w == 0 || rect->h == 0)
+                        continue;
 
                     uint32_t *imageData = calloc(rect->w * rect->h * 4, sizeof(uint32_t));
                     memset(imageData, 0, rect->w * rect->h * 4);
