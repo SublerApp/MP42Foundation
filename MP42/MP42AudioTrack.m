@@ -8,7 +8,9 @@
 
 #import "MP42AudioTrack.h"
 #import "MP42Track+Private.h"
+
 #import "MP42PrivateUtilities.h"
+#import "MP42FormatUtilites.h"
 #import "MP42MediaFormat.h"
 
 extern u_int8_t MP4AV_AacConfigGetChannels(u_int8_t* pConfig);

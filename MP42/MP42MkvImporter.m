@@ -19,6 +19,7 @@
 
 #import "mp4v2.h"
 #import "MP42PrivateUtilities.h"
+#import "MP42FormatUtilites.h"
 #import "MP42Track+Muxer.h"
 
 #define SCALE_FACTOR 1000000.f
@@ -546,38 +547,8 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
                 [magicCookie appendBytes:&frmsizecod length:sizeof(uint64_t)];
             }
             else if (!strcmp(trackInfo->CodecID, "A_EAC3")) {
-                // parse EAC3 header
-
-                /*uint64_t strmtyp, substreamid;
-                uint64_t frmsiz, fscod, bsid, bsmod, acmod, lfeon;
-
-                strmtyp = (*(frame+2) >> 6) & 0x3;
-                substreamid = (*(frame+2) >> 3) & 0x7;
-
-                frmsiz = (*(frame+2) & 0x7) << 8;
-                frmsiz += *(frame+3);
-
-                fscod = (*(frame+4) >> 6) & 0x3;
-
-                if (fscod == 0x3) {
-
-                }
-                else {
-
-                }
-
-                acmod = (*(frame+4) & 0xe) >> 1;
-                lfeon = (*(frame+4) & 0x1);
-                bsid = (*(frame+5) >> 3) & 0x1f;
-                bsmod = 0;
-
-                if (acmod == 0x0) { // if 1+1 mode (dual mono, so some items need a second value)
-
-                }
-
-                if (strmtyp == 0x1) { // if dependent stream
-
-                }*/
+                NSData *magicCookie = (NSData *)createCookie_EAC3(frame, FrameSize);
+                return [magicCookie autorelease];
             }
 
             mkv_Seek(_matroskaFile, 0, 0);

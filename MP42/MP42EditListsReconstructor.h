@@ -32,7 +32,6 @@
 
     BOOL        _editOpen;
 
-    FourCharCode _format;
     uint64_t     _priming;
     BOOL         _primingUsed;
 }

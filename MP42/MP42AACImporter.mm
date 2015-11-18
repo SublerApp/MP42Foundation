@@ -718,7 +718,7 @@ static bool GetFirstHeader(FILE* inFile)
 {
     if ((self = [super initWithURL:fileURL])) {
 
-        MP42Track *newTrack = [[MP42AudioTrack alloc] init];
+        MP42AudioTrack *newTrack = [[MP42AudioTrack alloc] init];
 
         newTrack.format = MP42AudioFormatAAC;
         newTrack.sourceURL = self.fileURL;
@@ -801,7 +801,7 @@ static bool GetFirstHeader(FILE* inFile)
                                   samplesPerSecond,
                                   channelConfig);
 
-        [(MP42AudioTrack*) newTrack setChannels:channelConfig];
+        [newTrack setChannels:channelConfig];
         [newTrack setDataLength:[[[[NSFileManager defaultManager] attributesOfItemAtPath:self.fileURL.path error:nil] valueForKey:NSFileSize] unsignedLongLongValue]];
 
         aacInfo = [[NSMutableData alloc] init];

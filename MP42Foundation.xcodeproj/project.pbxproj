@@ -68,6 +68,10 @@
 		A91711E9187D547D00459495 /* MP42PreviewGenerator.m in Sources */ = {isa = PBXBuildFile; fileRef = A91711E5187D547D00459495 /* MP42PreviewGenerator.m */; };
 		A917286619FD2BCE00348DF8 /* MP42Logging.h in Headers */ = {isa = PBXBuildFile; fileRef = A917286519FD2BCE00348DF8 /* MP42Logging.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A917286719FD2BCE00348DF8 /* MP42Logging.h in Headers */ = {isa = PBXBuildFile; fileRef = A917286519FD2BCE00348DF8 /* MP42Logging.h */; };
+		A91C3ACE1BF20CF1008BCF87 /* MP42FormatUtilites.mm in Sources */ = {isa = PBXBuildFile; fileRef = A91C3ACC1BF20CF1008BCF87 /* MP42FormatUtilites.mm */; };
+		A91C3ACF1BF20CF1008BCF87 /* MP42FormatUtilites.mm in Sources */ = {isa = PBXBuildFile; fileRef = A91C3ACC1BF20CF1008BCF87 /* MP42FormatUtilites.mm */; };
+		A91C3AD01BF20CF1008BCF87 /* MP42FormatUtilites.h in Headers */ = {isa = PBXBuildFile; fileRef = A91C3ACD1BF20CF1008BCF87 /* MP42FormatUtilites.h */; };
+		A91C3AD11BF20CF1008BCF87 /* MP42FormatUtilites.h in Headers */ = {isa = PBXBuildFile; fileRef = A91C3ACD1BF20CF1008BCF87 /* MP42FormatUtilites.h */; };
 		A925AAAF18379AF800BE84D4 /* MP42Utilities.h in Headers */ = {isa = PBXBuildFile; fileRef = A925AAAD18379AF800BE84D4 /* MP42Utilities.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A925AAB018379AF800BE84D4 /* MP42Utilities.m in Sources */ = {isa = PBXBuildFile; fileRef = A925AAAE18379AF800BE84D4 /* MP42Utilities.m */; };
 		A925AABC1837A16500BE84D4 /* QTKitDecrap.h in Headers */ = {isa = PBXBuildFile; fileRef = A925AABB1837A16500BE84D4 /* QTKitDecrap.h */; };
@@ -270,6 +274,8 @@
 		A91711E4187D547D00459495 /* MP42PreviewGenerator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MP42PreviewGenerator.h; sourceTree = "<group>"; };
 		A91711E5187D547D00459495 /* MP42PreviewGenerator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MP42PreviewGenerator.m; sourceTree = "<group>"; };
 		A917286519FD2BCE00348DF8 /* MP42Logging.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MP42Logging.h; sourceTree = "<group>"; };
+		A91C3ACC1BF20CF1008BCF87 /* MP42FormatUtilites.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MP42FormatUtilites.mm; sourceTree = "<group>"; };
+		A91C3ACD1BF20CF1008BCF87 /* MP42FormatUtilites.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MP42FormatUtilites.h; sourceTree = "<group>"; };
 		A925AAAD18379AF800BE84D4 /* MP42Utilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MP42Utilities.h; sourceTree = "<group>"; };
 		A925AAAE18379AF800BE84D4 /* MP42Utilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MP42Utilities.m; sourceTree = "<group>"; };
 		A925AABB1837A16500BE84D4 /* QTKitDecrap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QTKitDecrap.h; sourceTree = "<group>"; };
@@ -683,6 +689,8 @@
 				A9B9C2CE182396A100416A4E /* MP42Ratings.m */,
 				A9B9C2521823923100416A4E /* MP42PrivateUtilities.h */,
 				A9B9C2531823923100416A4E /* MP42PrivateUtilities.m */,
+				A91C3ACD1BF20CF1008BCF87 /* MP42FormatUtilites.h */,
+				A91C3ACC1BF20CF1008BCF87 /* MP42FormatUtilites.mm */,
 				A925AAAD18379AF800BE84D4 /* MP42Utilities.h */,
 				A925AAAE18379AF800BE84D4 /* MP42Utilities.m */,
 				A9B9C24E1823923100416A4E /* MP42SubUtilities.h */,
@@ -725,6 +733,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A9A0C9B21981593900A72763 /* MP42ComponentLoader.h in Headers */,
+				A91C3AD11BF20CF1008BCF87 /* MP42FormatUtilites.h in Headers */,
 				A96D28941BAD390400403327 /* MP42Metadata+Private.h in Headers */,
 				A917286719FD2BCE00348DF8 /* MP42Logging.h in Headers */,
 				A99FCBC51BAD65EF0058E27A /* MP42Track+Private.h in Headers */,
@@ -786,6 +795,7 @@
 				A989F1001823AB2E0070AD8C /* MP42Track+Muxer.h in Headers */,
 				A9B9C26A1823923200416A4E /* MP42AudioConverter.h in Headers */,
 				A9B9C2A11823923200416A4E /* MP42VobSubImporter.h in Headers */,
+				A91C3AD01BF20CF1008BCF87 /* MP42FormatUtilites.h in Headers */,
 				A9B9C2AC1823923200416A4E /* mbs.h in Headers */,
 				A9B9C2891823923200416A4E /* MP42MkvImporter.h in Headers */,
 				A96D28931BAD390400403327 /* MP42Metadata+Private.h in Headers */,
@@ -974,6 +984,7 @@
 				A910B60118394EB20064028F /* MP42AudioConverter.m in Sources */,
 				A910B60318394EB20064028F /* MP42H264Importer.mm in Sources */,
 				A910B60518394EB20064028F /* MP42VobSubImporter.m in Sources */,
+				A91C3ACF1BF20CF1008BCF87 /* MP42FormatUtilites.mm in Sources */,
 				A910B60718394EB20064028F /* MP42MkvImporter.m in Sources */,
 				A910B60918394EB20064028F /* MP42Mp4Importer.m in Sources */,
 				A910B60B18394EB20064028F /* MP42QTImporter.m in Sources */,
@@ -1027,6 +1038,7 @@
 				A9B9C2841823923200416A4E /* MP42Image.m in Sources */,
 				A9B9C29E1823923200416A4E /* MP42PrivateUtilities.m in Sources */,
 				A9B9C28C1823923200416A4E /* MP42Mp4Importer.m in Sources */,
+				A91C3ACE1BF20CF1008BCF87 /* MP42FormatUtilites.mm in Sources */,
 				A9B9C26D1823923200416A4E /* MP42AudioTrack.m in Sources */,
 				A9B9C2901823923200416A4E /* MP42OCRWrapper.mm in Sources */,
 				A9B9C2881823923200416A4E /* MP42Metadata.m in Sources */,

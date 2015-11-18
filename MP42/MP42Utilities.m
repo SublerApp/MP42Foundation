@@ -45,7 +45,7 @@ MP42Duration TimeFromString(NSString *time_string, MP42Duration timeScale)
 
 BOOL isTrackMuxable(NSString *formatName)
 {
-    NSArray *supportedFormats = @[MP42VideoFormatH264, MP42VideoFormatMPEG4Visual, MP42AudioFormatAAC, MP42AudioFormatALAC,
+    NSArray *supportedFormats = @[MP42VideoFormatH264, MP42VideoFormatMPEG4Visual, MP42AudioFormatAAC, MP42AudioFormatHEAAC, MP42AudioFormatALAC,
                                   MP42AudioFormatAC3, MP42AudioFormatEAC3, MP42AudioFormatDTS, MP42SubtitleFormatTx3g, MP42SubtitleFormatText,
                                   MP42ClosedCaptionFormatCEA608, MP42VideoFormatJPEG, MP42SubtitleFormatVobSub];
 

@@ -195,7 +195,8 @@
         }
 
         // AAC audio track
-        else if ([track isMemberOfClass:[MP42AudioTrack class]] && [track.format isEqualToString:MP42AudioFormatAAC]) {
+        else if ([track isMemberOfClass:[MP42AudioTrack class]] &&
+                 ([track.format isEqualToString:MP42AudioFormatAAC] || [track.format isEqualToString:MP42AudioFormatHEAAC])) {
             dstTrackId = MP4AddAudioTrack(_fileHandle,
                                           timeScale,
                                           1024, MP4_MPEG4_AUDIO_TYPE);
