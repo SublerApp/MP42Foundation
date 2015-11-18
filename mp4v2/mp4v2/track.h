@@ -168,6 +168,13 @@ MP4TrackId MP4AddAC3AudioTrack(
     uint8_t       bit_rate_code );
 
 MP4V2_EXPORT
+MP4TrackId MP4AddEAC3AudioTrack(
+    MP4FileHandle hFile,
+    uint32_t samplingRate,
+    const void *cookie,
+    uint16_t cookieLen);
+
+MP4V2_EXPORT
 MP4TrackId MP4AddALACAudioTrack(
     MP4FileHandle hFile,
     uint32_t      samplingRate );
