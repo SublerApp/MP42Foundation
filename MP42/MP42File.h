@@ -26,6 +26,7 @@ extern NSString * const MP4264BitTime;
 extern NSString * const MP42GenerateChaptersPreviewTrack;
 extern NSString * const MP42CustomChaptersPreviewTrack;
 extern NSString * const MP42OrganizeAlternateGroups;
+extern NSString * const MP42AutoFallback;
 
 /**
  *  MP42Status
@@ -221,6 +222,12 @@ typedef void (^MP42FileProgressHandler)(double progress);
  *  Cancels a write/update operation.
  */
 - (void)cancel;
+
+
+/**
+ *  Auto set fallback track
+ */
+- (void)setAutoFallback;
 
 @end
 
