@@ -24,6 +24,7 @@ NSString * const MP4264BitTime = @"MP4264BitTime";
 NSString * const MP42GenerateChaptersPreviewTrack = @"MP42ChaptersPreview";
 NSString * const MP42CustomChaptersPreviewTrack = @"MP42CustomChaptersPreview";
 NSString * const MP42OrganizeAlternateGroups = @"MP42AlternateGroups";
+NSString * const MP42AutoFallback = @"MP42AutoFallback";
 
 static id <MP42Logging> _logger = nil;
 
@@ -713,6 +714,14 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 }
 
 - (BOOL)updateMP4FileWithOptions:(nullable NSDictionary<NSString *, id> *)options error:(NSError **)outError {
+    
+    
+    // Auto set fallback to
+    if ([options[MP42AutoFallback] boolValue]) {
+        [self setAutoFallback];
+    }
+    
+    
     // Organize the alternate groups
     if ([options[MP42OrganizeAlternateGroups] boolValue]) {
         [self organizeAlternateGroups];
@@ -1011,6 +1020,48 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 
     return NO;
 }
+
+
+#pragma mark - Auto Fallback
+//
+// Set automatically a fallback track for AC3 if Stereo track in the same language is present
+//
+- (void)setAutoFallback {
+    
+    NSMutableArray<MP42AudioTrack *> *availableFallbackTracks = [[NSMutableArray alloc] init];
+    NSMutableArray<MP42AudioTrack *> *needFallbackTracks = [[NSMutableArray alloc] init];
+    
+    for (MP42AudioTrack *track in [self tracksWithMediaType:MP42MediaTypeAudio] ) {
+        if ([track.format isEqualToString:MP42AudioFormatAC3] ||
+            [track.format isEqualToString:MP42AudioFormatEAC3]) {
+            [needFallbackTracks addObject:track];
+        } else if ([[track format] isEqualToString:MP42AudioFormatAAC]) {
+            [availableFallbackTracks addObject:track];
+        }
+    }
+    
+    NSUInteger counter = 0;
+    for (MP42AudioTrack *track in needFallbackTracks) {
+        // Same Language
+        if ([[track language] isEqualToString: [[availableFallbackTracks objectAtIndex:counter] language]]) {
+            
+            
+            
+            uint32_t expectedIndex = [[availableFallbackTracks objectAtIndex:counter] trackId] - 1;
+            // Check if index of availableFallback is trackId - 1 for commentary
+            if (  [track trackId] == expectedIndex && track.fallbackTrack != [availableFallbackTracks objectAtIndex:counter]) {
+                // Set it to the expected commentary language
+                [track setFallbackTrack:[availableFallbackTracks objectAtIndex:expectedIndex]];
+            } else
+                // Set it the the suitable language
+                if (track.fallbackTrack != [availableFallbackTracks objectAtIndex:counter]) {
+                    [track setFallbackTrack:[availableFallbackTracks objectAtIndex:counter]];
+                }
+        }
+        counter++;
+    }
+}
+
 
 #pragma mark - NSCoding
 
