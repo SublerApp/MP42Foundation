@@ -1013,11 +1013,10 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
     return NO;
 }
 
-
 #pragma mark - Auto Fallback
-//
-// Set automatically a fallback track for AC3 if Stereo track in the same language is present
-//
+/**
+ * Set automatically a fallback track for AC3 if Stereo track in the same language is present
+ */
 - (void)setAutoFallback {
     
     NSMutableArray<MP42AudioTrack *> *availableFallbackTracks = [[NSMutableArray alloc] init];
@@ -1052,8 +1051,10 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
         }
         counter++;
     }
-}
 
+    [availableFallbackTracks release];
+    [needFallbackTracks release];
+}
 
 #pragma mark - NSCoding
 

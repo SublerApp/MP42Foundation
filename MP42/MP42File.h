@@ -177,6 +177,11 @@ typedef void (^MP42FileProgressHandler)(double progress);
  */
 - (void)organizeAlternateGroups;
 
+/**
+ *  Set automatically a fallback track for AC3 if Stereo track in the same language is present
+ */
+- (void)setAutoFallback;
+
 @property (nonatomic, readwrite, copy, nullable) MP42FileProgressHandler progressHandler;
 
 /**
@@ -221,12 +226,6 @@ typedef void (^MP42FileProgressHandler)(double progress);
  *  Cancels a write/update operation.
  */
 - (void)cancel;
-
-
-/**
- *  Auto set fallback track
- */
-- (void)setAutoFallback;
 
 @end
 
