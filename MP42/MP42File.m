@@ -1012,38 +1012,27 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
  * Set automatically a fallback track for AC3 if Stereo track in the same language is present
  */
 - (void)setAutoFallback {
-    
     NSMutableArray<MP42AudioTrack *> *availableFallbackTracks = [[NSMutableArray alloc] init];
     NSMutableArray<MP42AudioTrack *> *needFallbackTracks = [[NSMutableArray alloc] init];
-    
+
     for (MP42AudioTrack *track in [self tracksWithMediaType:MP42MediaTypeAudio] ) {
-        if ([track.format isEqualToString:MP42AudioFormatAC3] ||
-            [track.format isEqualToString:MP42AudioFormatEAC3]) {
+        if (([track.format isEqualToString:MP42AudioFormatAC3] ||
+            [track.format isEqualToString:MP42AudioFormatEAC3]) &&
+            track.fallbackTrack == nil) {
             [needFallbackTracks addObject:track];
-        } else if ([[track format] isEqualToString:MP42AudioFormatAAC]) {
+        }
+        else if ([track.format isEqualToString:MP42AudioFormatAAC]) {
             [availableFallbackTracks addObject:track];
         }
     }
-    
-    NSUInteger counter = 0;
-    for (MP42AudioTrack *track in needFallbackTracks) {
-        // Same Language
-        if ([[track language] isEqualToString: [[availableFallbackTracks objectAtIndex:counter] language]]) {
-            
-            
-            
-            uint32_t expectedIndex = [[availableFallbackTracks objectAtIndex:counter] trackId] - 1;
-            // Check if index of availableFallback is trackId - 1 for commentary
-            if (  [track trackId] == expectedIndex && track.fallbackTrack != [availableFallbackTracks objectAtIndex:counter]) {
-                // Set it to the expected commentary language
-                [track setFallbackTrack:[availableFallbackTracks objectAtIndex:expectedIndex]];
-            } else
-                // Set it the the suitable language
-                if (track.fallbackTrack != [availableFallbackTracks objectAtIndex:counter]) {
-                    [track setFallbackTrack:[availableFallbackTracks objectAtIndex:counter]];
-                }
+
+    for (MP42AudioTrack *ac3Track in needFallbackTracks) {
+        for (MP42AudioTrack *aacTrack in availableFallbackTracks.reverseObjectEnumerator) {
+            if ((aacTrack.trackId < ac3Track.trackId) && [aacTrack.language isEqualTo:ac3Track.language]) {
+                ac3Track.fallbackTrack = aacTrack;
+                break;
+            }
         }
-        counter++;
     }
 
     [availableFallbackTracks release];
