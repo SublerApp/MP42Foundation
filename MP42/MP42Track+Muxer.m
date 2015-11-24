@@ -40,7 +40,7 @@
             helper->done = YES;
         }
 
-        sample = [helper->fifo deque];
+        sample = [helper->fifo dequeue];
     }
 
     return sample;

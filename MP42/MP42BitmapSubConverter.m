@@ -126,7 +126,7 @@ void FFInitFFmpeg() {
             @autoreleasepool {
                 MP42SampleBuffer *sampleBuffer = nil;
 
-                while (!(sampleBuffer = [_inputSamplesBuffer dequeAndWait]) && !_readerDone);
+                while (!(sampleBuffer = [_inputSamplesBuffer dequeueAndWait]) && !_readerDone);
 
                 if (!sampleBuffer) {
                     break;
@@ -293,7 +293,7 @@ void FFInitFFmpeg() {
             @autoreleasepool {
                 MP42SampleBuffer *sampleBuffer = nil;
 
-                while (!(sampleBuffer = [_inputSamplesBuffer dequeAndWait]) && !_readerDone);
+                while (!(sampleBuffer = [_inputSamplesBuffer dequeueAndWait]) && !_readerDone);
 
                 if (!sampleBuffer) {
                     break;
@@ -464,7 +464,7 @@ void FFInitFFmpeg() {
 
 - (nullable MP42SampleBuffer *)copyEncodedSample
 {
-    return [_outputSamplesBuffer deque];
+    return [_outputSamplesBuffer dequeue];
 }
 
 - (void)cancel

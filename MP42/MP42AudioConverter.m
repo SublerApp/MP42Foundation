@@ -290,7 +290,7 @@ OSStatus DecoderDataProc(AudioConverterRef              inAudioConverter,
         return err;
     }
     else {
-        afio->sample = [afio->inputSamplesBuffer deque];
+        afio->sample = [afio->inputSamplesBuffer dequeue];
     }
 
     // advance input file packet position
@@ -670,7 +670,7 @@ OSStatus DecoderDataProc(AudioConverterRef              inAudioConverter,
 }
 
 - (MP42SampleBuffer *)copyEncodedSample {
-    return [_outputSamplesBuffer deque];
+    return [_outputSamplesBuffer dequeue];
 }
 
 - (void)setInputDone {

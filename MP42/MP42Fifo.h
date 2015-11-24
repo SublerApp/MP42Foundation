@@ -29,8 +29,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithCapacity:(NSUInteger)capacity NS_DESIGNATED_INITIALIZER;
 
 - (void)enqueue:(ObjectType)item;
-- (nullable ObjectType)deque NS_RETURNS_RETAINED;
-- (nullable ObjectType)dequeAndWait NS_RETURNS_RETAINED;
+- (nullable ObjectType)dequeue NS_RETURNS_RETAINED;
+- (nullable ObjectType)dequeueAndWait NS_RETURNS_RETAINED;
 
 - (BOOL)isFull;
 - (BOOL)isEmpty;

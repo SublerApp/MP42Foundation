@@ -44,7 +44,7 @@
     dispatch_semaphore_signal(_empty);
 }
 
-- (nullable id)deque {
+- (nullable id)dequeue {
     if (!_count) return nil;
 
     id item = _array[_head++];
@@ -59,8 +59,8 @@
     return item;
 }
 
-- (nullable id)dequeAndWait {
-    id item = [self deque];
+- (nullable id)dequeueAndWait {
+    id item = [self dequeue];
 
     if (!item) {
         dispatch_time_t time = dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC / 1000);
@@ -84,7 +84,7 @@
 
 - (void)drain {
     id item;
-    while ((item = [self deque])) {
+    while ((item = [self dequeue])) {
         [item release];
     }
 }
