@@ -26,7 +26,6 @@ extern NSString * const MP4264BitTime;
 extern NSString * const MP42GenerateChaptersPreviewTrack;
 extern NSString * const MP42CustomChaptersPreviewTrack;
 extern NSString * const MP42OrganizeAlternateGroups;
-extern NSString * const MP42AutoFallback;
 
 /**
  *  MP42Status

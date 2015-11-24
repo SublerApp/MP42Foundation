@@ -24,7 +24,6 @@ NSString * const MP4264BitTime = @"MP4264BitTime";
 NSString * const MP42GenerateChaptersPreviewTrack = @"MP42ChaptersPreview";
 NSString * const MP42CustomChaptersPreviewTrack = @"MP42CustomChaptersPreview";
 NSString * const MP42OrganizeAlternateGroups = @"MP42AlternateGroups";
-NSString * const MP42AutoFallback = @"MP42AutoFallback";
 
 static id <MP42Logging> _logger = nil;
 
@@ -714,14 +713,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 }
 
 - (BOOL)updateMP4FileWithOptions:(nullable NSDictionary<NSString *, id> *)options error:(NSError **)outError {
-    
-    
-    // Auto set fallback to
-    if ([options[MP42AutoFallback] boolValue]) {
-        [self setAutoFallback];
-    }
-    
-    
+
     // Organize the alternate groups
     if ([options[MP42OrganizeAlternateGroups] boolValue]) {
         [self organizeAlternateGroups];
