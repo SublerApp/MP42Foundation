@@ -248,7 +248,10 @@ unsigned ParseSubTime(const char *time, unsigned secondScale, BOOL hasSign)
 	}
 
     if (sscanf(time, "%u:%u:%u%[,.:]%u", &hour, &minute, &second, separator, &subsecond) < 5) {
-		return 0;
+        subsecond = 0;
+        if (sscanf(time, "%u:%u:%u", &hour, &minute, &second) < 3) {
+            return 0;
+        }
     }
 
     if (second > 60) {

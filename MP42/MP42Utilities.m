@@ -7,6 +7,7 @@
 //
 
 #import "MP42Utilities.h"
+#import "MP42SubUtilities.h"
 
 NSString * StringFromTime(long long time, long timeScale)
 {
@@ -32,15 +33,7 @@ NSString * StringFromTime(long long time, long timeScale)
 
 MP42Duration TimeFromString(NSString *time_string, MP42Duration timeScale)
 {
-    int hour, minute, second, frame;
-    MP42Duration timeval;
-
-    sscanf([time_string UTF8String], "%d:%02d:%02d.%03d",&hour, &minute, &second, &frame);
-
-    timeval = hour * 60 * 60 + minute * 60 + second;
-	timeval = timeScale * timeval + frame;
-    
-    return timeval;
+    return ParseSubTime(time_string.UTF8String, timeScale, NO);
 }
 
 BOOL isTrackMuxable(NSString *formatName)
