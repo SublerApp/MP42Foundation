@@ -257,8 +257,9 @@ unsigned ParseSubTime(const char *time, unsigned secondScale, BOOL hasSign)
     if (second > 60) {
         second = 0;
     }
-    if (subsecond > secondScale) {
-        subsecond = 0;
+
+    while (subsecond > secondScale) {
+        subsecond /= 10;
     }
 
 	timeval = hour * 60 * 60 + minute * 60 + second;
