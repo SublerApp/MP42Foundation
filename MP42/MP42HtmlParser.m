@@ -137,25 +137,28 @@ int compare_color(rgba_color c1, rgba_color c2) {
         contentInternalRange.length -=1;
         content = [_text substringWithRange:contentInternalRange];
     }
-    else
+    else {
         tagType = kTagOpen;
+    }
 
     if ([content hasPrefix:@"font"]) {
         style = [[MP42Style alloc] initWithStyle:kStyleColor type:tagType location:openRange.location color: _defaultColor];
         if (tagType == kTagOpen) {
             NSRange colorRange = [content rangeOfString:@"color=\"#"];
-            if (colorRange.location != NSNotFound && colorRange.location < [content length]) {
+            if (colorRange.location != NSNotFound && colorRange.location < content.length) {
                 colorRange.location += 8;
                 colorRange.length = 6;
-                NSString *color = [content substringWithRange:colorRange];
-                const char *r = [[color substringWithRange:NSMakeRange(0, 2)] UTF8String];
-                const char *g = [[color substringWithRange:NSMakeRange(2, 2)] UTF8String];
-                const char *b = [[color substringWithRange:NSMakeRange(4, 2)] UTF8String];
-                int rc, gc, bc;
-                sscanf(r, "%x", &rc);
-                sscanf(g, "%x", &gc);
-                sscanf(b, "%x", &bc);
-                style.color = make_color(rc,gc,bc,255);
+                if ((colorRange.location + colorRange.location) < content.length) {
+                    NSString *color = [content substringWithRange:colorRange];
+                    const char *r = [[color substringWithRange:NSMakeRange(0, 2)] UTF8String];
+                    const char *g = [[color substringWithRange:NSMakeRange(2, 2)] UTF8String];
+                    const char *b = [[color substringWithRange:NSMakeRange(4, 2)] UTF8String];
+                    int rc, gc, bc;
+                    sscanf(r, "%x", &rc);
+                    sscanf(g, "%x", &gc);
+                    sscanf(b, "%x", &bc);
+                    style.color = make_color(rc,gc,bc,255);
+                }
             }
         }
     }
