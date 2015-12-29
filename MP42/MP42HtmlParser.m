@@ -106,10 +106,10 @@ int compare_color(rgba_color c1, rgba_color c2) {
         }
 
         if (closeRange.location == NSNotFound)
-            closeRange.location = [_text length];
+            closeRange.location = _text.length;
     }
     else {
-        _location = [_text length];
+        _location = _text.length;
         return NSNotFound;
     }
 
@@ -123,7 +123,7 @@ int compare_color(rgba_color c1, rgba_color c2) {
 
     // If the internal content range location is equal to the text length
     // it means there is no content at all
-    if (contentInternalRange.location == [_text length]) {
+    if (contentInternalRange.location == _text.length) {
         return NSNotFound;
     }
 
@@ -184,36 +184,43 @@ int compare_color(rgba_color c1, rgba_color c2) {
 
 - (void)serializeStyles
 {
-    NSMutableArray *serializedStyles = [[NSMutableArray alloc] init];
+    NSMutableArray<MP42Style *> *serializedStyles = [[NSMutableArray alloc] init];
     MP42Style *currentStyle = [[MP42Style alloc] init];
 
     for (MP42Style *nextStyle in _styles) {
         if (currentStyle.location != nextStyle.location) {
             currentStyle.length = nextStyle.location - currentStyle.location;
-            if (currentStyle.style || compare_color(currentStyle.color, nextStyle.color))
-                if (currentStyle.length)
+            if (currentStyle.style || compare_color(currentStyle.color, nextStyle.color)) {
+                if (currentStyle.length) {
                     [serializedStyles addObject:[[currentStyle copy] autorelease]];
-
+                }
+            }
             currentStyle.location = nextStyle.location;
         }
+
         if (nextStyle.type == kTagOpen) {
-            if (nextStyle.style == kStyleColor)
+            if (nextStyle.style == kStyleColor) {
                 currentStyle.color = nextStyle.color;
-            else
+            }
+            else {
                 currentStyle.style |= nextStyle.style;
+            }
         }
         else if (nextStyle.type == kTagClose) {
-            if (nextStyle.style == kStyleColor)
+            if (nextStyle.style == kStyleColor) {
                 currentStyle.color = _defaultColor;
-            else
+            }
+            else {
                 currentStyle.style ^= nextStyle.style;
+            }
         }
     }
 
     if (currentStyle.style || compare_color(currentStyle.color, _defaultColor)) {
-        currentStyle.length = [_text length] - currentStyle.location;
-        if (currentStyle.length)
+        currentStyle.length = _text.length - currentStyle.location;
+        if (currentStyle.length) {
             [serializedStyles addObject:[[currentStyle copy] autorelease]];
+        }
     }
 
     [currentStyle release];
@@ -225,11 +232,12 @@ int compare_color(rgba_color c1, rgba_color c2) {
 @synthesize styles = _styles;
 @synthesize defaultColor = _defaultColor;
 
-
 - (void)dealloc
 {
     [_text release];
     [_styles release];
+
     [super dealloc];
 }
+
 @end
