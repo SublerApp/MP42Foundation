@@ -230,7 +230,7 @@ canOutput:
 	[super dealloc];
 }
 
--(NSString*)description
+-(NSString *)description
 {
 	return [NSString stringWithFormat:@"\"%@\", from %d s to %d s",[line substringToIndex:[line length]-1],begin_time,end_time];
 }

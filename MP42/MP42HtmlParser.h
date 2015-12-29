@@ -49,7 +49,7 @@ int compare_color(rgba_color c1, rgba_color c2);
 {
     NSUInteger _location;
     NSMutableString *_text;
-    NSMutableArray *_styles;
+    NSMutableArray<MP42Style *> *_styles;
     rgba_color _defaultColor;
 }
 
