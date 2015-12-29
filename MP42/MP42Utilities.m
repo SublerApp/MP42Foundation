@@ -24,7 +24,7 @@ NSString * StringFromTime(long long time, long timeScale)
     minute = result % 60;
 
     result = result / 60; // hour
-    hour = result % 24;
+    hour = result;
 
     time_string = [NSString stringWithFormat:@"%d:%02d:%02d.%03d", hour, minute, second, frame]; // h:mm:ss.mss
 
