@@ -223,6 +223,14 @@
 
             return [magicCookie autorelease];
         }
+        else if (!strcmp(media_data_name, "mp4v")) {
+            uint8_t *ppConfig; uint32_t pConfigSize;
+            MP4GetTrackESConfiguration(_fileHandle, srcTrackId, &ppConfig, &pConfigSize);
+            magicCookie = [NSData dataWithBytes:ppConfig length:pConfigSize];
+            free(ppConfig);
+
+            return magicCookie;
+        }
     }
 
     return nil;

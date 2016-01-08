@@ -177,10 +177,11 @@
                                           [(MP42VideoTrack*)track width], [(MP42VideoTrack*)track height],
                                           MP4_MPEG4_VIDEO_TYPE);
 
-            if ([magicCookie length])
+            if (magicCookie.length) {
                 MP4SetTrackESConfiguration(_fileHandle, dstTrackId,
-                                           [magicCookie bytes],
-                                           [magicCookie length]);
+                                           magicCookie.bytes,
+                                           magicCookie.length);
+            }
 
             [helper->importer setActiveTrack:track];
         }
