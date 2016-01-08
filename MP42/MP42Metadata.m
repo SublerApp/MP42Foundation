@@ -565,6 +565,10 @@ static const genreType_t genreType_strings[] = {
         }
     }
 
+    if (metadata.artworks.count) {
+        [artworks removeAllObjects];
+    }
+
     for (MP42Image *artwork in metadata.artworks) {
         isArtworkEdited = YES;
         [artworks addObject:artwork];
