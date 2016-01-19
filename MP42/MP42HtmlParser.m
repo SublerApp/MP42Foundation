@@ -148,7 +148,7 @@ int compare_color(rgba_color c1, rgba_color c2) {
             if (colorRange.location != NSNotFound && colorRange.location < content.length) {
                 colorRange.location += 8;
                 colorRange.length = 6;
-                if ((colorRange.location + colorRange.location) < content.length) {
+                if ((colorRange.location + colorRange.length) < content.length) {
                     NSString *color = [content substringWithRange:colorRange];
                     const char *r = [[color substringWithRange:NSMakeRange(0, 2)] UTF8String];
                     const char *g = [[color substringWithRange:NSMakeRange(2, 2)] UTF8String];
