@@ -800,7 +800,7 @@
         SoundDescriptionHandle sndDesc = (SoundDescriptionHandle) desc;
 
         ByteCount           formatDescSize;
-        AudioStreamBasicDescription formatDesc;
+        AudioStreamBasicDescription formatDesc = {0};
 
         err = QTSoundDescriptionGetPropertyInfo(sndDesc, kQTPropertyClass_SoundDescription,
                                                 kQTSoundDescriptionPropertyID_AudioStreamBasicDescription,

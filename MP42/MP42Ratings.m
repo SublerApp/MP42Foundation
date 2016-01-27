@@ -108,11 +108,15 @@
 }
 
 - (NSUInteger) ratingIndexForiTunesCode:(NSString *)aiTunesCode {
-	for (NSUInteger i = 0; i < [iTunesCodes count]; i++) {
-		if ([[iTunesCodes objectAtIndex:i] isEqualToString:aiTunesCode]) {
-			return i;
-		}
-	}
+    NSUInteger i = 0;
+
+    for (NSString *code in iTunesCodes) {
+        if ([code isEqualToString:aiTunesCode]) {
+            return i;
+        }
+        i++;
+    }
+
 	return [self unknownIndex];
 }
 

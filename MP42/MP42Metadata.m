@@ -1034,13 +1034,18 @@ static const genreType_t genreType_strings[] = {
                 [ratingString release];
 
                 if (ratingItems.count > 2) {
-                    ratingiTunesCode = [[NSString stringWithFormat:@"%@|%@|%@|",ratingItems[0], ratingItems[1], ratingItems[2]] retain];
+                    ratingiTunesCode = [[NSString stringWithFormat:@"%@|%@|%@|", ratingItems[0], ratingItems[1], ratingItems[2]] retain];
                 }
                 else {
                     ratingiTunesCode = nil;
                 }
 
-				[tagsDict setObject:[NSNumber numberWithUnsignedInteger:[[MP42Ratings defaultManager] ratingIndexForiTunesCode:ratingiTunesCode]] forKey:@"Rating"];
+                if (ratingiTunesCode) {
+                    tagsDict[@"Rating"] = [NSNumber numberWithUnsignedInteger:[[MP42Ratings defaultManager] ratingIndexForiTunesCode:ratingiTunesCode]];
+                }
+                else {
+                    tagsDict[@"Rating"] = @(0);
+                }
 
                 if (ratingItems.count >= 4) {
                     tagsDict[@"Rating Annotation"] = ratingItems[3];

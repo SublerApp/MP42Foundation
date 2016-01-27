@@ -589,10 +589,9 @@
 - (NSUInteger)timescaleForTrack:(MP42Track *)track {
     AVAssetTrack *assetTrack = [_localAsset trackWithTrackID:[track sourceId]];
 
-    CMFormatDescriptionRef formatDescription = NULL;
     NSArray *formatDescriptions = assetTrack.formatDescriptions;
-    if ([formatDescriptions count] > 0)
-        formatDescription = (CMFormatDescriptionRef)[formatDescriptions objectAtIndex:0];
+    CMFormatDescriptionRef formatDescription = (CMFormatDescriptionRef) formatDescriptions.firstObject;
+    if (formatDescriptions) {
         if ([[assetTrack mediaType] isEqualToString:AVMediaTypeAudio]) {
             const AudioStreamBasicDescription* const asbd =
             CMAudioFormatDescriptionGetStreamBasicDescription(formatDescription);
@@ -600,6 +599,7 @@
             double sampleRate = asbd->mSampleRate;
 
             return (NSUInteger)sampleRate;
+        }
     }
 
     return [assetTrack naturalTimeScale];

@@ -41,7 +41,7 @@ struct AudioFileIO
 	UInt32			numPacketsPerRead;
 
     AudioStreamBasicDescription     srcFormat;
-	AudioStreamPacketDescription    *pktDescs;
+    AudioStreamPacketDescription     * _Nullable pktDescs;
 
     MP42Fifo<MP42SampleBuffer *>    *inputSamplesBuffer;
 

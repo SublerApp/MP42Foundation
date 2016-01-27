@@ -543,7 +543,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
     #endif
 
     if (tempURL) {
-        tempURL = [tempURL URLByAppendingPathComponent:[NSString stringWithFormat:@"%@.tmp", [self.URL lastPathComponent]]];
+        tempURL = [tempURL URLByAppendingPathComponent:[NSString stringWithFormat:@"%@.tmp", self.URL.lastPathComponent]];
     }
 
     return tempURL;
@@ -568,7 +568,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 
             // Loop to check the progress
             while (!done) {
-                unsigned long long fileSize = [[[fileManager attributesOfItemAtPath:self.tempURL.path error:nil] valueForKey:NSFileSize] unsignedLongLongValue];
+                unsigned long long fileSize = [[[fileManager attributesOfItemAtPath:tempURL.path error:nil] valueForKey:NSFileSize] unsignedLongLongValue];
                 [self progressStatus:((double)fileSize / originalFileSize) * 100];
                 usleep(450000);
             }
