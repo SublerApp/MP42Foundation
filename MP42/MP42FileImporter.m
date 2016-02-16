@@ -36,18 +36,24 @@ static NSArray<NSString *> *_supportedFileFormats;
 
 + (void)initialize {
     if (self == [MP42FileImporter class]) {
-        _fileImporters = [@[[MP42MkvImporter class],
-                            [MP42Mp4Importer class],
-                            [MP42SrtImporter class],
-                            [MP42CCImporter class],
-                            [MP42AC3Importer class],
-                            [MP42AACImporter class],
-                            [MP42H264Importer class],
-                            [MP42VobSubImporter class],
+        NSMutableArray<Class> * fileImporters = [@[[MP42MkvImporter class],
+                                                   [MP42Mp4Importer class],
+                                                   [MP42SrtImporter class],
+                                                   [MP42CCImporter class],
+                                                   [MP42AC3Importer class],
+                                                   [MP42AACImporter class],
+                                                   [MP42H264Importer class],
+                                                   [MP42VobSubImporter class],
+                                                   [MP42AVFImporter class]] mutableCopy];
+
 #if !__LP64__
-                            [MP42QTImporter class],
+        if ([[NSUserDefaults standardUserDefaults] boolForKey:@"MP42PreferQuickTime"]) {
+            [fileImporters insertObject:[MP42QTImporter class] atIndex:7];
+        }
 #endif
-                            [MP42AVFImporter class]] retain];
+
+        _fileImporters = [fileImporters copy];
+        [fileImporters release];
 
         NSMutableArray<NSString *> *formats = [[NSMutableArray alloc] init];
 
