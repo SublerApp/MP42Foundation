@@ -202,7 +202,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
                 if (trackId == chapterId) {
                     track = [MP42ChapterTrack alloc];
                 } else {
-                    track = [MP42Track alloc];
+                    track = [MP42SubtitleTrack alloc];
                 }
             } else if (!strcmp(type, MP4_SUBTITLE_TRACK_TYPE)) {
                 track = [MP42SubtitleTrack alloc];
