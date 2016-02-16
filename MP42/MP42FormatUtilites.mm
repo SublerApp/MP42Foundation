@@ -727,29 +727,30 @@ concatenate:
         return -2;
     }
 
-    /*if (!info->num_blocks) {
-        int ret;
-        if ((ret = av_copy_packet(&info->pkt, pkt)) < 0)
-            return ret;
+    if (!info->num_blocks) {
+        // Copy the frame
+        info->frame = (uint8_t *)malloc(size);
+        if (info->frame == NULL) {
+            return -2;
+        }
+        memcpy(info->frame, frame, size);
+        info->size = size;
         info->num_blocks = num_blocks;
         return 0;
     } else {
-        int ret;
-        if ((ret = av_grow_packet(&info->pkt, pkt->size)) < 0)
-            return ret;
-        memcpy(info->pkt.data + info->pkt.size - pkt->size, pkt->data, pkt->size);
+        info->frame = (uint8_t *)realloc(info->frame, info->size + size);
+        if (info->frame == NULL) {
+            return -2;
+        }
+        memcpy(info->frame + info->size, frame, size);
+        info->size += size;
         info->num_blocks += num_blocks;
-        info->pkt.duration += pkt->duration;
-        if ((ret = av_copy_packet_side_data(&info->pkt, pkt)) < 0)
-            return ret;
-        if (info->num_blocks != 6)
+
+        if (info->num_blocks != 6) {
             return 0;
-        av_packet_unref(pkt);
-        if ((ret = av_copy_packet(pkt, &info->pkt)) < 0)
-            return ret;
-        av_packet_unref(&info->pkt);
+        }
         info->num_blocks = 0;
-    }*/
+    }
     
     return 0;
 }
@@ -786,6 +787,8 @@ CFDataRef createCookie_EAC3(void *context)
             cookie.PutBits(info->substream[i].chan_loc, 9); // chan_loc
         }
     }
+
+    free(info->frame);
 
     return CFDataCreate(kCFAllocatorDefault, cookie.GetBuffer(), cookie.GetBitPosition() / 8);
 }
