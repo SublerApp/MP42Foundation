@@ -45,7 +45,7 @@
 @implementation MP42AVFImporter
 
 + (NSArray<NSString *> *)supportedFileFormats {
-    return @[@"mov", @"m2ts", @"ts", @"mts", @"ac3", @"eac3", @"ec3", @"webvtt"];
+    return @[@"mov", @"m2ts", @"ts", @"mts", @"ac3", @"eac3", @"ec3", @"webvtt", @"vtt"];
 }
 
 - (NSString *)formatForTrack:(AVAssetTrack *)track {
@@ -177,7 +177,7 @@
 }
 
 - (NSString *)langForTrack:(AVAssetTrack *)track {
-    return [NSString stringWithUTF8String:lang_for_qtcode([[track languageCode] integerValue])->eng_name];
+    return [NSString stringWithUTF8String:lang_for_qtcode(track.languageCode.integerValue)->eng_name];
 }
 
 - (instancetype)initWithURL:(NSURL *)fileURL error:(NSError **)outError {
@@ -297,12 +297,19 @@
             }
             else if ([track.mediaType isEqualToString:AVMediaTypeText]) {
 
-                // It looks like there is no way to know what text track is used for chapters in the original file.
-                if (chapters) {
-                    newTrack = chapters;
+                FourCharCode code = 0;
+                if (formatDescription) {
+                    code = CMFormatDescriptionGetMediaSubType(formatDescription);
+                }
+                if (code == kCMSubtitleFormatType_WebVTT) {
+                    newTrack = [[MP42SubtitleTrack alloc] init];
+                }
+                else if (chapters) {
+                    // It looks like there is no way to know what text track is used for chapters in the original file.
+                        newTrack = chapters;
                 }
                 else {
-                    newTrack = [[MP42ChapterTrack alloc] init];
+                    newTrack = [[MP42SubtitleTrack alloc] init];
                 }
             }
             else {
@@ -738,9 +745,25 @@
 
                 return [ac3Info autorelease];
 
-            } else if (cookieSizeOut)
+            } else if (cookieSizeOut) {
                 return [NSData dataWithBytes:magicCookie length:cookieSizeOut];
+            }
         }
+
+        else if ([assetTrack.mediaType isEqualToString:AVMediaTypeText]) {
+
+            if (code == kCMSubtitleFormatType_WebVTT) {
+
+                CFDictionaryRef extentions = CMFormatDescriptionGetExtensions(formatDescription);
+                CFDictionaryRef atoms = CFDictionaryGetValue(extentions, kCMFormatDescriptionExtension_SampleDescriptionExtensionAtoms);
+                CFDataRef magicCookie = NULL;
+
+                magicCookie = CFDictionaryGetValue(atoms, @"vttC");
+
+                return (NSData *)magicCookie;
+            }
+        }
+
     }
     return nil;
 }
