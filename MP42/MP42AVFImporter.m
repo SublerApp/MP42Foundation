@@ -58,6 +58,10 @@
             case kCMVideoCodecType_H264:
                 result = MP42VideoFormatH264;
                 break;
+            case 'hev1':
+            case kCMVideoCodecType_HEVC:
+                result = MP42VideoFormatH265;
+                break;
             case kCMVideoCodecType_MPEG4Video:
                 result = MP42VideoFormatMPEG4Visual;
                 break;

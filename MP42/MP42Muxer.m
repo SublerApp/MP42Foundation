@@ -116,7 +116,7 @@
         // H.264 video track
         if ([track isMemberOfClass:[MP42VideoTrack class]] && [track.format isEqualToString:MP42VideoFormatH264]) {
 
-            if ([magicCookie length] < sizeof(uint8_t) * 6) {
+            if (magicCookie.length < sizeof(uint8_t) * 6) {
                 continue;
             }
 
@@ -166,6 +166,19 @@
             MP4SetVideoProfileLevel(_fileHandle, 0x15);
 
             [helper->importer setActiveTrack:track];
+        }
+
+        // H.265 video track
+        else if ([track isMemberOfClass:[MP42VideoTrack class]] && [track.format isEqualToString:MP42VideoFormatH265]) {
+
+            if (magicCookie.length < sizeof(uint8_t) * 6) {
+                continue;
+            }
+
+            //NSSize size = [helper->importer sizeForTrack:track];
+            //uint8_t *hvCCAtom = (uint8_t *)magicCookie.bytes;
+
+            NSAssert(NO, @"H.265 muxing not implemented yet");
         }
 
         // MPEG-4 Visual video track
