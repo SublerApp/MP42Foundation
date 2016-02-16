@@ -16,7 +16,8 @@ extern "C" {
     int readAC3Config(uint64_t acmod, uint64_t lfeon, UInt32 *channelsCount, UInt32 *channelLayoutTag);
     int readEAC3Config(const uint8_t *cookie, uint32_t cookieLen, UInt32 *channelsCount, UInt32 *channelLayoutTag);
 
-    CFDataRef createCookie_EAC3(uint8_t *frame, uint32_t size);
+    int analyze_EAC3(void **context ,uint8_t *frame, uint32_t size);
+    CFDataRef createCookie_EAC3(void *context);
 
 #ifdef __cplusplus
 }

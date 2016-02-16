@@ -349,7 +349,6 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
     uint64_t    *trackTimestamp;
     uint64_t    StartTime, EndTime, FilePos;
     uint32_t    Track, FrameSize, FrameFlags;
-    int i = 0;
 
     SegmentInfo *segInfo = mkv_GetFileInfo(_matroskaFile);
     NSInteger trackCount = mkv_GetNumTracks(_matroskaFile);
@@ -358,26 +357,29 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
         trackSizes = (uint64_t *) malloc(sizeof(uint64_t) * trackCount);
         trackTimestamp = (uint64_t *) malloc(sizeof(uint64_t) * trackCount);
 
-        for (i= 0; i < trackCount; i++) {
+        for (int i = 0; i < trackCount; i++) {
             trackSizes[i] = 0;
             trackTimestamp[i] = 0;
         }
 
         StartTime = 0;
-        i = 0;
+        int i = 0;
         while (StartTime < (segInfo->Duration / 64)) {
             if (!mkv_ReadFrame(_matroskaFile, 0, &Track, &StartTime, &EndTime, &FilePos, &FrameSize, &FrameFlags)) {
                 trackSizes[Track] += FrameSize;
                 trackTimestamp[Track] = StartTime;
                 i++;
             }
-            else
+            else {
                 break;
+            }
         }
 
-        for (i= 0; i < trackCount; i++)
-            if (trackTimestamp[i] > 0)
-                trackSizes[i] = trackSizes[i] * (segInfo->Duration / trackTimestamp[i]);
+        for (int j = 0; i < trackCount; i++) {
+            if (trackTimestamp[j] > 0) {
+                trackSizes[j] = trackSizes[j] * (segInfo->Duration / trackTimestamp[j]);
+            }
+        }
 
         free(trackTimestamp);
         mkv_Seek(_matroskaFile, 0, 0);
@@ -424,11 +426,16 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
             return MP42SubtitleFormatSSA;
         else if (!strcmp(track->CodecID, "S_VOBSUB"))
             return MP42SubtitleFormatVobSub;
-        else if (!strcmp(track->CodecID, "S_HDMV/PGS"))
+        else if (!strcmp(track->CodecID, "S_HDMV/PGS")) {
             return MP42SubtitleFormatPGS;
+        }
+        else if (!strcmp(track->CodecID, "V_MPEGH/ISO/HEVC")) {
+            return MP42VideoFormatH265;
+        }
 
-        else
+        else {
             return [NSString stringWithUTF8String:track->CodecID];
+        }
     }
     else {
         return @"Unknown";
@@ -502,18 +509,18 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
         uint64_t        StartTime, EndTime, FilePos;
         uint32_t        rt, FrameSize, FrameFlags;
         uint8_t         *frame = NULL;
+        NSData *magicCookie = nil;
 
-		// read first header to create track
-		int firstFrame = mkv_ReadFrame(_matroskaFile, 0, &rt, &StartTime, &EndTime, &FilePos, &FrameSize, &FrameFlags);
+        if (!strcmp(trackInfo->CodecID, "A_AC3")) {
+            // read first header to create track
+            int firstFrame = mkv_ReadFrame(_matroskaFile, 0, &rt, &StartTime, &EndTime, &FilePos, &FrameSize, &FrameFlags);
 
-        if (firstFrame != 0) {
-			return nil;
-        }
-        
-        if (readMkvPacket(_ioStream, trackInfo, FilePos, &frame, &FrameSize)) {
-            NSMutableData *magicCookie = nil;
+            if (firstFrame != 0) {
+                return nil;
+            }
 
-            if (!strcmp(trackInfo->CodecID, "A_AC3")) {
+            if (readMkvPacket(_ioStream, trackInfo, FilePos, &frame, &FrameSize)) {
+
                 // parse AC3 header
                 // collect all the necessary meta information
                 uint64_t fscod, frmsizecod, bsid, bsmod, acmod, lfeon;
@@ -537,28 +544,43 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
                 }
                 lfeon = (*(frame+6) >> lfe_offset) & 0x1;
 
+                NSMutableData *mutableCookie = [[NSMutableData alloc] init];
+                [mutableCookie appendBytes:&fscod length:sizeof(uint64_t)];
+                [mutableCookie appendBytes:&bsid length:sizeof(uint64_t)];
+                [mutableCookie appendBytes:&bsmod length:sizeof(uint64_t)];
+                [mutableCookie appendBytes:&acmod length:sizeof(uint64_t)];
+                [mutableCookie appendBytes:&lfeon length:sizeof(uint64_t)];
+                [mutableCookie appendBytes:&frmsizecod length:sizeof(uint64_t)];
 
-                magicCookie = [[NSMutableData alloc] init];
-                [magicCookie appendBytes:&fscod length:sizeof(uint64_t)];
-                [magicCookie appendBytes:&bsid length:sizeof(uint64_t)];
-                [magicCookie appendBytes:&bsmod length:sizeof(uint64_t)];
-                [magicCookie appendBytes:&acmod length:sizeof(uint64_t)];
-                [magicCookie appendBytes:&lfeon length:sizeof(uint64_t)];
-                [magicCookie appendBytes:&frmsizecod length:sizeof(uint64_t)];
+                magicCookie = mutableCookie;
+
+                free(frame);
             }
-            else if (!strcmp(trackInfo->CodecID, "A_EAC3")) {
-                NSData *magicCookie = (NSData *)createCookie_EAC3(frame, FrameSize);
-                return [magicCookie autorelease];
+        }
+
+        else if (!strcmp(trackInfo->CodecID, "A_EAC3")) {
+
+            void *context = NULL;
+            SegmentInfo *segInfo = mkv_GetFileInfo(_matroskaFile);
+
+            while (!mkv_ReadFrame(_matroskaFile, 0, &rt, &StartTime, &EndTime, &FilePos, &FrameSize, &FrameFlags) &&
+                   StartTime < (segInfo->Duration / 64)) {
+
+                if (readMkvPacket(_ioStream, trackInfo, FilePos, &frame, &FrameSize)) {
+                    analyze_EAC3(&context, frame, FrameSize);
+                    free(frame);
+                }
             }
 
-            mkv_Seek(_matroskaFile, 0, 0);
-            free(frame);
+            if (context) {
+                magicCookie = (NSData *)createCookie_EAC3(context);
+                free(context);
+            }
+        }
 
-            return [magicCookie autorelease];
-        }
-        else {
-            return nil;
-        }
+        mkv_Seek(_matroskaFile, 0, 0);
+
+        return [magicCookie autorelease];
     }
     else if (!strcmp(trackInfo->CodecID, "S_VOBSUB")) {
         char *string = (char *) trackInfo->CodecPrivate;
@@ -653,13 +675,20 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
                     // MKV timestamps are a bit random, try to round them
                     // to make the sample table in the mp4 smaller.
 
+                    // Round ac3
+                    if (sampleDuration < 550 && sampleDuration > 480) {
+                        sampleDuration = 512;
+                    }
+
                     // Round aac
-                    if (sampleDuration < 1060 && sampleDuration > 990)
+                    if (sampleDuration < 1060 && sampleDuration > 990) {
                         sampleDuration = 1024;
+                    }
 
                     // Round ac3
-                    if (sampleDuration < 1576 && sampleDuration > 1500)
+                    if (sampleDuration < 1576 && sampleDuration > 1500) {
                         sampleDuration = 1536;
+                    }
 
                     demuxHelper->previousSample->duration = sampleDuration;
                     [self enqueue:demuxHelper->previousSample];
