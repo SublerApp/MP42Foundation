@@ -195,9 +195,6 @@ static const genreType_t genreType_strings[] = {
 @synthesize artworks;
 
 @synthesize isArtworkEdited;
-@synthesize artworkThumbURLs;
-@synthesize artworkFullsizeURLs;
-@synthesize artworkProviderNames;
 
 @synthesize mediaKind;
 @synthesize contentRating;
@@ -247,10 +244,6 @@ static const genreType_t genreType_strings[] = {
 
     [artworks release];
 
-    [artworkThumbURLs release];
-    [artworkFullsizeURLs release];
-    [artworkProviderNames release];
-
     [ratingiTunesCode release];
     [tagsDict release];
 
@@ -259,7 +252,7 @@ static const genreType_t genreType_strings[] = {
 
 #pragma mark - Supported metadata
 
-- (NSArray<NSString *> *) availableMetadata
++ (NSArray<NSString *> *) availableMetadata
 {
     return @[
             @"Name",
@@ -547,9 +540,9 @@ static const genreType_t genreType_strings[] = {
 }
 
 - (NSArray<NSString *> *)availableGenres {
-    return [NSArray arrayWithObjects:  @"Animation", @"Classic TV", @"Comedy", @"Drama", 
+    return @[@"Animation", @"Classic TV", @"Comedy", @"Drama",
             @"Fitness & Workout", @"Kids", @"Non-Fiction", @"Reality TV", @"Sci-Fi & Fantasy",
-            @"Sports", nil];
+            @"Sports"];
 }
 
 #pragma mark - Mutators
