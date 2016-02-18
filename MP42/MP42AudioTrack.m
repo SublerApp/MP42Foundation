@@ -75,8 +75,8 @@ extern u_int8_t MP4AV_AacConfigGetChannels(u_int8_t* pConfig);
             uint8_t    *ppValue;
             uint32_t    pValueSize;
             MP4GetTrackBytesProperty(fileHandle, _trackId, "mdia.minf.stbl.stsd.ec-3.dec3.content", &ppValue, &pValueSize);
-
             readEAC3Config(ppValue, pValueSize, &_channels, &_channelLayoutTag);
+            free(ppValue);
         }
         else if (MP4HaveTrackAtom(fileHandle, _trackId, "mdia.minf.stbl.stsd.alac")) {
             uint64_t channels_count = 0;

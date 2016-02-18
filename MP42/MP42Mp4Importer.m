@@ -112,6 +112,7 @@
                 uint32_t    pValueSize;
                 MP4GetTrackBytesProperty(_fileHandle, srcTrackId, "mdia.minf.stbl.stsd.ec-3.dec3.content", &ppValue, &pValueSize);
                 magicCookie = [NSData dataWithBytes:ppValue length:pValueSize];
+                free(ppValue);
             }
         }
         else if (!strcmp(media_data_name, "alac")) {
@@ -120,6 +121,7 @@
                 uint32_t    pValueSize;
                 MP4GetTrackBytesProperty(_fileHandle, srcTrackId, "mdia.minf.stbl.stsd.alac.alac.AppleLosslessMagicCookie", &ppValue, &pValueSize);
                 magicCookie = [NSData dataWithBytes:ppValue length:pValueSize];
+                free(ppValue);
             }
         }
         else {
@@ -230,6 +232,20 @@
             free(ppConfig);
 
             return magicCookie;
+        }
+    }
+
+    else if ((!strcasecmp(trackType, MP4_TEXT_TRACK_TYPE))) {
+
+        if (!strcmp(media_data_name, "wvtt")) {
+            if (MP4HaveTrackAtom(_fileHandle, srcTrackId, "mdia.minf.stbl.stsd.wvtt.vttC")) {
+                uint8_t    *ppValue;
+                uint32_t    pValueSize;
+                MP4GetTrackBytesProperty(_fileHandle, srcTrackId, "mdia.minf.stbl.stsd.wvtt.vttC.config", &ppValue, &pValueSize);
+                magicCookie = [NSData dataWithBytes:ppValue length:pValueSize];
+                free(ppValue);
+                return magicCookie;
+            }
         }
     }
 

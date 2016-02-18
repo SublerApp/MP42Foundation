@@ -649,6 +649,7 @@ int analyze_EAC3(void **context ,uint8_t *frame, uint32_t size)
     if (!info->ec3_done) {
         /* AC-3 substream must be the first one */
         if (hdr->bitstream_id <= 10 && hdr->substreamid != 0) {
+            free(hdr);
             return -1;
         }
 
@@ -657,11 +658,13 @@ int analyze_EAC3(void **context ,uint8_t *frame, uint32_t size)
         if (hdr->frame_type == EAC3_FRAME_TYPE_INDEPENDENT) {
             /* substream ids must be incremental */
             if (hdr->substreamid > info->num_ind_sub + 1) {
+                free(hdr);
                 return -1;
             }
 
             if (hdr->substreamid == info->num_ind_sub + 1) {
                 //info->num_ind_sub++;
+                free(hdr);
                 return -1;
             } else if (hdr->substreamid < info->num_ind_sub ||
                        (hdr->substreamid == 0 && info->substream[0].bsid)) {
@@ -719,6 +722,8 @@ int analyze_EAC3(void **context ,uint8_t *frame, uint32_t size)
     }
 
 concatenate:
+
+    free(hdr);
 
     if (!info->num_blocks && num_blocks == 6) {
         return size;
@@ -790,5 +795,10 @@ CFDataRef createCookie_EAC3(void *context)
 
     free(info->frame);
 
-    return CFDataCreate(kCFAllocatorDefault, cookie.GetBuffer(), cookie.GetBitPosition() / 8);
+    uint8_t *buffer = cookie.GetBuffer();
+    size_t size = cookie.GetBitPosition() / 8;
+    CFDataRef cookieData = CFDataCreate(kCFAllocatorDefault, buffer, size);
+    free (buffer);
+
+    return cookieData;
 }

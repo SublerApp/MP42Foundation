@@ -926,7 +926,7 @@
                     int pos = 0;
                     for (int i = 0; i < samplesNum; i++) {
                         CMSampleTimingInfo sampleTimingInfo;
-                        CMTime decodeTimeStamp;
+                        __unused CMTime decodeTimeStamp;
                         CMTime presentationTimeStamp;
                         CMTime presentationOutputTimeStamp = CMSampleBufferGetOutputPresentationTimeStamp(sampleBuffer);
 

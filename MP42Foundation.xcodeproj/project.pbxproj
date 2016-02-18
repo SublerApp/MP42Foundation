@@ -134,7 +134,7 @@
 		A9B9C27D1823923200416A4E /* MP42FileImporter.h in Headers */ = {isa = PBXBuildFile; fileRef = A9B9C2321823923100416A4E /* MP42FileImporter.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A9B9C27E1823923200416A4E /* MP42FileImporter.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2331823923100416A4E /* MP42FileImporter.m */; };
 		A9B9C27F1823923200416A4E /* MP42H264Importer.h in Headers */ = {isa = PBXBuildFile; fileRef = A9B9C2341823923100416A4E /* MP42H264Importer.h */; };
-		A9B9C2801823923200416A4E /* MP42H264Importer.mm in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2351823923100416A4E /* MP42H264Importer.mm */; settings = {COMPILER_FLAGS = "-w"; }; };
+		A9B9C2801823923200416A4E /* MP42H264Importer.mm in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2351823923100416A4E /* MP42H264Importer.mm */; settings = {COMPILER_FLAGS = "-w -Xanalyzer -analyzer-disable-all-checks"; }; };
 		A9B9C2811823923200416A4E /* MP42HtmlParser.h in Headers */ = {isa = PBXBuildFile; fileRef = A9B9C2361823923100416A4E /* MP42HtmlParser.h */; };
 		A9B9C2821823923200416A4E /* MP42HtmlParser.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2371823923100416A4E /* MP42HtmlParser.m */; };
 		A9B9C2831823923200416A4E /* MP42Image.h in Headers */ = {isa = PBXBuildFile; fileRef = A9B9C2381823923100416A4E /* MP42Image.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -174,7 +174,7 @@
 		A9B9C2A61823923200416A4E /* downmix.h in Headers */ = {isa = PBXBuildFile; fileRef = A9B9C25C1823923200416A4E /* downmix.h */; };
 		A9B9C2A71823923200416A4E /* MatroskaFile.c in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C25D1823923200416A4E /* MatroskaFile.c */; };
 		A9B9C2A81823923200416A4E /* MatroskaFile.h in Headers */ = {isa = PBXBuildFile; fileRef = A9B9C25E1823923200416A4E /* MatroskaFile.h */; };
-		A9B9C2A91823923200416A4E /* MatroskaParser.c in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C25F1823923200416A4E /* MatroskaParser.c */; settings = {COMPILER_FLAGS = "-w"; }; };
+		A9B9C2A91823923200416A4E /* MatroskaParser.c in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C25F1823923200416A4E /* MatroskaParser.c */; settings = {COMPILER_FLAGS = "-w -Xanalyzer -analyzer-disable-all-checks"; }; };
 		A9B9C2AA1823923200416A4E /* MatroskaParser.h in Headers */ = {isa = PBXBuildFile; fileRef = A9B9C2601823923200416A4E /* MatroskaParser.h */; };
 		A9B9C2AB1823923200416A4E /* mbs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2611823923200416A4E /* mbs.cpp */; };
 		A9B9C2AC1823923200416A4E /* mbs.h in Headers */ = {isa = PBXBuildFile; fileRef = A9B9C2621823923200416A4E /* mbs.h */; };
