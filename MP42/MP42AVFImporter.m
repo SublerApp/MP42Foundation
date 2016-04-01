@@ -45,7 +45,7 @@
 @implementation MP42AVFImporter
 
 + (NSArray<NSString *> *)supportedFileFormats {
-    return @[@"mov", @"m2ts", @"ts", @"mts", @"ac3", @"eac3", @"ec3", @"webvtt", @"vtt"];
+    return @[@"mov", @"mp4", @"m4v", @"m4a", @"m2ts", @"ts", @"mts", @"ac3", @"eac3", @"ec3", @"webvtt", @"vtt"];
 }
 
 - (NSString *)formatForTrack:(AVAssetTrack *)track {

@@ -183,6 +183,13 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
             }
         }
 
+        // Refuse to open fragmented mp4
+        if (MP4HaveAtom(_fileHandle, "moof")) {
+            [self stopReading];
+            [self release];
+            return nil;
+        };
+
         // Wraps the tracks in obj-c objects
         _tracks = [[NSMutableArray alloc] init];
         uint32_t tracksCount = MP4GetNumberOfTracks(_fileHandle, 0, 0);

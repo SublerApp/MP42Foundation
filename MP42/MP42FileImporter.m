@@ -87,8 +87,9 @@ static NSArray<NSString *> *_supportedFileFormats;
                 for (MP42Track *track in _tracksArray) {
                     track.muxer_helper->importer = self;
                 }
+
+                break;
             }
-            return self;
         }
     }
 
