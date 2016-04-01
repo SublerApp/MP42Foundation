@@ -762,8 +762,11 @@ static const genreType_t genreType_strings[] = {
                      forKey:@"Genre"];
     
     if (tags->genreType && !tags->genre) {
-        [tagsDict setObject:[self genreFromIndex:*tags->genreType]
-                     forKey:@"Genre"];
+        NSString *genre = [self genreFromIndex:*tags->genreType];
+        if (genre) {
+            [tagsDict setObject:genre
+                         forKey:@"Genre"];
+        }
     }
 
     if (tags->releaseDate)
