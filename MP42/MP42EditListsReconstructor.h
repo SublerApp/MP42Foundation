@@ -23,6 +23,7 @@
 
     uint64_t        _currentTime;
     CMTimeScale     _timescale;
+    CMTimeScale     _primingTimescale;
 
     int64_t     _delta;
 

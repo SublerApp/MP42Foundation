@@ -598,22 +598,8 @@
 }
 
 - (NSUInteger)timescaleForTrack:(MP42Track *)track {
-    AVAssetTrack *assetTrack = [_localAsset trackWithTrackID:[track sourceId]];
-
-    NSArray *formatDescriptions = assetTrack.formatDescriptions;
-    CMFormatDescriptionRef formatDescription = (CMFormatDescriptionRef) formatDescriptions.firstObject;
-    if (formatDescriptions) {
-        if ([[assetTrack mediaType] isEqualToString:AVMediaTypeAudio]) {
-            const AudioStreamBasicDescription* const asbd =
-            CMAudioFormatDescriptionGetStreamBasicDescription(formatDescription);
-
-            double sampleRate = asbd->mSampleRate;
-
-            return (NSUInteger)sampleRate;
-        }
-    }
-
-    return [assetTrack naturalTimeScale];
+    AVAssetTrack *assetTrack = [_localAsset trackWithTrackID:track.sourceId];
+    return assetTrack.naturalTimeScale;
 }
 
 - (NSSize)sizeForTrack:(MP42Track *)track {
@@ -685,7 +671,8 @@
                 return [NSData dataWithBytes:magicCookie length:cookieSizeOut];
             }
 
-            else if (code == kAudioFormatAC3) {
+            else if (code == kAudioFormatAC3 ||
+                     code == 'ms \0') {
 
                 OSStatus err = noErr;
                 size_t channelLayoutSize = 0;

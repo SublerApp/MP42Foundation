@@ -82,6 +82,9 @@ static NSArray<NSString *> *_supportedFileFormats;
     // Initialize the right file importer subclass
     for (Class c in _fileImporters) {
         if ([c canInitWithFileType:fileURL.pathExtension]) {
+
+            [self release];
+
             self = [[c alloc] initWithURL:fileURL error:error];
             if (self) {
                 for (MP42Track *track in _tracksArray) {

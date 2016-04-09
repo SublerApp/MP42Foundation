@@ -29,10 +29,12 @@
 
         if ([format isEqualToString:MP42AudioFormatAAC]) {
             _priming = 2112;
+            _primingTimescale = 480000;
         }
         else if ([format isEqualToString:MP42AudioFormatHEAAC])
         {
             _priming = 4224;
+            _primingTimescale = 480000;
         }
     }
     return self;
@@ -129,7 +131,9 @@
         }
 
         if (_priming && _primingUsed == NO) {
-            editStart.value -= _priming;
+            CMTime convertedPriming = CMTimeConvertScale(CMTimeMake(_priming, _primingTimescale),
+                                                   _timescale, kCMTimeRoundingMethod_QuickTime);
+            editStart.value -= convertedPriming.value;
             _primingUsed = YES;
         }
 
