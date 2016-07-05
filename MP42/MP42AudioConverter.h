@@ -26,7 +26,7 @@ extern NSString * const SBDolbyMixdown;
 extern NSString * const SBDolbyPlIIMixdown;
 
 // a struct to hold info for the data proc
-struct AudioFileIO
+static struct AudioFileIO
 {    
     AudioConverterRef converter;
     AudioStreamBasicDescription inputFormat;

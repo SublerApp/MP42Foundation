@@ -120,11 +120,11 @@
         copy->_sourceId = _sourceId;
 
         copy->_sourceURL = [_sourceURL retain];
-        copy->_sourceFormat = [_sourceFormat retain];
-        copy->_format = [_format retain];
-        copy->_name = [_name retain];
-        copy->_language = [_language retain];
-        copy->_extendedLanguageTag = [_extendedLanguageTag retain];
+        copy->_sourceFormat = [_sourceFormat copy];
+        copy->_format = [_format copy];
+        copy->_name = [_name copy];
+        copy->_language = [_language copy];
+        copy->_extendedLanguageTag = [_extendedLanguageTag copy];
         copy->_enabled = _enabled;
         copy->_alternate_group = _alternate_group;
         copy->_startOffset = _startOffset;
@@ -456,6 +456,9 @@
     [_name release];
     [_language release];
     [_extendedLanguageTag release];
+    [_mediaType release];
+    [_sourceFormat release];
+
     [super dealloc];
 }
 
