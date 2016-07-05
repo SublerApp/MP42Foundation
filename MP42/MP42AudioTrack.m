@@ -127,7 +127,7 @@ extern u_int8_t MP4AV_AacConfigGetChannels(u_int8_t* pConfig);
         copy->_fallbackTrackId = _fallbackTrackId;
         copy->_followsTrackId = _followsTrackId;
 
-        copy->_mixdownType = [_mixdownType retain];
+        copy->_mixdownType = [_mixdownType copy];
     }
     
     return copy;
@@ -190,6 +190,8 @@ extern u_int8_t MP4AV_AacConfigGetChannels(u_int8_t* pConfig);
 
 - (void)dealloc
 {
+    [_mixdownType release];
+
     [super dealloc];
 }
 
