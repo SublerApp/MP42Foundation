@@ -29,12 +29,12 @@
 
         if ([format isEqualToString:MP42AudioFormatAAC]) {
             _priming = 2112;
-            _primingTimescale = 480000;
+            _primingTimescale = 48000;
         }
         else if ([format isEqualToString:MP42AudioFormatHEAAC])
         {
             _priming = 4224;
-            _primingTimescale = 480000;
+            _primingTimescale = 48000;
         }
     }
     return self;
@@ -131,9 +131,14 @@
         }
 
         if (_priming && _primingUsed == NO) {
-            CMTime convertedPriming = CMTimeConvertScale(CMTimeMake(_priming, _primingTimescale),
-                                                   _timescale, kCMTimeRoundingMethod_QuickTime);
-            editStart.value -= convertedPriming.value;
+            if (_timescale <= 1000) {
+                CMTime convertedPriming = CMTimeConvertScale(CMTimeMake(_priming, _primingTimescale),
+                                                             _timescale, kCMTimeRoundingMethod_QuickTime);
+                editStart.value -= convertedPriming.value;
+            }
+            else {
+                editStart.value -= _priming;
+            }
             _primingUsed = YES;
         }
 
