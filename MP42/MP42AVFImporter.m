@@ -295,6 +295,12 @@
                 newTrack = [[MP42SubtitleTrack alloc] init];
 
             }
+            else if ([track.mediaType isEqualToString:AVMediaTypeClosedCaption]) {
+
+                // Subtitle type, nothing interesting here
+                newTrack = [[MP42ClosedCaptionTrack alloc] init];
+
+            }
             else if ([track.mediaType isEqualToString:AVMediaTypeText]) {
 
                 FourCharCode code = 0;
