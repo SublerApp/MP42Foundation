@@ -160,7 +160,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
     return self;
 }
 
-- (instancetype)initWithURL:(NSURL *)URL {
+- (instancetype)initWithURL:(NSURL *)URL error:(NSError * _Nullable *)error {
     self = [super init];
     if (self) {
         _fileURL = [[URL fileReferenceURL] retain];
@@ -168,6 +168,10 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
         // Open the file for reading
         if (![self startReading]) {
             [self release];
+
+            if (error) {
+                *error = MP42Error(@"The movie could not be opened.", @"The file is not a mp4 file.", 100);
+            }
 			return nil;
         }
 
@@ -179,6 +183,11 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
             if (!strcmp(brand, "qt  ")) {
                 [self stopReading];
                 [self release];
+
+                if (error) {
+                    *error = MP42Error(@"Invalid File Type.", @"MOV File cannot be edited.", 100);
+                }
+
                 return nil;
             }
         }
@@ -187,6 +196,11 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
         if (MP4HaveAtom(_fileHandle, "moof")) {
             [self stopReading];
             [self release];
+
+            if (error) {
+                *error = MP42Error(@"Invalid File Type.", @"Fragmented MP4 cannot be edited.", 100);
+            }
+
             return nil;
         };
 
@@ -558,7 +572,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 
 - (BOOL)optimize {
     __block BOOL noErr = NO;
-    __block BOOL done = NO;
+    __block int32_t done = 0;
 
     @autoreleasepool {
         NSError *error = nil;
@@ -570,7 +584,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 
             dispatch_async(dispatch_get_global_queue(0, 0), ^{
                 noErr = MP4Optimize(self.URL.path.fileSystemRepresentation, tempURL.path.fileSystemRepresentation);
-                done = YES;
+                OSAtomicIncrement32Barrier(&done);
             });
 
             // Loop to check the progress
@@ -581,7 +595,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
             }
 
             // Additional check to see if we can open the optimized file
-            if (noErr && [[[MP42File alloc] initWithURL:tempURL] autorelease]) {
+            if (noErr && [[[MP42File alloc] initWithURL:tempURL error:NULL] autorelease]) {
                 // Replace the original file
                 NSURL *result = nil;
                 noErr = [fileManager replaceItemAtURL:self.URL
@@ -1117,6 +1131,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
     [_importers release];
     [_tracksToBeDeleted release];
     [_metadata release];
+    [_muxer release];
 
     [super dealloc];
 }

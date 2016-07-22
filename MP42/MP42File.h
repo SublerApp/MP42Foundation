@@ -104,7 +104,7 @@ typedef void (^MP42FileProgressHandler)(double progress);
  *
  *  @return An instance of MP42File
  */
-- (instancetype)initWithURL:(NSURL *)URL;
+- (instancetype)initWithURL:(NSURL *)URL error:(NSError * _Nullable *)error;
 
 /**
  * Provides the array of MP42Tracks contained by the mp4 file
