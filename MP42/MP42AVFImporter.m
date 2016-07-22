@@ -297,7 +297,7 @@
             }
             else if ([track.mediaType isEqualToString:AVMediaTypeClosedCaption]) {
 
-                // Subtitle type, nothing interesting here
+                // Closed caption type, nothing interesting here
                 newTrack = [[MP42ClosedCaptionTrack alloc] init];
 
             }
