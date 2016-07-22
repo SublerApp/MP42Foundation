@@ -40,9 +40,9 @@
 @interface MatroskaDemuxHelper : NSObject {
     @public
     NSMutableArray<MatroskaSample *> *queue;
-    NSMutableArray<NSNumber *> *offsetsArray;
 
-    uint64_t        current_time;
+    uint64_t        currentTime;
+    uint64_t        startTime;
     int64_t         minDisplayOffset;
     unsigned int buffer, samplesWritten, bufferFlush;
 
@@ -57,14 +57,13 @@
 {
     if ((self = [super init])) {
         queue = [[NSMutableArray alloc] init];
-        offsetsArray = [[NSMutableArray alloc] init];
+        startTime = INT64_MAX;
     }
     return self;
 }
 
 - (void) dealloc {
     [queue release], queue = nil;
-    [offsetsArray release], offsetsArray = nil;
     [ss release], ss = nil;
 
     [super dealloc];
@@ -225,8 +224,9 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
                 newTrack.trackId = i;
                 newTrack.sourceURL = self.fileURL;
                 newTrack.dataLength = trackSizes[i];
-                if (mkvTrack->Type == TT_AUDIO)
+                if (mkvTrack->Type == TT_AUDIO) {
                     newTrack.startOffset = [self matroskaTrackStartTime:mkvTrack Id:i];
+                }
 
                 if ([newTrack.format isEqualToString:MP42VideoFormatH264]) {
                     uint8_t *avcCAtom = (uint8_t *)malloc(mkvTrack->CodecPrivateSize); // mkv stores h.264 avcC in CodecPrivate
@@ -290,8 +290,7 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
             [newTrack release];
         }
 
-        if (trackSizes)
-            free(trackSizes);
+        free(trackSizes);
 
         _metadata = [[self readMatroskaMetadata] retain];
     }
@@ -452,10 +451,10 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
 
 - (uint64_t)matroskaTrackStartTime:(TrackInfo *)track Id:(MP4TrackId)Id
 {
-    uint64_t        StartTime, EndTime, FilePos;
-    uint32_t        Track, FrameSize, FrameFlags;
+    uint64_t StartTime, EndTime, FilePos;
+    uint32_t Track, FrameSize, FrameFlags;
 
-    /* mask other tracks because we don't need them */
+    // mask other tracks because we don't need them
     unsigned int TrackMask = ~0;
     TrackMask &= ~(1 << Id);
 
@@ -616,7 +615,7 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
 
     MatroskaDemuxHelper *demuxHelper = nil;
     MatroskaSample      *frameSample = nil, *currentSample = nil;
-    int64_t             offset, minOffset = 0, duration, next_duration;
+    int64_t             duration, next_duration;
 
     const unsigned int bufferSize = 20;
 
@@ -652,6 +651,10 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
 
         TrackInfo *trackInfo = mkv_GetTrackInfo(_matroskaFile, Track);
 
+        if (StartTime < demuxHelper->startTime) {
+            demuxHelper->startTime = StartTime;
+        }
+
         if (trackInfo->Type == TT_AUDIO) {
             demuxHelper->samplesWritten++;
 
@@ -670,7 +673,7 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
 
 #ifdef VARIABLE_AUDIO_RATE
                 if (demuxHelper->previousSample) {
-                    uint64_t sampleDuration = (sample->timestamp * (double)mkv_TruncFloat(trackInfo->AV.Audio.SamplingFreq) / 1000000000.f) - demuxHelper->current_time;
+                    uint64_t sampleDuration = (sample->timestamp * (double)mkv_TruncFloat(trackInfo->AV.Audio.SamplingFreq) / 1000000000.f) - demuxHelper->currentTime;
 
                     // MKV timestamps are a bit random, try to round them
                     // to make the sample table in the mp4 smaller.
@@ -693,9 +696,9 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
                     demuxHelper->previousSample->duration = sampleDuration;
                     [self enqueue:demuxHelper->previousSample];
 
-                    demuxHelper->current_time += sampleDuration;
+                    demuxHelper->currentTime += sampleDuration;
                 } else {
-                    demuxHelper->current_time = sample->timestamp * (double)mkv_TruncFloat(trackInfo->AV.Audio.SamplingFreq) / 1000000000.f;
+                    demuxHelper->currentTime = sample->timestamp * (double)mkv_TruncFloat(trackInfo->AV.Audio.SamplingFreq) / 1000000000.f;
                 }
 
                 [demuxHelper->previousSample release];
@@ -766,9 +769,9 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
                         demuxHelper->samplesWritten++;
                     } else if (!strcmp(trackInfo->CodecID, "S_VOBSUB")) {
                         // VobSub seems to have an end duration, and no blank samples, so create a new one each time to fill the gaps
-                        if (StartTime > demuxHelper->current_time) {
+                        if (StartTime > demuxHelper->currentTime) {
                             MP42SampleBuffer *sample = [[MP42SampleBuffer alloc] init];
-                            sample->duration = (StartTime - demuxHelper->current_time) / SCALE_FACTOR;
+                            sample->duration = (StartTime - demuxHelper->currentTime) / SCALE_FACTOR;
                             sample->size = 2;
                             sample->data = calloc(1, 2);
                             sample->isSync = YES;
@@ -778,12 +781,12 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
                             [sample release];
                         }
                         
-                        nextSample->duration = (EndTime - StartTime ) / SCALE_FACTOR;
+                        nextSample->duration = (EndTime - StartTime) / SCALE_FACTOR;
                         
                         [self enqueue:nextSample];
                         [nextSample release];
                         
-                        demuxHelper->current_time = EndTime;
+                        demuxHelper->currentTime = EndTime;
                     }
                 }
             }
@@ -791,7 +794,7 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
 
         else if (trackInfo->Type == TT_VIDEO) {
 
-            /* read frames from file */
+            // read frames from file
             frameSample = [[MatroskaSample alloc] init];
             frameSample->startTime = StartTime;
             frameSample->endTime = EndTime;
@@ -820,14 +823,9 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
                 }
 
                 // offset calculation
-                offset = currentSample->startTime - demuxHelper->current_time;
-                // save the minimum offset, used later to keep all the offset values positive
-                if (offset < minOffset)
-                    minOffset = offset;
+                int64_t offset = currentSample->startTime - demuxHelper->currentTime;
 
-                [demuxHelper->offsetsArray addObject:@(offset)];
-
-                demuxHelper->current_time += duration;
+                demuxHelper->currentTime += duration;
 
                 if (readMkvPacket(_ioStream, trackInfo, currentSample->filePos, &frame, &currentSample->frameSize)) {
                     MP42SampleBuffer *sample = [[MP42SampleBuffer alloc] init];
@@ -841,6 +839,7 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
 
                     demuxHelper->samplesWritten++;
 
+                    // save the minimum offset, used later to keep all the offset values positive
                     if (sample->offset < demuxHelper->minDisplayOffset) {
                         demuxHelper->minDisplayOffset = sample->offset;
                     }
@@ -898,14 +897,9 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
                 }
 
                 // offset calculation
-                offset = currentSample->startTime - demuxHelper->current_time;
-                // save the minimum offset, used later to keep the all the offset values positive
-                if (offset < minOffset)
-                    minOffset = offset;
+                int64_t offset = currentSample->startTime - demuxHelper->currentTime;
 
-                [demuxHelper->offsetsArray addObject:[NSNumber numberWithLongLong:offset]];
-
-                demuxHelper->current_time += duration;
+                demuxHelper->currentTime += duration;
 
                 if (readMkvPacket(_ioStream, trackInfo, currentSample->filePos, &frame, &currentSample->frameSize)) {
                     MP42SampleBuffer *sample = [[MP42SampleBuffer alloc] init];
@@ -919,6 +913,7 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
 
                     demuxHelper->samplesWritten++;
 
+                    // save the minimum offset, used later to keep the all the offset values positive
                     if (sample->offset < demuxHelper->minDisplayOffset) {
                         demuxHelper->minDisplayOffset = sample->offset;
                     }
@@ -935,8 +930,9 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
                         break;
                     }
                 }
-                else
+                else {
                     continue;
+                }
             }
         }
 
@@ -961,8 +957,8 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
                     break;
                 }
 
-                demuxHelper->current_time += sample->duration;
-                sample->timestamp = demuxHelper->current_time;
+                demuxHelper->currentTime += sample->duration;
+                sample->timestamp = demuxHelper->currentTime;
 
                 [self enqueue:sample];
                 [sample release];
@@ -996,20 +992,32 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
 
         if (demuxHelper->minDisplayOffset != 0) {
 
-            for (unsigned int i = 0; i < demuxHelper->samplesWritten; i++) {
+            for (unsigned int i = 1; i <= demuxHelper->samplesWritten; i++) {
+                int64_t correctedOffset = MP4GetSampleRenderingOffset(fileHandle, trackId, i) - demuxHelper->minDisplayOffset;
                 MP4SetSampleRenderingOffset(fileHandle,
                                             trackId,
-                                            1 + i,
-                                            MP4GetSampleRenderingOffset(fileHandle, trackId, 1 + i) - demuxHelper->minDisplayOffset);
+                                            i,
+                                            correctedOffset);
             }
 
-            MP4Duration editDuration = MP4ConvertFromTrackDuration(fileHandle,
-                                                                   trackId,
+            MP4Duration editDuration = MP4ConvertFromTrackDuration(fileHandle, trackId,
                                                                    MP4GetTrackDuration(fileHandle, trackId),
                                                                    MP4GetTimeScale(fileHandle));
 
+
+            // Add an empty edit list if the first pts is not 0.
+            if (demuxHelper->startTime > 0) {
+                MP4Duration emptyDuration = MP4ConvertFromTrackDuration(fileHandle, trackId,
+                                                                       demuxHelper->startTime / 10000.0f,
+                                                                       MP4GetTimeScale(fileHandle));
+
+                MP4AddTrackEdit(fileHandle, trackId, MP4_INVALID_EDIT_ID, -1, emptyDuration, 0);
+            }
+
             MP4AddTrackEdit(fileHandle,
-                            trackId, MP4_INVALID_EDIT_ID, - demuxHelper->minDisplayOffset,
+                            trackId,
+                            MP4_INVALID_EDIT_ID,
+                            - demuxHelper->minDisplayOffset + demuxHelper->startTime / 10000.0f,
                             editDuration,
                             0);
         }
