@@ -39,13 +39,9 @@
 - (instancetype)initWithURL:(NSURL *)fileURL error:(NSError **)outError;
 {
     if ((self = [super initWithURL:fileURL])) {
-        MP42File *sourceFile = [[MP42File alloc] initWithURL:self.fileURL];
+        MP42File *sourceFile = [[MP42File alloc] initWithURL:self.fileURL error:outError];
 
-        if(!sourceFile) {
-            if (outError) {
-                *outError = MP42Error(@"The movie could not be opened.", @"The file is not a mp4 file.", 100);          
-            }
-
+        if (!sourceFile) {
             [self release];
             return nil;
         }
@@ -82,6 +78,10 @@
 
     const char *trackType = MP4GetTrackType(_fileHandle, srcTrackId);
     const char *media_data_name = MP4GetTrackMediaDataName(_fileHandle, srcTrackId);
+
+    if (!trackType) {
+        return nil;
+    }
 
     if (MP4_IS_AUDIO_TRACK_TYPE(trackType)){
 
