@@ -21,9 +21,6 @@ NS_ASSUME_NONNULL_BEGIN
 - (nullable MP42SampleBuffer *)copyEncodedSample;
 
 - (void)cancel;
-- (BOOL)encoderDone;
-
-- (void)setInputDone;
 
 @end
 
