@@ -21,51 +21,9 @@
 #import "MP42OCRWrapper.h"
 #import "MP42SubUtilities.h"
 
+#include "FFmpegUtils.h"
+
 #import <QuartzCore/QuartzCore.h>
-
-#include <pthread.h>
-
-#define REGISTER_DECODER(x) { \
-extern AVCodec ff_##x##_decoder; \
-avcodec_register(&ff_##x##_decoder); }
-
-static int ff_lockmgr_cb(void **mutex, enum AVLockOp op)
-{
-    switch (op) {
-        case AV_LOCK_CREATE:
-        {
-            pthread_mutex_t *ff_mutext = calloc(1, sizeof(pthread_mutex_t));
-            *mutex = ff_mutext;
-            pthread_mutex_init(*mutex, NULL);
-        } break;
-        case AV_LOCK_DESTROY:
-        {
-            pthread_mutex_destroy(*mutex);
-            free(*mutex);
-        } break;
-        case AV_LOCK_OBTAIN:
-        {
-            pthread_mutex_lock(*mutex);
-        } break;
-        case AV_LOCK_RELEASE:
-        {
-            pthread_mutex_unlock(*mutex);
-        } break;
-        default:
-            break;
-    }
-    return 0;
-}
-
-void FFInitFFmpeg() {
-	static dispatch_once_t once;
-
-	dispatch_once(&once, ^{
-        av_lockmgr_register(ff_lockmgr_cb);
-		REGISTER_DECODER(dvdsub);
-        REGISTER_DECODER(pgssub);
-	});
-}
 
 @interface MP42BitmapSubConverter ()
 
@@ -282,7 +240,7 @@ void FFInitFFmpeg() {
             }
         }
 
-        _encoderDone = YES;
+        [self enqueueEndOfFileSample];
         dispatch_semaphore_signal(_done);
     }
 }
@@ -401,7 +359,7 @@ void FFInitFFmpeg() {
             
         }
 
-        _encoderDone = YES;
+        [self enqueueEndOfFileSample];
         dispatch_semaphore_signal(_done);
     }
 }
@@ -461,7 +419,12 @@ void FFInitFFmpeg() {
 
 - (void)addSample:(MP42SampleBuffer *)sample
 {
-    [_inputSamplesBuffer enqueue:sample];
+    if (sample->flags & MP42SampleBufferFlagEndOfFile) {
+        [self setInputDone];
+    }
+    else {
+        [_inputSamplesBuffer enqueue:sample];
+    }
 }
 
 - (nullable MP42SampleBuffer *)copyEncodedSample
@@ -484,9 +447,15 @@ void FFInitFFmpeg() {
     _readerDone = YES;
 }
 
-- (BOOL)encoderDone
+/**
+ * Sends the EOF flag down the muxer chain.
+ */
+- (void)enqueueEndOfFileSample
 {
-    return _encoderDone && [_outputSamplesBuffer isEmpty];
+    MP42SampleBuffer *sample = [[MP42SampleBuffer alloc] init];
+    sample->flags |= MP42SampleBufferFlagEndOfFile;
+    [_outputSamplesBuffer enqueue:sample];
+    [sample release];
 }
 
 - (void)dealloc

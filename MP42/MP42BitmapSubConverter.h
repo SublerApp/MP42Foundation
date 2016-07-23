@@ -48,9 +48,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)cancel;
 
-- (BOOL)encoderDone;
-- (void)setInputDone;
-
 @end
 
 NS_ASSUME_NONNULL_END
