@@ -231,7 +231,7 @@ static NSArray<NSString *> *_supportedFileFormats;
 
     _doneSem = dispatch_semaphore_create(0);
 
-    if (!_demuxerThread && !_done) {
+    if (!_demuxerThread) {
         _demuxerThread = [[NSThread alloc] initWithTarget:self selector:@selector(demux) object:nil];
         _demuxerThread.name = self.description;
 
@@ -274,14 +274,27 @@ static NSArray<NSString *> *_supportedFileFormats;
     }
 }
 
-- (BOOL)done
+/**
+ * Sends the EOF flag down the muxer chain.
+ */
+- (void)enqueueEndOfFileSamples
 {
-    return (_done > 0);
+    for (MP42Track *track in _outputsTracks) {
+        MP42SampleBuffer *sample = [[MP42SampleBuffer alloc] init];
+        sample->flags |= MP42SampleBufferFlagEndOfFile;
+
+        if (track.muxer_helper->converter) {
+            [track.muxer_helper->converter addSample:sample];
+        } else {
+            [track.muxer_helper->fifo enqueue:sample];
+        }
+        [sample release];
+    }
 }
 
 - (void)setDone
 {
-    OSAtomicIncrement32(&_done);
+    [self enqueueEndOfFileSamples];
     dispatch_semaphore_signal(_doneSem);
 }
 

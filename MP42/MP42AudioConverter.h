@@ -85,9 +85,6 @@ static struct AudioFileIO
 - (NSData *)magicCookie;
 
 - (void)cancel;
-- (BOOL)encoderDone;
-
-- (void)setInputDone;
 
 NS_ASSUME_NONNULL_END
 

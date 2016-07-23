@@ -10,21 +10,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface MP42Fifo<__covariant ObjectType> : NSObject {
-@private
-    id *_array;
-
-    int32_t     _head;
-    int32_t     _tail;
-
-    int32_t     _count;
-    int32_t     _size;
-
-    int32_t     _cancelled;
-
-    dispatch_semaphore_t _full;
-    dispatch_semaphore_t _empty;
-}
+@interface MP42Fifo<__covariant ObjectType> : NSObject
 
 - (instancetype)initWithCapacity:(NSUInteger)capacity NS_DESIGNATED_INITIALIZER;
 

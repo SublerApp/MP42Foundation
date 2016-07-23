@@ -33,8 +33,6 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)enqueue:(MP42SampleBuffer *)sample;
 
 - (double)progress;
-
-- (BOOL)done;
 - (void)setDone;
 
 @end

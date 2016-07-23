@@ -32,7 +32,6 @@ NS_ASSUME_NONNULL_BEGIN
 
     NSThread *_demuxerThread;
 
-    int32_t  _done;
     dispatch_semaphore_t _doneSem;
 }
 

@@ -8,7 +8,21 @@
 
 #import "MP42Fifo.h"
 
-@implementation MP42Fifo
+@implementation MP42Fifo {
+@private
+    id *_array;
+
+    int32_t     _head;
+    int32_t     _tail;
+
+    int32_t     _count;
+    int32_t     _size;
+
+    int32_t     _cancelled;
+
+    dispatch_semaphore_t _full;
+    dispatch_semaphore_t _empty;
+}
 
 - (instancetype)init {
     self = [self initWithCapacity:300];

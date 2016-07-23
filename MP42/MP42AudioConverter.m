@@ -255,6 +255,7 @@ OSStatus EncoderDataProc(AudioConverterRef              inAudioConverter,
         
         AudioConverterDispose(converterEnc);
 
+        [self enqueueEndOfFileSample];
         encoderDone = YES;
     }
 
@@ -666,7 +667,12 @@ OSStatus DecoderDataProc(AudioConverterRef              inAudioConverter,
 }
 
 - (void)addSample:(MP42SampleBuffer *)sample {
-    [_inputSamplesBuffer enqueue:sample];
+    if (sample->flags & MP42SampleBufferFlagEndOfFile) {
+        [self setInputDone];
+    }
+    else {
+        [_inputSamplesBuffer enqueue:sample];
+    }
 }
 
 - (MP42SampleBuffer *)copyEncodedSample {
@@ -676,6 +682,17 @@ OSStatus DecoderDataProc(AudioConverterRef              inAudioConverter,
 - (void)setInputDone {
     decoderData.fileReaderDone = YES;
     encoderData.fileReaderDone = YES;
+}
+
+/**
+ * Sends the EOF flag down the muxer chain.
+ */
+- (void)enqueueEndOfFileSample
+{
+    MP42SampleBuffer *sample = [[MP42SampleBuffer alloc] init];
+    sample->flags |= MP42SampleBufferFlagEndOfFile;
+    [_outputSamplesBuffer enqueue:sample];
+    [sample release];
 }
 
 - (void)cancel {
@@ -690,10 +707,6 @@ OSStatus DecoderDataProc(AudioConverterRef              inAudioConverter,
     while (!(readerDone && encoderDone)) {
         usleep(500);
     }
-}
-
-- (BOOL)encoderDone {
-    return encoderDone && [_outputSamplesBuffer isEmpty];
 }
 
 - (NSData *)magicCookie {

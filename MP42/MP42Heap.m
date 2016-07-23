@@ -26,7 +26,14 @@ uint64 right(uint64 i) {
     return i * 2 + 2;
 }
 
-@implementation MP42Heap
+@implementation MP42Heap {
+@private
+    id *_array;
+    uint64 _size;
+    uint64 _len;
+
+    NSComparator _cmptr;
+}
 
 - (instancetype)initWithCapacity:(NSUInteger)numItems andComparator:(NSComparator)cmptr {
     self = [super init];

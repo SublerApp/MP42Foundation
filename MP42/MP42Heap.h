@@ -14,14 +14,7 @@ NS_ASSUME_NONNULL_BEGIN
  *  A simple heap/priority queue implementations with a static size.
  *  It takes a NSComparator in input.
  */
-@interface MP42Heap<ObjectType> : NSObject {
-@private
-    id *_array;
-    uint64 _size;
-    uint64 _len;
-
-    NSComparator _cmptr;
-}
+@interface MP42Heap<ObjectType> : NSObject
 
 - (instancetype)initWithCapacity:(NSUInteger)numItems andComparator:(NSComparator)cmptr;
 

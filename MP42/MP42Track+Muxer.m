@@ -21,29 +21,14 @@
 }
 
 - (MP42SampleBuffer *)copyNextSample {
-    MP42SampleBuffer *sample = nil;
     muxer_helper *helper = (muxer_helper *)_helper;
 
     if (helper->converter) {
-        if ([helper->importer done]) {
-            [helper->converter setInputDone];
-        }
-
-        if ([helper->converter encoderDone]) {
-            helper->done = YES;
-        }
-
-        sample = [helper->converter copyEncodedSample];
+        return [helper->converter copyEncodedSample];
     }
     else {
-        if ([helper->fifo isEmpty] && [helper->importer done]) {
-            helper->done = YES;
-        }
-
-        sample = [helper->fifo dequeue];
+        return [helper->fifo dequeue];
     }
-
-    return sample;
 }
 
 

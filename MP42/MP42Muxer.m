@@ -179,6 +179,8 @@
             //uint8_t *hvCCAtom = (uint8_t *)magicCookie.bytes;
 
             NSAssert(NO, @"H.265 muxing not implemented yet");
+
+            [helper->importer setActiveTrack:track];
         }
 
         // MPEG-4 Visual video track
@@ -254,8 +256,9 @@
         else if ([track isMemberOfClass:[MP42AudioTrack class]] && [track.format isEqualToString:MP42AudioFormatALAC]) {
             dstTrackId = MP4AddALACAudioTrack(_fileHandle,
                                           timeScale);
-            if ([magicCookie length])
-                MP4SetTrackBytesProperty(_fileHandle, dstTrackId, "mdia.minf.stbl.stsd.alac.alac.AppleLosslessMagicCookie", [magicCookie bytes], [magicCookie length]);
+            if (magicCookie.length) {
+                MP4SetTrackBytesProperty(_fileHandle, dstTrackId, "mdia.minf.stbl.stsd.alac.alac.AppleLosslessMagicCookie", magicCookie.bytes, magicCookie.length);
+            }
 
             [helper->importer setActiveTrack:track];
         }
@@ -277,12 +280,13 @@
 
             NSInteger vPlacement = [(MP42SubtitleTrack*)track verticalPlacement];
 
-            for (id workingTrack in _workingTracks)
+            for (id workingTrack in _workingTracks) {
                 if ([workingTrack isMemberOfClass:[MP42VideoTrack class]]) {
                     videoSize.width  = [workingTrack trackWidth];
                     videoSize.height = [workingTrack trackHeight];
                     break;
                 }
+            }
 
             if (!videoSize.width) {
                 MP4TrackId videoTrack = findFirstVideoTrack(_fileHandle);
@@ -301,8 +305,9 @@
                 else
                     subSize.height = 0.15 * videoSize.height;
             }
-            else
+            else {
                 subSize.height = videoSize.height;
+            }
 
             const uint8_t textColor[4] = { 255,255,255,255 };
             dstTrackId = MP4AddSubtitleTrack(_fileHandle, timeScale, videoSize.width, subSize.height);
@@ -359,27 +364,56 @@
 
             [helper->importer setActiveTrack:track];
         }
+
         // VobSub bitmap track
         else if ([track isMemberOfClass:[MP42SubtitleTrack class]] && [track.format isEqualToString:MP42SubtitleFormatVobSub]) {
-            if ([magicCookie length] < sizeof(uint32_t) * 16)
+            if (magicCookie.length < sizeof(uint32_t) * 16)
                 continue;
 
             dstTrackId = MP4AddSubpicTrack(_fileHandle, timeScale, 640, 480);
 
-            uint32_t *subPalette = (uint32_t*) [magicCookie bytes];
-            int ii;
-            for ( ii = 0; ii < 16; ii++ )
+            uint32_t *subPalette = (uint32_t *) magicCookie.bytes;
+            for (int ii = 0; ii < 16; ii++) {
                 subPalette[ii] = rgb2yuv(subPalette[ii]);
+            }
 
             uint8_t palette[16][4];
-            for ( ii = 0; ii < 16; ii++ ) {
+            for (int ii = 0; ii < 16; ii++ ) {
                 palette[ii][0] = 0;
                 palette[ii][1] = (subPalette[ii] >> 16) & 0xff;
                 palette[ii][2] = (subPalette[ii] >> 8) & 0xff;
                 palette[ii][3] = (subPalette[ii]) & 0xff;
             }
             MP4SetTrackESConfiguration(_fileHandle, dstTrackId,
-                                             (uint8_t*)palette, 16 * 4 );
+                                             (uint8_t *)palette, 16 * 4 );
+
+            [helper->importer setActiveTrack:track];
+        }
+
+        // WebVTT
+        else if ([track isMemberOfClass:[MP42SubtitleTrack class]] && [track.format isEqualToString:MP42SubtitleFormatWebVTT]) {
+            NSSize videoSize = [helper->importer sizeForTrack:track];
+
+            for (id workingTrack in _workingTracks)
+                if ([workingTrack isMemberOfClass:[MP42VideoTrack class]]) {
+                    videoSize.width  = [workingTrack trackWidth];
+                    videoSize.height = [workingTrack trackHeight];
+                    break;
+                }
+
+            if (!videoSize.width) {
+                MP4TrackId videoTrack = findFirstVideoTrack(_fileHandle);
+                if (videoTrack) {
+                    videoSize.width = getFixedVideoWidth(_fileHandle, videoTrack);
+                    videoSize.height = MP4GetTrackVideoHeight(_fileHandle, videoTrack);
+                }
+                else {
+                    videoSize.width = 640;
+                    videoSize.height = 480;
+                }
+            }
+
+            dstTrackId = MP4AddWebVTTTrack(_fileHandle, timeScale, videoSize.width, videoSize.height, magicCookie.bytes, magicCookie.length);
 
             [helper->importer setActiveTrack:track];
         }
@@ -460,10 +494,16 @@
                 MP42SampleBuffer *sampleBuffer = nil;
 
                 for (int i = 0; i < 100 && (sampleBuffer = [track copyNextSample]) != nil; i++) {
-                    if (!MP4WriteSample(_fileHandle, track.trackId,
-                                        sampleBuffer->data, sampleBuffer->size,
-                                        sampleBuffer->duration, sampleBuffer->offset,
-                                        sampleBuffer->isSync)) {
+
+                    // Check if the track helper is done.
+                    if (sampleBuffer->flags & MP42SampleBufferFlagEndOfFile) {
+                        track.muxer_helper->done = 1;
+                    }
+
+                    else if (!MP4WriteSample(_fileHandle, track.trackId,
+                                             sampleBuffer->data, sampleBuffer->size,
+                                             sampleBuffer->duration, sampleBuffer->offset,
+                                             sampleBuffer->isSync)) {
                         _cancelled = YES;
                     }
 

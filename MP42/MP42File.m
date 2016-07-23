@@ -578,6 +578,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
         NSError *error = nil;
         NSURL *tempURL = [self tempURL];
         NSFileManager *fileManager = [[NSFileManager alloc] init];
+        dispatch_semaphore_t sem = dispatch_semaphore_create(0);
 
         if (tempURL) {
             unsigned long long originalFileSize = [[[fileManager attributesOfItemAtPath:self.URL.path error:nil] valueForKey:NSFileSize] unsignedLongLongValue];
@@ -585,6 +586,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
             dispatch_async(dispatch_get_global_queue(0, 0), ^{
                 noErr = MP4Optimize(self.URL.path.fileSystemRepresentation, tempURL.path.fileSystemRepresentation);
                 OSAtomicIncrement32Barrier(&done);
+                dispatch_semaphore_signal(sem);
             });
 
             // Loop to check the progress
@@ -593,6 +595,8 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
                 [self progressStatus:((double)fileSize / originalFileSize) * 100];
                 usleep(450000);
             }
+
+            dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);
 
             // Additional check to see if we can open the optimized file
             if (noErr && [[[MP42File alloc] initWithURL:tempURL error:NULL] autorelease]) {
@@ -616,6 +620,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
             }
         }
 
+        dispatch_release(sem);
         [fileManager release];
     }
 
