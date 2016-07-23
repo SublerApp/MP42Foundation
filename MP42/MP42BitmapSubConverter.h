@@ -26,15 +26,14 @@ NS_ASSUME_NONNULL_BEGIN
     CIContext               *_imgContext;
 	AVCodec                 *avCodec;
 	AVCodecContext          *avContext;
-	AVSubtitle              subtitle;
 
     MP42Fifo<MP42SampleBuffer *> *_inputSamplesBuffer;
     MP42Fifo<MP42SampleBuffer *> *_outputSamplesBuffer;
 
 	UInt32                  paletteG[16];
-    NSData *srcMagicCookie;
+    NSData                 *srcMagicCookie;
 
-    uint8_t                 *codecData;
+    uint8_t                *codecData;
     unsigned int            bufferSize;
 
     int32_t     _readerDone;

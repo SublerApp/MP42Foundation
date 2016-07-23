@@ -166,6 +166,7 @@ void FFInitFFmpeg() {
                 }
 
                 AVPacket pkt;
+                AVSubtitle subtitle;
                 av_init_packet(&pkt);
                 pkt.data = codecData;
                 pkt.size = bufferSize;
@@ -208,10 +209,10 @@ void FFInitFFmpeg() {
                     uint8_t *imageData = calloc(rect->w * rect->h * 4, sizeof(uint8_t));
 
                     uint8_t *line = (uint8_t *)imageData;
-                    uint8_t *sub = rect->pict.data[0];
+                    uint8_t *sub = rect->data[0];
                     unsigned int w = rect->w;
                     unsigned int h = rect->h;
-                    uint32_t *palette = (uint32_t *)rect->pict.data[1];
+                    uint32_t *palette = (uint32_t *)rect->data[1];
 
                     if (usePalette) {
                         for (unsigned int j = 0; j < 4; j++)
@@ -226,7 +227,7 @@ void FFInitFFmpeg() {
                         }
 
                         line += rect->w*4;
-                        sub += rect->pict.linesize[0];
+                        sub += rect->linesize[0];
                     }
 
                     // Kill the alpha
@@ -275,7 +276,7 @@ void FFInitFFmpeg() {
                 }
 
                 avsubtitle_free(&subtitle);
-                av_free_packet(&pkt);
+                av_packet_unref(&pkt);
 
                 [sampleBuffer release];
             }
@@ -300,6 +301,7 @@ void FFInitFFmpeg() {
                 }
 
                 AVPacket pkt;
+                AVSubtitle subtitle;
                 av_init_packet(&pkt);
                 pkt.data = sampleBuffer->data;
                 pkt.size = sampleBuffer->size;
@@ -339,8 +341,8 @@ void FFInitFFmpeg() {
                             uint8_t color;
 
                             pixel = yy * rect->w + xx;
-                            color = rect->pict.data[0][pixel];
-                            argb = ((uint32_t *)rect->pict.data[1])[color];
+                            color = rect->data[0][pixel];
+                            argb = ((uint32_t *)rect->data[1])[color];
 
                             imageData[yy * rect->w + xx] = EndianU32_BtoN(argb);
                         }
@@ -392,7 +394,7 @@ void FFInitFFmpeg() {
                 }
                 
                 avsubtitle_free(&subtitle);
-                av_free_packet(&pkt);
+                av_packet_unref(&pkt);
                 
                 [sampleBuffer release];
             }
@@ -495,15 +497,6 @@ void FFInitFFmpeg() {
     }
     if (codecData) {
         av_freep(&codecData);
-    }
-
-    if (subtitle.rects) {
-        for (unsigned i = 0; i < subtitle.num_rects; i++) {
-            av_freep(&subtitle.rects[i]->pict.data[0]);
-            av_freep(&subtitle.rects[i]->pict.data[1]);
-            av_freep(&subtitle.rects[i]);
-        }
-        av_freep(&subtitle.rects);
     }
 
     [srcMagicCookie release];
