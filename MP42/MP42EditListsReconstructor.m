@@ -8,8 +8,27 @@
 
 #import "MP42EditListsReconstructor.h"
 #import "MP42MediaFormat.h"
+#import "MP42Heap.h"
 
-@implementation MP42EditListsReconstructor
+@implementation MP42EditListsReconstructor {
+@private
+    MP42Heap *_priorityQueue;
+
+    uint64_t        _currentTime;
+    CMTimeScale     _timescale;
+    CMTimeScale     _primingTimescale;
+
+    int64_t     _delta;
+
+    CMTimeRange *_edits;
+    uint64_t    _editsCount;
+    uint64_t    _editsSize;
+
+    BOOL        _editOpen;
+
+    uint64_t     _priming;
+    BOOL         _primingUsed;
+}
 
 @synthesize edits = _edits;
 @synthesize editsCount = _editsCount;

@@ -186,7 +186,24 @@ static const genreType_t genreType_strings[] = {
 };
 
 
-@implementation MP42Metadata
+@implementation MP42Metadata {
+@private
+    NSString *presetName;
+    NSMutableDictionary<NSString *, id> *tagsDict;
+
+    NSMutableArray<MP42Image *> *artworks;
+
+    NSString *ratingiTunesCode;
+
+    uint8_t mediaKind;
+    uint8_t contentRating;
+    uint8_t hdVideo;
+    uint8_t gapless;
+    uint8_t podcast;
+
+    BOOL isEdited;
+    BOOL isArtworkEdited;
+}
 
 @synthesize presetName;
 

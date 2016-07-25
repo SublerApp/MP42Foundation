@@ -49,7 +49,9 @@ protected:
     TessBaseAPI tess_base_api;
 };
 
-@implementation MP42OCRWrapper
+@implementation MP42OCRWrapper {
+    void *tess_base;
+}
 
 - (NSURL *)appSupportUrl
 {

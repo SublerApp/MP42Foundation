@@ -76,6 +76,7 @@ static const struct {
 
     { kAudioFormatAC3, AV_CODEC_ID_AC3 },
     { kAudioFormatEnhancedAC3, AV_CODEC_ID_EAC3 },
+    { 'trhd', AV_CODEC_ID_TRUEHD },
 
     { 'DTS ', AV_CODEC_ID_DTS },
 

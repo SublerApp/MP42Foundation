@@ -27,6 +27,13 @@ int compare_color(rgba_color c1, rgba_color c2) {
         return 1;
 }
 @implementation MP42Style
+{
+    NSInteger _style;
+    rgba_color _color;
+    NSInteger _type;
+    NSUInteger _location;
+    NSUInteger _length;
+}
 
 - (instancetype)init {
     self = [super init];
@@ -75,7 +82,12 @@ int compare_color(rgba_color c1, rgba_color c2) {
 @end
 
 @implementation MP42HtmlParser
-
+{
+    NSUInteger _location;
+    NSMutableString *_text;
+    NSMutableArray<MP42Style *> *_styles;
+    rgba_color _defaultColor;
+}
 - (instancetype)initWithString: (NSString*) string
 {
     self = [super init];

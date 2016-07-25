@@ -7,11 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#include "downmix.h"
 #import "MP42ConverterProtocol.h"
-
-#import <AudioToolbox/AudioToolbox.h>
-#import <CoreAudio/CoreAudio.h>
 
 NS_ASSUME_NONNULL_BEGIN
 

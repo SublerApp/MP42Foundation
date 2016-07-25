@@ -13,24 +13,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @class MP42Image;
 
-@interface MP42Metadata : NSObject <NSCoding, NSCopying> {
-@private
-    NSString *presetName;
-    NSMutableDictionary<NSString *, id> *tagsDict;
-
-    NSMutableArray<MP42Image *> *artworks;
-
-	NSString *ratingiTunesCode;
-
-    uint8_t mediaKind;
-    uint8_t contentRating;
-    uint8_t hdVideo;
-    uint8_t gapless;
-    uint8_t podcast;
-
-    BOOL isEdited;
-    BOOL isArtworkEdited;
-}
+@interface MP42Metadata : NSObject <NSCoding, NSCopying>
 
 /**
  *  Initializes a new metadata instance by a given URL

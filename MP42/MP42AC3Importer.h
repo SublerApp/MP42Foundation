@@ -9,13 +9,5 @@
 #import <Foundation/Foundation.h>
 #import "MP42FileImporter.h"
 
-@interface MP42AC3Importer : MP42FileImporter {
-@private
-    FILE *inFile;
-    int64_t size;
-
-    NSMutableData *ac3Info;
-    u_int32_t samplesPerSecond;
-}
-
+@interface MP42AC3Importer : MP42FileImporter
 @end

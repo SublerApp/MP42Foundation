@@ -23,7 +23,14 @@
 #define NUM_AC3_FRAMECODE_SIZES 19 * 2
 
 
-@implementation MP42AC3Importer
+@implementation MP42AC3Importer {
+@private
+    FILE *inFile;
+    int64_t size;
+
+    NSMutableData *ac3Info;
+    u_int32_t samplesPerSecond;
+}
 
 u_int32_t Ac3SamplingRates[NUM_AC3_SAMPLING_RATES] = {
     48000, 44100, 32000, 0

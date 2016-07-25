@@ -26,41 +26,12 @@ extern NSString * const MP4264BitTime;
 extern NSString * const MP42GenerateChaptersPreviewTrack;
 extern NSString * const MP42CustomChaptersPreviewTrack;
 
-/**
- *  MP42Status
- */
-typedef NS_ENUM(NSUInteger, MP42Status) {
-    MP42StatusLoaded = 0,
-    MP42StatusReading,
-    MP42StatusWriting
-};
-
-@class MP42Muxer;
-@class MP42FileImporter;
-
 typedef void (^MP42FileProgressHandler)(double progress);
 
 /**
  *  A MP42File object is an object that represents a mp4 file.
  */
-@interface MP42File : NSObject <NSCoding> {
-@private
-    MP42FileHandle   _fileHandle;
-    NSURL           *_fileURL;
-
-    MP42Status  _status;
-    BOOL        _cancelled;
-
-    MP42FileProgressHandler _progressHandler;
-
-    NSMutableArray<__kindof MP42Track *>  *_tracks;
-    NSMutableArray<MP42Track *>  *_tracksToBeDeleted;
-    MP42Metadata    *_metadata;
-    MP42Muxer       *_muxer;
-    NSMutableDictionary<NSString *, MP42FileImporter *> *_importers;
-
-    BOOL        _hasFileRepresentation;
-}
+@interface MP42File : NSObject <NSCoding>
 
 + (void)setGlobalLogger:(id <MP42Logging>)logger;
 

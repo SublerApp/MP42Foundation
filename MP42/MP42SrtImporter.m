@@ -17,7 +17,11 @@
 #import "MP42PrivateUtilities.h"
 #import "MP42Track+Muxer.h"
 
-@implementation MP42SrtImporter
+@implementation MP42SrtImporter {
+@private
+    SBSubSerializer *_ss;
+    BOOL _verticalPlacement;
+}
 
 + (NSArray<NSString *> *)supportedFileFormats {
     return @[@"srt"];

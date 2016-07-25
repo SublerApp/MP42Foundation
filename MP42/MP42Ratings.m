@@ -8,7 +8,12 @@
 
 #import "MP42Ratings.h"
 
-@implementation MP42Ratings
+@implementation MP42Ratings {
+@private
+    NSMutableArray *ratingsDictionary;
+    NSMutableArray<NSString *> *ratings;
+    NSMutableArray<NSString *> *iTunesCodes;
+}
 
 @synthesize ratings;
 @synthesize iTunesCodes;

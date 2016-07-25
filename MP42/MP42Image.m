@@ -15,7 +15,16 @@
 
 @end
 
-@implementation MP42Image
+@implementation MP42Image {
+@private
+    NSImage *_image;
+
+    NSURL   *_url;
+    NSData  *_data;
+    NSString *_uuid;
+
+    NSInteger _type;
+}
 
 @synthesize url = _url;
 @synthesize data = _data;

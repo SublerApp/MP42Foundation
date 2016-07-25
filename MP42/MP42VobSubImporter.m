@@ -219,7 +219,10 @@ static NSArray<SBVobSubTrack *> * LoadVobSubSubtitles(NSURL *theDirectory, NSStr
     }
 }
 
-@implementation MP42VobSubImporter
+@implementation MP42VobSubImporter {
+@private
+    NSArray *_VobSubTracks;
+}
 
 + (NSArray<NSString *> *)supportedFileFormats {
     return @[@"idx"];

@@ -21,18 +21,6 @@ NS_ASSUME_NONNULL_BEGIN
 
     double        _progress;
     int32_t       _cancelled;
-
-@private
-    NSURL    *_fileURL;
-
-    NSMutableArray<MP42Track *> *_tracksArray;
-
-    NSMutableArray<MP42Track *> *_inputTracks;
-    NSMutableArray<MP42Track *> *_outputsTracks;
-
-    NSThread *_demuxerThread;
-
-    dispatch_semaphore_t _doneSem;
 }
 
 + (NSArray<NSString *> *)supportedFileFormats;

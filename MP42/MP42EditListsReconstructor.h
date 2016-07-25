@@ -9,7 +9,6 @@
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
 
-#import "MP42Heap.h"
 #import "MP42Sample.h"
 
 /**
@@ -17,25 +16,7 @@
  *  by analyzing the doNotDisplay and trimAtStart/End flags
  *  TO-DO: doesn't work in all cases yet.
  */
-@interface MP42EditListsReconstructor : NSObject {
-@private
-    MP42Heap *_priorityQueue;
-
-    uint64_t        _currentTime;
-    CMTimeScale     _timescale;
-    CMTimeScale     _primingTimescale;
-
-    int64_t     _delta;
-
-    CMTimeRange *_edits;
-    uint64_t    _editsCount;
-    uint64_t    _editsSize;
-
-    BOOL        _editOpen;
-
-    uint64_t     _priming;
-    BOOL         _primingUsed;
-}
+@interface MP42EditListsReconstructor : NSObject
 
 - (instancetype)initWithMediaFormat:(NSString *)format;
 

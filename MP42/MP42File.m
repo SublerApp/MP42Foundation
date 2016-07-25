@@ -24,6 +24,15 @@ NSString * const MP4264BitTime = @"MP4264BitTime";
 NSString * const MP42GenerateChaptersPreviewTrack = @"MP42ChaptersPreview";
 NSString * const MP42CustomChaptersPreviewTrack = @"MP42CustomChaptersPreview";
 
+/**
+ *  MP42Status
+ */
+typedef NS_ENUM(NSUInteger, MP42Status) {
+    MP42StatusLoaded = 0,
+    MP42StatusReading,
+    MP42StatusWriting
+};
+
 static id <MP42Logging> _logger = nil;
 
 static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
@@ -65,7 +74,24 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
     [_logger writeToLog:output];
 }
 
-@interface MP42File () <MP42MuxerDelegate>
+@interface MP42File () <MP42MuxerDelegate> {
+@private
+    MP42FileHandle   _fileHandle;
+    NSURL           *_fileURL;
+
+    MP42Status  _status;
+    BOOL        _cancelled;
+
+    MP42FileProgressHandler _progressHandler;
+
+    NSMutableArray<__kindof MP42Track *>  *_tracks;
+    NSMutableArray<MP42Track *>  *_tracksToBeDeleted;
+    MP42Metadata    *_metadata;
+    MP42Muxer       *_muxer;
+    NSMutableDictionary<NSString *, MP42FileImporter *> *_importers;
+
+    BOOL        _hasFileRepresentation;
+}
 
 @property(nonatomic, readwrite)  MP42FileHandle fileHandle;
 @property(nonatomic, readwrite, retain) NSURL *URL;

@@ -8,8 +8,6 @@
 
 #import <Foundation/Foundation.h>
 
-@class MP42Track;
-
 typedef NS_OPTIONS(NSUInteger, MP42SampleBufferFlag) {
     MP42SampleBufferFlagEndOfFile = 1 << 0,
 };

@@ -40,14 +40,13 @@
                 NSImage *frame = [[NSImage alloc] initWithCGImage:imgRef size:size];
 
                 [images addObject:frame];
-                [frame release];
             }
 
             CGImageRelease(imgRef);
         }
     }
     
-    return [images autorelease];
+    return images;
 }
 
 @end

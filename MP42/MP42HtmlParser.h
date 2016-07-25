@@ -27,13 +27,6 @@ rgba_color make_color(u_int8_t r, u_int8_t g, u_int8_t b, u_int8_t a);
 int compare_color(rgba_color c1, rgba_color c2);
 
 @interface MP42Style : NSObject
-{
-    NSInteger _style;
-    rgba_color _color;
-    NSInteger _type;
-    NSUInteger _location;
-    NSUInteger _length;
-}
 
 - (instancetype)initWithStyle:(NSInteger)style type:(NSInteger)type location:(NSUInteger) location color:(rgba_color) color;
 
@@ -46,12 +39,6 @@ int compare_color(rgba_color c1, rgba_color c2);
 @end
 
 @interface MP42HtmlParser : NSObject
-{
-    NSUInteger _location;
-    NSMutableString *_text;
-    NSMutableArray<MP42Style *> *_styles;
-    rgba_color _defaultColor;
-}
 
 @property (nonatomic, readonly) NSString *text;
 @property (nonatomic, readonly) NSArray *styles;

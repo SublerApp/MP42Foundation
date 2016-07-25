@@ -8,7 +8,12 @@
 
 #import "MP42TextSample.h"
 
-@implementation MP42TextSample
+@implementation MP42TextSample {
+@private
+    MP42Duration _timestamp;
+    MP42Image *_image;
+    NSString *_title;
+}
 
 - (NSComparisonResult)compare:(MP42TextSample *)otherObject
 {

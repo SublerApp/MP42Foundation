@@ -42,7 +42,10 @@
 
 @end
 
-@implementation MP42AVFImporter
+@implementation MP42AVFImporter {
+@private
+    AVAsset *_localAsset;
+}
 
 + (NSArray<NSString *> *)supportedFileFormats {
     return @[@"mov", @"mp4", @"m4v", @"m4a", @"m2ts", @"ts", @"mts", @"ac3", @"eac3", @"ec3", @"webvtt", @"vtt"];
@@ -372,7 +375,9 @@
             }
 
             CMTimeRange timeRange = track.timeRange;
-            newTrack.duration = timeRange.duration.value / timeRange.duration.timescale * 1000;
+            if (timeRange.duration.timescale > 0) {
+                newTrack.duration = timeRange.duration.value / timeRange.duration.timescale * 1000;
+            }
 
             [self addTrack:newTrack];
             [newTrack release];

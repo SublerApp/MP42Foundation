@@ -8,7 +8,6 @@
 
 #import "MP42Sample.h"
 
-
 @implementation MP42SampleBuffer
 
 - (void)dealloc {

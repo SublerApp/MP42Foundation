@@ -16,9 +16,6 @@
 #import "MP42H264Importer.h"
 #import "MP42VobSubImporter.h"
 #import "MP42AVFImporter.h"
-#if !__LP64__
-#import "MP42QTImporter.h"
-#endif
 
 #import "MP42Track.h"
 #import "MP42Fifo.h"
@@ -26,34 +23,39 @@
 #import "MP42AudioConverter.h"
 #import "MP42Track+Muxer.h"
 
+#import <CoreAudio/CoreAudio.h>
+
 /// The available subclasses
 static NSArray<Class> *_fileImporters;
 
 /// The supporter file extentions.
 static NSArray<NSString *> *_supportedFileFormats;
 
-@implementation MP42FileImporter
+@implementation MP42FileImporter {
+@private
+    NSURL    *_fileURL;
+
+    NSMutableArray<MP42Track *> *_tracksArray;
+
+    NSMutableArray<MP42Track *> *_inputTracks;
+    NSMutableArray<MP42Track *> *_outputsTracks;
+
+    NSThread *_demuxerThread;
+
+    dispatch_semaphore_t _doneSem;
+}
 
 + (void)initialize {
     if (self == [MP42FileImporter class]) {
-        NSMutableArray<Class> * fileImporters = [@[[MP42MkvImporter class],
-                                                   [MP42Mp4Importer class],
-                                                   [MP42SrtImporter class],
-                                                   [MP42CCImporter class],
-                                                   [MP42AC3Importer class],
-                                                   [MP42AACImporter class],
-                                                   [MP42H264Importer class],
-                                                   [MP42VobSubImporter class],
-                                                   [MP42AVFImporter class]] mutableCopy];
-
-#if !__LP64__
-        if ([[NSUserDefaults standardUserDefaults] boolForKey:@"MP42PreferQuickTime"]) {
-            [fileImporters insertObject:[MP42QTImporter class] atIndex:7];
-        }
-#endif
-
-        _fileImporters = [fileImporters copy];
-        [fileImporters release];
+        _fileImporters = @[[MP42MkvImporter class],
+                           [MP42Mp4Importer class],
+                           [MP42SrtImporter class],
+                           [MP42CCImporter class],
+                           [MP42AC3Importer class],
+                           [MP42AACImporter class],
+                           [MP42H264Importer class],
+                           [MP42VobSubImporter class],
+                           [MP42AVFImporter class]];
 
         NSMutableArray<NSString *> *formats = [[NSMutableArray alloc] init];
 

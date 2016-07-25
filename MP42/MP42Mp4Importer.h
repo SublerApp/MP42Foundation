@@ -8,11 +8,6 @@
 
 #import <Foundation/Foundation.h>
 #import "MP42FileImporter.h"
-#import "MP42File.h"
 
-@interface MP42Mp4Importer : MP42FileImporter {
-@private
-    MP42FileHandle   _fileHandle;
-}
-
+@interface MP42Mp4Importer : MP42FileImporter
 @end

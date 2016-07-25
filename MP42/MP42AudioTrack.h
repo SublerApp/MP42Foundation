@@ -9,21 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "MP42Track.h"
 
-@interface MP42AudioTrack : MP42Track <NSCoding, NSCopying> {
-@private
-    float _volume;
-    UInt32 _channels;
-    UInt32 _sourceChannels;
-    UInt32 _channelLayoutTag;
-
-    MP42TrackId  _fallbackTrackId;
-    MP42TrackId  _followsTrackId;
-
-    MP42Track  *_fallbackTrack;
-    MP42Track  *_followsTrack;
-    
-    NSString *_mixdownType;
-}
+@interface MP42AudioTrack : MP42Track <NSCoding, NSCopying>
 
 @property(nonatomic, readwrite) float volume;
 @property(nonatomic, readwrite) UInt32 channels;

@@ -11,15 +11,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface MP42SubtitleTrack : MP42VideoTrack <NSCoding> {
-@private
-    BOOL _verticalPlacement;
-    BOOL _someSamplesAreForced;
-    BOOL _allSamplesAreForced;
-
-    MP42TrackId  _forcedTrackId;
-    MP42Track  *_forcedTrack;
-}
+@interface MP42SubtitleTrack : MP42VideoTrack <NSCoding>
 
 - (BOOL)exportToURL:(NSURL *)url error:(NSError **)error;
 

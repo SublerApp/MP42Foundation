@@ -14,7 +14,15 @@
 #import "MP42PrivateUtilities.h"
 #import "MP42Sample.h"
 
-@implementation MP42AACImporter
+@implementation MP42AACImporter {
+@private
+    FILE *inFile;
+    int64_t size;
+
+    NSMutableData *aacInfo;
+    u_int32_t samplesPerSecond;
+}
+
 
 static int aacUseOldFile = 0;
 static int aacProfileLevel = 4;

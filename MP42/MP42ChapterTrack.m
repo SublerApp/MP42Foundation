@@ -12,7 +12,11 @@
 #import "MP42PrivateUtilities.h"
 #import "MP42MediaFormat.h"
 
-@implementation MP42ChapterTrack
+@implementation MP42ChapterTrack {
+@private
+    NSMutableArray<MP42TextSample *> *chapters;
+    BOOL _areChaptersEdited;
+}
 
 - (instancetype)init
 {

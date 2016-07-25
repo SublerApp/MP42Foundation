@@ -8,6 +8,7 @@
 
 #import "MP42Mp4Importer.h"
 #import "MP42FileImporter+Private.h"
+#import "MP42File.h"
 
 #import "MP42Languages.h"
 #import "MP42Sample.h"
@@ -30,7 +31,10 @@
 @implementation MP4DemuxHelper
 @end
 
-@implementation MP42Mp4Importer
+@implementation MP42Mp4Importer {
+@private
+    MP42FileHandle   _fileHandle;
+}
 
 + (NSArray<NSString *> *)supportedFileFormats {
     return @[@"mp4", @"m4v", @"m4a", @"m4r"];

@@ -12,7 +12,15 @@
 #import "MP42MediaFormat.h"
 #import "MP42HtmlParser.h"
 
-@implementation MP42SubtitleTrack
+@implementation MP42SubtitleTrack {
+@private
+    BOOL _verticalPlacement;
+    BOOL _someSamplesAreForced;
+    BOOL _allSamplesAreForced;
+
+    MP42TrackId  _forcedTrackId;
+    MP42Track  *_forcedTrack;
+}
 
 - (instancetype)initWithSourceURL:(NSURL *)URL trackID:(NSInteger)trackID fileHandle:(MP4FileHandle)fileHandle
 {

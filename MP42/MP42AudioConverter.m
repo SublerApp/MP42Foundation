@@ -17,6 +17,8 @@
 #import "MP42Track+Muxer.h"
 #import "MP42FileImporter+Private.h"
 
+#import <CoreAudio/CoreAudio.h>
+
 @interface MP42AudioConverter ()
 
 @property (nonatomic, readonly) MP42AudioDecoder *decoder;

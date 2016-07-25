@@ -139,7 +139,13 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
     return 1;
 }
 
-@implementation MP42MkvImporter
+@implementation MP42MkvImporter {
+@private
+    struct MatroskaFile	*_matroskaFile;
+    struct StdIoStream  *_ioStream;
+
+    u_int64_t   _fileDuration;
+}
 
 + (NSArray<NSString *> *)supportedFileFormats {
     return @[@"mkv", @"mka", @"mks"];

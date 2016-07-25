@@ -12,11 +12,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface MP42ChapterTrack : MP42Track <NSCoding> {
-@private
-    NSMutableArray<MP42TextSample *> *chapters;
-    BOOL _areChaptersEdited;
-}
+@interface MP42ChapterTrack : MP42Track <NSCoding>
 
 - (instancetype)initWithSourceURL:(NSURL *)URL trackID:(NSInteger)trackID fileHandle:(MP42FileHandle)fileHandle;
 + (instancetype)chapterTrackFromFile:(NSURL *)URL;

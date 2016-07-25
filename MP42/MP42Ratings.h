@@ -10,12 +10,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface MP42Ratings : NSObject {
-@private
-	NSMutableArray *ratingsDictionary;
-	NSMutableArray<NSString *> *ratings;
-	NSMutableArray<NSString *> *iTunesCodes;
-}
+@interface MP42Ratings : NSObject
 
 @property (atomic, readonly) NSArray<NSString *> *ratings;
 @property (atomic, readonly) NSArray<NSString *> *iTunesCodes;

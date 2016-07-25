@@ -9,12 +9,5 @@
 #import <Foundation/Foundation.h>
 #import "MP42FileImporter.h"
 
-@interface MP42MkvImporter : MP42FileImporter {
-@private
-    struct MatroskaFile	*_matroskaFile;
-	struct StdIoStream  *_ioStream;
-
-    u_int64_t   _fileDuration;
-}
-
+@interface MP42MkvImporter : MP42FileImporter
 @end
