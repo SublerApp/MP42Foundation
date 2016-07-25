@@ -47,7 +47,7 @@ static NSArray<NSString *> *_supportedFileFormats;
 
 + (void)initialize {
     if (self == [MP42FileImporter class]) {
-        _fileImporters = @[[MP42MkvImporter class],
+        _fileImporters = [@[[MP42MkvImporter class],
                            [MP42Mp4Importer class],
                            [MP42SrtImporter class],
                            [MP42CCImporter class],
@@ -55,7 +55,7 @@ static NSArray<NSString *> *_supportedFileFormats;
                            [MP42AACImporter class],
                            [MP42H264Importer class],
                            [MP42VobSubImporter class],
-                           [MP42AVFImporter class]];
+                           [MP42AVFImporter class]] retain];
 
         NSMutableArray<NSString *> *formats = [[NSMutableArray alloc] init];
 
