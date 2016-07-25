@@ -23,7 +23,6 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly) NSData *magicCookie;
 
 - (void)addSample:(MP42SampleBuffer *)sample;
-- (void)cancel;
 
 @end
 

@@ -19,7 +19,6 @@ typedef NS_ENUM(NSUInteger, MP42AudioUnitOutput) {
 @protocol MP42AudioUnit <MP42ConverterProtocol>
 
 @property (nonatomic, readwrite) MP42AudioUnitOutput outputType;
-
 @property (nonatomic, readwrite, unsafe_unretained) id<MP42ConverterProtocol> outputUnit;
 
 @property (nonatomic, readonly) AudioStreamBasicDescription inputFormat;

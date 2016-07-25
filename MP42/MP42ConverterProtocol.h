@@ -20,8 +20,6 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)addSample:(MP42SampleBuffer *)sample;
 - (nullable MP42SampleBuffer *)copyEncodedSample;
 
-- (void)cancel;
-
 @end
 
 NS_ASSUME_NONNULL_END

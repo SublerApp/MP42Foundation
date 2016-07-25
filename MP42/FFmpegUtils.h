@@ -16,7 +16,4 @@ void FFInitFFmpeg();
 enum AVCodecID FourCCToCodecID(OSType formatID);
 OSType CodecIDToFourCC(enum AVCodecID codecID);
 
-void hb_ff_set_sample_fmt(AVCodecContext *context, AVCodec *codec,
-                          enum AVSampleFormat request_sample_fmt);
-
 #endif /* FFmpegUtils_h */

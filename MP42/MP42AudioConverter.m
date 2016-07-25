@@ -117,11 +117,6 @@
     return [_encoder copyEncodedSample];
 }
 
-- (void)cancel {
-    [_decoder cancel];
-    [_encoder cancel];
-}
-
 - (NSData *)magicCookie {
     return _encoder.magicCookie;
 }

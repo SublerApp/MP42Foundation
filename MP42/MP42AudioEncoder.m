@@ -51,9 +51,6 @@ typedef struct AudioFileIO
 
 @property (nonatomic, readonly, unsafe_unretained) id<MP42AudioUnit> inputUnit;
 
-@property (nonatomic, readwrite) int32_t readerDone;
-@property (nonatomic, readwrite) int32_t decoderDone;
-
 @end
 
 @implementation MP42AudioEncoder
@@ -260,11 +257,6 @@ typedef struct AudioFileIO
 - (nullable MP42SampleBuffer *)copyEncodedSample
 {
     return [_outputSamplesBuffer dequeue];
-}
-
-- (void)cancel
-{
-    [_inputSamplesBuffer cancel];
 }
 
 #pragma mark - Encoder

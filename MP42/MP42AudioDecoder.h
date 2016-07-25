@@ -23,7 +23,6 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly) AudioStreamBasicDescription outputFormat;
 
 - (void)addSample:(MP42SampleBuffer *)sample;
-- (void)cancel;
 
 @end
 

@@ -32,8 +32,6 @@ extern NSString * const SBDolbyPlIIMixdown;
 
 - (NSData *)magicCookie;
 
-- (void)cancel;
-
 NS_ASSUME_NONNULL_END
 
 @end

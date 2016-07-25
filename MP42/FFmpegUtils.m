@@ -57,6 +57,9 @@ void FFInitFFmpeg()
         REGISTER_DECODER(eac3);
         REGISTER_DECODER(flac);
         REGISTER_DECODER(vorbis);
+        REGISTER_DECODER(alac);
+        REGISTER_DECODER(dca);
+        REGISTER_DECODER(truehd);
     });
 }
 
@@ -71,13 +74,21 @@ static const struct {
     { kAudioFormatMPEGLayer3, AV_CODEC_ID_MP3 },
     { 'ms\0\0' + 0x50, AV_CODEC_ID_MP2 },
 
+    { kAudioFormatAC3, AV_CODEC_ID_AC3 },
+    { kAudioFormatEnhancedAC3, AV_CODEC_ID_EAC3 },
+
+    { 'DTS ', AV_CODEC_ID_DTS },
+
+    { 'XiFL', AV_CODEC_ID_FLAC },
+    { 'XiVs', AV_CODEC_ID_VORBIS },
+
+    { kAudioFormatMPEG4AAC, AV_CODEC_ID_AAC },
+    { kAudioFormatMPEG4AAC_HE, AV_CODEC_ID_AAC },
+
     { kAudioFormatLinearPCM, AV_CODEC_ID_PCM_S16LE },
     { kAudioFormatLinearPCM, AV_CODEC_ID_PCM_U8 },
     { kAudioFormatALaw, AV_CODEC_ID_PCM_ALAW },
     { kAudioFormatULaw, AV_CODEC_ID_PCM_MULAW },
-    { kAudioFormatMPEG4AAC, AV_CODEC_ID_AAC },
-    { 'XiFL', AV_CODEC_ID_FLAC },
-    { 'XiVs', AV_CODEC_ID_VORBIS },
     {0, AV_CODEC_ID_NONE }
 };
 
@@ -99,48 +110,4 @@ OSType OSTypeFCodecIDToFourCC(enum AVCodecID codecID)
         }
     }
     return AV_CODEC_ID_NONE;
-}
-
-/*
- * Set sample format to the request format if supported by the codec.
- * The planar/packed variant of the requested format is the next best thing.
- */
-void hb_ff_set_sample_fmt(AVCodecContext *context, AVCodec *codec,
-                          enum AVSampleFormat request_sample_fmt)
-{
-    if (context != NULL && codec != NULL &&
-        codec->type == AVMEDIA_TYPE_AUDIO && codec->sample_fmts != NULL)
-    {
-        const enum AVSampleFormat *fmt;
-        enum AVSampleFormat next_best_fmt;
-
-        next_best_fmt = (av_sample_fmt_is_planar(request_sample_fmt)  ?
-                         av_get_packed_sample_fmt(request_sample_fmt) :
-                         av_get_planar_sample_fmt(request_sample_fmt));
-
-        context->request_sample_fmt = AV_SAMPLE_FMT_NONE;
-
-        for (fmt = codec->sample_fmts; *fmt != AV_SAMPLE_FMT_NONE; fmt++)
-        {
-            if (*fmt == request_sample_fmt)
-            {
-                context->request_sample_fmt = request_sample_fmt;
-                break;
-            }
-            else if (*fmt == next_best_fmt)
-            {
-                context->request_sample_fmt = next_best_fmt;
-            }
-        }
-
-        /*
-         * When encoding and AVCodec.sample_fmts exists, avcodec_open2()
-         * will error out if AVCodecContext.sample_fmt isn't set.
-         */
-        if (context->request_sample_fmt == AV_SAMPLE_FMT_NONE)
-        {
-            context->request_sample_fmt = codec->sample_fmts[0];
-        }
-        context->sample_fmt = context->request_sample_fmt;
-    }
 }

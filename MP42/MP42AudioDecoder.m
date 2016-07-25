@@ -15,9 +15,22 @@
 #include "FFmpegUtils.h"
 
 #include <avcodec.h>
-#include <libswresample/swresample.h>
+#include <libavresample/avresample.h>
 #include <libavutil/channel_layout.h>
 #include <libavutil/opt.h>
+
+struct MP42DecodeContext {
+    AVCodecContext *avctx;
+    AVAudioResampleContext *resampler;
+
+    AudioStreamBasicDescription inputFormat;
+    AudioStreamBasicDescription outputFormat;
+
+    enum AVMatrixEncoding matrix_encoding;
+    enum AVSampleFormat out_sample_format;
+};
+
+typedef struct MP42DecodeContext MP42DecodeContext;
 
 @interface MP42AudioDecoder ()
 {
@@ -32,10 +45,7 @@
 @property (nonatomic, readonly) MP42Fifo<MP42SampleBuffer *> *inputSamplesBuffer;
 @property (nonatomic, readonly) MP42Fifo<MP42SampleBuffer *> *outputSamplesBuffer;
 
-@property (nonatomic, readonly) SwrContext *swr;
-
-@property (nonatomic, readwrite) int32_t readerDone;
-@property (nonatomic, readwrite) int32_t decoderDone;
+@property (nonatomic, readonly) MP42DecodeContext *context;
 
 @end
 
@@ -66,13 +76,13 @@
             return nil;
         }
 
-        hb_ff_set_sample_fmt(_avctx, _codec, AV_SAMPLE_FMT_FLT);
-
         if (_avctx && magicCookie) {
 
             _avctx->extradata = (uint8_t*)av_malloc(magicCookie.length + AV_INPUT_BUFFER_PADDING_SIZE);
             if (!_avctx->extradata) {
                 NSLog(@"Could not av_malloc extradata");
+                av_freep(&_avctx);
+                return nil;
             }
             else {
                 _avctx->extradata_size = magicCookie.length;
@@ -86,18 +96,22 @@
             return nil;
         }
 
-        // We want float interleaved, FFmpeg usually prefers
-        // float planar, so we need to convert it.
-        if (_avctx->sample_fmt != AV_SAMPLE_FMT_FLT) {
-            // Set up SWR context once you've got codec information
-            _swr = swr_alloc();
-            av_opt_set_int(_swr, "in_channel_layout",  AV_CH_LAYOUT_STEREO, 0);
-            av_opt_set_int(_swr, "out_channel_layout", AV_CH_LAYOUT_STEREO,  0);
-            av_opt_set_int(_swr, "in_sample_rate",     _inputFormat.mSampleRate, 0);
-            av_opt_set_int(_swr, "out_sample_rate",    _inputFormat.mSampleRate, 0);
-            av_opt_set_sample_fmt(_swr, "in_sample_fmt",  _avctx->sample_fmt, 0);
-            av_opt_set_sample_fmt(_swr, "out_sample_fmt", AV_SAMPLE_FMT_FLT,  0);
-            swr_init(_swr);
+        // Check the out channel count for the current downmix
+        UInt32 channels = _inputFormat.mChannelsPerFrame;
+        enum AVMatrixEncoding matrix_encoding = AV_MATRIX_ENCODING_NONE;
+        if ([mixdownType isEqualToString:SBMonoMixdown]) {
+            channels = 1;
+        }
+        else if ([mixdownType isEqualToString:SBStereoMixdown]) {
+            channels = 2;
+        }
+        else if ([mixdownType isEqualToString:SBDolbyMixdown]) {
+            matrix_encoding = AV_MATRIX_ENCODING_DOLBY;
+            channels = 2;
+        }
+        else if ([mixdownType isEqualToString:SBDolbyPlIIMixdown]) {
+            matrix_encoding = AV_MATRIX_ENCODING_DPLII;
+            channels = 2;
         }
 
         // Creates the output audio stream basic description.
@@ -107,14 +121,24 @@
         outputFormat.mSampleRate = _inputFormat.mSampleRate;
         outputFormat.mFormatID = kAudioFormatLinearPCM ;
         outputFormat.mFormatFlags =  kLinearPCMFormatFlagIsFloat | kAudioFormatFlagsNativeEndian;
-        outputFormat.mBytesPerPacket = 4 * _inputFormat.mChannelsPerFrame;
+        outputFormat.mBytesPerPacket = 4 * channels;
         outputFormat.mFramesPerPacket = 1;
         outputFormat.mBytesPerFrame = outputFormat.mBytesPerPacket * outputFormat.mFramesPerPacket;
-        outputFormat.mChannelsPerFrame = _inputFormat.mChannelsPerFrame;
+        outputFormat.mChannelsPerFrame = channels;
         outputFormat.mBitsPerChannel = 32;
 
         _outputFormat = outputFormat;
 
+        // Context used by the decoder
+        _context = malloc(sizeof(MP42DecodeContext));
+        _context->avctx = _avctx;
+        _context->resampler = NULL;
+        _context->inputFormat = _inputFormat;
+        _context->outputFormat = _outputFormat;
+        _context->matrix_encoding = matrix_encoding;
+        _context->out_sample_format = AV_SAMPLE_FMT_FLT;
+
+        // Init the FIFOs
         _inputSamplesBuffer = [[MP42Fifo alloc] initWithCapacity:100];
         _outputSamplesBuffer = [[MP42Fifo alloc] initWithCapacity:100];
 
@@ -131,8 +155,11 @@
         av_freep(&_avctx);
     }
 
-    if (_swr) {
-        swr_free(&_swr);
+    if (_context) {
+        if (_context->resampler) {
+            avresample_close(_context->resampler);
+            avresample_free(&_context->resampler);
+        }
     }
 }
 
@@ -155,11 +182,6 @@
     return [_outputSamplesBuffer dequeue];
 }
 
-- (void)cancel
-{
-    [_inputSamplesBuffer cancel];
-}
-
 #pragma mark - Decode
 
 static AVPacket * packetFromSampleBuffer(MP42SampleBuffer *sample)
@@ -173,70 +195,108 @@ static AVPacket * packetFromSampleBuffer(MP42SampleBuffer *sample)
     return pkt;
 }
 
-static MP42SampleBuffer * sampleBufferFromFrame(AVFrame *frame, SwrContext *swr)
+static MP42SampleBuffer * sampleBufferFromFrame(uint8_t *output_data, int output_data_size)
 {
     MP42SampleBuffer *sample = [[MP42SampleBuffer alloc] init];
 
-    int out_samples;
-    int out_sample_rate = 44100;
-    int out_nb_channels = 2;
-    enum AVSampleFormat out_sample_format = AV_SAMPLE_FMT_FLT;
-
-    // if sample rate changes, number of samples is different
-    if (out_sample_rate !=  frame->sample_rate) {
-        //int delay = swr_get_delay(swr, frame->sample_rate);
-        //            out_samples = av_rescale_rnd(swr_get_delay(swr_context, avctx->sample_rate) +
-        //                                 frame->nb_samples, out_sample_rate, avctx->sample_rate, AV_ROUND_UP);
-        out_samples = av_rescale_rnd(frame->nb_samples, out_sample_rate, frame->sample_rate, AV_ROUND_UP);
-    }
-    else {
-        out_samples = frame->nb_samples;
-    }
-
-    int plane_size;
-    int planar = av_sample_fmt_is_planar(frame->format);
-
-    int output_data_size = av_samples_get_buffer_size(&plane_size, 2,
-                                                      out_samples,
-                                                      out_sample_format, 1);
-
-    uint8_t *outputBuffer = malloc(output_data_size + AV_INPUT_BUFFER_PADDING_SIZE);
-
-    // if resampling is needed, call swr_convert
-    if (swr) {
-
-        out_samples = swr_convert(swr, &outputBuffer, out_samples,
-                                  (const uint8_t **)frame->extended_data, frame->nb_samples);
-
-        // recompute output_data_size following swr_convert result (number of samples actually converted)
-        output_data_size = av_samples_get_buffer_size(&plane_size, out_nb_channels,
-                                                      out_samples,
-                                                      out_sample_format, 1);
-    }
-    else {
-        memcpy(outputBuffer, frame->extended_data[0], plane_size);
-
-        if (planar && frame->channels > 1) {
-            uint8_t *out = outputBuffer + plane_size;
-            for (int ch = 1; ch < frame->channels; ch++) {
-                memcpy(out, frame->extended_data[ch], plane_size);
-                out += plane_size;
-            }
-        }
-    }
-
-    sample->data = outputBuffer;
+    sample->data = output_data;
     sample->size = output_data_size;
 
     return sample;
 }
 
-static int decode(AVCodecContext *avctx, SwrContext *swr, MP42SampleBuffer *inSample, MP42SampleBuffer **outSample)
+static int initResampler(MP42DecodeContext *context, AVFrame *frame)
+{
+    int ret = 0;
+    AVAudioResampleContext *resampler;
+
+    // We want float interleaved, FFmpeg usually prefers
+    // float planar, so we need to convert it.
+
+    if (context->avctx->sample_fmt != context->out_sample_format ||
+        context->outputFormat.mChannelsPerFrame != context->inputFormat.mChannelsPerFrame) {
+
+        resampler = avresample_alloc_context();
+        if (!resampler) {
+            return 1;
+        }
+
+        av_opt_set_int(resampler, "in_channel_layout",  frame->channel_layout, 0);
+        if (context->outputFormat.mChannelsPerFrame < context->inputFormat.mChannelsPerFrame) {
+            if (context->outputFormat.mChannelsPerFrame == 2) {
+                av_opt_set_int(resampler, "out_channel_layout", AV_CH_LAYOUT_STEREO,  0);
+            }
+            else if (context->outputFormat.mChannelsPerFrame == 1) {
+                av_opt_set_int(resampler, "out_channel_layout", AV_CH_LAYOUT_MONO,  0);
+            }
+        }
+        else {
+            av_opt_set_int(resampler, "out_channel_layout", frame->channel_layout,  0);
+        }
+
+        av_opt_set_int(resampler, "in_sample_rate",  context->inputFormat.mSampleRate, 0);
+        av_opt_set_int(resampler, "out_sample_rate", context->inputFormat.mSampleRate, 0);
+
+        av_opt_set_int(resampler, "in_sample_fmt",  context->avctx->sample_fmt, 0);
+        av_opt_set_int(resampler, "out_sample_fmt", context->out_sample_format,  0);
+
+        if (context->matrix_encoding != AV_MATRIX_ENCODING_NONE) {
+            av_opt_set_int(resampler, "matrix_encoding", context->matrix_encoding, 0);
+        }
+
+        ret = avresample_open(resampler);
+
+        if (ret) {
+            avresample_free(&resampler);
+        }
+        else {
+            context->resampler = resampler;
+        }
+    }
+
+    return ret;
+}
+
+static int resample(MP42DecodeContext *context, AVFrame *frame, uint8_t **output_data, int *output_data_size)
+{
+    int ret = 0;
+    if (!context->resampler) {
+        ret = initResampler(context, frame);
+        if (ret) {
+            return ret;
+        }
+    }
+
+    int out_samples = avresample_get_out_samples(context->resampler, frame->nb_samples);
+    int out_nb_channels = context->outputFormat.mChannelsPerFrame;
+
+    int in_plane_size, out_plane_size = 0;
+
+    *output_data_size = av_samples_get_buffer_size(&in_plane_size, out_nb_channels,
+                                                   out_samples,
+                                                   context->out_sample_format, 1);
+
+    *output_data = malloc(*output_data_size + AV_INPUT_BUFFER_PADDING_SIZE);
+
+    // if resampling is needed, call avresample_convert
+    out_samples = avresample_convert(context->resampler,
+                                     output_data, out_plane_size, out_samples,
+                                     frame->extended_data, in_plane_size, frame->nb_samples);
+
+    // Recompute output_data_size following swr_convert result (number of samples actually converted)
+    *output_data_size = av_samples_get_buffer_size(&out_plane_size, out_nb_channels,
+                                                   out_samples,
+                                                   context->out_sample_format, 1);
+
+    return ret;
+}
+
+static int decode(MP42DecodeContext *context, MP42SampleBuffer *inSample, MP42SampleBuffer **outSample)
 {
     int ret;
 
     AVPacket *pkt = packetFromSampleBuffer(inSample);
-    ret = avcodec_send_packet(avctx, pkt);
+    ret = avcodec_send_packet(context->avctx, pkt);
     av_packet_free(&pkt);
 
     // In particular, we don't expect AVERROR(EAGAIN), because we read all
@@ -247,9 +307,12 @@ static int decode(AVCodecContext *avctx, SwrContext *swr, MP42SampleBuffer *inSa
     }
 
     AVFrame *frame = av_frame_alloc();
-    ret = avcodec_receive_frame(avctx, frame);
+    ret = avcodec_receive_frame(context->avctx, frame);
     if (!ret) {
-        *outSample = sampleBufferFromFrame(frame, swr);
+        uint8_t *output_data = NULL;
+        int output_data_size = 0;
+        resample(context, frame, &output_data, &output_data_size);
+        *outSample = sampleBufferFromFrame(output_data, output_data_size);
     }
     av_frame_free(&frame);
 
@@ -277,7 +340,7 @@ static int decode(AVCodecContext *avctx, SwrContext *swr, MP42SampleBuffer *inSa
                     lastSample = YES;
                 }
                 else {
-                    decode(_avctx, _swr, sampleBuffer, &outSample);
+                    decode(_context, sampleBuffer, &outSample);
                 }
 
                 if (outSample) {
