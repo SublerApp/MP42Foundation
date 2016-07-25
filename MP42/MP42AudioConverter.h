@@ -6,11 +6,9 @@
 //  Copyright 2010 Damiano Galassi. All rights reserved.
 //
 
-#import <Cocoa/Cocoa.h>
-#include "sfifo.h"
+#import <Foundation/Foundation.h>
 #include "downmix.h"
 #import "MP42ConverterProtocol.h"
-#import "MP42Fifo.h"
 
 #import <AudioToolbox/AudioToolbox.h>
 #import <CoreAudio/CoreAudio.h>
@@ -25,57 +23,7 @@ extern NSString * const SBStereoMixdown;
 extern NSString * const SBDolbyMixdown;
 extern NSString * const SBDolbyPlIIMixdown;
 
-// a struct to hold info for the data proc
-static struct AudioFileIO
-{    
-    AudioConverterRef converter;
-    AudioStreamBasicDescription inputFormat;
-    AudioStreamBasicDescription outputFormat;
-
-    sfifo_t          *fifo;
-
-	SInt64          pos;
-	char *			srcBuffer;
-	UInt32			srcBufferSize;
-	UInt32			srcSizePerPacket;
-	UInt32			numPacketsPerRead;
-
-    AudioStreamBasicDescription     srcFormat;
-    AudioStreamPacketDescription     * _Nullable pktDescs;
-
-    MP42Fifo<MP42SampleBuffer *>    *inputSamplesBuffer;
-
-    MP42SampleBuffer      *sample;
-    int                   fileReaderDone;
-} AudioFileIO;
-
-@interface MP42AudioConverter : NSObject <MP42ConverterProtocol> {
-    NSThread *decoderThread;
-    NSThread *encoderThread;
-
-    sfifo_t fifo;
-
-    BOOL readerDone;
-    BOOL encoderDone;
-
-    int32_t       _cancelled;
-
-    Float64     sampleRate;
-    UInt32      inputChannelsCount;
-    UInt32      outputChannelCount;
-
-    NSUInteger  downmixType;
-    NSUInteger  layout;
-    hb_chan_map_t *ichanmap;
-
-    MP42Fifo<MP42SampleBuffer *> *_inputSamplesBuffer;
-    MP42Fifo<MP42SampleBuffer *> *_outputSamplesBuffer;
-
-    NSData *outputMagicCookie;
-
-    struct AudioFileIO decoderData;
-    struct AudioFileIO encoderData;
-}
+@interface MP42AudioConverter : NSObject <MP42ConverterProtocol>
 
 - (instancetype)initWithTrack:(MP42AudioTrack *)track andMixdownType:(NSString *)mixdownType error:(NSError **)error;
 

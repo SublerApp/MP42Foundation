@@ -76,9 +76,9 @@
 - (nullable id)dequeueAndWait {
     id item = [self dequeue];
 
-    if (!item) {
-        dispatch_time_t time = dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC / 1000);
-        dispatch_semaphore_wait(_empty, time);
+    while (!item) {
+        dispatch_semaphore_wait(_empty, DISPATCH_TIME_FOREVER);
+        item = [self dequeue];
     }
 
     return item;

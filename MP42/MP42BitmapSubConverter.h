@@ -8,38 +8,13 @@
 
 #import <Cocoa/Cocoa.h>
 #import "MP42ConverterProtocol.h"
-#import "MP42Fifo.h"
-
-#include <avcodec.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
 @class MP42SampleBuffer;
 @class MP42SubtitleTrack;
-@class MP42OCRWrapper;
 
-@interface MP42BitmapSubConverter : NSObject <MP42ConverterProtocol> {
-    NSThread *decoderThread;
-    NSThread *encoderThread;
-
-    MP42OCRWrapper          *_ocr;
-    CIContext               *_imgContext;
-	AVCodec                 *avCodec;
-	AVCodecContext          *avContext;
-
-    MP42Fifo<MP42SampleBuffer *> *_inputSamplesBuffer;
-    MP42Fifo<MP42SampleBuffer *> *_outputSamplesBuffer;
-
-	UInt32                  paletteG[16];
-    NSData                 *srcMagicCookie;
-
-    uint8_t                *codecData;
-    unsigned int            bufferSize;
-
-    int32_t     _readerDone;
-    int32_t     _encoderDone;
-    dispatch_semaphore_t _done;
-}
+@interface MP42BitmapSubConverter : NSObject <MP42ConverterProtocol>
 
 - (instancetype)initWithTrack:(MP42SubtitleTrack *)track error:(NSError **)outError;
 

@@ -26,6 +26,25 @@
 #import <QuartzCore/QuartzCore.h>
 
 @interface MP42BitmapSubConverter ()
+{
+    NSThread *decoderThread;
+
+    MP42OCRWrapper          *_ocr;
+    CIContext               *_imgContext;
+    AVCodec                 *avCodec;
+    AVCodecContext          *avContext;
+
+    MP42Fifo<MP42SampleBuffer *> *_inputSamplesBuffer;
+    MP42Fifo<MP42SampleBuffer *> *_outputSamplesBuffer;
+
+    UInt32                  paletteG[16];
+    NSData                 *srcMagicCookie;
+
+    uint8_t                *codecData;
+    unsigned int            bufferSize;
+
+    dispatch_semaphore_t _done;
+}
 
 @property (nonatomic, readonly) CIContext *imgContext;
 
@@ -80,13 +99,14 @@
 - (void)VobSubDecoderThreadMainRoutine
 {
     @autoreleasepool {
-        while(1) {
+        MP42SampleBuffer *sampleBuffer = nil;
+
+        while ((sampleBuffer = [_inputSamplesBuffer dequeueAndWait])) {
             @autoreleasepool {
-                MP42SampleBuffer *sampleBuffer = nil;
 
-                while (!(sampleBuffer = [_inputSamplesBuffer dequeueAndWait]) && !_readerDone);
-
-                if (!sampleBuffer) {
+                if (sampleBuffer->flags & MP42SampleBufferFlagEndOfFile) {
+                    [_outputSamplesBuffer enqueue:sampleBuffer];
+                    [sampleBuffer release];
                     break;
                 }
 
@@ -221,26 +241,24 @@
                     else {
                         subSample = copyEmptySubtitleSample(sampleBuffer->trackId, sampleBuffer->duration, forced);
                     }
-
+                    
                     [_outputSamplesBuffer enqueue:subSample];
                     [subSample release];
-
+                    
                     CGImageRelease(cgImage);
                     CGImageRelease(filteredCGImage);
                     CGDataProviderRelease(provider);
                     CFRelease(imgData);
-
+                    
                     free(imageData);
                 }
-
+                
                 avsubtitle_free(&subtitle);
                 av_packet_unref(&pkt);
-
+                
                 [sampleBuffer release];
             }
         }
-
-        [self enqueueEndOfFileSample];
         dispatch_semaphore_signal(_done);
     }
 }
@@ -248,13 +266,15 @@
 - (void)PGSDecoderThreadMainRoutine
 {
     @autoreleasepool {
-        while(1) {
+        MP42SampleBuffer *sampleBuffer = nil;
+
+        while ((sampleBuffer = [_inputSamplesBuffer dequeueAndWait])) {
             @autoreleasepool {
-                MP42SampleBuffer *sampleBuffer = nil;
 
-                while (!(sampleBuffer = [_inputSamplesBuffer dequeueAndWait]) && !_readerDone);
+                if (sampleBuffer->flags & MP42SampleBufferFlagEndOfFile) {
+                    [_outputSamplesBuffer enqueue:sampleBuffer];
+                    [sampleBuffer release];
 
-                if (!sampleBuffer) {
                     break;
                 }
 
@@ -356,10 +376,7 @@
                 
                 [sampleBuffer release];
             }
-            
         }
-
-        [self enqueueEndOfFileSample];
         dispatch_semaphore_signal(_done);
     }
 }
@@ -368,11 +385,12 @@
 {
     if ((self = [super init])) {
         FFInitFFmpeg();
+        NSString *format = track.sourceFormat;
 
-        if (([track.sourceFormat isEqualToString:MP42SubtitleFormatVobSub])) {
+        if ([format isEqualToString:MP42SubtitleFormatVobSub]) {
             avCodec = avcodec_find_decoder(AV_CODEC_ID_DVD_SUBTITLE);
         }
-        else if (([track.sourceFormat isEqualToString:MP42SubtitleFormatPGS])) {
+        else if ([format isEqualToString:MP42SubtitleFormatPGS]) {
             avCodec = avcodec_find_decoder(AV_CODEC_ID_HDMV_PGS_SUBTITLE);
         }
 
@@ -392,26 +410,25 @@
 
         _outputSamplesBuffer = [[MP42Fifo alloc] initWithCapacity:20];
         _inputSamplesBuffer  = [[MP42Fifo alloc] initWithCapacity:20];
+        _done = dispatch_semaphore_create(0);
 
         srcMagicCookie = [[track.muxer_helper->importer magicCookieForTrack:track] retain];
 
         _ocr = [[MP42OCRWrapper alloc] initWithLanguage:track.language extendedLanguageTag:track.extendedLanguageTag];
 
-        _done = dispatch_semaphore_create(0);
 
-        if (([track.sourceFormat isEqualToString:MP42SubtitleFormatVobSub])) {
+        if ([format isEqualToString:MP42SubtitleFormatVobSub]) {
             // Launch the vobsub decoder thread.
             decoderThread = [[NSThread alloc] initWithTarget:self selector:@selector(VobSubDecoderThreadMainRoutine) object:nil];
             [decoderThread setName:@"VobSub Decoder"];
             [decoderThread start];
         }
-        else if (([track.sourceFormat isEqualToString:MP42SubtitleFormatPGS])) {
+        else if ([format isEqualToString:MP42SubtitleFormatPGS]) {
             // Launch the pgs decoder thread.
             decoderThread = [[NSThread alloc] initWithTarget:self selector:@selector(PGSDecoderThreadMainRoutine) object:nil];
             [decoderThread setName:@"PGS Decoder"];
             [decoderThread start];
         }
-
     }
 
     return self;
@@ -419,12 +436,7 @@
 
 - (void)addSample:(MP42SampleBuffer *)sample
 {
-    if (sample->flags & MP42SampleBufferFlagEndOfFile) {
-        [self setInputDone];
-    }
-    else {
-        [_inputSamplesBuffer enqueue:sample];
-    }
+    [_inputSamplesBuffer enqueue:sample];
 }
 
 - (nullable MP42SampleBuffer *)copyEncodedSample
@@ -434,28 +446,10 @@
 
 - (void)cancel
 {
-    _readerDone = YES;
-
     [_inputSamplesBuffer cancel];
     [_outputSamplesBuffer cancel];
 
     dispatch_semaphore_wait(_done, DISPATCH_TIME_FOREVER);
-}
-
-- (void)setInputDone
-{
-    _readerDone = YES;
-}
-
-/**
- * Sends the EOF flag down the muxer chain.
- */
-- (void)enqueueEndOfFileSample
-{
-    MP42SampleBuffer *sample = [[MP42SampleBuffer alloc] init];
-    sample->flags |= MP42SampleBufferFlagEndOfFile;
-    [_outputSamplesBuffer enqueue:sample];
-    [sample release];
 }
 
 - (void)dealloc

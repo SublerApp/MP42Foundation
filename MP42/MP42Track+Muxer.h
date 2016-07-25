@@ -27,7 +27,7 @@ typedef struct muxer_helper {
 
 @interface MP42Track (MP42TrackMuxerExtentions)
 
-@property(nonatomic, readonly, nullable) muxer_helper *muxer_helper;
+@property (nonatomic, readonly, nullable) muxer_helper *muxer_helper;
 
 - (MP42SampleBuffer *)copyNextSample;
 
