@@ -21,6 +21,16 @@
 #import "MP42Track+Muxer.h"
 
 @implementation MP42Muxer
+{
+@private
+    MP4FileHandle    _fileHandle;
+
+    id <MP42MuxerDelegate>  _delegate;
+    id <MP42Logging>        _logger;
+
+    NSMutableArray<MP42Track *> *_workingTracks;
+    int32_t         _cancelled;
+}
 
 - (instancetype)init
 {
@@ -40,6 +50,13 @@
     }
 
     return self;
+}
+
+- (void)dealloc
+{
+    [_logger release];
+    [_workingTracks release];
+    [super dealloc];
 }
 
 - (BOOL)canAddTrack:(MP42Track *)track
@@ -467,15 +484,9 @@
         return;
     }
 
-    NSMutableArray<MP42FileImporter *> *trackImportersArray = [[NSMutableArray alloc] init];
+    NSArray<MP42FileImporter *> *trackImportersArray = self.fileImporters;
     NSUInteger done = 0, update = 0;
     CGFloat progress = 0;
-
-    for (MP42Track *track in _workingTracks) {
-        if (![trackImportersArray containsObject:track.muxer_helper->importer]) {
-            [trackImportersArray addObject:track.muxer_helper->importer];
-        }
-    }
 
     for (MP42FileImporter *importerHelper in trackImportersArray) {
         [importerHelper startReading];
@@ -550,27 +561,29 @@
 
     // Stop the importers and clean ups
     for (MP42FileImporter *importerHelper in trackImportersArray) {
-        if (_cancelled) {
-            [importerHelper cancelReading];
-        }
-        else {
+        if (!_cancelled) {
             [importerHelper cleanUp:_fileHandle];
         }
     }
-
-    [trackImportersArray release];
 }
 
 - (void)cancel
 {
-    OSAtomicIncrement32(&_cancelled);
+    for (MP42FileImporter *importerHelper in self.fileImporters) {
+        [importerHelper cancelReading];
+    }
 }
 
-- (void)dealloc
+- (NSArray<MP42FileImporter *> *)fileImporters
 {
-    [_logger release];
-    [_workingTracks release];
-    [super dealloc];
+    NSMutableArray<MP42FileImporter *> *trackImportersArray = [NSMutableArray array];
+
+    for (MP42Track *track in _workingTracks) {
+        if (![trackImportersArray containsObject:track.muxer_helper->importer]) {
+            [trackImportersArray addObject:track.muxer_helper->importer];
+        }
+    }
+    return [[trackImportersArray copy] autorelease];
 }
 
 @end

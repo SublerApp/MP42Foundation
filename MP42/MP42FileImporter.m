@@ -248,17 +248,8 @@ static NSArray<NSString *> *_supportedFileFormats;
 {
     OSAtomicIncrement32(&_cancelled);
 
-    for (MP42Track *track in _outputsTracks) {
-        [track.muxer_helper->fifo cancel];
-    }
-
     // wait until the demuxer thread exits
     dispatch_semaphore_wait(_doneSem, DISPATCH_TIME_FOREVER);
-
-    // stop all the related converters
-    for (MP42Track *track in _outputsTracks) {
-        [track.muxer_helper->converter cancel];
-    }
 }
 
 - (void)enqueue:(MP42SampleBuffer *)sample

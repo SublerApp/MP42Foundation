@@ -18,16 +18,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)progressStatus:(double)progress;
 @end
 
-@interface MP42Muxer : NSObject {
-@private
-    MP4FileHandle    _fileHandle;
-
-    id <MP42MuxerDelegate>  _delegate;
-    id <MP42Logging>        _logger;
-
-    NSMutableArray<MP42Track *> *_workingTracks;
-    int32_t         _cancelled;
-}
+@interface MP42Muxer : NSObject
 
 - (instancetype)initWithFileHandle:(MP4FileHandle)fileHandle delegate:(id <MP42MuxerDelegate>)del logger:(id <MP42Logging>)logger;
 
