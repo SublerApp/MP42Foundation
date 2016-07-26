@@ -157,7 +157,7 @@ typedef struct AudioFileIO
     }
 
     // Get the output channel layout.
-    /*err = AudioConverterGetPropertyInfo(_encoder,
+    err = AudioConverterGetPropertyInfo(_encoder,
                                         kAudioConverterOutputChannelLayout,
                                         &_outputLayoutSize, NULL);
     if (err) {
@@ -167,10 +167,10 @@ typedef struct AudioFileIO
     _outputLayout = malloc(_outputLayoutSize);
     err = AudioConverterGetProperty(_encoder,
                                     kAudioConverterOutputChannelLayout,
-                                    &_outputLayoutSize, &_outputLayout);
+                                    &_outputLayoutSize, _outputLayout);
     if (err) {
         NSLog(@"err: kAudioConverterOutputChannelLayout From AudioConverter");
-    }*/
+    }
 
     // Get real input.
     tmpsiz = sizeof(_inputFormat);

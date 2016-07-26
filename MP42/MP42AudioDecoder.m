@@ -257,10 +257,10 @@ static int initResampler(MP42DecodeContext *context, AVFrame *frame)
         layout = frame->channel_layout;
     }
     UInt32 layout_size = sizeof(AudioChannelLayout) +
-                         sizeof(AudioChannelDescription) * nb_channels;
+                         sizeof(AudioChannelDescription) * context->outputFormat->mChannelsPerFrame;
     AudioChannelLayout *outputLayout = malloc(layout_size);
     bzero(outputLayout, layout_size);
-    remap_layout(outputLayout, frame->channel_layout, nb_channels);
+    remap_layout(outputLayout, layout, context->outputFormat->mChannelsPerFrame);
 
     *context->outputLayoutSize = layout_size;
     *context->outputLayout = outputLayout;
