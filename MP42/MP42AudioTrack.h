@@ -14,6 +14,7 @@
 @property(nonatomic, readwrite) float volume;
 @property(nonatomic, readwrite) UInt32 channels;
 @property(nonatomic, readwrite) UInt32 sourceChannels;
+
 @property(nonatomic, readwrite) UInt32 channelLayoutTag;
 
 @property(nonatomic, readonly) MP42TrackId fallbackTrackId;

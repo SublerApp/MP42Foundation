@@ -41,13 +41,14 @@ typedef struct AudioFileIO
 }
 
 @property (nonatomic, readonly) AudioConverterRef encoder;
+@property (nonatomic, readonly) NSUInteger bitrate;
 
 @property (nonatomic, readonly) NSThread *decoderThread;
 @property (nonatomic, readonly) MP42Fifo<MP42SampleBuffer *> *inputSamplesBuffer;
 @property (nonatomic, readonly) MP42Fifo<MP42SampleBuffer *> *outputSamplesBuffer;
 
 @property (nonatomic, readonly) sfifo_t *ringBuffer;
-@property (nonatomic, readonly) AudioFileIO afio;
+@property (nonatomic, readonly) AudioFileIO *afio;
 
 @property (nonatomic, readonly, unsafe_unretained) id<MP42AudioUnit> inputUnit;
 
@@ -68,13 +69,7 @@ typedef struct AudioFileIO
         _inputUnit.outputUnit = self;
         _inputFormat = unit.outputFormat;
 
-        if (![self initConverterWithBitRate:bitRate]) {
-            return nil;
-        }
-
-        if (![self createMagicCookie]) {
-            return nil;
-        }
+        _bitrate = bitRate;
 
         _inputSamplesBuffer = [[MP42Fifo alloc] initWithCapacity:100];
         _outputSamplesBuffer = [[MP42Fifo alloc] initWithCapacity:100];
@@ -86,13 +81,7 @@ typedef struct AudioFileIO
 
 - (void)dealloc
 {
-    if (_encoder) {
-        AudioConverterDispose(_encoder);
-    }
-    if (_ringBuffer) {
-        sfifo_close(_ringBuffer);
-        free(_ringBuffer);
-    }
+    [self disposeConverter];
 }
 
 #pragma mark - Encoder Init
@@ -144,7 +133,7 @@ typedef struct AudioFileIO
     if (err) {
         NSLog(@"err: kAudioConverterApplicableEncodeBitRates From AudioConverter");
     }
-    bitrateCounts = tmpsiz / sizeof( AudioValueRange );
+    bitrateCounts = tmpsiz / sizeof(AudioValueRange);
 
     // Set bitrate.
     tmp = bitrate * outputFormat.mChannelsPerFrame * 1000;
@@ -157,7 +146,31 @@ typedef struct AudioFileIO
     free(bitrates);
 
     AudioConverterSetProperty(_encoder, kAudioConverterEncodeBitRate,
-                              sizeof( tmp ), &tmp);
+                              sizeof(tmp), &tmp);
+
+    // Set the input channel layout.
+    if (_inputLayout) {
+        err = AudioConverterSetProperty(_encoder, kAudioConverterInputChannelLayout, _inputLayoutSize, _inputLayout);
+        if (err) {
+            NSLog(@"err: kAudioConverterInputChannelLayout From AudioConverter");
+        }
+    }
+
+    // Get the output channel layout.
+    /*err = AudioConverterGetPropertyInfo(_encoder,
+                                        kAudioConverterOutputChannelLayout,
+                                        &_outputLayoutSize, NULL);
+    if (err) {
+        NSLog(@"err: kAudioConverterOutputChannelLayout From AudioConverter");
+    }
+
+    _outputLayout = malloc(_outputLayoutSize);
+    err = AudioConverterGetProperty(_encoder,
+                                    kAudioConverterOutputChannelLayout,
+                                    &_outputLayoutSize, &_outputLayout);
+    if (err) {
+        NSLog(@"err: kAudioConverterOutputChannelLayout From AudioConverter");
+    }*/
 
     // Get real input.
     tmpsiz = sizeof(_inputFormat);
@@ -186,22 +199,48 @@ typedef struct AudioFileIO
     sfifo_init(_ringBuffer, ringbuffer_len);
 
     // Set up buffers and data proc info struct
-    struct AudioFileIO encoderData;
-    encoderData.srcBufferSize = 32768;
-    encoderData.srcBuffer = (char *) malloc(encoderData.srcBufferSize);
+    _afio = malloc(sizeof(AudioFileIO));
+    _afio->srcBufferSize = 32768;
+    _afio->srcBuffer = (char *) malloc(_afio->srcBufferSize);
 
-    encoderData.outputMaxSize = outputSizePerPacket;
+    _afio->outputMaxSize = outputSizePerPacket;
 
-    encoderData.srcSizePerPacket = _inputFormat.mBytesPerPacket;
-    encoderData.channelsPerFrame = _inputFormat.mChannelsPerFrame;
-    encoderData.numPacketsPerRead = encoderData.srcBufferSize / encoderData.srcSizePerPacket;
+    _afio->srcSizePerPacket = _inputFormat.mBytesPerPacket;
+    _afio->channelsPerFrame = _inputFormat.mChannelsPerFrame;
+    _afio->numPacketsPerRead = _afio->srcBufferSize / _afio->srcSizePerPacket;
 
-    encoderData.pktDescs = NULL;
-    encoderData.ringBuffer = _ringBuffer;
-
-    _afio = encoderData;
+    _afio->pktDescs = NULL;
+    _afio->ringBuffer = _ringBuffer;
 
     return YES;
+}
+
+- (void)disposeConverter
+{
+    if (_encoder) {
+        AudioConverterDispose(_encoder);
+        _encoder = NULL;
+    }
+    if (_ringBuffer) {
+        sfifo_close(_ringBuffer);
+        free(_ringBuffer);
+        _ringBuffer = NULL;
+    }
+
+    if (_afio) {
+        free(_afio);
+        _afio = NULL;
+    }
+
+    if (_outputLayout) {
+        free(_outputLayout);
+        _outputLayout = NULL;
+    }
+
+    if (_inputLayout) {
+        free(_inputLayout);
+        _inputLayout = NULL;
+    }
 }
 
 - (BOOL)createMagicCookie
@@ -243,6 +282,24 @@ typedef struct AudioFileIO
 }
 
 #pragma mark - Public methods
+
+- (void)reconfigure
+{
+    [self disposeConverter];
+
+    _inputFormat = _inputUnit.outputFormat;
+    _inputLayoutSize = _inputUnit.outputLayoutSize;
+    _inputLayout = malloc(_inputLayoutSize);
+    memcpy(_inputLayout, _inputUnit.outputLayout, _inputLayoutSize);
+
+    if (![self initConverterWithBitRate:_bitrate]) {
+        return;
+    }
+
+    if (![self createMagicCookie]) {
+        return;
+    }
+}
 
 - (NSData *)magicCookie
 {
@@ -360,7 +417,7 @@ static MP42SampleBuffer *encode(AudioConverterRef encoder, AudioFileIO *afio)
                     sfifo_write(_ringBuffer, sampleBuffer->data, sampleBuffer->size);
                 }
 
-                while ((outSample = encode(_encoder, &_afio))) {
+                while ((outSample = encode(_encoder, _afio))) {
                     if (_outputType == MP42AudioUnitOutputPush) {
                         [_outputUnit addSample:outSample];
                     }

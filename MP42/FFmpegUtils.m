@@ -112,3 +112,49 @@ OSType OSTypeFCodecIDToFourCC(enum AVCodecID codecID)
     }
     return AV_CODEC_ID_NONE;
 }
+
+static av_cold int get_channel_label(int channel)
+{
+    uint64_t map = 1 << channel;
+    if (map <= AV_CH_LOW_FREQUENCY)
+        return channel + 1;
+    else if (map <= AV_CH_BACK_RIGHT)
+        return channel + 29;
+    else if (map <= AV_CH_BACK_CENTER)
+        return channel - 1;
+    else if (map <= AV_CH_SIDE_RIGHT)
+        return channel - 4;
+    else if (map <= AV_CH_TOP_BACK_RIGHT)
+        return channel + 1;
+    else if (map <= AV_CH_STEREO_RIGHT)
+        return -1;
+    else if (map <= AV_CH_WIDE_RIGHT)
+        return channel + 4;
+    else if (map <= AV_CH_SURROUND_DIRECT_RIGHT)
+        return channel - 23;
+    else if (map == AV_CH_LOW_FREQUENCY_2)
+        return kAudioChannelLabel_LFE2;
+    else
+        return -1;
+}
+
+int remap_layout(AudioChannelLayout *layout, uint64_t in_layout, int count)
+{
+    int i;
+    int c = 0;
+    layout->mChannelLayoutTag = kAudioChannelLayoutTag_UseChannelDescriptions;
+    layout->mNumberChannelDescriptions = count;
+    for (i = 0; i < count; i++) {
+        int label;
+        while (!(in_layout & (1 << c)) && c < 64)
+            c++;
+        if (c == 64)
+            return AVERROR(EINVAL); // This should never happen
+        label = get_channel_label(c);
+        layout->mChannelDescriptions[i].mChannelLabel = label;
+        if (label < 0)
+            return AVERROR(EINVAL);
+        c++;
+    }
+    return 0;
+}

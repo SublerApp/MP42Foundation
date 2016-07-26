@@ -18,11 +18,15 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (instancetype)initWithInputUnit:(id<MP42AudioUnit>)unit bitRate:(NSUInteger)bitRate error:(NSError **)error;
 
+@property (nonatomic, readonly, nullable) AudioChannelLayout *inputLayout;
+@property (nonatomic, readonly) UInt32 inputLayoutSize;
 @property (nonatomic, readonly) AudioStreamBasicDescription inputFormat;
-@property (nonatomic, readonly) AudioStreamBasicDescription outputFormat;
-@property (nonatomic, readonly) NSData *magicCookie;
 
-- (void)addSample:(MP42SampleBuffer *)sample;
+@property (nonatomic, readonly, nullable) AudioChannelLayout *outputLayout;
+@property (nonatomic, readonly) UInt32 outputLayoutSize;
+@property (nonatomic, readonly) AudioStreamBasicDescription outputFormat;
+
+@property (nonatomic, readonly) NSData *magicCookie;
 
 @end
 
