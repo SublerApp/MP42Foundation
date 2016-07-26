@@ -1080,11 +1080,9 @@ static const genreType_t genreType_strings[] = {
 
                 MP4ItmfData *data = &item->dataList.elements[j];
                 NSData *xmlData = [NSData dataWithBytes:data->value length:data->valueSize];
-                NSDictionary *dma = (NSDictionary *)[NSPropertyListSerialization
-                                                         propertyListFromData:xmlData
-                                                         mutabilityOption:NSPropertyListMutableContainersAndLeaves
-                                                         format:nil
-                                                         errorDescription:nil];
+                NSDictionary *dma = (NSDictionary *)[NSPropertyListSerialization propertyListWithData:xmlData
+                                                                                              options:NSPropertyListMutableContainersAndLeaves
+                                                                                               format:nil error:NULL];
                 
                 NSString *tag = nil;
 
@@ -1454,11 +1452,9 @@ static const genreType_t genreType_strings[] = {
             for(j = 0; j < item->dataList.size; j++) {
                 MP4ItmfData* data = &item->dataList.elements[j];
                 NSData *xmlData = [NSData dataWithBytes:data->value length:data->valueSize];
-                NSDictionary *dma = (NSDictionary *)[NSPropertyListSerialization
-                                                     propertyListFromData:xmlData
-                                                     mutabilityOption:NSPropertyListMutableContainersAndLeaves
-                                                     format:nil
-                                                     errorDescription:nil];
+                NSDictionary *dma = (NSDictionary *)[NSPropertyListSerialization propertyListWithData:xmlData
+                                                                                              options:NSPropertyListMutableContainersAndLeaves
+                                                                                               format:nil error:NULL];
                 [iTunMovi release];
                 iTunMovi = [dma mutableCopy];
             }
@@ -1509,10 +1505,9 @@ static const genreType_t genreType_strings[] = {
             [iTunMovi removeObjectForKey:@"studio"];
         }
 
-        NSData *serializedPlist = [NSPropertyListSerialization
-                                        dataFromPropertyList:iTunMovi
-                                        format:NSPropertyListXMLFormat_v1_0
-                                        errorDescription:nil];
+        NSData *serializedPlist = [NSPropertyListSerialization dataWithPropertyList:iTunMovi
+                                                   format:NSPropertyListXMLFormat_v1_0
+                                                  options:0 error:NULL];
         if (iTunMovi.count) {
             MP4ItmfItemList *moviList = MP4ItmfGetItemsByMeaning(fileHandle, "com.apple.iTunes", "iTunMOVI");
             if (moviList) {

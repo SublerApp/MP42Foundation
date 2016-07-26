@@ -97,7 +97,7 @@
         _areChaptersEdited = YES;
 
         chapters = [[NSMutableArray alloc] init];
-        LoadChaptersFromPath([_sourceURL path], chapters);
+        LoadChaptersFromURL(_sourceURL, chapters);
         [chapters sortUsingSelector:@selector(compare:)];
     }
     
@@ -369,7 +369,7 @@
 //     <three>
 + (nullable NSArray<NSArray<NSString *> *> *)arrayWithContentsOfCSVURL:(NSURL *)url;
 {
-    NSString *str1 = STLoadFileWithUnknownEncoding(url.path);
+    NSString *str1 = STLoadFileWithUnknownEncoding(url);
     NSMutableString *csvString = STStandardizeStringNewlines(str1);
     if (!csvString) return 0;
     

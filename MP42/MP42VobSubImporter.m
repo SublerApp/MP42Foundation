@@ -124,8 +124,8 @@ static NSString *getNextVobSubLine(NSEnumerator *lineEnum)
 static NSArray<SBVobSubTrack *> * LoadVobSubSubtitles(NSURL *theDirectory, NSString *filename)
 {
     @autoreleasepool {
-        NSString *nsPath = [[theDirectory path] stringByAppendingPathComponent:filename];
-        NSString *idxContent = STLoadFileWithUnknownEncoding(nsPath);
+        NSURL *nsURL = [theDirectory URLByAppendingPathComponent:filename];
+        NSString *idxContent = STLoadFileWithUnknownEncoding(nsURL);
         NSData *privateData = nil;
 
         VobSubState state = VOB_SUB_STATE_READING_PRIVATE;
@@ -133,11 +133,11 @@ static NSArray<SBVobSubTrack *> * LoadVobSubSubtitles(NSURL *theDirectory, NSStr
         int imageWidth = 0, imageHeight = 0;
         long delay=0;
 
-        NSString *subFileName = [[nsPath stringByDeletingPathExtension] stringByAppendingPathExtension:@"sub"];
+        NSURL *subFileURL = [[nsURL URLByDeletingPathExtension] URLByAppendingPathExtension:@"sub"];
 
         if([idxContent length]) {
             NSError *nsErr;
-            NSDictionary *attr = [[NSFileManager defaultManager] attributesOfItemAtPath:subFileName error:&nsErr];
+            NSDictionary *attr = [[NSFileManager defaultManager] attributesOfItemAtPath:subFileURL.path error:&nsErr];
             if (!attr) goto bail;
             int subFileSize = [[attr objectForKey:NSFileSize] intValue];
 

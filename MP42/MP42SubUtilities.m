@@ -310,9 +310,9 @@ BOOL SubDifferentiateLatin12(const unsigned char *data, int length)
 }
 
 
-extern NSString *STLoadFileWithUnknownEncoding(NSString *path)
+extern NSString *STLoadFileWithUnknownEncoding(NSURL *url)
 {
-	NSData *data = [NSData dataWithContentsOfMappedFile:path];
+	NSData *data = [NSData dataWithContentsOfURL:url];
 
     if (!data)
         return nil;
@@ -339,7 +339,7 @@ extern NSString *STLoadFileWithUnknownEncoding(NSString *path)
 	}
 
 	if ((conf < .6 || latin2) && enc != NSASCIIStringEncoding) {
-		NSLog(@"Guessed encoding \"%s\" for \"%s\", but not sure (confidence %f%%).\n",[enc_str UTF8String],[path UTF8String],conf*100.);
+		NSLog(@"Guessed encoding \"%s\" for \"%s\", but not sure (confidence %f%%).\n", enc_str.UTF8String, url.path.UTF8String, conf*100.);
 	}
 
 	res = [[[NSString alloc] initWithData:data encoding:enc] autorelease];
@@ -385,9 +385,9 @@ static int ParseForced(NSString *str)
 	return res;
 }
 
-int LoadSRTFromPath(NSString *path, SBSubSerializer *ss, MP4Duration *duration)
+int LoadSRTFromURL(NSURL *url, SBSubSerializer *ss, MP4Duration *duration)
 {
-	NSMutableString *srt = STStandardizeStringNewlines(STLoadFileWithUnknownEncoding(path));
+	NSMutableString *srt = STStandardizeStringNewlines(STLoadFileWithUnknownEncoding(url));
 	if (!srt.length) return 0;
 
 	if ([srt characterAtIndex:0] == 0xFEFF) [srt deleteCharactersInRange:NSMakeRange(0,1)];
@@ -454,9 +454,9 @@ int LoadSRTFromPath(NSString *path, SBSubSerializer *ss, MP4Duration *duration)
     return 1;
 }
 
-int LoadChaptersFromPath(NSString *path, NSMutableArray *ss)
+int LoadChaptersFromURL(NSURL *url, NSMutableArray *ss)
 {
-	NSMutableString *srt = STStandardizeStringNewlines(STLoadFileWithUnknownEncoding(path));
+	NSMutableString *srt = STStandardizeStringNewlines(STLoadFileWithUnknownEncoding(url));
 	if (!srt) return 0;
 
 	if ([srt characterAtIndex:0] == 0xFEFF) [srt deleteCharactersInRange:NSMakeRange(0,1)];
@@ -668,9 +668,9 @@ static NSMutableString *StandardizeSMIWhitespace(NSString *str)
 	return ms;
 }
 
-int LoadSMIFromPath(NSString *path, SBSubSerializer *ss, int subCount)
+int LoadSMIFromURL(NSURL *url, SBSubSerializer *ss, int subCount)
 {
-	NSMutableString *smi = StandardizeSMIWhitespace(STLoadFileWithUnknownEncoding(path));
+	NSMutableString *smi = StandardizeSMIWhitespace(STLoadFileWithUnknownEncoding(url));
 	if (!smi) return 0;
     
 	NSScanner *sc = [NSScanner scannerWithString:smi];

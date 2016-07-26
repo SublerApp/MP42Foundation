@@ -93,9 +93,9 @@
 
         _ss = [[SBSubSerializer alloc] init];
         if ([self.fileURL.pathExtension caseInsensitiveCompare: @"srt"] == NSOrderedSame) {
-            success = LoadSRTFromPath(self.fileURL.path, _ss, &duration);
+            success = LoadSRTFromURL(self.fileURL, _ss, &duration);
         } else if ([self.fileURL.pathExtension caseInsensitiveCompare: @"smi"] == NSOrderedSame) {
-            success = LoadSMIFromPath(self.fileURL.path, _ss, 1);
+            success = LoadSMIFromURL(self.fileURL, _ss, 1);
         }
 
         [newTrack setDuration:duration];

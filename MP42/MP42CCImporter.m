@@ -114,7 +114,7 @@ static int ParseByte(const char *string, UInt8 *byte, Boolean hex)
     @autoreleasepool {
         MP4TrackId trackId = self.inputTracks.lastObject.sourceId;
 
-        NSString *scc = STStandardizeStringNewlines(STLoadFileWithUnknownEncoding(self.fileURL.path));
+        NSString *scc = STStandardizeStringNewlines(STLoadFileWithUnknownEncoding(self.fileURL));
         if (!scc) return;
 
         NSScanner *sc = [NSScanner scannerWithString:scc];

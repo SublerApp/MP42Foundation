@@ -49,11 +49,11 @@
 @end
 
 NSMutableString *STStandardizeStringNewlines(NSString *str);
-extern NSString *STLoadFileWithUnknownEncoding(NSString *path);
-int LoadSRTFromPath(NSString *path, SBSubSerializer *ss, MP4Duration *duration);
-int LoadSMIFromPath(NSString *path, SBSubSerializer *ss, int subCount);
+extern NSString *STLoadFileWithUnknownEncoding(NSURL *url);
+int LoadSRTFromURL(NSURL *url, SBSubSerializer *ss, MP4Duration *duration);
+int LoadSMIFromURL(NSURL *url, SBSubSerializer *ss, int subCount);
 
-int LoadChaptersFromPath(NSString *path, NSMutableArray *ss);
+int LoadChaptersFromURL(NSURL *url, NSMutableArray *ss);
 int ParseSSAHeader(NSString *header);
 NSString *StripSSALine(NSString *line);
 

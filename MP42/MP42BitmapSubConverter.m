@@ -416,7 +416,6 @@
 
         _ocr = [[MP42OCRWrapper alloc] initWithLanguage:track.language extendedLanguageTag:track.extendedLanguageTag];
 
-
         if ([format isEqualToString:MP42SubtitleFormatVobSub]) {
             // Launch the vobsub decoder thread.
             decoderThread = [[NSThread alloc] initWithTarget:self selector:@selector(VobSubDecoderThreadMainRoutine) object:nil];
