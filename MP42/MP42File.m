@@ -675,6 +675,17 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
         return NO;
     }
 
+    for (MP42Track *track in self.tracks) {
+        NSURL *sourceURL = track.sourceURL.filePathURL;
+        if ([sourceURL isEqualTo:url]) {
+            if (outError) {
+                *outError = MP42Error(@"Invalid destination.", @"Can't overwrite the source movie.", 100);
+                [_logger writeErrorToLog:*outError];
+            }
+            return NO;
+        }
+    }
+
     if (self.hasFileRepresentation) {
         __block BOOL noErr = YES;
 
