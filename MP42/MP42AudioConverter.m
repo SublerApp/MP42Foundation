@@ -39,7 +39,10 @@
         UInt32 bitRate = [[[NSUserDefaults standardUserDefaults] valueForKey:@"SBAudioBitrate"] integerValue];
         AudioStreamBasicDescription asbd = [self basicDescriptorForTrack:track];
 
-        _decoder = [[MP42AudioDecoder alloc] initWithAudioFormat:asbd mixdownType:mixdownType magicCookie:magicCookie error:error];
+        _decoder = [[MP42AudioDecoder alloc] initWithAudioFormat:asbd
+                                                     mixdownType:mixdownType
+                                                             drc:1.5
+                                                     magicCookie:magicCookie error:error];
 
         if (!_decoder) {
             return nil;

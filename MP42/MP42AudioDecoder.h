@@ -17,7 +17,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MP42AudioDecoder : NSObject<MP42AudioUnit>
 
-- (instancetype)initWithAudioFormat:(AudioStreamBasicDescription)asbd mixdownType:(NSString *)mixdownType magicCookie:(NSData *)magicCookie error:(NSError **)error;
+- (instancetype)initWithAudioFormat:(AudioStreamBasicDescription)asbd
+                        mixdownType:(NSString *)mixdownType
+                                drc:(float)drc
+                        magicCookie:(NSData *)magicCookie
+                              error:(NSError **)error;
 
 @property (nonatomic, readonly, nullable) AudioChannelLayout *inputLayout;
 @property (nonatomic, readonly) UInt32 inputLayoutSize;
