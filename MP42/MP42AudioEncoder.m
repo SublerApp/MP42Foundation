@@ -20,14 +20,17 @@ typedef struct AudioFileIO
 {
     sfifo_t *ringBuffer;
 
-    char   *srcBuffer;
-    UInt32  srcBufferSize;
+    char   *inBuffer;
+    UInt32  inBufferSize;
 
     UInt32  outputMaxSize;
 
-    UInt32  srcSizePerPacket;
+    UInt32  inSizePerPacket;
+    UInt32  inSamples;
     UInt32  channelsPerFrame;
     UInt32  numPacketsPerRead;
+
+    UInt64 outputPos;
 
     AudioStreamPacketDescription * _Nullable pktDescs;
 } AudioFileIO;
@@ -200,16 +203,18 @@ typedef struct AudioFileIO
 
     // Set up buffers and data proc info struct
     _afio = malloc(sizeof(AudioFileIO));
-    _afio->srcBufferSize = 32768;
-    _afio->srcBuffer = (char *) malloc(_afio->srcBufferSize);
+    bzero(_afio, sizeof(AudioFileIO));
+
+    _afio->inBufferSize = 32768;
+    _afio->inBuffer = (char *) malloc(_afio->inBufferSize);
 
     _afio->outputMaxSize = outputSizePerPacket;
 
-    _afio->srcSizePerPacket = _inputFormat.mBytesPerPacket;
+    _afio->inSizePerPacket = _inputFormat.mBytesPerPacket;
+    _afio->inSamples = _outputFormat.mFramesPerPacket;
     _afio->channelsPerFrame = _inputFormat.mChannelsPerFrame;
-    _afio->numPacketsPerRead = _afio->srcBufferSize / _afio->srcSizePerPacket;
+    _afio->numPacketsPerRead = _afio->inBufferSize / _afio->inSizePerPacket;
 
-    _afio->pktDescs = NULL;
     _afio->ringBuffer = _ringBuffer;
 
     return YES;
@@ -228,6 +233,7 @@ typedef struct AudioFileIO
     }
 
     if (_afio) {
+        free(_afio->inBuffer);
         free(_afio);
         _afio = NULL;
     }
@@ -338,15 +344,15 @@ OSStatus EncoderDataProc(AudioConverterRef               inAudioConverter,
     }
 
     // Read from the fifo
-    UInt32 wanted = MIN(*ioNumberDataPackets * afio->srcSizePerPacket, availableBytes);
-    UInt32 outNumBytes = sfifo_read(afio->ringBuffer, afio->srcBuffer, wanted);
+    UInt32 wanted = MIN(*ioNumberDataPackets * afio->inSizePerPacket, availableBytes);
+    UInt32 outNumBytes = sfifo_read(afio->ringBuffer, afio->inBuffer, wanted);
 
     // Put the data pointer into the buffer list
-    ioData->mBuffers[0].mData = afio->srcBuffer;
+    ioData->mBuffers[0].mData = afio->inBuffer;
     ioData->mBuffers[0].mDataByteSize = outNumBytes;
     ioData->mBuffers[0].mNumberChannels = afio->channelsPerFrame;
 
-    *ioNumberDataPackets = ioData->mBuffers[0].mDataByteSize / afio->srcSizePerPacket;
+    *ioNumberDataPackets = ioData->mBuffers[0].mDataByteSize / afio->inSizePerPacket;
 
     if (outDataPacketDescription) {
         if (afio->pktDescs) {
@@ -365,6 +371,12 @@ static MP42SampleBuffer *encode(AudioConverterRef encoder, AudioFileIO *afio)
     OSStatus err = noErr;
     AudioStreamPacketDescription odesc = {0, 0, 0};
     UInt32 ioOutputDataPackets = 1;
+
+    UInt32 availableBytes = sfifo_used(afio->ringBuffer);
+    // Check if we need more data
+    if (availableBytes < afio->inSamples * afio->inSizePerPacket) {
+        return nil;
+    }
 
     MP42SampleBuffer *sample = [[MP42SampleBuffer alloc] init];
     sample->size = afio->outputMaxSize;
@@ -391,12 +403,38 @@ static MP42SampleBuffer *encode(AudioConverterRef encoder, AudioFileIO *afio)
 
     sample->size = fillBufList.mBuffers[0].mDataByteSize;
     sample->duration = 1024;
-    sample->offset = 0;
-    //sample->timestamp = outputPos;
+    sample->timestamp = afio->outputPos * 1024;
     sample->isSync = YES;
 
+    afio->outputPos += ioOutputDataPackets;
+
     return sample;
-    //outputPos += ioOutputDataPackets;
+}
+
+static MP42SampleBuffer *flush(AudioConverterRef encoder, AudioFileIO *afio)
+{
+    UInt32 availableBytes = sfifo_used(afio->ringBuffer);
+    UInt32 pad = afio->inSamples * afio->inSizePerPacket - availableBytes;
+
+    if (pad > 0 && availableBytes > 0) {
+        UInt8 *padBuffer = calloc(1, pad);
+        sfifo_write(afio->ringBuffer, padBuffer, pad);
+        free(padBuffer);
+    }
+    MP42SampleBuffer *outSample = encode(encoder, afio);
+    return outSample;
+}
+
+static inline void enqueue(MP42AudioEncoder *self, MP42SampleBuffer *outSample)
+{
+    if (outSample) {
+        if (self->_outputType == MP42AudioUnitOutputPush) {
+            [self->_outputUnit addSample:outSample];
+        }
+        else {
+            [self->_outputSamplesBuffer enqueue:outSample];
+        }
+    }
 }
 
 - (void)threadMainRoutine
@@ -408,32 +446,20 @@ static MP42SampleBuffer *encode(AudioConverterRef encoder, AudioFileIO *afio)
             @autoreleasepool {
 
                 MP42SampleBuffer *outSample = nil;
-                BOOL lastSample = NO;
 
                 if (sampleBuffer->flags & MP42SampleBufferFlagEndOfFile) {
-                    lastSample = YES;
+                    while ((outSample = flush(_encoder, _afio))) {
+                        enqueue(self, outSample);
+                    }
+
+                    enqueue(self, sampleBuffer);
+                    return;
                 }
                 else {
                     sfifo_write(_ringBuffer, sampleBuffer->data, sampleBuffer->size);
-                }
-
-                while ((outSample = encode(_encoder, _afio))) {
-                    if (_outputType == MP42AudioUnitOutputPush) {
-                        [_outputUnit addSample:outSample];
+                    while ((outSample = encode(_encoder, _afio))) {
+                        enqueue(self, outSample);
                     }
-                    else {
-                        [_outputSamplesBuffer enqueue:outSample];
-                    }
-                }
-
-                if (lastSample) {
-                    if (_outputType == MP42AudioUnitOutputPush) {
-                        [_outputUnit addSample:sampleBuffer];
-                    }
-                    else {
-                        [_outputSamplesBuffer enqueue:sampleBuffer];
-                    }
-                    return;
                 }
             }
         }
