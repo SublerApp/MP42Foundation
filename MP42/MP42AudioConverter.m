@@ -92,12 +92,23 @@
     else if ([format isEqualToString:MP42AudioFormatDTS]) {
         asbd.mFormatID = 'DTS ';
     }
+    else if ([format isEqualToString:MP42AudioFormatMP1]) {
+        asbd.mFormatID = kAudioFormatMPEGLayer1;
+        asbd.mFramesPerPacket = 1152;
+    }
+    else if ([format isEqualToString:MP42AudioFormatMP2]) {
+        asbd.mFormatID = kAudioFormatMPEGLayer2;
+        asbd.mFramesPerPacket = 1152;
+    }
     else if ([format isEqualToString:MP42AudioFormatMP3]) {
         asbd.mFormatID = kAudioFormatMPEGLayer3;
         asbd.mFramesPerPacket = 1152;
     }
     else if ([format isEqualToString:MP42AudioFormatTrueHD]) {
         asbd.mFormatID = 'trhd';
+    }
+    else if ([format isEqualToString:MP42AudioFormatOpus]) {
+        asbd.mFormatID = 'Opus';
     }
     else if ([format isEqualToString:MP42AudioFormatPCM]) {
         AudioStreamBasicDescription temp = [track.muxer_helper->importer audioDescriptionForTrack:track];

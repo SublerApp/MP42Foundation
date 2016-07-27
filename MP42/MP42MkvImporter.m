@@ -414,10 +414,16 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
             return MP42VideoFormatMPEG2;
         else if (!strcmp(track->CodecID, "A_DTS"))
             return MP42AudioFormatDTS;
+        else if (!strcmp(track->CodecID, "A_OPUS"))
+            return MP42AudioFormatOpus;
         else if (!strcmp(track->CodecID, "A_VORBIS"))
             return MP42AudioFormatVorbis;
         else if (!strcmp(track->CodecID, "A_FLAC"))
             return MP42AudioFormatFLAC;
+        else if (!strcmp(track->CodecID, "A_MPEG/L1"))
+            return MP42AudioFormatMP1;
+        else if (!strcmp(track->CodecID, "A_MPEG/L2"))
+            return MP42AudioFormatMP2;
         else if (!strcmp(track->CodecID, "A_MPEG/L3"))
             return MP42AudioFormatMP3;
         else if (!strcmp(track->CodecID, "A_TRUEHD"))

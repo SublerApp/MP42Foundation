@@ -79,7 +79,6 @@ static const struct {
     { kAudioFormatMPEGLayer1, AV_CODEC_ID_MP1 },
     { kAudioFormatMPEGLayer2, AV_CODEC_ID_MP2 },
     { kAudioFormatMPEGLayer3, AV_CODEC_ID_MP3 },
-    { 'ms\0\0' + 0x50, AV_CODEC_ID_MP2 },
     { kAudioFormatAC3, AV_CODEC_ID_AC3 },
     { kAudioFormatEnhancedAC3, AV_CODEC_ID_EAC3 },
     { 'XiFL', AV_CODEC_ID_FLAC },

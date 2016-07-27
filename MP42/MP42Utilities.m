@@ -46,7 +46,7 @@ BOOL isTrackMuxable(NSString *formatName)
 }
 
 BOOL trackNeedConversion(NSString *formatName) {
-    NSArray *supportedConversionFormats = @[MP42AudioFormatVorbis, MP42AudioFormatFLAC, MP42AudioFormatMP3,
+    NSArray *supportedConversionFormats = @[MP42AudioFormatVorbis, MP42AudioFormatFLAC, MP42AudioFormatMP1, MP42AudioFormatMP2, MP42AudioFormatMP3, MP42AudioFormatOpus,
                                             MP42AudioFormatTrueHD, MP42SubtitleFormatSSA, MP42SubtitleFormatText, MP42SubtitleFormatPGS];
 
     return [supportedConversionFormats containsObject:formatName];
