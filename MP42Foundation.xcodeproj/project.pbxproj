@@ -62,6 +62,8 @@
 		A91C3AD11BF20CF1008BCF87 /* MP42FormatUtilites.h in Headers */ = {isa = PBXBuildFile; fileRef = A91C3ACD1BF20CF1008BCF87 /* MP42FormatUtilites.h */; };
 		A925AAAF18379AF800BE84D4 /* MP42Utilities.h in Headers */ = {isa = PBXBuildFile; fileRef = A925AAAD18379AF800BE84D4 /* MP42Utilities.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A925AAB018379AF800BE84D4 /* MP42Utilities.m in Sources */ = {isa = PBXBuildFile; fileRef = A925AAAE18379AF800BE84D4 /* MP42Utilities.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		A93EE6E91D489FFC003E3B56 /* libavresample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A99DB6AD1D4648D100C6E56C /* libavresample.a */; };
+		A93EE6EA1D48A01A003E3B56 /* libswresample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A9D599BA1D4885E0001C22BD /* libswresample.a */; };
 		A947BA9B1824F0B3004C734B /* Ratings.json in Resources */ = {isa = PBXBuildFile; fileRef = A947BA9A1824F0B3004C734B /* Ratings.json */; };
 		A96523451BAC315900E994E0 /* NSString+MP42Additions.h in Headers */ = {isa = PBXBuildFile; fileRef = A96523431BAC315900E994E0 /* NSString+MP42Additions.h */; };
 		A96523461BAC315900E994E0 /* NSString+MP42Additions.h in Headers */ = {isa = PBXBuildFile; fileRef = A96523431BAC315900E994E0 /* NSString+MP42Additions.h */; };
@@ -95,7 +97,6 @@
 		A99DB6AA1D4648B700C6E56C /* liblept.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A99DB6A71D4648B700C6E56C /* liblept.a */; };
 		A99DB6AB1D4648B700C6E56C /* libtesseract.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A99DB6A81D4648B700C6E56C /* libtesseract.a */; };
 		A99DB6AF1D4648D100C6E56C /* libavcodec.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A99DB6AC1D4648D100C6E56C /* libavcodec.a */; };
-		A99DB6B01D4648D100C6E56C /* libavresample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A99DB6AD1D4648D100C6E56C /* libavresample.a */; };
 		A99DB6B11D4648D100C6E56C /* libavutil.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A99DB6AE1D4648D100C6E56C /* libavutil.a */; };
 		A99DB6B31D46497B00C6E56C /* libiconv.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = A99DB6B21D46497B00C6E56C /* libiconv.tbd */; };
 		A99DB6B51D4649C300C6E56C /* eng.traineddata in CopyFiles */ = {isa = PBXBuildFile; fileRef = A99DB6B41D4649C300C6E56C /* eng.traineddata */; };
@@ -385,6 +386,7 @@
 		A9B9C2D91823971F00416A4E /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		A9B9C2DD1823973200416A4E /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
 		A9B9C4921823986200416A4E /* Quartz.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Quartz.framework; path = System/Library/Frameworks/Quartz.framework; sourceTree = SDKROOT; };
+		A9D599BA1D4885E0001C22BD /* libswresample.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libswresample.a; path = contrib/ffmpeg/lib/libswresample.a; sourceTree = "<group>"; };
 		A9DFBD9F195FF5BA00410060 /* MP42Heap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MP42Heap.h; sourceTree = "<group>"; };
 		A9DFBDA0195FF5BA00410060 /* MP42Heap.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MP42Heap.m; sourceTree = "<group>"; };
 		A9DFBDC91960174500410060 /* MP42EditListsReconstructor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MP42EditListsReconstructor.h; sourceTree = "<group>"; };
@@ -411,11 +413,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A93EE6EA1D48A01A003E3B56 /* libswresample.a in Frameworks */,
+				A93EE6E91D489FFC003E3B56 /* libavresample.a in Frameworks */,
 				A9E8FB871D4664F70071A5F1 /* libz.tbd in Frameworks */,
 				A9E8FB851D4664E80071A5F1 /* libbz2.tbd in Frameworks */,
 				A99DB6B31D46497B00C6E56C /* libiconv.tbd in Frameworks */,
 				A99DB6AF1D4648D100C6E56C /* libavcodec.a in Frameworks */,
-				A99DB6B01D4648D100C6E56C /* libavresample.a in Frameworks */,
 				A99DB6B11D4648D100C6E56C /* libavutil.a in Frameworks */,
 				A99DB6A91D4648B700C6E56C /* libjpeg.a in Frameworks */,
 				A99DB6AA1D4648B700C6E56C /* liblept.a in Frameworks */,
@@ -467,6 +470,7 @@
 		A9B9C1EF182391DF00416A4E /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				A9D599BA1D4885E0001C22BD /* libswresample.a */,
 				A9E8FB861D4664F70071A5F1 /* libz.tbd */,
 				A9E8FB841D4664E80071A5F1 /* libbz2.tbd */,
 				A99DB6B21D46497B00C6E56C /* libiconv.tbd */,

@@ -53,13 +53,18 @@ void FFInitFFmpeg()
         REGISTER_DECODER(dvdsub);
         REGISTER_DECODER(pgssub);
         REGISTER_DECODER(aac);
+        REGISTER_DECODER(mp1);
+        REGISTER_DECODER(mp2);
+        REGISTER_DECODER(mp3);
         REGISTER_DECODER(ac3);
         REGISTER_DECODER(eac3);
         REGISTER_DECODER(flac);
         REGISTER_DECODER(vorbis);
+        REGISTER_DECODER(opus);
         REGISTER_DECODER(alac);
         REGISTER_DECODER(dca);
         REGISTER_DECODER(truehd);
+        REGISTER_DECODER(mlp);
     });
 }
 
@@ -69,23 +74,21 @@ static const struct {
     enum AVCodecID codecID;
 } kAudioCodecMap[] =
 {
+    { kAudioFormatMPEG4AAC, AV_CODEC_ID_AAC },
+    { kAudioFormatMPEG4AAC_HE, AV_CODEC_ID_AAC },
     { kAudioFormatMPEGLayer1, AV_CODEC_ID_MP1 },
     { kAudioFormatMPEGLayer2, AV_CODEC_ID_MP2 },
     { kAudioFormatMPEGLayer3, AV_CODEC_ID_MP3 },
     { 'ms\0\0' + 0x50, AV_CODEC_ID_MP2 },
-
     { kAudioFormatAC3, AV_CODEC_ID_AC3 },
     { kAudioFormatEnhancedAC3, AV_CODEC_ID_EAC3 },
-    { 'trhd', AV_CODEC_ID_TRUEHD },
-
-    { 'DTS ', AV_CODEC_ID_DTS },
-
     { 'XiFL', AV_CODEC_ID_FLAC },
     { 'XiVs', AV_CODEC_ID_VORBIS },
-
-    { kAudioFormatMPEG4AAC, AV_CODEC_ID_AAC },
-    { kAudioFormatMPEG4AAC_HE, AV_CODEC_ID_AAC },
-
+    { 'Opus', AV_CODEC_ID_OPUS },
+    { kAudioFormatAppleLossless, AV_CODEC_ID_ALAC },
+    { 'DTS ', AV_CODEC_ID_DTS },
+    { 'trhd', AV_CODEC_ID_TRUEHD },
+    { 'mlp ', AV_CODEC_ID_MLP },
     { kAudioFormatLinearPCM, AV_CODEC_ID_PCM_S16LE },
     { kAudioFormatLinearPCM, AV_CODEC_ID_PCM_U8 },
     { kAudioFormatALaw, AV_CODEC_ID_PCM_ALAW },
