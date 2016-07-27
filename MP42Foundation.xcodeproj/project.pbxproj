@@ -64,6 +64,10 @@
 		A925AAB018379AF800BE84D4 /* MP42Utilities.m in Sources */ = {isa = PBXBuildFile; fileRef = A925AAAE18379AF800BE84D4 /* MP42Utilities.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		A93EE6E91D489FFC003E3B56 /* libavresample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A99DB6AD1D4648D100C6E56C /* libavresample.a */; };
 		A93EE6EA1D48A01A003E3B56 /* libswresample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A9D599BA1D4885E0001C22BD /* libswresample.a */; };
+		A9422FC51D4917AF000DB435 /* audio_resample.c in Sources */ = {isa = PBXBuildFile; fileRef = A9422FC31D4917AF000DB435 /* audio_resample.c */; };
+		A9422FC61D4917AF000DB435 /* audio_resample.c in Sources */ = {isa = PBXBuildFile; fileRef = A9422FC31D4917AF000DB435 /* audio_resample.c */; };
+		A9422FC71D4917AF000DB435 /* audio_resample.h in Headers */ = {isa = PBXBuildFile; fileRef = A9422FC41D4917AF000DB435 /* audio_resample.h */; };
+		A9422FC81D4917AF000DB435 /* audio_resample.h in Headers */ = {isa = PBXBuildFile; fileRef = A9422FC41D4917AF000DB435 /* audio_resample.h */; };
 		A947BA9B1824F0B3004C734B /* Ratings.json in Resources */ = {isa = PBXBuildFile; fileRef = A947BA9A1824F0B3004C734B /* Ratings.json */; };
 		A96523451BAC315900E994E0 /* NSString+MP42Additions.h in Headers */ = {isa = PBXBuildFile; fileRef = A96523431BAC315900E994E0 /* NSString+MP42Additions.h */; };
 		A96523461BAC315900E994E0 /* NSString+MP42Additions.h in Headers */ = {isa = PBXBuildFile; fileRef = A96523431BAC315900E994E0 /* NSString+MP42Additions.h */; };
@@ -267,6 +271,8 @@
 		A91C3ACD1BF20CF1008BCF87 /* MP42FormatUtilites.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MP42FormatUtilites.h; sourceTree = "<group>"; };
 		A925AAAD18379AF800BE84D4 /* MP42Utilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MP42Utilities.h; sourceTree = "<group>"; };
 		A925AAAE18379AF800BE84D4 /* MP42Utilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MP42Utilities.m; sourceTree = "<group>"; };
+		A9422FC31D4917AF000DB435 /* audio_resample.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = audio_resample.c; sourceTree = "<group>"; };
+		A9422FC41D4917AF000DB435 /* audio_resample.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = audio_resample.h; sourceTree = "<group>"; };
 		A947BA9A1824F0B3004C734B /* Ratings.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = Ratings.json; sourceTree = "<group>"; };
 		A96523431BAC315900E994E0 /* NSString+MP42Additions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+MP42Additions.h"; sourceTree = "<group>"; };
 		A96523441BAC315900E994E0 /* NSString+MP42Additions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+MP42Additions.m"; sourceTree = "<group>"; };
@@ -568,6 +574,8 @@
 		A9B9C25A1823923200416A4E /* others */ = {
 			isa = PBXGroup;
 			children = (
+				A9422FC41D4917AF000DB435 /* audio_resample.h */,
+				A9422FC31D4917AF000DB435 /* audio_resample.c */,
 				A9B9C25D1823923200416A4E /* MatroskaFile.c */,
 				A9B9C25E1823923200416A4E /* MatroskaFile.h */,
 				A9B9C25F1823923200416A4E /* MatroskaParser.c */,
@@ -703,6 +711,7 @@
 			files = (
 				A91C3AD11BF20CF1008BCF87 /* MP42FormatUtilites.h in Headers */,
 				A96D28941BAD390400403327 /* MP42Metadata+Private.h in Headers */,
+				A9422FC81D4917AF000DB435 /* audio_resample.h in Headers */,
 				A99DB6A11D46480500C6E56C /* MP42AudioUnit.h in Headers */,
 				A917286719FD2BCE00348DF8 /* MP42Logging.h in Headers */,
 				A99DB6991D46480500C6E56C /* MP42AudioDecoder.h in Headers */,
@@ -767,6 +776,7 @@
 				A9B9C26A1823923200416A4E /* MP42AudioConverter.h in Headers */,
 				A9B9C2A11823923200416A4E /* MP42VobSubImporter.h in Headers */,
 				A91C3AD01BF20CF1008BCF87 /* MP42FormatUtilites.h in Headers */,
+				A9422FC71D4917AF000DB435 /* audio_resample.h in Headers */,
 				A9B9C2AC1823923200416A4E /* mbs.h in Headers */,
 				A9B9C2891823923200416A4E /* MP42MkvImporter.h in Headers */,
 				A96D28931BAD390400403327 /* MP42Metadata+Private.h in Headers */,
@@ -965,6 +975,7 @@
 				A99DB69B1D46480500C6E56C /* MP42AudioDecoder.m in Sources */,
 				A910B61318394EB20064028F /* MP42AACImporter.mm in Sources */,
 				A910B61518394EB20064028F /* MP42AC3Importer.m in Sources */,
+				A9422FC61D4917AF000DB435 /* audio_resample.c in Sources */,
 				A910B61818394EB20064028F /* MatroskaFile.c in Sources */,
 				A910B61A18394EB20064028F /* MatroskaParser.c in Sources */,
 				A910B61C18394EB20064028F /* mbs.cpp in Sources */,
@@ -1019,6 +1030,7 @@
 				A925AAB018379AF800BE84D4 /* MP42Utilities.m in Sources */,
 				A9B9C2731823923200416A4E /* MP42CCImporter.m in Sources */,
 				A9B9C29A1823923200416A4E /* MP42SubUtilities.m in Sources */,
+				A9422FC51D4917AF000DB435 /* audio_resample.c in Sources */,
 				A9B9C2981823923200416A4E /* MP42SubtitleTrack.m in Sources */,
 				A9B9C29C1823923200416A4E /* MP42Track.m in Sources */,
 				A9B9C2711823923200416A4E /* MP42BitmapSubConverter.m in Sources */,

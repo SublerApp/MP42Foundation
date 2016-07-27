@@ -14,15 +14,15 @@
 
 #include "FFmpegUtils.h"
 
+#include "audio_resample.h"
+
 #include <avcodec.h>
-#include <libavresample/avresample.h>
-#include <libavutil/channel_layout.h>
 #include <libavutil/downmix_info.h>
 #include <libavutil/opt.h>
 
 struct MP42DecodeContext {
     AVCodecContext         *avctx;
-    AVAudioResampleContext *resampler;
+    hb_audio_resample_t    *resampler;
 
     AudioChannelLayout **inputLayout;
     UInt32 *inputLayoutSize;
@@ -33,10 +33,9 @@ struct MP42DecodeContext {
     AudioStreamBasicDescription *outputFormat;
 
     enum AVMatrixEncoding matrix_encoding;
-    enum AVSampleFormat   out_sample_format;
     int                   out_layout;
 
-    BOOL reconfigured;
+    BOOL configured;
 };
 
 typedef struct MP42DecodeContext MP42DecodeContext;
@@ -180,19 +179,15 @@ typedef struct MP42DecodeContext MP42DecodeContext;
 
         // Context used by the decoder
         _context = malloc(sizeof(MP42DecodeContext));
+        bzero(_context, (sizeof(MP42DecodeContext)));
+
         _context->avctx = _avctx;
-        _context->resampler = NULL;
-
         _context->inputFormat = &_inputFormat;
-
         _context->outputFormat = &_outputFormat;
         _context->outputLayout = &_outputLayout;
         _context->outputLayoutSize = &_outputLayoutSize;
-
         _context->matrix_encoding = matrix_encoding;
-        _context->out_sample_format = AV_SAMPLE_FMT_FLT;
-
-        _context->reconfigured = NO;
+        _context->configured = NO;
 
         // Init the FIFOs
         _inputSamplesBuffer = [[MP42Fifo alloc] initWithCapacity:100];
@@ -214,8 +209,7 @@ typedef struct MP42DecodeContext MP42DecodeContext;
 
     if (_context) {
         if (_context->resampler) {
-            avresample_close(_context->resampler);
-            avresample_free(&_context->resampler);
+            hb_audio_resample_free(_context->resampler);
         }
     }
 
@@ -271,11 +265,12 @@ static MP42SampleBuffer * sampleBufferFromFrame(uint8_t *output_data, int output
     return sample;
 }
 
-static void reconfigureDescriptors(MP42DecodeContext *context, AVFrame *frame)
+static void configureDescriptors(MP42DecodeContext *context, AVFrame *frame)
 {
     // Get real channels number and layout
     int nb_channels = av_get_channel_layout_nb_channels(frame->channel_layout);
 
+    // Reset the channels per frame
     if (context->inputFormat->mChannelsPerFrame == context->outputFormat->mChannelsPerFrame) {
         context->outputFormat->mChannelsPerFrame = nb_channels;
         context->inputFormat->mChannelsPerFrame = nb_channels;
@@ -297,6 +292,8 @@ static void reconfigureDescriptors(MP42DecodeContext *context, AVFrame *frame)
     else {
         context->out_layout = frame->channel_layout;
     }
+
+    // Create the AudioChannelLayout from the FFmpeg channel layout
     UInt32 layout_size = sizeof(AudioChannelLayout) +
     sizeof(AudioChannelDescription) * context->outputFormat->mChannelsPerFrame;
     AudioChannelLayout *outputLayout = malloc(layout_size);
@@ -305,29 +302,32 @@ static void reconfigureDescriptors(MP42DecodeContext *context, AVFrame *frame)
 
     *context->outputLayoutSize = layout_size;
     *context->outputLayout = outputLayout;
-
-    // Tell the audio unit loop we need to reconfigure the chain.
-    context->reconfigured = YES;
 }
 
-static int initResampler(MP42DecodeContext *context, AVFrame *frame)
+static int resample(MP42DecodeContext *context, AVFrame *frame, uint8_t **output_data, int *output_data_size)
 {
     int ret = 0;
-    AVAudioResampleContext *resampler;
+    if (!context->configured) {
+        configureDescriptors(context, frame);
+        // We want float interleaved.
+        context->resampler = hb_audio_resample_init(AV_SAMPLE_FMT_FLT,
+                                                    context->out_layout,
+                                                    context->matrix_encoding,
+                                                    0);
+    }
 
-    // We want float interleaved, FFmpeg usually prefers
-    // float planar, so we need to convert it.
-    resampler = avresample_alloc_context();
-    if (!resampler) {
+    if (!context->resampler) {
         return 1;
     }
 
     AVFrameSideData *side_data;
-    if ((side_data = av_frame_get_side_data(frame, AV_FRAME_DATA_DOWNMIX_INFO)) != NULL) {
-        double          surround_mix_level, center_mix_level, lfe_mix_level;
+    if ((side_data =
+         av_frame_get_side_data(frame,  AV_FRAME_DATA_DOWNMIX_INFO)) != NULL)
+    {
+        double          surround_mix_level, center_mix_level;
         AVDownmixInfo * downmix_info;
 
-        downmix_info = (AVDownmixInfo *)side_data->data;
+        downmix_info = (AVDownmixInfo*)side_data->data;
         if (context->matrix_encoding == AV_MATRIX_ENCODING_DOLBY ||
             context->matrix_encoding == AV_MATRIX_ENCODING_DPLII)
         {
@@ -339,91 +339,24 @@ static int initResampler(MP42DecodeContext *context, AVFrame *frame)
             surround_mix_level = downmix_info->surround_mix_level;
             center_mix_level   = downmix_info->center_mix_level;
         }
-        lfe_mix_level = downmix_info->lfe_mix_level;
-
-        av_opt_set_double(resampler, "lfe_mix_level", lfe_mix_level, 0);
-        av_opt_set_double(resampler, "center_mix_level", center_mix_level, 0);
-        av_opt_set_double(resampler, "surround_mix_level", surround_mix_level, 0);
+        hb_audio_resample_set_mix_levels(context->resampler,
+                                         surround_mix_level,
+                                         center_mix_level,
+                                         downmix_info->lfe_mix_level);
     }
-
-    av_opt_set_int(resampler, "in_channel_layout",  frame->channel_layout, 0);
-    av_opt_set_int(resampler, "out_channel_layout", context->out_layout,  0);
-
-    av_opt_set_int(resampler, "in_sample_rate",  context->inputFormat->mSampleRate, 0);
-    av_opt_set_int(resampler, "out_sample_rate", context->inputFormat->mSampleRate, 0);
-
-    av_opt_set_int(resampler, "in_sample_fmt",  context->avctx->sample_fmt, 0);
-    av_opt_set_int(resampler, "out_sample_fmt", context->out_sample_format,  0);
-
-    if (context->matrix_encoding != AV_MATRIX_ENCODING_NONE) {
-        av_opt_set_int(resampler, "matrix_encoding", context->matrix_encoding, 0);
+    hb_audio_resample_set_channel_layout(context->resampler,
+                                         frame->channel_layout);
+    hb_audio_resample_set_sample_fmt(context->resampler,
+                                     frame->format);
+    if (hb_audio_resample_update(context->resampler))
+    {
+        NSLog(@"decavcodec: hb_audio_resample_update() failed");
+        return 1;
     }
+    ret = hb_audio_resample(context->resampler,
+                            frame->extended_data, frame->nb_samples,
+                            output_data, output_data_size);
 
-    ret = avresample_open(resampler);
-
-    if (ret) {
-        avresample_free(&resampler);
-    }
-    else {
-        context->resampler = resampler;
-    }
-
-    return ret;
-}
-
-static int updateResampler(MP42DecodeContext *context, AVFrame *frame)
-{
-    int ret = 0, resample_changed = 0;
-
-    int nb_channels = av_get_channel_layout_nb_channels(frame->channel_layout);
-    if (context->inputFormat->mChannelsPerFrame != nb_channels) {
-        resample_changed = 1;
-    }
-
-    if (resample_changed) {
-        if (context->resampler) {
-            avresample_close(context->resampler);
-            avresample_free(&context->resampler);
-        }
-        ret = initResampler(context, frame);
-    }
-
-    return ret;
-}
-
-static int resample(MP42DecodeContext *context, AVFrame *frame, uint8_t **output_data, int *output_data_size)
-{
-    int ret = 0;
-    if (!context->resampler) {
-        reconfigureDescriptors(context, frame);
-        ret = initResampler(context, frame);
-        if (ret) {
-            return ret;
-        }
-    }
-
-    updateResampler(context, frame);
-
-    int out_samples = avresample_get_out_samples(context->resampler, frame->nb_samples);
-    int out_nb_channels = context->outputFormat->mChannelsPerFrame;
-
-    int in_plane_size, out_plane_size = 0;
-
-    *output_data_size = av_samples_get_buffer_size(&in_plane_size, out_nb_channels,
-                                                   out_samples,
-                                                   context->out_sample_format, 1);
-
-    *output_data = malloc(*output_data_size + AV_INPUT_BUFFER_PADDING_SIZE);
-
-    // If resampling is needed, call avresample_convert
-    out_samples = avresample_convert(context->resampler,
-                                     output_data, out_plane_size, out_samples,
-                                     frame->extended_data, in_plane_size, frame->nb_samples);
-
-    // Recompute output_data_size following avresample_convert result (number of samples actually converted)
-    *output_data_size = av_samples_get_buffer_size(&out_plane_size, out_nb_channels,
-                                                   out_samples,
-                                                   context->out_sample_format, 1);
 
     return ret;
 }
@@ -491,9 +424,9 @@ static inline void enqueue(MP42AudioDecoder *self, MP42SampleBuffer *outSample)
                 }
                 else {
                     decode(_context, sampleBuffer, &outSample);
-                    if (_context->reconfigured) {
+                    if (_context->configured == NO) {
                         [_outputUnit reconfigure];
-                        _context->reconfigured = NO;
+                        _context->configured = YES;
                     }
                     enqueue(self, outSample);
                 }
