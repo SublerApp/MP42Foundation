@@ -10,15 +10,11 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@class MP42SampleBuffer;
 @class MP42Metadata;
 @class MP42Track;
 
 @interface MP42FileImporter : NSObject {
 @protected
-    NSInteger       _chapterId;
-    MP42Metadata   *_metadata;
-
     double        _progress;
     int32_t       _cancelled;
 }

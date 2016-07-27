@@ -17,6 +17,17 @@
 #import "MP42Track+Muxer.h"
 
 @implementation MP42Track
+{
+    MP42TrackId  _sourceId;
+
+    uint64_t    _size;
+    uint32_t    _bitrate;
+
+    NSSet<NSString *> *_mediaCharacteristicTags;
+
+    uint64_t    _alternate_group;
+    int64_t     _startOffset;
+}
 
 - (instancetype)init
 {

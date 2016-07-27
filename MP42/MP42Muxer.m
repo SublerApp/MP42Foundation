@@ -503,6 +503,7 @@
             // Iterate the tracks array and mux the samples
             for (MP42Track *track in _workingTracks) {
                 MP42SampleBuffer *sampleBuffer = nil;
+                MP42TrackId trackId = track.trackId;
 
                 for (int i = 0; i < 100 && (sampleBuffer = [track copyNextSample]) != nil; i++) {
 
@@ -511,10 +512,10 @@
                         track.muxer_helper->done = 1;
                     }
 
-                    else if (!MP4WriteSample(_fileHandle, track.trackId,
+                    else if (!MP4WriteSample(_fileHandle, trackId,
                                              sampleBuffer->data, sampleBuffer->size,
                                              sampleBuffer->duration, sampleBuffer->offset,
-                                             sampleBuffer->isSync)) {
+                                             sampleBuffer->flags & MP42SampleBufferFlagIsSync)) {
                         _cancelled = YES;
                     }
 

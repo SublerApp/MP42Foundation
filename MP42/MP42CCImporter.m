@@ -194,8 +194,8 @@ static int ParseByte(const char *string, UInt8 *byte, Boolean hex)
                 sample->size = 8;
                 sample->duration = ccSample.timestamp *= 1001;
                 sample->offset = 0;
-                sample->timestamp = 0;
-                sample->isSync = 1;
+                sample->decodeTimestamp = 0;
+                sample->flags |= MP42SampleBufferFlagIsSync;
                 sample->trackId = trackId;
 
                 [self enqueue:sample];
@@ -228,8 +228,8 @@ static int ParseByte(const char *string, UInt8 *byte, Boolean hex)
             sample->size = byteCount + 8;
             sample->duration = sampleDuration * 1001;
             sample->offset = 0;
-            sample->timestamp = 0;
-            sample->isSync = 1;
+            sample->decodeTimestamp = 0;
+            sample->flags |= MP42SampleBufferFlagIsSync;
             sample->trackId = trackId;
             
             [self enqueue:sample];

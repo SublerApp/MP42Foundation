@@ -51,7 +51,7 @@
         }
 
         [self addTracks:sourceFile.tracks];
-        _metadata = [sourceFile.metadata retain];
+        self.metadata = sourceFile.metadata;
 
         [sourceFile release];
     }
@@ -326,8 +326,8 @@
                     sample->size = numBytes;
                     sample->duration = duration;
                     sample->offset = renderingOffset;
-                    sample->timestamp = pStartTime;
-                    sample->isSync = isSyncSample;
+                    sample->decodeTimestamp = pStartTime;
+                    sample->flags |= isSyncSample ? MP42SampleBufferFlagIsSync : 0;
                     sample->trackId = track.sourceId;
                     
                     [self enqueue:sample];

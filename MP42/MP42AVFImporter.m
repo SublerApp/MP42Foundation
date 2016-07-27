@@ -418,14 +418,14 @@
                                      @"Encoding Tool", AVMetadataCommonKeySoftware,
                                      nil];
 
-    _metadata = [[MP42Metadata alloc] init];
+    self.metadata = [[[MP42Metadata alloc] init] autorelease];
 
     for (NSString *commonKey in commonItemsDict.allKeys) {
         NSArray<AVMetadataItem *> *items = [AVMetadataItem metadataItemsFromArray:_localAsset.commonMetadata
                                                                           withKey:commonKey
                                                                          keySpace:AVMetadataKeySpaceCommon];
         if (items.count) {
-            [_metadata setTag:items.lastObject.value forKey:commonItemsDict[commonKey]];
+            [self.metadata setTag:items.lastObject.value forKey:commonItemsDict[commonKey]];
         }
     }
 
@@ -439,7 +439,7 @@
 
         if ([artworkData isKindOfClass:[NSData class]]) {
             NSImage *image = [[NSImage alloc] initWithData:artworkData];
-            [_metadata.artworks addObject:[[[MP42Image alloc] initWithImage:image] autorelease]];
+            [self.metadata.artworks addObject:[[[MP42Image alloc] initWithImage:image] autorelease]];
             [image release];
         }
     }
@@ -523,7 +523,7 @@
         for (NSString *itunesKey in itunesMetadataDict.allKeys) {
             items = [AVMetadataItem metadataItemsFromArray:itunesMetadata withKey:itunesKey keySpace:AVMetadataKeySpaceiTunes];
             if (items.count) {
-                [_metadata setTag:items.lastObject.value forKey:itunesMetadataDict[itunesKey]];
+                [self.metadata setTag:items.lastObject.value forKey:itunesMetadataDict[itunesKey]];
             }
         }
 
@@ -569,7 +569,7 @@
         for (NSString *qtKey in quicktimeMetadataDict.allKeys) {
             items = [AVMetadataItem metadataItemsFromArray:quicktimeMetadata withKey:qtKey keySpace:AVMetadataKeySpaceQuickTimeUserData];
             if (items.count) {
-                [_metadata setTag:items.lastObject.value forKey:quicktimeMetadataDict[qtKey]];
+                [self.metadata setTag:items.lastObject.value forKey:quicktimeMetadataDict[qtKey]];
             }
         }
     }
@@ -602,7 +602,7 @@
         for (NSString *qtUserDataKey in quicktimeUserDataMetadataDict.allKeys) {
             items = [AVMetadataItem metadataItemsFromArray:quicktimeUserDataMetadata withKey:qtUserDataKey keySpace:AVMetadataKeySpaceQuickTimeUserData];
             if (items.count) {
-                [_metadata setTag:items.lastObject.value forKey:quicktimeUserDataMetadataDict[qtUserDataKey]];
+                [self.metadata setTag:items.lastObject.value forKey:quicktimeUserDataMetadataDict[qtUserDataKey]];
             }
         }
     }
@@ -862,10 +862,10 @@
                     sample->presentationTimestamp = presentationTimeStamp.value;
                     sample->presentationOutputTimestamp = currentOutputTimeStamp.value;
                     sample->timescale = duration.timescale;
-                    sample->isSync = sync;
+                    sample->flags |= sync ? MP42SampleBufferFlagIsSync : 0;
+                    sample->flags |= doNotDisplay ? MP42SampleBufferFlagDoNotDisplay : 0;
                     sample->trackId = track.sourceId;
                     sample->attachments = (void *)attachments;
-                    sample->doNotDisplay = doNotDisplay;
 
                     if (sample->offset < demuxHelper->minDisplayOffset) {
                         demuxHelper->minDisplayOffset = sample->offset;
@@ -995,9 +995,9 @@
                         sample->presentationTimestamp = presentationTimeStamp.value;
                         sample->presentationOutputTimestamp = presentationTimeStamp.value;
                         sample->timescale = sampleTimingInfo.duration.timescale;
-                        sample->isSync = sync;
+                        sample->flags |= sync ? MP42SampleBufferFlagIsSync : 0;
+                        sample->flags |= doNotDisplay ? MP42SampleBufferFlagDoNotDisplay : 0;
                         sample->trackId = track.sourceId;
-                        sample->doNotDisplay = doNotDisplay;
 
                         if (attachmentsSent == NO) {
                             sample->attachments = (void *)attachments;

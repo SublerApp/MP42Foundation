@@ -298,7 +298,7 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
 
         free(trackSizes);
 
-        _metadata = [[self readMatroskaMetadata] retain];
+        self.metadata = [self readMatroskaMetadata];
     }
 
     return self;
@@ -677,15 +677,15 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
                 sample->size = FrameSize;
                 sample->duration = MP4_INVALID_DURATION;
                 sample->offset = 0;
-                sample->timestamp = StartTime;
-                sample->isSync = YES;
+                sample->decodeTimestamp = StartTime;
+                sample->flags |= MP42SampleBufferFlagIsSync;
                 sample->trackId = track.sourceId;
 
 #define VARIABLE_AUDIO_RATE 1
 
 #ifdef VARIABLE_AUDIO_RATE
                 if (demuxHelper->previousSample) {
-                    uint64_t sampleDuration = (sample->timestamp * (double)mkv_TruncFloat(trackInfo->AV.Audio.SamplingFreq) / 1000000000.f) - demuxHelper->currentTime;
+                    uint64_t sampleDuration = (sample->decodeTimestamp * (double)mkv_TruncFloat(trackInfo->AV.Audio.SamplingFreq) / 1000000000.f) - demuxHelper->currentTime;
 
                     // MKV timestamps are a bit random, try to round them
                     // to make the sample table in the mp4 smaller.
@@ -710,7 +710,7 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
 
                     demuxHelper->currentTime += sampleDuration;
                 } else {
-                    demuxHelper->currentTime = sample->timestamp * (double)mkv_TruncFloat(trackInfo->AV.Audio.SamplingFreq) / 1000000000.f;
+                    demuxHelper->currentTime = sample->decodeTimestamp * (double)mkv_TruncFloat(trackInfo->AV.Audio.SamplingFreq) / 1000000000.f;
                 }
 
                 [demuxHelper->previousSample release];
@@ -748,10 +748,10 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
 
                     nextSample->duration = 0;
                     nextSample->offset = 0;
-                    nextSample->timestamp = StartTime;
+                    nextSample->decodeTimestamp = StartTime;
                     nextSample->data = frame;
                     nextSample->size = FrameSize;
-                    nextSample->isSync = YES;
+                    nextSample->flags |= MP42SampleBufferFlagIsSync;
                     nextSample->trackId = track.sourceId;
 
                     // PGS are usually stored with just the start time, and blank samples to fill the gaps
@@ -760,18 +760,18 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
                             demuxHelper->previousSample = [[MP42SampleBuffer alloc] init];
                             demuxHelper->previousSample->duration = StartTime / SCALE_FACTOR;
                             demuxHelper->previousSample->offset = 0;
-                            demuxHelper->previousSample->timestamp = StartTime;
-                            demuxHelper->previousSample->isSync = YES;
+                            demuxHelper->previousSample->decodeTimestamp = StartTime;
+                            demuxHelper->previousSample->flags |= MP42SampleBufferFlagIsSync;
                             demuxHelper->previousSample->trackId = track.sourceId;
                         } else {
-                            if (nextSample->timestamp < demuxHelper->previousSample->timestamp) {
+                            if (nextSample->decodeTimestamp < demuxHelper->previousSample->decodeTimestamp) {
                                 // Out of order samples? swap the next with the previous
                                 MP42SampleBuffer *temp = nextSample;
                                 nextSample = demuxHelper->previousSample;
                                 demuxHelper->previousSample = temp;
                             }
 
-                            demuxHelper->previousSample->duration = (nextSample->timestamp - demuxHelper->previousSample->timestamp) / SCALE_FACTOR;
+                            demuxHelper->previousSample->duration = (nextSample->decodeTimestamp - demuxHelper->previousSample->decodeTimestamp) / SCALE_FACTOR;
                         }
 
                         [self enqueue:demuxHelper->previousSample];
@@ -786,7 +786,7 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
                             sample->duration = (StartTime - demuxHelper->currentTime) / SCALE_FACTOR;
                             sample->size = 2;
                             sample->data = calloc(1, 2);
-                            sample->isSync = YES;
+                            sample->flags |= MP42SampleBufferFlagIsSync;
                             sample->trackId = track.sourceId;
                             
                             [self enqueue:sample];
@@ -845,8 +845,8 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
                     sample->size = currentSample->frameSize;
                     sample->duration = duration / 10000.0f;
                     sample->offset = offset / 10000.0f;
-                    sample->timestamp = StartTime;
-                    sample->isSync = currentSample->frameFlags & FRAME_KF;
+                    sample->decodeTimestamp = StartTime;
+                    sample->flags |= (currentSample->frameFlags & FRAME_KF) ? MP42SampleBufferFlagIsSync : 0;
                     sample->trackId = track.sourceId;
 
                     demuxHelper->samplesWritten++;
@@ -919,8 +919,8 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
                     sample->size = currentSample->frameSize;
                     sample->duration = duration / 10000.0f;
                     sample->offset = offset / 10000.0f;
-                    sample->timestamp = StartTime;
-                    sample->isSync = currentSample->frameFlags & FRAME_KF;
+                    sample->decodeTimestamp = StartTime;
+                    sample->flags |= (currentSample->frameFlags & FRAME_KF) ? MP42SampleBufferFlagIsSync : 0;
                     sample->trackId = track.sourceId;
 
                     demuxHelper->samplesWritten++;
@@ -970,7 +970,7 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
                 }
 
                 demuxHelper->currentTime += sample->duration;
-                sample->timestamp = demuxHelper->currentTime;
+                sample->decodeTimestamp = demuxHelper->currentTime;
 
                 [self enqueue:sample];
                 [sample release];

@@ -17,7 +17,6 @@ NS_ASSUME_NONNULL_BEGIN
 @interface MP42Track : NSObject <NSCoding, NSCopying> {
 @protected
     MP42TrackId  _trackId;
-    MP42TrackId  _sourceId;
 
     NSURL       *_sourceURL;
     NSString    *_format;
@@ -34,19 +33,10 @@ NS_ASSUME_NONNULL_BEGIN
     BOOL    _muxed;
     BOOL    _needConversion;
 
-    uint64_t    _size;
 	uint32_t    _timescale;
-	uint32_t    _bitrate;
 	MP42Duration _duration;
 
     NSMutableDictionary<NSString *, NSNumber *> *_updatedProperty;
-
-    @private
-    NSSet<NSString *> *_mediaCharacteristicTags;
-
-    uint64_t    _alternate_group;
-    int64_t     _startOffset;
-
     void *_helper;
 }
 

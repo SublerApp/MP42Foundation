@@ -364,8 +364,10 @@ static NSArray<SBVobSubTrack *> * LoadVobSubSubtitles(NSURL *theDirectory, NSStr
                     sample->data = calloc(1, 2);
                     sample->duration = startTime - lastTime;
                     sample->offset = 0;
-                    sample->timestamp = startTime;
-                    sample->isSync = YES;
+                    sample->presentationTimestamp = startTime;
+                    sample->presentationOutputTimestamp = startTime;
+                    sample->decodeTimestamp = startTime;
+                    sample->flags |= MP42SampleBufferFlagIsSync;
                     sample->trackId = track.sourceId;
 
                     [self enqueue:sample];
@@ -377,8 +379,10 @@ static NSArray<SBVobSubTrack *> * LoadVobSubSubtitles(NSURL *theDirectory, NSStr
                 sample->size = size;
                 sample->duration = duration;
                 sample->offset = 0;
-                sample->timestamp = startTime;
-                sample->isSync = YES;
+                sample->presentationTimestamp = startTime;
+                sample->presentationOutputTimestamp = startTime;
+                sample->decodeTimestamp = startTime;
+                sample->flags |= MP42SampleBufferFlagIsSync;
                 sample->trackId = track.sourceId;
                 
                 [self enqueue:sample];

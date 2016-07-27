@@ -13,9 +13,13 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+@class MP42SampleBuffer;
+
 @interface MP42FileImporter (Private)
 
 - (instancetype)initWithURL:(NSURL *)fileURL;
+
+@property(nonatomic, readwrite) MP42Metadata *metadata;
 
 - (void)addTrack:(MP42Track *)track;
 - (void)addTracks:(NSArray<MP42Track *> *)tracks;

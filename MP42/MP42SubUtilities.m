@@ -1063,8 +1063,8 @@ MP42SampleBuffer * copySubtitleSample(MP4TrackId subtitleTrackId, NSString *stri
     sample->size = sampleSize;
     sample->duration = duration;
     sample->offset = 0;
-    sample->timestamp = duration;
-    sample->isSync = true;
+    sample->decodeTimestamp = duration;
+    sample->flags |= MP42SampleBufferFlagIsSync;
     sample->trackId = subtitleTrackId;
 
     return sample;
@@ -1083,8 +1083,8 @@ MP42SampleBuffer* copyEmptySubtitleSample(MP4TrackId subtitleTrackId, MP4Duratio
     sample->size = 2;
     sample->duration = duration;
     sample->offset = 0;
-    sample->timestamp = duration;
-    sample->isSync = true;
+    sample->decodeTimestamp = duration;
+    sample->flags |= MP42SampleBufferFlagIsSync;
     sample->trackId = subtitleTrackId;
 
     return sample;

@@ -13,6 +13,27 @@
 #import <mp4v2.h>
 
 @implementation MP42VideoTrack
+{
+    uint64_t width, height;
+    float trackWidth, trackHeight;
+
+    // Pixel Aspect Ratio
+    uint64_t hSpacing, vSpacing;
+
+    // Clean Aperture
+    uint64_t cleanApertureWidthN, cleanApertureWidthD;
+    uint64_t cleanApertureHeightN, cleanApertureHeightD;
+    uint64_t horizOffN, horizOffD;
+    uint64_t vertOffN, vertOffD;
+
+    // Matrix
+    uint32_t offsetX, offsetY;
+
+    // H.264 profile
+    uint8_t _origProfile, _origLevel;
+    uint8_t _newProfile, _newLevel;
+
+}
 
 - (instancetype)initWithSourceURL:(NSURL *)URL trackID:(NSInteger)trackID fileHandle:(MP42FileHandle)fileHandle
 {
@@ -93,7 +114,6 @@
 
         if (trackWidth > 0 && trackHeight > 0) {
             MP4SetTrackFloatProperty(fileHandle, _trackId, "tkhd.width", trackWidth);
-
             MP4SetTrackFloatProperty(fileHandle, _trackId, "tkhd.height", trackHeight);
 
             uint8_t *val;

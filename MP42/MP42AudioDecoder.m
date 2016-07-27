@@ -255,7 +255,7 @@ static AVPacket * packetFromSampleBuffer(MP42SampleBuffer *sample)
     AVPacket *pkt = av_packet_alloc();
     pkt->data = sample->data;
     pkt->size = sample->size;
-    pkt->pts = sample->timestamp;
+    pkt->pts = sample->decodeTimestamp;
     pkt->dts = AV_NOPTS_VALUE;
 
     return pkt;

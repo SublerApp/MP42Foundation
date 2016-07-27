@@ -1499,9 +1499,7 @@ NSData* H264Info(const char *filePath, uint32_t *pic_width, uint32_t *pic_height
                     sample->data = sampleData;
                     sample->size = nal_buffer_size;
                     sample->duration = mp4FrameDuration;
-                    sample->offset = 0;
-                    sample->timestamp = 0;
-                    sample->isSync = nal_is_sync;
+                    sample->flags = nal_is_sync ? MP42SampleBufferFlagIsSync : 0;
                     sample->trackId = trackId;
 
                     [self enqueue:sample];
@@ -1588,9 +1586,7 @@ NSData* H264Info(const char *filePath, uint32_t *pic_width, uint32_t *pic_height
             sample->data = sampleData;
             sample->size = nal_buffer_size;
             sample->duration = mp4FrameDuration;
-            sample->offset = 0;
-            sample->timestamp = 0;
-            sample->isSync = nal_is_sync;
+            sample->flags = nal_is_sync ? MP42SampleBufferFlagIsSync : 0;
             sample->trackId = trackId;
             
             [self enqueue:sample];

@@ -132,7 +132,7 @@
         [self endEditListAtTime:editEnd empty:YES];
     }
 
-    BOOL shouldStartNewEdit = trimStart || (sample->doNotDisplay == NO && _editOpen == NO);
+    BOOL shouldStartNewEdit = trimStart || ((sample->flags & MP42SampleBufferFlagDoNotDisplay) == NO && _editOpen == NO);
 
     if (shouldStartNewEdit) {
         // Close the current edit list
@@ -166,7 +166,7 @@
 
     _currentTime += sample->duration;
 
-    BOOL shouldEndEdit = trimEnd || (sample->doNotDisplay == YES && _editOpen == YES);
+    BOOL shouldEndEdit = trimEnd || ((sample->flags & MP42SampleBufferFlagDoNotDisplay) == YES && _editOpen == YES);
 
     if (shouldEndEdit) {
         CMTime editEnd = CMTimeMake(_currentTime, _timescale);

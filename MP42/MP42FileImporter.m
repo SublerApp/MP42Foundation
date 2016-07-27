@@ -122,7 +122,7 @@ static NSArray<NSString *> *_supportedFileFormats;
         [track.muxer_helper->converter release];
     }
 
-    [_metadata release], _metadata = nil;
+    [_metadata release];
     [_tracksArray release], _tracksArray = nil;
     [_inputTracks release], _inputTracks = nil;
     [_outputsTracks release], _outputsTracks = nil;
@@ -162,7 +162,11 @@ static NSArray<NSString *> *_supportedFileFormats;
     return [[_outputsTracks copy] autorelease];
 }
 
-@synthesize metadata = _metadata;
+- (void)setMetadata:(MP42Metadata * _Nonnull)metadata
+{
+    _metadata = [metadata retain];
+}
+
 @synthesize tracks = _tracksArray;
 
 - (NSUInteger)timescaleForTrack:(MP42Track *)track

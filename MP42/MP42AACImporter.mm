@@ -864,8 +864,7 @@ static bool GetFirstHeader(FILE* inFile)
             sample->size = sampleSize;
             sample->duration = MP4_INVALID_DURATION;
             sample->offset = 0;
-            sample->timestamp = 0;
-            sample->isSync = 1;
+            sample->flags |= MP42SampleBufferFlagIsSync;
             sample->trackId = trackId;
 
             [self enqueue:sample];

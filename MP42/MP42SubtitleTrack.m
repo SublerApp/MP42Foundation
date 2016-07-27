@@ -31,9 +31,13 @@
         _mediaType = MP42MediaTypeSubtitle;
 
         if (![_format isEqualToString:MP42SubtitleFormatVobSub]) {
+            uint64_t width, height;
 
-            MP4GetTrackIntegerProperty(fileHandle, _trackId, "mdia.minf.stbl.stsd.tx3g.defTextBoxBottom", &height);
             MP4GetTrackIntegerProperty(fileHandle, _trackId, "mdia.minf.stbl.stsd.tx3g.defTextBoxRight", &width);
+            MP4GetTrackIntegerProperty(fileHandle, _trackId, "mdia.minf.stbl.stsd.tx3g.defTextBoxBottom", &height);
+
+            self.width = width;
+            self.height = height;
 
             uint64_t displayFlags = 0;
             MP4GetTrackIntegerProperty(fileHandle, _trackId, "mdia.minf.stbl.stsd.tx3g.displayFlags", &displayFlags);
@@ -104,8 +108,12 @@
     }
 
     if (_isEdited && !_muxed) {
+        float trackWidth, trackHeight;
         MP4GetTrackFloatProperty(fileHandle, _trackId, "tkhd.width", &trackWidth);
         MP4GetTrackFloatProperty(fileHandle, _trackId, "tkhd.height", &trackHeight);
+
+        self.trackWidth = trackWidth;
+        self.trackHeight = trackHeight;
 
         uint8_t *val;
         uint8_t nval[36];
@@ -114,8 +122,8 @@
 
         MP4GetTrackBytesProperty(fileHandle ,_trackId, "tkhd.matrix", &val, &size);
         memcpy(nval, val, size);
-        offsetX = CFSwapInt32BigToHost(ptr32[6]) / 0x10000;
-        offsetY = CFSwapInt32BigToHost(ptr32[7]) / 0x10000;
+        self.offsetX = CFSwapInt32BigToHost(ptr32[6]) / 0x10000;
+        self.offsetY = CFSwapInt32BigToHost(ptr32[7]) / 0x10000;
         free(val);
 
         [super writeToFile:fileHandle error:outError];
@@ -127,8 +135,8 @@
     }
 
     if (![_format isEqualToString:MP42SubtitleFormatVobSub]) {
-        MP4SetTrackIntegerProperty(fileHandle, _trackId, "mdia.minf.stbl.stsd.tx3g.defTextBoxBottom", trackHeight);
-        MP4SetTrackIntegerProperty(fileHandle, _trackId, "mdia.minf.stbl.stsd.tx3g.defTextBoxRight", trackWidth);
+        MP4SetTrackIntegerProperty(fileHandle, _trackId, "mdia.minf.stbl.stsd.tx3g.defTextBoxBottom", self.trackHeight);
+        MP4SetTrackIntegerProperty(fileHandle, _trackId, "mdia.minf.stbl.stsd.tx3g.defTextBoxRight", self.trackWidth);
 
         uint32_t displayFlags = 0;
         if (_verticalPlacement)

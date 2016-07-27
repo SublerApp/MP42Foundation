@@ -403,8 +403,10 @@ static MP42SampleBuffer *encode(AudioConverterRef encoder, AudioFileIO *afio)
 
     sample->size = fillBufList.mBuffers[0].mDataByteSize;
     sample->duration = 1024;
-    sample->timestamp = afio->outputPos * 1024;
-    sample->isSync = YES;
+    sample->decodeTimestamp = afio->outputPos * 1024;
+    sample->presentationTimestamp = sample->decodeTimestamp;
+    sample->presentationOutputTimestamp = sample->decodeTimestamp;
+    sample->flags |= MP42SampleBufferFlagIsSync;
 
     afio->outputPos += ioOutputDataPackets;
 

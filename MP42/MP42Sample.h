@@ -9,7 +9,10 @@
 #import <Foundation/Foundation.h>
 
 typedef NS_OPTIONS(NSUInteger, MP42SampleBufferFlag) {
-    MP42SampleBufferFlagEndOfFile = 1 << 0,
+    MP42SampleBufferFlagEndOfFile    = 1 << 0,
+    MP42SampleBufferFlagIsSync       = 1 << 1,
+    MP42SampleBufferFlagIsForced     = 1 << 2,
+    MP42SampleBufferFlagDoNotDisplay = 1 << 3
 };
 
 @interface MP42SampleBuffer : NSObject {
@@ -23,16 +26,12 @@ typedef NS_OPTIONS(NSUInteger, MP42SampleBufferFlag) {
 
     int64_t     presentationTimestamp;
     int64_t     presentationOutputTimestamp;
-    uint64_t    timestamp;
+    uint64_t    decodeTimestamp;
 
     uint32_t    trackId;
 
-    BOOL        isSync;
-    BOOL        isForced;
-    BOOL        doNotDisplay;
-
-    void        *attachments;
     uint16_t    flags;
+    void        *attachments;
 }
 
 @end
