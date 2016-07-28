@@ -32,7 +32,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  *  Returns the complete list of writable metadata.
  */
-- (NSArray<NSString *> *) writableMetadata;
++ (NSArray<NSString *> *) writableMetadata;
 
 /**
  *  Returns the list of the available genres.

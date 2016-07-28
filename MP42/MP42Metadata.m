@@ -343,7 +343,7 @@ static const genreType_t genreType_strings[] = {
             @"Sort TV Show"];
 }
 
-- (NSArray<NSString *> *) writableMetadata
++ (NSArray<NSString *> *) writableMetadata
 {
     return @[
             @"Name",
@@ -569,7 +569,7 @@ static const genreType_t genreType_strings[] = {
 
     [metadata retain];
 
-    for (NSString *key in [self writableMetadata]) {
+    for (NSString *key in [MP42Metadata writableMetadata]) {
         if ((tagValue = metadata.tagsDict[key])) {
             [tagsDict setObject:tagValue forKey:key];
         }
