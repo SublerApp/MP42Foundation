@@ -24,6 +24,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSUInteger) ratingIndexForiTunesCode:(NSString *)aiTunesCode;
 - (NSUInteger) ratingIndexForiTunesCountry:(NSString *)aCountry media:(NSString *)aMedia ratingString:(NSString *)aRatingString;
 
+- (NSString *) ratingStringForiTunesCountry:(NSString *)aCountry media:(NSString *)aMedia ratingString:(NSString *)aRatingString;
+
 @end
 
 NS_ASSUME_NONNULL_END

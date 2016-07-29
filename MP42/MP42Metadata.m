@@ -690,6 +690,14 @@ static const genreType_t genreType_strings[] = {
         } else if ([value isKindOfClass:[NSString class]]) {
             [tagsDict setValue:value forKey:key];
         }
+    } else if ([key isEqualToString:@"Rating"]) {
+        if ([value isKindOfClass:[NSString class]]) {
+            NSNumber *index = @([[MP42Ratings defaultManager] ratingIndexForiTunesCode:value]);
+            [tagsDict setValue:index forKey:key];
+        }
+        else {
+            [tagsDict setValue:value forKey:key];
+        }
 
     } else if ([key isEqualToString:@"Content Rating"]) {
         isEdited = YES;

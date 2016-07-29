@@ -151,4 +151,8 @@
 	return [self unknownIndex];
 }
 
+- (NSString *) ratingStringForiTunesCountry:(NSString *)aCountry media:(NSString *)aMedia ratingString:(NSString *)aRatingString {
+    return iTunesCodes[[self ratingIndexForiTunesCountry:aCountry media:aMedia ratingString:aRatingString]];
+}
+
 @end
