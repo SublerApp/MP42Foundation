@@ -14,6 +14,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (NSArray<NSString *> *)MP42_componentsSeparatedByRegex:(NSString *)regex;
 - (BOOL)MP42_isMatchedByRegex:(NSString *)regex;
+- (NSString *)MP42_stringByMatching:(NSString *)regex capture:(NSInteger)capture;
 
 @end
 

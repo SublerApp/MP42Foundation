@@ -53,4 +53,10 @@
     return ([r matchesInString:self options:0 range:NSMakeRange(0, self.length)].count) > 0;
 }
 
+- (NSString *)MP42_stringByMatching:(NSString *)regex capture:(NSInteger)capture {
+    NSRegularExpression *r = [NSRegularExpression regularExpressionWithPattern:regex options:0 error:NULL];
+    NSTextCheckingResult *match = [r firstMatchInString:self options:0 range:NSMakeRange(0, self.length)];
+    return [self substringWithRange:[match rangeAtIndex:capture]];
+}
+
 @end
