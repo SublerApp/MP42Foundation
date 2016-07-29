@@ -1278,7 +1278,7 @@ static const genreType_t genreType_strings[] = {
 
     MP4TagsSetContentRating(tags, &contentRating);
 
-    if (tagsDict[@"iTunes Country"]) {
+    if (tagsDict[@"iTunes Country"] && [tagsDict[@"iTunes Country"] length]) {
         const uint32_t i = [tagsDict[@"iTunes Country"] integerValue];
         MP4TagsSetITunesCountry(tags, &i);
     }
@@ -1286,7 +1286,7 @@ static const genreType_t genreType_strings[] = {
         MP4TagsSetITunesCountry(tags, NULL);
     }
 
-    if (tagsDict[@"contentID"]) {
+    if (tagsDict[@"contentID"] && [tagsDict[@"contentID"] length]) {
         const uint32_t i = [tagsDict[@"contentID"] integerValue];
         MP4TagsSetContentID(tags, &i);
     }
@@ -1294,7 +1294,7 @@ static const genreType_t genreType_strings[] = {
         MP4TagsSetContentID(tags, NULL);
     }
 
-    if (tagsDict[@"genreID"]) {
+    if (tagsDict[@"genreID"] && [tagsDict[@"genreID"] length]) {
         const uint32_t i = [tagsDict[@"genreID"] integerValue];
         MP4TagsSetGenreID(tags, &i);
     }
@@ -1302,7 +1302,7 @@ static const genreType_t genreType_strings[] = {
         MP4TagsSetGenreID(tags, NULL);
     }
 
-    if (tagsDict[@"artistID"]) {
+    if (tagsDict[@"artistID"] && [tagsDict[@"artistID"] length]) {
         const uint32_t i = [tagsDict[@"artistID"] integerValue];
         MP4TagsSetArtistID(tags, &i);
     }
@@ -1310,7 +1310,7 @@ static const genreType_t genreType_strings[] = {
         MP4TagsSetArtistID(tags, NULL);
     }
 
-    if (tagsDict[@"playlistID"]) {
+    if (tagsDict[@"playlistID"] && [tagsDict[@"playlistID"] length]) {
         const uint64_t i = [tagsDict[@"playlistID"] integerValue];
         MP4TagsSetPlaylistID(tags, &i);
     }
@@ -1318,7 +1318,7 @@ static const genreType_t genreType_strings[] = {
         MP4TagsSetPlaylistID(tags, NULL);
     }
 
-    if (tagsDict[@"composerID"]) {
+    if (tagsDict[@"composerID"] && [tagsDict[@"composerID"] length]) {
         const uint32_t i = [tagsDict[@"composerID"] integerValue];
         MP4TagsSetComposerID(tags, &i);
     }
