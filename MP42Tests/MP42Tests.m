@@ -11,7 +11,7 @@
 
 @interface MP42Tests : XCTestCase
 
-@property (retain) MP42File *mp4;
+@property (nonatomic, retain) MP42File *mp4;
 
 @end
 
