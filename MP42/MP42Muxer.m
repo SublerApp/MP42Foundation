@@ -337,9 +337,9 @@
             if (vPlacement)
                 displayFlags = 0x20000000;
             if ([(MP42SubtitleTrack *)track someSamplesAreForced])
-                displayFlags += 0x40000000;
+                displayFlags |= 0x40000000;
             if ([(MP42SubtitleTrack *)track allSamplesAreForced])
-                displayFlags += 0xC0000000;
+                displayFlags |= 0xC0000000;
 
             MP4SetTrackIntegerProperty(_fileHandle, dstTrackId, "mdia.minf.stbl.stsd.tx3g.displayFlags", displayFlags);
 
