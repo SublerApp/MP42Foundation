@@ -104,6 +104,7 @@ typedef struct AudioFileIO
     err = AudioConverterNew(&_inputFormat, &_outputFormat, &_encoder);
     if (err) {
         NSLog(@"err: encoder converter init failed");
+        _encoder = NULL;
         return NO;
     }
 
@@ -450,17 +451,21 @@ static inline void enqueue(MP42AudioEncoder *self, MP42SampleBuffer *outSample)
                 MP42SampleBuffer *outSample = nil;
 
                 if (sampleBuffer->flags & MP42SampleBufferFlagEndOfFile) {
-                    while ((outSample = flush(_encoder, _afio))) {
-                        enqueue(self, outSample);
+                    if (_encoder) {
+                        while ((outSample = flush(_encoder, _afio))) {
+                            enqueue(self, outSample);
+                        }
                     }
 
                     enqueue(self, sampleBuffer);
                     return;
                 }
                 else {
-                    sfifo_write(_ringBuffer, sampleBuffer->data, sampleBuffer->size);
-                    while ((outSample = encode(_encoder, _afio))) {
-                        enqueue(self, outSample);
+                    if (_encoder) {
+                        sfifo_write(_ringBuffer, sampleBuffer->data, sampleBuffer->size);
+                        while ((outSample = encode(_encoder, _afio))) {
+                            enqueue(self, outSample);
+                        }
                     }
                 }
             }
