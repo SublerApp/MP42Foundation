@@ -38,7 +38,7 @@
     return self;
 }
 
-- (instancetype)initWithMediaFormat:(NSString *)format {
+- (instancetype)initWithMediaFormat:(FourCharCode)format {
     self = [super init];
     if (self) {
         _priorityQueue = [[MP42Heap alloc] initWithCapacity:32 andComparator:^NSComparisonResult(MP42SampleBuffer * obj1, MP42SampleBuffer * obj2) {
@@ -46,11 +46,11 @@
         }];
 
 
-        if ([format isEqualToString:MP42AudioFormatAAC]) {
+        if (format == kMP42AudioCodecType_MPEG4AAC) {
             _priming = 2112;
             _primingTimescale = 48000;
         }
-        else if ([format isEqualToString:MP42AudioFormatHEAAC])
+        else if (format == kMP42AudioCodecType_MPEG4AAC_HE)
         {
             _priming = 4224;
             _primingTimescale = 48000;

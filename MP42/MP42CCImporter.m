@@ -28,7 +28,7 @@
         MP42Track *newTrack = [[MP42ClosedCaptionTrack alloc] init];
 
         newTrack.name = @"Closed Caption Track";
-        newTrack.format = MP42ClosedCaptionFormatCEA608;
+        newTrack.format = kMP42ClosedCaptionCodecType_CEA608;
         newTrack.sourceURL = self.fileURL;
 
         [self addTrack:newTrack];

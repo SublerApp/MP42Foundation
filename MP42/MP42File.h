@@ -107,7 +107,7 @@ typedef void (^MP42FileProgressHandler)(double progress);
  *
  *  @return An NSArray of MP42Tracks; may be empty if no tracks of the specified media type are available.
  */
-- (NSArray<MP42Track *> *)tracksWithMediaType:(NSString *)mediaType;
+- (NSArray<MP42Track *> *)tracksWithMediaType:(MP42MediaType)mediaType;
 
 /**
  *  Add a track to the mp4 file.

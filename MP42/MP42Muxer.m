@@ -113,7 +113,7 @@
 
             helper->converter = audioConverter;
         }
-        if ([track isMemberOfClass:[MP42SubtitleTrack class]] && ([track.sourceFormat isEqualToString:MP42SubtitleFormatVobSub] || [track.sourceFormat isEqualToString:MP42SubtitleFormatPGS]) && track.needConversion) {
+        if ([track isMemberOfClass:[MP42SubtitleTrack class]] && (track.sourceFormat == kMP42SubtitleCodecType_VobSub || track.sourceFormat == kMP42SubtitleCodecType_PGS) && track.needConversion) {
             MP42BitmapSubConverter *subConverter = [[MP42BitmapSubConverter alloc] initWithTrack:(MP42SubtitleTrack *)track
                                                                                        error:outError];
 
@@ -127,11 +127,11 @@
 
             helper->converter = subConverter;
         } else if ([track isMemberOfClass:[MP42SubtitleTrack class]] && track.needConversion) {
-            track.format = MP42SubtitleFormatTx3g;
+            track.format = kMP42SubtitleCodecType_3GText;
         }
 
         // H.264 video track
-        if ([track isMemberOfClass:[MP42VideoTrack class]] && [track.format isEqualToString:MP42VideoFormatH264]) {
+        if ([track isMemberOfClass:[MP42VideoTrack class]] && track.format == kMP42VideoCodecType_H264) {
 
             if (magicCookie.length < sizeof(uint8_t) * 6) {
                 continue;
@@ -186,22 +186,25 @@
         }
 
         // H.265 video track
-        else if ([track isMemberOfClass:[MP42VideoTrack class]] && [track.format isEqualToString:MP42VideoFormatH265]) {
+        else if ([track isMemberOfClass:[MP42VideoTrack class]] && track.format == kMP42VideoCodecType_HEVC) {
 
             if (magicCookie.length < sizeof(uint8_t) * 6) {
                 continue;
             }
 
-            //NSSize size = [helper->importer sizeForTrack:track];
-            //uint8_t *hvCCAtom = (uint8_t *)magicCookie.bytes;
+            NSSize size = [helper->importer sizeForTrack:track];
 
-            NSAssert(NO, @"H.265 muxing not implemented yet");
+            dstTrackId = MP4AddH265VideoTrack(_fileHandle, timeScale, MP4_INVALID_DURATION, size.width, size.height);
+
+            if (dstTrackId) {
+                MP4SetTrackBytesProperty(_fileHandle, dstTrackId, "mdia.minf.stbl.stsd.hev1.hvcC.content", magicCookie.bytes, magicCookie.length);
+            }
 
             [helper->importer setActiveTrack:track];
         }
 
         // MPEG-4 Visual video track
-        else if ([track isMemberOfClass:[MP42VideoTrack class]] && [track.format isEqualToString:MP42VideoFormatMPEG4Visual]) {
+        else if ([track isMemberOfClass:[MP42VideoTrack class]] && track.format == kMP42VideoCodecType_MPEG4Video) {
             MP4SetVideoProfileLevel(_fileHandle, MPEG4_SP_L3);
             // Add video track
             dstTrackId = MP4AddVideoTrack(_fileHandle, timeScale,
@@ -219,7 +222,7 @@
         }
 
         // Photo-JPEG video track
-        else if ([track isMemberOfClass:[MP42VideoTrack class]] && [track.format isEqualToString:MP42VideoFormatJPEG]) {
+        else if ([track isMemberOfClass:[MP42VideoTrack class]] && track.format == kMP42VideoCodecType_JPEG) {
             // Add video track
             dstTrackId = MP4AddJpegVideoTrack(_fileHandle, timeScale,
                                   MP4_INVALID_DURATION, [(MP42VideoTrack*)track width], [(MP42VideoTrack*)track height]);
@@ -229,7 +232,7 @@
 
         // AAC audio track
         else if ([track isMemberOfClass:[MP42AudioTrack class]] &&
-                 ([track.format isEqualToString:MP42AudioFormatAAC] || [track.format isEqualToString:MP42AudioFormatHEAAC])) {
+                 (track.format == kMP42AudioCodecType_MPEG4AAC || track.format == kMP42AudioCodecType_MPEG4AAC_HE)) {
             dstTrackId = MP4AddAudioTrack(_fileHandle,
                                           timeScale,
                                           1024, MP4_MPEG4_AUDIO_TYPE);
@@ -244,7 +247,7 @@
         }
 
         // AC-3 audio track
-        else if ([track isMemberOfClass:[MP42AudioTrack class]] && [track.format isEqualToString:MP42AudioFormatAC3]) {
+        else if ([track isMemberOfClass:[MP42AudioTrack class]] && track.format == kMP42AudioCodecType_AC3) {
             if ([magicCookie length] < sizeof(uint64_t) * 6)
                 continue;
 
@@ -263,14 +266,14 @@
         }
 
         // EAC-3 audio tack
-        else if ([track isMemberOfClass:[MP42AudioTrack class]] && [track.format isEqualToString:MP42AudioFormatEAC3]) {
+        else if ([track isMemberOfClass:[MP42AudioTrack class]] && track.format == kMP42AudioCodecType_EnhancedAC3) {
             dstTrackId = MP4AddEAC3AudioTrack(_fileHandle, timeScale, magicCookie.bytes, magicCookie.length);
 
             [helper->importer setActiveTrack:track];
         }
 
         // ALAC audio track
-        else if ([track isMemberOfClass:[MP42AudioTrack class]] && [track.format isEqualToString:MP42AudioFormatALAC]) {
+        else if ([track isMemberOfClass:[MP42AudioTrack class]] && track.format == kMP42AudioCodecType_AppleLossless) {
             dstTrackId = MP4AddALACAudioTrack(_fileHandle,
                                           timeScale);
             if (magicCookie.length) {
@@ -281,7 +284,7 @@
         }
 
         // DTS audio track
-        else if ([track isMemberOfClass:[MP42AudioTrack class]] && [track.format isEqualToString:MP42AudioFormatDTS]) {
+        else if ([track isMemberOfClass:[MP42AudioTrack class]] && track.format == kMP42AudioCodecType_DTS) {
             dstTrackId = MP4AddAudioTrack(_fileHandle,
                                           timeScale,
                                           512, 0xA9);
@@ -291,7 +294,7 @@
         }
 
         // 3GPP text track
-        else if ([track isMemberOfClass:[MP42SubtitleTrack class]] && [track.format isEqualToString:MP42SubtitleFormatTx3g]) {
+        else if ([track isMemberOfClass:[MP42SubtitleTrack class]] && track.format == kMP42SubtitleCodecType_3GText) {
             NSSize subSize = NSMakeSize(0, 0);
             NSSize videoSize = NSMakeSize(0, 0);
 
@@ -383,7 +386,7 @@
         }
 
         // VobSub bitmap track
-        else if ([track isMemberOfClass:[MP42SubtitleTrack class]] && [track.format isEqualToString:MP42SubtitleFormatVobSub]) {
+        else if ([track isMemberOfClass:[MP42SubtitleTrack class]] && track.format == kMP42SubtitleCodecType_VobSub) {
             if (magicCookie.length < sizeof(uint32_t) * 16)
                 continue;
 
@@ -408,7 +411,7 @@
         }
 
         // WebVTT
-        else if ([track isMemberOfClass:[MP42SubtitleTrack class]] && [track.format isEqualToString:MP42SubtitleFormatWebVTT]) {
+        else if ([track isMemberOfClass:[MP42SubtitleTrack class]] && track.format ==kMP42SubtitleCodecType_WebVTT) {
             NSSize videoSize = [helper->importer sizeForTrack:track];
 
             for (id workingTrack in _workingTracks)

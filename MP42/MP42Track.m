@@ -50,7 +50,7 @@
         _updatedProperty = [[NSMutableDictionary alloc] init];
 
         if (fileHandle) {
-            _format = [getHumanReadableTrackMediaDataName(fileHandle, _trackId) retain];
+            _format = getHumanReadableTrackMediaDataName(fileHandle, _trackId);
             _name = [getTrackName(fileHandle, _trackId) retain];
             _language = [getHumanReadableTrackLanguage(fileHandle, _trackId) retain];
 
@@ -131,8 +131,8 @@
         copy->_sourceId = _sourceId;
 
         copy->_sourceURL = [_sourceURL retain];
-        copy->_sourceFormat = [_sourceFormat copy];
-        copy->_format = [_format copy];
+        copy->_sourceFormat = _sourceFormat;
+        copy->_format = _format;
         copy->_name = [_name copy];
         copy->_language = [_language copy];
         copy->_extendedLanguageTag = [_extendedLanguageTag copy];
@@ -336,7 +336,7 @@
 
 - (NSString *)formatSummary
 {
-    return [[_format retain] autorelease];
+    return @(FourCC2Str(_format));
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder
@@ -367,8 +367,8 @@
     [coder encodeObject:_sourceURL forKey:@"sourceURL"];
 #endif
 
-    [coder encodeObject:_sourceFormat forKey:@"sourceFormat"];
-    [coder encodeObject:_format forKey:@"format"];
+    [coder encodeInteger:_sourceFormat forKey:@"sourceFormat"];
+    [coder encodeInteger:_format forKey:@"format"];
     [coder encodeObject:_name forKey:@"name"];
     [coder encodeObject:_language forKey:@"language"];
     [coder encodeObject:_extendedLanguageTag forKey:@"extendedLanguageTag"];
@@ -415,8 +415,8 @@
         _sourceURL = [[decoder decodeObjectForKey:@"sourceURL"] retain];
     }
 
-    _sourceFormat = [[decoder decodeObjectForKey:@"sourceFormat"] retain];
-    _format = [[decoder decodeObjectForKey:@"format"] retain];
+    _sourceFormat = [decoder decodeIntegerForKey:@"sourceFormat"];
+    _format = [decoder decodeIntegerForKey:@"format"];
     _name = [[decoder decodeObjectForKey:@"name"] retain];
     _language = [[decoder decodeObjectForKey:@"language"] retain];
     _extendedLanguageTag = [[decoder decodeObjectForKey:@"extendedLanguageTag"] retain];
@@ -462,13 +462,10 @@
 
     [_updatedProperty release];
     [_mediaCharacteristicTags release];
-    [_format release];
     [_sourceURL release];
     [_name release];
     [_language release];
     [_extendedLanguageTag release];
-    [_mediaType release];
-    [_sourceFormat release];
 
     [super dealloc];
 }

@@ -11,7 +11,8 @@
 #import "MP42HtmlParser.h"
 
 @implementation SBSubSerializer
--(id)init
+
+-(instancetype)init
 {
 	if ((self = [super init])) {
 		lines = [[NSMutableArray alloc] init];
@@ -40,15 +41,6 @@ static CFComparisonResult CompareLinesByBeginTime(const void *a, const void *b, 
 	if (al->no < bl->no) return kCFCompareLessThan;
 	return kCFCompareEqualTo;
 }
-
-/*static int cmp_uint(const void *a, const void *b)
-{
-	unsigned av = *(unsigned*)a, bv = *(unsigned*)b;
-	
-	if (av > bv) return 1;
-	if (av < bv) return -1;
-	return 0;
-}*/
 
 -(void)addLine:(SBSubLine *)line
 {
@@ -198,10 +190,12 @@ canOutput:
 {
 	return [NSString stringWithFormat:@"lines left: %lu finished inputting: %d",(unsigned long)[lines count],finished];
 }
+
 @end
 
 @implementation SBSubLine
--(id)initWithLine:(NSString*)l start:(unsigned)s end:(unsigned)e
+
+-(instancetype)initWithLine:(NSString*)l start:(unsigned)s end:(unsigned)e
 {
 	if ((self = [super init])) {
 		if ([l characterAtIndex:[l length]-1] != '\n') l = [l stringByAppendingString:@"\n"];
@@ -234,6 +228,7 @@ canOutput:
 {
 	return [NSString stringWithFormat:@"\"%@\", from %d s to %d s",[line substringToIndex:[line length]-1],begin_time,end_time];
 }
+
 @end
 
 unsigned ParseSubTime(const char *time, unsigned secondScale, BOOL hasSign)

@@ -234,7 +234,7 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
                     newTrack.startOffset = [self matroskaTrackStartTime:mkvTrack Id:i];
                 }
 
-                if ([newTrack.format isEqualToString:MP42VideoFormatH264]) {
+                if (newTrack.format == kMP42VideoCodecType_H264) {
                     uint8_t *avcCAtom = (uint8_t *)malloc(mkvTrack->CodecPrivateSize); // mkv stores h.264 avcC in CodecPrivate
                     memcpy(avcCAtom, mkvTrack->CodecPrivate, mkvTrack->CodecPrivateSize);
                     if (mkvTrack->CodecPrivateSize >= 3) {
@@ -397,72 +397,71 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
     return trackSizes;
 }
 
-- (NSString *)matroskaCodecIDToHumanReadableName:(TrackInfo *)track
+- (FourCharCode)matroskaCodecIDToHumanReadableName:(TrackInfo *)track
 {
     if (track->CodecID) {
         if (!strcmp(track->CodecID, "V_MPEG4/ISO/AVC"))
-            return MP42VideoFormatH264;
+            return kMP42VideoCodecType_H264;
         else if (!strcmp(track->CodecID, "A_AAC") ||
                  !strcmp(track->CodecID, "A_AAC/MPEG4/LC") ||
                  !strcmp(track->CodecID, "A_AAC/MPEG2/LC"))
-            return MP42AudioFormatAAC;
+            return kMP42AudioCodecType_MPEG4AAC;
         else if (!strcmp(track->CodecID, "A_AC3"))
-            return MP42AudioFormatAC3;
+            return kMP42AudioCodecType_AC3;
         else if (!strcmp(track->CodecID, "A_EAC3"))
-            return MP42AudioFormatEAC3;
+            return kMP42AudioCodecType_EnhancedAC3;
         else if (!strcmp(track->CodecID, "V_MPEG4/ISO/SP"))
-            return MP42VideoFormatMPEG4Visual;
+            return kMP42VideoCodecType_MPEG4Video;
         else if (!strcmp(track->CodecID, "V_MPEG4/ISO/ASP"))
-            return MP42VideoFormatMPEG4Visual;
+            return kMP42VideoCodecType_MPEG4Video;
         else if (!strcmp(track->CodecID, "V_MPEG2"))
-            return MP42VideoFormatMPEG2;
+            return kMP42VideoCodecType_MPEG2Video;
         else if (!strcmp(track->CodecID, "A_DTS"))
-            return MP42AudioFormatDTS;
+            return kMP42AudioCodecType_DTS;
         else if (!strcmp(track->CodecID, "A_OPUS"))
-            return MP42AudioFormatOpus;
+            return kMP42AudioCodecType_Opus;
         else if (!strcmp(track->CodecID, "A_VORBIS"))
-            return MP42AudioFormatVorbis;
+            return kMP42AudioCodecType_Vorbis;
         else if (!strcmp(track->CodecID, "A_FLAC"))
-            return MP42AudioFormatFLAC;
+            return kMP42AudioCodecType_FLAC;
         else if (!strcmp(track->CodecID, "A_MPEG/L1"))
-            return MP42AudioFormatMP1;
+            return kMP42AudioCodecType_MPEGLayer1;
         else if (!strcmp(track->CodecID, "A_MPEG/L2"))
-            return MP42AudioFormatMP2;
+            return kMP42AudioCodecType_MPEGLayer2;
         else if (!strcmp(track->CodecID, "A_MPEG/L3"))
-            return MP42AudioFormatMP3;
+            return kMP42AudioCodecType_MPEGLayer3;
         else if (!strcmp(track->CodecID, "A_TRUEHD"))
-            return MP42AudioFormatTrueHD;
+            return kMP42AudioCodecType_TrueHD;
         else if (!strcmp(track->CodecID, "A_MLP"))
-            return @"MLP";
+            return kMP42AudioCodecType_MLP;
         else if (!strcmp(track->CodecID, "S_TEXT/UTF8"))
-            return MP42SubtitleFormatText;
+            return kMP42SubtitleCodecType_Text;
         else if (!strcmp(track->CodecID, "S_TEXT/ASS")
                  || !strcmp(track->CodecID, "S_TEXT/SSA"))
-            return MP42SubtitleFormatSSA;
+            return kMP42SubtitleCodecType_SSA;
         else if (!strcmp(track->CodecID, "S_VOBSUB"))
-            return MP42SubtitleFormatVobSub;
+            return kMP42SubtitleCodecType_VobSub;
         else if (!strcmp(track->CodecID, "S_HDMV/PGS")) {
-            return MP42SubtitleFormatPGS;
+            return kMP42SubtitleCodecType_PGS;
         }
         else if (!strcmp(track->CodecID, "V_MPEGH/ISO/HEVC")) {
-            return MP42VideoFormatH265;
+            return kMP42VideoCodecType_HEVC_2;
         }
         else if (!strcmp(track->CodecID, "V_THEORA")) {
-            return @"Theora";
+            return kMP42VideoCodecType_Theora;
         }
         else if (!strcmp(track->CodecID, "V_VP8")) {
-            return @"VP8";
+            return kMP42VideoCodecType_VP8;
         }
         else if (!strcmp(track->CodecID, "V_VP9")) {
-            return @"VP9";
+            return kMP42VideoCodecType_VP9;
         }
-
         else {
-            return [NSString stringWithUTF8String:track->CodecID];
+            return kMP42MediaType_Unknown;
         }
     }
     else {
-        return @"Unknown";
+        return kMP42MediaType_Unknown;
     }
 }
 
@@ -993,7 +992,7 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
         }
 
         if (demuxHelper->previousSample) {
-            if ([track.mediaType isEqualToString:MP42MediaTypeSubtitle]) {
+            if (track.mediaType == kMP42MediaType_Subtitle) {
                 demuxHelper->previousSample->duration = 100;
             }
 

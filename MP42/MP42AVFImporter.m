@@ -51,128 +51,24 @@
     return @[@"mov", @"mp4", @"m4v", @"m4a", @"m2ts", @"ts", @"mts", @"ac3", @"eac3", @"ec3", @"webvtt", @"vtt"];
 }
 
-- (NSString *)formatForTrack:(AVAssetTrack *)track {
-    NSString *result = @"";
+- (FourCharCode)formatForTrack:(AVAssetTrack *)track {
+    FourCharCode result = 0;
     CMFormatDescriptionRef formatDescription = (CMFormatDescriptionRef)track.formatDescriptions.firstObject;
 
     if (formatDescription) {
         FourCharCode code = CMFormatDescriptionGetMediaSubType(formatDescription);
         switch (code) {
-            case kCMVideoCodecType_H264:
-                result = MP42VideoFormatH264;
-                break;
-            case 'hev1':
-            case kCMVideoCodecType_HEVC:
-                result = MP42VideoFormatH265;
-                break;
-            case kCMVideoCodecType_MPEG4Video:
-                result = MP42VideoFormatMPEG4Visual;
-                break;
-            case kCMVideoCodecType_MPEG2Video:
-                result = MP42VideoFormatMPEG2;
-                break;
-            case kCMVideoCodecType_MPEG1Video:
-                result = MP42VideoFormatMPEG1;
-                break;
-            case kCMVideoCodecType_AppleProRes422:
-            case kCMVideoCodecType_AppleProRes422HQ:
-            case kCMVideoCodecType_AppleProRes422LT:
-            case kCMVideoCodecType_AppleProRes422Proxy:
-            case kCMVideoCodecType_AppleProRes4444:
-                result = MP42VideoFormatProRes;
-                break;
-            case kCMVideoCodecType_SorensonVideo3:
-                result = MP42VideoFormatSorenson3;
-                break;
-            case 'png ':
-                result = MP42VideoFormatPNG;
-                break;
-            case kAudioFormatMPEG4AAC:
-                result = MP42AudioFormatAAC;
-                break;
-            case kAudioFormatMPEG4AAC_HE:
-            case kAudioFormatMPEG4AAC_HE_V2:
-                result = MP42AudioFormatHEAAC;
-                break;
-            case kAudioFormatLinearPCM:
-                result = MP42AudioFormatPCM;
-                break;
-            case kAudioFormatAppleLossless:
-                result = MP42AudioFormatALAC;
-                break;
-            case kAudioFormatAC3:
             case 'ms \0':
-                result = MP42AudioFormatAC3;
-                break;
-            case kAudioFormatEnhancedAC3:
-                result = MP42AudioFormatEAC3;
-                break;
-            case kAudioFormatMPEGLayer1:
-            case kAudioFormatMPEGLayer2:
-            case kAudioFormatMPEGLayer3:
-                result = MP42AudioFormatMP3;
-                break;
-            case kAudioFormatAMR:
-                result = MP42AudioFormatAMR;
-                break;
-            case kAudioFormatAppleIMA4:
-                result = @"IMA 4:1";
-                break;
-            case kCMTextFormatType_QTText:
-                result = MP42SubtitleFormatText;
-                break;
-            case kCMTextFormatType_3GText:
-                result = MP42SubtitleFormatTx3g;
-                break;
-            case kCMSubtitleFormatType_WebVTT:
-                result = MP42SubtitleFormatWebVTT;
+                result = kMP42AudioCodecType_AC3;
                 break;
             case 'SRT ':
-                result = MP42SubtitleFormatText;
+                result = kMP42SubtitleCodecType_Text;
                 break;
             case 'SSA ':
-                result = MP42SubtitleFormatSSA;
-                break;
-            case kCMClosedCaptionFormatType_CEA608:
-                result = MP42ClosedCaptionFormatCEA608;
-                break;
-            case kCMClosedCaptionFormatType_CEA708:
-                result = MP42ClosedCaptionFormatCEA708;
-                break;
-            case kCMClosedCaptionFormatType_ATSC:
-                result = @"ATSC/52 part-4";
-                break;
-            case kCMTimeCodeFormatType_TimeCode32:
-            case kCMTimeCodeFormatType_TimeCode64:
-            case kCMTimeCodeFormatType_Counter32:
-            case kCMTimeCodeFormatType_Counter64:
-                result = MP42TimeCodeFormat;
-                break;
-            case kCMVideoCodecType_JPEG:
-                result = MP42VideoFormatJPEG;
-                break;
-            case kCMVideoCodecType_DVCNTSC:
-            case kCMVideoCodecType_DVCPAL:
-                result = MP42VideoFormatDV;
-                break;
-            case kCMVideoCodecType_DVCProPAL:
-            case kCMVideoCodecType_DVCPro50NTSC:
-            case kCMVideoCodecType_DVCPro50PAL:
-                result = @"DVCPro";
-                break;
-            case kCMVideoCodecType_DVCPROHD720p60:
-            case kCMVideoCodecType_DVCPROHD720p50:
-            case kCMVideoCodecType_DVCPROHD1080i60:
-            case kCMVideoCodecType_DVCPROHD1080i50:
-            case kCMVideoCodecType_DVCPROHD1080p30:
-            case kCMVideoCodecType_DVCPROHD1080p25:
-                result = @"DVCProHD";
-                break;
-            case 'AVdn':
-                result = @"DNxHD";
+                result = kMP42SubtitleCodecType_SSA;
                 break;
             default:
-                result = @"Unknown";
+                result = code;
                 break;
         }
     }

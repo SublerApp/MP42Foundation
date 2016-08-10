@@ -273,7 +273,7 @@ static bool GetFirstHeader(FILE* inFile)
 
         MP42AudioTrack *newTrack = [[MP42AudioTrack alloc] init];
 
-        newTrack.format = MP42AudioFormatAC3;
+        newTrack.format = kMP42AudioCodecType_AC3;
         newTrack.sourceURL = self.fileURL;
 
         if (!inFile) {

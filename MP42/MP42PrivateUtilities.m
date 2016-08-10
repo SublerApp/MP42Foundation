@@ -173,7 +173,7 @@ uint16_t getFixedVideoWidth(MP4FileHandle fileHandle, MP4TrackId Id)
     return videoWidth;
 }
 
-NSString* getTrackName(MP4FileHandle fileHandle, MP4TrackId Id)
+NSString * getTrackName(MP4FileHandle fileHandle, MP4TrackId Id)
 {
     char *trackName;
 
@@ -206,67 +206,71 @@ NSString* getTrackName(MP4FileHandle fileHandle, MP4TrackId Id)
         return NSLocalizedString(@"Unknown Track", @"Unknown Track");
 }
 
-NSString* getHumanReadableTrackMediaDataName(MP4FileHandle fileHandle, MP4TrackId Id)
+FourCharCode getHumanReadableTrackMediaDataName(MP4FileHandle fileHandle, MP4TrackId Id)
 {
     const char* type = MP4GetTrackType(fileHandle, Id);
     const char* dataName = MP4GetTrackMediaDataName(fileHandle, Id);
     if (dataName) {
-        if (!strcmp(dataName, "avc1"))
-            return MP42VideoFormatH264;
-        else if (!strcmp(dataName, "hev1"))
-            return MP42VideoFormatH265;
+        if (!strcmp(dataName, "avc1")) {
+            return kMP42VideoCodecType_H264;
+        }
+        else if (!strcmp(dataName, "hev1")) {
+            return kMP42VideoCodecType_HEVC_2;
+        }
         else if (!strcmp(dataName, "mp4a")) {
             uint8_t audiotype = MP4GetTrackEsdsObjectTypeId(fileHandle, Id);
             if (audiotype == MP4_MPEG4_AUDIO_TYPE)
-                return MP42AudioFormatAAC;
+                return kMP42AudioCodecType_MPEG4AAC;
             else if (audiotype == MP4_MPEG2_AUDIO_TYPE)
-                return MP42AudioFormatMP3;
+                return kMP42AudioCodecType_MPEGLayer3;
             else if (audiotype == 0xA9)
-                return MP42AudioFormatDTS;
+                return kMP42AudioCodecType_DTS;
         }
         else if (!strcmp(dataName, "alac"))
-            return MP42AudioFormatALAC;
+            return kMP42AudioCodecType_AppleLossless;
         else if (!strcmp(dataName, "ac-3"))
-            return MP42AudioFormatAC3;
+            return kMP42AudioCodecType_AC3;
         else if (!strcmp(dataName, "ec-3"))
-            return MP42AudioFormatEAC3;
+            return kMP42AudioCodecType_EnhancedAC3;
         else if (!strcmp(dataName, "mp4v"))
-            return MP42VideoFormatMPEG4Visual;
+            return kMP42VideoCodecType_MPEG4Video;
         else if (!strcmp(dataName, "text"))
-            return MP42SubtitleFormatText;
+            return kMP42SubtitleCodecType_Text;
         else if (!strcmp(dataName, "tx3g"))
-            return MP42SubtitleFormatTx3g;
+            return kMP42SubtitleCodecType_3GText;
         else if (!strcmp(dataName, "wvtt"))
-            return MP42SubtitleFormatWebVTT;
+            return kMP42SubtitleCodecType_WebVTT;
         else if (!strcmp(dataName, "c608"))
-            return MP42ClosedCaptionFormatCEA608;
+            return kMP42ClosedCaptionCodecType_CEA608;
         else if (!strcmp(dataName, "c708"))
-            return MP42ClosedCaptionFormatCEA708;
+            return kMP42ClosedCaptionCodecType_CEA708;
         else if (!strcmp(dataName, "samr"))
-            return MP42AudioFormatAMR;
+            return kMP42AudioCodecType_AMR;
         else if (!strcmp(dataName, "jpeg"))
-            return MP42VideoFormatJPEG;
+            return kMP42VideoCodecType_JPEG;
         else if (!strcmp(dataName, "rtp "))
-            return @"Hint";
+            return 'rtp ';
         else if (!strcmp(dataName, "drms"))
-            return MP42AudioFormatFairPlay;
+            return kMP42AudioCodecType_FairPlay;
         else if (!strcmp(dataName, "drmi"))
-            return MP42VideoFormatFairPlay;
+            return kMP42VideoCodecType_FairPlay;
         else if (!strcmp(dataName, "p608"))
-            return MP42ClosedCaptionFormatFairPlay;
+            return kMP42ClosedCaptionCodecType_FairPlay;
         else if (!strcmp(dataName, "tmcd"))
-            return MP42TimeCodeFormat;
+            return kMP42TimeCodeFormatType_TimeCode32;
         else if (!strcmp(dataName, "mp4s") && !strcmp(type, "subp"))
-            return MP42SubtitleFormatVobSub;
+            return kMP42SubtitleCodecType_PGS;
 
-        else
-            return [NSString stringWithUTF8String:dataName];
+        else {
+            // FIXME
+            return kMP42MediaType_Unknown;
+        }
     }
 
-    return @"Unknown";
+    return kMP42MediaType_Unknown;
 }
 
-NSString* getHumanReadableTrackLanguage(MP4FileHandle fileHandle, MP4TrackId Id)
+NSString * getHumanReadableTrackLanguage(MP4FileHandle fileHandle, MP4TrackId Id)
 {
     NSString *language;
     char lang[4] = "";
@@ -278,7 +282,7 @@ NSString* getHumanReadableTrackLanguage(MP4FileHandle fileHandle, MP4TrackId Id)
 
 // if the subtitle filename is something like title.en.srt or movie.fre.srt
 // this function detects it and returns the subtitle language
-NSString* getFilenameLanguage(CFStringRef filename)
+NSString * getFilenameLanguage(CFStringRef filename)
 {
 	CFRange findResult;
 	CFStringRef baseName = NULL;

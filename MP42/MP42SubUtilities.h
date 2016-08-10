@@ -20,8 +20,8 @@
     unsigned top;
     unsigned forced;
 }
--(id)initWithLine:(NSString*)l start:(unsigned)s end:(unsigned)e;
--(id)initWithLine:(NSString*)l start:(unsigned)s end:(unsigned)e top_pos:(unsigned)p forced:(unsigned)f;
+-(instancetype)initWithLine:(NSString*)l start:(unsigned)s end:(unsigned)e;
+-(instancetype)initWithLine:(NSString*)l start:(unsigned)s end:(unsigned)e top_pos:(unsigned)p forced:(unsigned)f;
 @end
 
 @interface SBSubSerializer : NSObject

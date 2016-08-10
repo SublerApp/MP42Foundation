@@ -67,50 +67,7 @@
     asbd.mSampleRate = [track.muxer_helper->importer timescaleForTrack:track];;
     asbd.mChannelsPerFrame = track.sourceChannels;
 
-    NSString *format = track.sourceFormat;
-
-    if ([format isEqualToString:MP42AudioFormatAAC]) {
-        asbd.mFormatID = kAudioFormatMPEG4AAC;
-    }
-    else if ([format isEqualToString:MP42AudioFormatALAC]) {
-        asbd.mFormatID = kAudioFormatAppleLossless;
-    }
-    else if ([format isEqualToString:MP42AudioFormatVorbis]) {
-        asbd.mFormatID = 'XiVs';
-    }
-    else if ([format isEqualToString:MP42AudioFormatFLAC]) {
-        asbd.mFormatID = 'XiFL';
-    }
-    else if ([format isEqualToString:MP42AudioFormatAC3]) {
-        asbd.mFormatID = kAudioFormatAC3;
-        asbd.mFramesPerPacket = 1536;
-    }
-    else if ([format isEqualToString:MP42AudioFormatEAC3]) {
-        asbd.mFormatID = kAudioFormatEnhancedAC3;
-        asbd.mFramesPerPacket = 1536;
-    }
-    else if ([format isEqualToString:MP42AudioFormatDTS]) {
-        asbd.mFormatID = 'DTS ';
-    }
-    else if ([format isEqualToString:MP42AudioFormatMP1]) {
-        asbd.mFormatID = kAudioFormatMPEGLayer1;
-        asbd.mFramesPerPacket = 1152;
-    }
-    else if ([format isEqualToString:MP42AudioFormatMP2]) {
-        asbd.mFormatID = kAudioFormatMPEGLayer2;
-        asbd.mFramesPerPacket = 1152;
-    }
-    else if ([format isEqualToString:MP42AudioFormatMP3]) {
-        asbd.mFormatID = kAudioFormatMPEGLayer3;
-        asbd.mFramesPerPacket = 1152;
-    }
-    else if ([format isEqualToString:MP42AudioFormatTrueHD]) {
-        asbd.mFormatID = 'trhd';
-    }
-    else if ([format isEqualToString:MP42AudioFormatOpus]) {
-        asbd.mFormatID = 'Opus';
-    }
-    else if ([format isEqualToString:MP42AudioFormatPCM]) {
+    if (track.sourceFormat == kMP42AudioCodecType_LinearPCM) {
         AudioStreamBasicDescription temp = [track.muxer_helper->importer audioDescriptionForTrack:track];
         if (temp.mFormatID) {
             asbd = temp;
@@ -118,6 +75,9 @@
         else {
             asbd.mFormatID = kAudioFormatLinearPCM;
         }
+    }
+    else {
+        asbd.mFormatID = track.sourceFormat;
     }
 
     return asbd;

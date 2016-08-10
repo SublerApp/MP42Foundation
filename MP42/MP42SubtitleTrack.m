@@ -28,9 +28,9 @@
 
     if (self) {
 
-        _mediaType = MP42MediaTypeSubtitle;
+        _mediaType = kMP42MediaType_Subtitle;
 
-        if (![_format isEqualToString:MP42SubtitleFormatVobSub]) {
+        if (_format != kMP42SubtitleCodecType_VobSub) {
             uint64_t width, height;
 
             MP4GetTrackIntegerProperty(fileHandle, _trackId, "mdia.minf.stbl.stsd.tx3g.defTextBoxRight", &width);
@@ -71,8 +71,8 @@
 {
     if ((self = [super init])) {
         _name = [self defaultName];
-        _format = MP42SubtitleFormatTx3g;
-        _mediaType = MP42MediaTypeSubtitle;
+        _format = kMP42SubtitleCodecType_3GText;
+        _mediaType = kMP42MediaType_Subtitle;
     }
 
     return self;
@@ -134,7 +134,7 @@
         [super writeToFile:fileHandle error:outError];
     }
 
-    if (![_format isEqualToString:MP42SubtitleFormatVobSub]) {
+    if (_format != kMP42SubtitleCodecType_VobSub) {
         MP4SetTrackIntegerProperty(fileHandle, _trackId, "mdia.minf.stbl.stsd.tx3g.defTextBoxBottom", self.trackHeight);
         MP4SetTrackIntegerProperty(fileHandle, _trackId, "mdia.minf.stbl.stsd.tx3g.defTextBoxRight", self.trackWidth);
 
@@ -452,7 +452,7 @@ static void insertTagsFromStyleRecord(style_record record, NSMutableString *samp
 }
 
 - (NSString *)defaultName {
-    return MP42MediaTypeSubtitle;
+    return @"Subtitles Track";
 }
 
 - (void)dealloc

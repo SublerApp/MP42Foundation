@@ -38,7 +38,7 @@ extern u_int8_t MP4AV_AacConfigGetChannels(u_int8_t* pConfig);
     if (self) {
 
         MP4GetTrackFloatProperty(fileHandle, _trackId, "tkhd.volume", &_volume);
-        _mediaType = MP42MediaTypeAudio;
+        _mediaType = kMP42MediaType_Audio;
 
         u_int8_t audioType = MP4GetTrackEsdsObjectTypeId(fileHandle, _trackId);
 
@@ -123,7 +123,7 @@ extern u_int8_t MP4AV_AacConfigGetChannels(u_int8_t* pConfig);
         _language = @"Unknown";
         _volume = 1;
         _mixdownType = SBDolbyPlIIMixdown;
-        _mediaType = MP42MediaTypeAudio;
+        _mediaType = kMP42MediaType_Audio;
     }
 
     return self;
@@ -199,7 +199,7 @@ extern u_int8_t MP4AV_AacConfigGetChannels(u_int8_t* pConfig);
 }
 
 - (NSString *)defaultName {
-    return MP42MediaTypeAudio;
+    return @"Sound Track";
 }
 
 - (void)dealloc
@@ -249,7 +249,7 @@ extern u_int8_t MP4AV_AacConfigGetChannels(u_int8_t* pConfig);
 
 - (NSString *)formatSummary
 {
-    return [NSString stringWithFormat:@"%@, %u ch", _format, (unsigned int)_channels];
+    return [NSString stringWithFormat:@"%@, %u ch", @(FourCC2Str(_format)), (unsigned int)_channels];
 }
 
 - (NSString *)description {

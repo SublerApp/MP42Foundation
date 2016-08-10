@@ -11,22 +11,20 @@
 
 @implementation MP42XMLReader
 
-@synthesize mMetadata;
-
 - (instancetype)initWithURL:(NSURL *)url error:(NSError **)error
 {
     if (self = [super init]) {
         NSXMLDocument *xml = [[NSXMLDocument alloc] initWithContentsOfURL:url options:0 error:NULL];
         if (xml) {
             NSError *err;
-            mMetadata = [[MP42Metadata alloc] init];
+            _mMetadata = [[MP42Metadata alloc] init];
             NSArray *nodes = [xml nodesForXPath:@"./movie" error:&err];
             if ([nodes count] == 1)
-                [self metadata:mMetadata forNode:[nodes objectAtIndex:0]];
+                [self metadata:_mMetadata forNode:[nodes objectAtIndex:0]];
             
             nodes = [xml nodesForXPath:@"./video" error:&err];
             if ([nodes count] == 1)
-                [self metadata2:mMetadata forNode:[nodes objectAtIndex:0]];
+                [self metadata2:_mMetadata forNode:[nodes objectAtIndex:0]];
         }
         [xml release];
     }
@@ -127,7 +125,7 @@
 
 - (void)dealloc
 {
-    [mMetadata release];
+    [_mMetadata release];
     [super dealloc];
 }
 

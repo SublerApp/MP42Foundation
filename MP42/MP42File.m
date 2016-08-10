@@ -76,10 +76,8 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 
 @interface MP42File () <MP42MuxerDelegate> {
 @private
-    MP42FileHandle   _fileHandle;
     NSURL           *_fileURL;
 
-    MP42Status  _status;
     BOOL        _cancelled;
 
     MP42FileProgressHandler _progressHandler;
@@ -87,8 +85,6 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
     NSMutableArray<__kindof MP42Track *>  *_tracks;
     NSMutableArray<MP42Track *>  *_tracksToBeDeleted;
     MP42Metadata    *_metadata;
-    MP42Muxer       *_muxer;
-    NSMutableDictionary<NSString *, MP42FileImporter *> *_importers;
 
     BOOL        _hasFileRepresentation;
 }
@@ -101,13 +97,6 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 
 @property(nonatomic, readwrite) MP42Status status;
 @property(nonatomic, retain) MP42Muxer *muxer;
-
-- (void)reconnectReferences;
-
-- (void)removeMuxedTrack:(MP42Track *)track;
-- (void)organizeAlternateGroupsForMediaType:(NSString *)mediaType withGroupID:(NSUInteger)groupID;
-
-- (BOOL)createChaptersPreview;
 
 @end
 
@@ -271,7 +260,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 
         // Ugly hack to check for the previews track
         for (MP42Track *track in _tracks) {
-            if ([track.format isEqualToString:MP42VideoFormatJPEG]) {
+            if (track.format == kMP42VideoCodecType_JPEG) {
                 previewsId = track.trackId;
             }
         }
@@ -403,11 +392,11 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
     return nil;
 }
 
-- (NSArray<MP42Track *> *)tracksWithMediaType:(NSString *)mediaType {
+- (NSArray<MP42Track *> *)tracksWithMediaType:(MP42MediaType)mediaType {
     NSMutableArray<MP42Track *> *tracks = [NSMutableArray array];
 
     for (MP42Track *track in self.itracks) {
-        if ([track.mediaType isEqualToString:mediaType])
+        if (track.mediaType == mediaType)
             [tracks addObject:track];
     }
 
@@ -440,7 +429,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
         track.sourceFormat = track.format;
         if ([track isMemberOfClass:[MP42AudioTrack class]]) {
             MP42AudioTrack *audioTrack = (MP42AudioTrack *)track;
-            track.format = MP42AudioFormatAAC;
+            track.format = kMP42AudioCodecType_MPEG4AAC;
             audioTrack.sourceChannels = audioTrack.channels;
             if ([audioTrack.mixdownType isEqualToString:SBMonoMixdown] || audioTrack.sourceChannels == 1) {
                 audioTrack.channels = 1;
@@ -448,7 +437,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
                 audioTrack.channels = 2;
             }
         } else if ([track isMemberOfClass:[MP42SubtitleTrack class]]) {
-            track.format = MP42SubtitleFormatTx3g;
+            track.format = kMP42SubtitleCodecType_3GText;
         }
     }
 
@@ -517,7 +506,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
     [track release];
 }
 
-- (void)organizeAlternateGroupsForMediaType:(NSString *)mediaType withGroupID:(NSUInteger)groupID {
+- (void)organizeAlternateGroupsForMediaType:(MP42MediaType)mediaType withGroupID:(NSUInteger)groupID {
     NSArray<MP42Track *> *tracks = [self tracksWithMediaType:mediaType];
     BOOL enabled = NO;
 
@@ -544,12 +533,12 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 - (void)organizeAlternateGroups {
     NSAssert(self.status != MP42StatusWriting, @"Unsupported operation: trying to organize alternate groups while the file is open for writing");
 
-    NSArray *typeToOrganize = @[MP42MediaTypeVideo,
-                                MP42MediaTypeAudio,
-                                MP42MediaTypeSubtitle];
+    MP42MediaType typeToOrganize[] = {kMP42MediaType_Video,
+                                      kMP42MediaType_Audio,
+                                      kMP42MediaType_Subtitle};
 
-    for (NSUInteger i = 0; i < typeToOrganize.count; i++) {
-        [self organizeAlternateGroupsForMediaType:[typeToOrganize objectAtIndex:i]
+    for (NSUInteger i = 0; i < 3; i++) {
+        [self organizeAlternateGroupsForMediaType:typeToOrganize[i]
                                       withGroupID:i];
     }
 
@@ -828,8 +817,9 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
                         [self.muxer addTrack:track];
                     } else {
                         // We don't know how to handle this type of track.
+                        // FIXME
                         NSError *error = MP42Error(@"Unsupported track",
-                                                   [NSString stringWithFormat:@"%@, %@, has not been muxed.", track.name, track.format],
+                                                   [NSString stringWithFormat:@"%@, %u, has not been muxed.", track.name, (unsigned int)track.format],
                                                    201);
 
                         [_logger writeErrorToLog:error];
@@ -986,11 +976,11 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
             chapterTrack = (MP42ChapterTrack *)track;
 
         if ([track isMemberOfClass:[MP42VideoTrack class]] &&
-            ![track.format isEqualToString:MP42VideoFormatJPEG]
+            !(track.format == kMP42VideoCodecType_JPEG)
             && !refTrack)
             refTrack = (MP42VideoTrack *)track;
 
-        if ([track.format isEqualToString:MP42VideoFormatJPEG] && !jpegTrack)
+        if (track.format == kMP42VideoCodecType_JPEG && !jpegTrack)
             jpegTrack = track.trackId;
     }
 
@@ -1014,16 +1004,16 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
         }
 
         if ([track isMemberOfClass:[MP42VideoTrack class]] &&
-            ![track.format isEqualToString:MP42VideoFormatJPEG]
+            !(track.format == kMP42VideoCodecType_JPEG)
             && !refTrack) {
             refTrack = (MP42VideoTrack *)track;
         }
 
-        if ([track.format isEqualToString:MP42VideoFormatJPEG] && !jpegTrack) {
+        if ((track.format == kMP42VideoCodecType_JPEG) && !jpegTrack) {
             jpegTrack = track.trackId;
         }
 
-        if ([track.format isEqualToString:MP42VideoFormatH264]) {
+        if (track.format == kMP42VideoCodecType_H264) {
             if ((((MP42VideoTrack *)track).origProfile) == 110) {
                 decodable = 0;
             }
@@ -1078,13 +1068,14 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
     NSMutableArray<MP42AudioTrack *> *availableFallbackTracks = [[NSMutableArray alloc] init];
     NSMutableArray<MP42AudioTrack *> *needFallbackTracks = [[NSMutableArray alloc] init];
 
-    for (MP42AudioTrack *track in [self tracksWithMediaType:MP42MediaTypeAudio] ) {
-        if (([track.format isEqualToString:MP42AudioFormatAC3] ||
-            [track.format isEqualToString:MP42AudioFormatEAC3]) &&
+    for (MP42AudioTrack *track in [self tracksWithMediaType:kMP42MediaType_Audio] ) {
+        if ((track.format == kMP42AudioCodecType_AC3 ||
+            track.format == kMP42AudioCodecType_EnhancedAC3) &&
             track.fallbackTrack == nil) {
             [needFallbackTracks addObject:track];
         }
-        else if ([track.format isEqualToString:MP42AudioFormatAAC]) {
+        else if (track.format == kMP42AudioCodecType_MPEG4AAC ||
+                 track.format == kMP42AudioCodecType_MPEG4AAC_HE) {
             [availableFallbackTracks addObject:track];
         }
     }

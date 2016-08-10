@@ -46,7 +46,7 @@
             width = MP4GetTrackVideoWidth(fileHandle, _trackId);
         }
 
-        _mediaType = MP42MediaTypeVideo;
+        _mediaType = kMP42MediaType_Video;
 
         MP4GetTrackFloatProperty(fileHandle, _trackId, "tkhd.width", &trackWidth);
         MP4GetTrackFloatProperty(fileHandle, _trackId, "tkhd.height", &trackHeight);
@@ -82,7 +82,7 @@
             MP4GetTrackIntegerProperty(fileHandle, _trackId, "mdia.minf.stbl.stsd.*.clap.vertOffD", &vertOffD);
         }
 
-        if ([_format isEqualToString:MP42VideoFormatH264]) {
+        if (_format == kMP42VideoCodecType_H264) {
             MP4GetTrackH264ProfileLevel(fileHandle, (MP4TrackId)trackID, &_origProfile, &_origLevel);
             _newProfile = _origProfile;
             _newLevel = _origLevel;
@@ -97,7 +97,7 @@
     if ((self = [super init])) {
         _name = [self defaultName];
         _language = @"Unknown";
-        _mediaType = MP42MediaTypeVideo;
+        _mediaType = kMP42MediaType_Video;
     }
 
     return self;
@@ -160,7 +160,7 @@
                                             horizOffN, horizOffD, vertOffN, vertOffD);
             }
 
-            if ([_format isEqualToString:MP42VideoFormatH264]) {
+            if (_format == kMP42VideoCodecType_H264) {
                 if (_updatedProperty[@"profile"]) {
                     MP4SetTrackIntegerProperty(fileHandle, _trackId, "mdia.minf.stbl.stsd.*[0].avcC.AVCProfileIndication", _newProfile);
                     _origProfile = _newProfile;
@@ -177,7 +177,7 @@
 }
 
 - (NSString *)defaultName {
-    return MP42MediaTypeVideo;
+    return @"Video Track";
 }
 
 @synthesize width;

@@ -19,9 +19,9 @@ NS_ASSUME_NONNULL_BEGIN
     MP42TrackId  _trackId;
 
     NSURL       *_sourceURL;
-    NSString    *_format;
-    NSString    *_sourceFormat;
-    NSString    *_mediaType;
+    FourCharCode   _format;
+    FourCharCode  _sourceFormat;
+    MP42MediaType _mediaType;
 
     NSString    *_name;
     NSString    *_language;
@@ -44,9 +44,9 @@ NS_ASSUME_NONNULL_BEGIN
 @property(nonatomic, readwrite) MP42TrackId sourceId;
 
 @property(nonatomic, readwrite, copy) NSURL *sourceURL;
-@property(nonatomic, readwrite, copy) NSString *format;
-@property(nonatomic, readwrite, copy) NSString *sourceFormat;
-@property(nonatomic, readonly, copy) NSString *mediaType;
+@property(nonatomic, readwrite) FourCharCode format;
+@property(nonatomic, readwrite) FourCharCode sourceFormat;
+@property(nonatomic, readonly) MP42MediaType mediaType;
 
 @property(nonatomic, readwrite, copy) NSString *name;
 @property(nonatomic, readwrite, copy) NSString *language;

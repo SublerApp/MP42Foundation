@@ -13,8 +13,8 @@ NS_ASSUME_NONNULL_BEGIN
 NSString * StringFromTime(long long time, long timeScale);
 MP42Duration TimeFromString(NSString *SMPTE_string, MP42Duration timeScale);
 
-BOOL isTrackMuxable(NSString * formatName);
-BOOL trackNeedConversion(NSString * formatName);
+BOOL isTrackMuxable(FourCharCode formatName);
+BOOL trackNeedConversion(FourCharCode formatName);
 
 int isHdVideo(uint64_t width, uint64_t height);
 

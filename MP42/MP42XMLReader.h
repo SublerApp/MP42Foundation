@@ -12,9 +12,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @class MP42Metadata;
 
-@interface MP42XMLReader : NSObject {
-    MP42Metadata *mMetadata;
-}
+@interface MP42XMLReader : NSObject
 
 - (instancetype)initWithURL:(NSURL *)url error:(NSError **)error;
 

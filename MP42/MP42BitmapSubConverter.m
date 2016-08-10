@@ -385,12 +385,12 @@
 {
     if ((self = [super init])) {
         FFInitFFmpeg();
-        NSString *format = track.sourceFormat;
+        MP42SubtitleCodecType format = track.sourceFormat;
 
-        if ([format isEqualToString:MP42SubtitleFormatVobSub]) {
+        if (format == kMP42SubtitleCodecType_VobSub) {
             avCodec = avcodec_find_decoder(AV_CODEC_ID_DVD_SUBTITLE);
         }
-        else if ([format isEqualToString:MP42SubtitleFormatPGS]) {
+        else if (format == kMP42SubtitleCodecType_PGS) {
             avCodec = avcodec_find_decoder(AV_CODEC_ID_HDMV_PGS_SUBTITLE);
         }
 
@@ -416,13 +416,13 @@
 
         _ocr = [[MP42OCRWrapper alloc] initWithLanguage:track.language extendedLanguageTag:track.extendedLanguageTag];
 
-        if ([format isEqualToString:MP42SubtitleFormatVobSub]) {
+        if (format == kMP42SubtitleCodecType_VobSub) {
             // Launch the vobsub decoder thread.
             decoderThread = [[NSThread alloc] initWithTarget:self selector:@selector(VobSubDecoderThreadMainRoutine) object:nil];
             [decoderThread setName:@"VobSub Decoder"];
             [decoderThread start];
         }
-        else if ([format isEqualToString:MP42SubtitleFormatPGS]) {
+        else if (format == kMP42SubtitleCodecType_PGS) {
             // Launch the pgs decoder thread.
             decoderThread = [[NSThread alloc] initWithTarget:self selector:@selector(PGSDecoderThreadMainRoutine) object:nil];
             [decoderThread setName:@"PGS Decoder"];

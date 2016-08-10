@@ -17,7 +17,7 @@
     self = [super initWithSourceURL:URL trackID:trackID fileHandle:fileHandle];
 
     if (self) {
-        _mediaType = MP42MediaTypeClosedCaption;
+        _mediaType = kMP42MediaType_ClosedCaption;
     }
 
     return self;
@@ -27,8 +27,8 @@
 {
     if ((self = [super init])) {
         _name = [self defaultName];
-        _format = MP42ClosedCaptionFormatCEA608;
-        _mediaType = MP42MediaTypeClosedCaption;
+        _format = kMP42ClosedCaptionCodecType_CEA608;
+        _mediaType = kMP42MediaType_ClosedCaption;
     }
 
     return self;
@@ -46,7 +46,9 @@
 }
 
 - (NSString *)defaultName {
-    return MP42MediaTypeClosedCaption;
+    // TODO
+    return @"Closed Caption";
+    //return kMP42MediaType_ClosedCaption;
 }
 
 - (void)dealloc

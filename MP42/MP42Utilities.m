@@ -36,21 +36,55 @@ MP42Duration TimeFromString(NSString *time_string, MP42Duration timeScale)
     return ParseSubTime(time_string.UTF8String, timeScale, NO);
 }
 
-BOOL isTrackMuxable(NSString *formatName)
+BOOL isTrackMuxable(FourCharCode format)
 {
-    NSArray *supportedFormats = @[MP42VideoFormatH265, MP42VideoFormatH264, MP42VideoFormatMPEG4Visual, MP42AudioFormatAAC, MP42AudioFormatHEAAC, MP42AudioFormatALAC,
-                                  MP42AudioFormatAC3, MP42AudioFormatEAC3, MP42AudioFormatDTS, MP42SubtitleFormatTx3g, MP42SubtitleFormatText,
-                                  MP42ClosedCaptionFormatCEA608, MP42VideoFormatJPEG, MP42SubtitleFormatVobSub, MP42SubtitleFormatWebVTT];
+    FourCharCode supportedFormats[] = {kMP42VideoCodecType_HEVC,
+                                        kMP42VideoCodecType_H264,
+                                        kMP42VideoCodecType_MPEG4Video,
+                                        kMP42VideoCodecType_JPEG,
+                                        kMP42AudioCodecType_MPEG4AAC,
+                                        kMP42AudioCodecType_MPEG4AAC_HE,
+                                        kMP42AudioCodecType_AppleLossless,
+                                        kMP42AudioCodecType_AC3,
+                                        kMP42AudioCodecType_EnhancedAC3,
+                                        kMP42AudioCodecType_DTS,
+                                        kMP42SubtitleCodecType_3GText,
+                                        kMP42SubtitleCodecType_Text,
+                                        kMP42ClosedCaptionCodecType_CEA608,
+                                        kMP42VideoCodecType_JPEG,
+                                        kMP42SubtitleCodecType_VobSub,
+                                        kMP42SubtitleCodecType_WebVTT,
+                                        0};
 
-    return [supportedFormats containsObject:formatName];
+    for (FourCharCode *currentFormat = supportedFormats; *currentFormat; currentFormat++) {
+        if (*currentFormat == format) {
+            return YES;
+        }
+    }
+
+    return NO;
 }
 
-BOOL trackNeedConversion(NSString *formatName) {
-    NSArray *supportedConversionFormats = @[MP42AudioFormatVorbis, MP42AudioFormatFLAC, MP42AudioFormatMP1, MP42AudioFormatMP2, MP42AudioFormatMP3, MP42AudioFormatOpus,
-                                            MP42AudioFormatTrueHD, MP42SubtitleFormatSSA, MP42SubtitleFormatText, MP42SubtitleFormatPGS];
+BOOL trackNeedConversion(FourCharCode format) {
+    FourCharCode supportedConversionFormats[] = {kMP42AudioCodecType_Vorbis,
+                                                 kMP42AudioCodecType_FLAC,
+                                                 kMP42AudioCodecType_MPEGLayer1,
+                                                 kMP42AudioCodecType_MPEGLayer2,
+                                                 kMP42AudioCodecType_MPEGLayer3,
+                                                 kMP42AudioCodecType_Opus,
+                                                 kMP42AudioCodecType_TrueHD,
+                                                 kMP42SubtitleCodecType_SSA,
+                                                 kMP42SubtitleCodecType_Text,
+                                                 kMP42SubtitleCodecType_PGS,
+                                                 0};
 
-    return [supportedConversionFormats containsObject:formatName];
-}
+    for (FourCharCode *currentFormat = supportedConversionFormats; *currentFormat; currentFormat++) {
+        if (*currentFormat == format) {
+            return YES;
+        }
+    }
+
+    return NO;}
 
 int isHdVideo(uint64_t width, uint64_t height)
 {

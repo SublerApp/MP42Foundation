@@ -22,12 +22,12 @@
 {
     if ((self = [super init])) {
         _name = [self defaultName];
-        _format = MP42SubtitleFormatText;
+        _format = kMP42SubtitleCodecType_Text;
         _language = @"English";
         _isEdited = NO;
         _muxed = NO;
         _enabled = NO;
-        _mediaType = MP42MediaTypeText;
+        _mediaType = kMP42MediaType_Text;
 
         chapters = [[NSMutableArray alloc] init];
     }
@@ -46,10 +46,10 @@
         }
 
         if (!_format) {
-            _format = MP42SubtitleFormatText;
+            _format = kMP42SubtitleCodecType_Text;
         }
 
-        _mediaType = MP42MediaTypeText;
+        _mediaType = kMP42MediaType_Text;
         chapters = [[NSMutableArray alloc] init];
 
         MP4Chapter_t *chapter_list = NULL;
@@ -87,13 +87,13 @@
 {
     if ((self = [super init])) {
         _name = [self defaultName];
-        _format = MP42SubtitleFormatText;
+        _format = kMP42SubtitleCodecType_Text;
         _sourceURL = [URL retain];
         _language = @"English";
         _isEdited = YES;
         _muxed = NO;
         _enabled = NO;
-        _mediaType = MP42MediaTypeText;
+        _mediaType = kMP42MediaType_Text;
         _areChaptersEdited = YES;
 
         chapters = [[NSMutableArray alloc] init];
