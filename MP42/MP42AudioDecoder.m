@@ -424,7 +424,7 @@ static inline void enqueue(MP42AudioDecoder *self, MP42SampleBuffer *outSample)
                 }
                 else {
                     decode(_context, sampleBuffer, &outSample);
-                    if (_context->configured == NO) {
+                    if (_context->configured == NO && outSample) {
                         [_outputUnit reconfigure];
                         _context->configured = YES;
                     }
