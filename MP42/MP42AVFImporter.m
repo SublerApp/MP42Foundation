@@ -640,6 +640,9 @@
             if (code == kCMVideoCodecType_H264) {
                 magicCookie = CFDictionaryGetValue(atoms, @"avcC");
             }
+            else if (code == kCMVideoCodecType_HEVC || code == 'hev1') {
+                magicCookie = CFDictionaryGetValue(atoms, @"hvcC");
+            }
             else if (code == kCMVideoCodecType_MPEG4Video) {
                 magicCookie = CFDictionaryGetValue(atoms, @"esds");
             }
