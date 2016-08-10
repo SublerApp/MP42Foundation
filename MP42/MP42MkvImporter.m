@@ -337,6 +337,10 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
 
             if (!strcmp(tags->SimpleTags[xi].Name, "ARTIST"))
                 [mkvMetadata setTag:[NSString stringWithUTF8String:tags->SimpleTags[xi].Value] forKey:@"Artist"];
+
+            if (!strcmp(tags->SimpleTags[xi].Name, "ENCODER"))
+                [mkvMetadata setTag:[NSString stringWithUTF8String:tags->SimpleTags[xi].Value] forKey:@"Encoding Tool"];
+
         }
     }
 
@@ -442,6 +446,15 @@ int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t 
         }
         else if (!strcmp(track->CodecID, "V_MPEGH/ISO/HEVC")) {
             return MP42VideoFormatH265;
+        }
+        else if (!strcmp(track->CodecID, "V_THEORA")) {
+            return @"Theora";
+        }
+        else if (!strcmp(track->CodecID, "V_VP8")) {
+            return @"VP8";
+        }
+        else if (!strcmp(track->CodecID, "V_VP9")) {
+            return @"VP9";
         }
 
         else {
