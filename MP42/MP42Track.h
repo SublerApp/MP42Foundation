@@ -31,10 +31,6 @@ NS_ASSUME_NONNULL_BEGIN
 
     BOOL    _isEdited;
     BOOL    _muxed;
-    BOOL    _needConversion;
-
-	uint32_t    _timescale;
-	MP42Duration _duration;
 
     NSMutableDictionary<NSString *, NSNumber *> *_updatedProperty;
     void *_helper;
