@@ -70,7 +70,6 @@
 - (instancetype)init
 {
     if ((self = [super init])) {
-        _name = [self defaultName];
         _format = kMP42SubtitleCodecType_3GText;
         _mediaType = kMP42MediaType_Subtitle;
     }
@@ -449,10 +448,6 @@ static void insertTagsFromStyleRecord(style_record record, NSMutableString *samp
     _forcedTrackId = (MP4TrackId)[decoder decodeInt64ForKey:@"forcedTrackId"];
 
     return self;
-}
-
-- (NSString *)defaultName {
-    return @"Subtitles Track";
 }
 
 - (void)dealloc

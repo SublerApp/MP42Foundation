@@ -20,6 +20,9 @@ extern NSString *const MP42FileTypeM4A;
 extern NSString *const MP42FileTypeM4B;
 extern NSString *const MP42FileTypeM4R;
 
+NSString *localizedMediaDisplayName(FourCharCode mediaType);
+NSString *localizedDisplayName(FourCharCode mediaType, FourCharCode mediaSubtype);
+
 #include <TargetConditionals.h>
 #if TARGET_RT_BIG_ENDIAN
 #   define FourCC2Str(fourcc) (const char[]){*((char*)&fourcc), *(((char*)&fourcc)+1), *(((char*)&fourcc)+2), *(((char*)&fourcc)+3),0}
@@ -27,7 +30,13 @@ extern NSString *const MP42FileTypeM4R;
 #   define FourCC2Str(fourcc) (const char[]){*(((char*)&fourcc)+3), *(((char*)&fourcc)+2), *(((char*)&fourcc)+1), *(((char*)&fourcc)+0),0}
 #endif
 
-static FourCharCode kMP42MediaType_Unknown = 'unkn';
+#define Str2FourCC(str) (str[0] << 24) + (str[1] << 16) + (str[2] << 8) + str[3]
+
+
+enum : FourCharCode
+{
+    kMP42MediaType_Unknown = 'unkn'
+};
 
 // Media Type
 typedef FourCharCode MP42MediaType;
@@ -41,6 +50,11 @@ enum : MP42MediaType
     kMP42MediaType_Subtitle			= 'sbtl',
     kMP42MediaType_TimeCode			= 'tmcd',
     kMP42MediaType_Metadata			= 'meta',
+    kMP42MediaType_OD               = 'odsm',
+    kMP42MediaType_Scene            = 'sdsm',
+    kMP42MediaType_Subpic           = 'subp',
+    kMP42MediaType_Hint             = 'hint',
+    kMP42MediaType_Control          = 'cnlt'
 };
 
 // Video Format
@@ -63,7 +77,7 @@ enum : MP42VideoCodecType
     kMP42VideoCodecType_SorensonVideo       = 'SVQ1',
     kMP42VideoCodecType_SorensonVideo3      = 'SVQ3',
 
-    kMP42VideoCodecType_Theora              = 'theo',
+    kMP42VideoCodecType_Theora              = 'XiTh',
     kMP42VideoCodecType_VP8                 = 'VP8 ',
     kMP42VideoCodecType_VP9                 = 'VP9 ',
 
@@ -135,6 +149,7 @@ enum : MP42AudioCodecType
     kMP42AudioCodecType_TrueHD                  = 'trhd',
     kMP42AudioCodecType_MLP                     = 'mlp ',
     kMP42AudioCodecType_Opus                    = 'Opus',
+    kMP42AudioCodecType_TTA                     = 'TTA1',
 
     kMP42AudioCodecType_FairPlay                = 'drms'
 };
@@ -149,7 +164,7 @@ enum : MP42SubtitleCodecType
     kMP42SubtitleCodecType_VobSub    = 'subp',
     kMP42SubtitleCodecType_PGS       = 'PGS ',
     kMP42SubtitleCodecType_SSA       = 'SSA ',
-    kMP42SubtitleCodecType_FairPlay  = 'wvtt',
+    kMP42SubtitleCodecType_FairPlay  = 'drmi', //FIXME
 };
 
 // Closed Caption Fromat

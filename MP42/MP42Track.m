@@ -35,7 +35,6 @@
         _enabled = YES;
         _updatedProperty = [[NSMutableDictionary alloc] init];
         _mediaCharacteristicTags = [[NSSet alloc] init];
-        _name = @"Unknown Track";
     }
     return self;
 }
@@ -50,7 +49,7 @@
         _updatedProperty = [[NSMutableDictionary alloc] init];
 
         if (fileHandle) {
-            _format = getHumanReadableTrackMediaDataName(fileHandle, _trackId);
+            _format = getTrackMediaFormat(fileHandle, _trackId);
             _name = [getTrackName(fileHandle, _trackId) retain];
             _language = [getHumanReadableTrackLanguage(fileHandle, _trackId) retain];
 
@@ -175,21 +174,10 @@
     }
 
     if (_updatedProperty[@"name"] || !_muxed) {
-        if (![_name isEqualToString:@"Video Track"] &&
-            ![_name isEqualToString:@"Sound Track"] &&
-            ![_name isEqualToString:@"Subtitle Track"] &&
-            ![_name isEqualToString:@"Text Track"] &&
-            ![_name isEqualToString:@"Chapter Track"] &&
-            ![_name isEqualToString:@"Closed Caption Track"] &&
-            ![_name isEqualToString:@"Unknown Track"] &&
-            _name != nil) {
+        NSString *defaultName = localizedMediaDisplayName(_mediaType);
+        if (![_name isEqualToString:defaultName] &&  _name != nil) {
 
-            const char *cString = [_name cStringUsingEncoding:NSMacOSRomanStringEncoding];
-
-            if (cString) {
-                MP4SetTrackName(fileHandle, _trackId, cString);
-            }
-
+            MP4SetTrackName(fileHandle, _trackId, _name.UTF8String);
         }
         else {
             MP4SetTrackName(fileHandle, _trackId, "\0");
@@ -243,11 +231,14 @@
 @synthesize extendedLanguageTag = _extendedLanguageTag;
 
 - (NSString *)name {
+    if (_name == nil) {
+        _name = localizedMediaDisplayName(_mediaType);
+    }
     return [[_name copy] autorelease];
 }
 
 - (NSString *)defaultName {
-    return @"Unknown Track";
+    return localizedMediaDisplayName(_mediaType);
 }
 
 - (void)setName:(NSString *)newName
@@ -336,7 +327,7 @@
 
 - (NSString *)formatSummary
 {
-    return @(FourCC2Str(_format));
+    return localizedDisplayName(_mediaType, _format);
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder
@@ -444,7 +435,7 @@
 }
 
 - (NSString *)description {
-    return [NSString stringWithFormat:@"Track: %d, %@, %@, %llu kbit/s, %@", [self trackId], [self name], [self timeString], [self dataLength] / [self duration] * 8, [self format]];
+    return [NSString stringWithFormat:@"Track: %d, %@, %@, %llu kbit/s, %@", self.trackId, self.name, self.timeString, self.dataLength / self.duration * 8, localizedDisplayName(self.mediaType, self.format)];
 }
 
 @synthesize timescale = _timescale;

@@ -186,7 +186,8 @@
         }
 
         // H.265 video track
-        else if ([track isMemberOfClass:[MP42VideoTrack class]] && track.format == kMP42VideoCodecType_HEVC) {
+        else if ([track isMemberOfClass:[MP42VideoTrack class]] &&
+                 (track.format == kMP42VideoCodecType_HEVC || track.format == kMP42VideoCodecType_HEVC_2)) {
 
             if (magicCookie.length < sizeof(uint8_t) * 6) {
                 continue;

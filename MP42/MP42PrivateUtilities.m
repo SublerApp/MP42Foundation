@@ -178,35 +178,17 @@ NSString * getTrackName(MP4FileHandle fileHandle, MP4TrackId Id)
     char *trackName;
 
     if (MP4GetTrackName(fileHandle, Id, &trackName)) {
-        NSString * name = [NSString stringWithCString:trackName encoding: NSMacOSRomanStringEncoding];
+        NSString *name = @(trackName);
         free(trackName);
         return name;
     }
 
-    const char* type = MP4GetTrackType(fileHandle, Id);
-    if (!strcmp(type, MP4_AUDIO_TRACK_TYPE))
-        return NSLocalizedString(@"Sound Track", @"Sound Track");
-    else if (!strcmp(type, MP4_VIDEO_TRACK_TYPE))
-        return NSLocalizedString(@"Video Track", @"Video Track");
-    else if (!strcmp(type, MP4_TEXT_TRACK_TYPE))
-        return NSLocalizedString(@"Text Track", @"Text Track");
-    else if (!strcmp(type, MP4_SUBTITLE_TRACK_TYPE))
-        return NSLocalizedString(@"Subtitle Track", @"Subtitle Track");
-    else if (!strcmp(type, "clcp"))
-        return NSLocalizedString(@"Closed Caption Track", @"Closed Caption Track");
-    else if (!strcmp(type, MP4_OD_TRACK_TYPE))
-        return NSLocalizedString(@"MPEG-4 ODSM Track", @"MPEG-4 ODSM Track");
-    else if (!strcmp(type, MP4_SCENE_TRACK_TYPE))
-        return NSLocalizedString(@"MPEG-4 SDSM Track", @"MPEG-4 SDSM Track");
-    else if (!strcmp(type, "tmcd"))
-        return NSLocalizedString(@"Timecode Track", @"Timecode Track");
-    else if (!strcmp(type, "subp"))
-        return NSLocalizedString(@"Subtitle Track", @"Subtitle Track");
-    else
-        return NSLocalizedString(@"Unknown Track", @"Unknown Track");
+    const char *type = MP4GetTrackType(fileHandle, Id);
+    FourCharCode code = Str2FourCC(type);
+    return localizedMediaDisplayName(code);
 }
 
-FourCharCode getHumanReadableTrackMediaDataName(MP4FileHandle fileHandle, MP4TrackId Id)
+FourCharCode getTrackMediaFormat(MP4FileHandle fileHandle, MP4TrackId Id)
 {
     const char* type = MP4GetTrackType(fileHandle, Id);
     const char* dataName = MP4GetTrackMediaDataName(fileHandle, Id);

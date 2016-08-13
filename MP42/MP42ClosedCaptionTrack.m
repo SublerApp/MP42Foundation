@@ -26,7 +26,6 @@
 - (instancetype)init
 {
     if ((self = [super init])) {
-        _name = [self defaultName];
         _format = kMP42ClosedCaptionCodecType_CEA608;
         _mediaType = kMP42MediaType_ClosedCaption;
     }
@@ -43,12 +42,6 @@
     [super writeToFile:fileHandle error:outError];
 
     return (_trackId > 0);
-}
-
-- (NSString *)defaultName {
-    // TODO
-    return @"Closed Caption";
-    //return kMP42MediaType_ClosedCaption;
 }
 
 - (void)dealloc

@@ -95,7 +95,6 @@
 - (instancetype)init
 {
     if ((self = [super init])) {
-        _name = [self defaultName];
         _language = @"Unknown";
         _mediaType = kMP42MediaType_Video;
     }
@@ -174,10 +173,6 @@
     }
 
     return (_trackId > 0);
-}
-
-- (NSString *)defaultName {
-    return @"Video Track";
 }
 
 @synthesize width;

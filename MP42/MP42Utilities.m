@@ -39,22 +39,23 @@ MP42Duration TimeFromString(NSString *time_string, MP42Duration timeScale)
 BOOL isTrackMuxable(FourCharCode format)
 {
     FourCharCode supportedFormats[] = {kMP42VideoCodecType_HEVC,
-                                        kMP42VideoCodecType_H264,
-                                        kMP42VideoCodecType_MPEG4Video,
-                                        kMP42VideoCodecType_JPEG,
-                                        kMP42AudioCodecType_MPEG4AAC,
-                                        kMP42AudioCodecType_MPEG4AAC_HE,
-                                        kMP42AudioCodecType_AppleLossless,
-                                        kMP42AudioCodecType_AC3,
-                                        kMP42AudioCodecType_EnhancedAC3,
-                                        kMP42AudioCodecType_DTS,
-                                        kMP42SubtitleCodecType_3GText,
-                                        kMP42SubtitleCodecType_Text,
-                                        kMP42ClosedCaptionCodecType_CEA608,
-                                        kMP42VideoCodecType_JPEG,
-                                        kMP42SubtitleCodecType_VobSub,
-                                        kMP42SubtitleCodecType_WebVTT,
-                                        0};
+                                       kMP42VideoCodecType_HEVC_2,
+                                       kMP42VideoCodecType_H264,
+                                       kMP42VideoCodecType_MPEG4Video,
+                                       kMP42VideoCodecType_JPEG,
+                                       kMP42VideoCodecType_PNG,
+                                       kMP42AudioCodecType_MPEG4AAC,
+                                       kMP42AudioCodecType_MPEG4AAC_HE,
+                                       kMP42AudioCodecType_AppleLossless,
+                                       kMP42AudioCodecType_AC3,
+                                       kMP42AudioCodecType_EnhancedAC3,
+                                       kMP42AudioCodecType_DTS,
+                                       kMP42ClosedCaptionCodecType_CEA608,
+                                       kMP42SubtitleCodecType_3GText,
+                                       kMP42SubtitleCodecType_Text,
+                                       kMP42SubtitleCodecType_VobSub,
+                                       kMP42SubtitleCodecType_WebVTT,
+                                       0};
 
     for (FourCharCode *currentFormat = supportedFormats; *currentFormat; currentFormat++) {
         if (*currentFormat == format) {
@@ -73,6 +74,7 @@ BOOL trackNeedConversion(FourCharCode format) {
                                                  kMP42AudioCodecType_MPEGLayer3,
                                                  kMP42AudioCodecType_Opus,
                                                  kMP42AudioCodecType_TrueHD,
+                                                 kMP42AudioCodecType_MLP,
                                                  kMP42SubtitleCodecType_SSA,
                                                  kMP42SubtitleCodecType_Text,
                                                  kMP42SubtitleCodecType_PGS,
@@ -84,7 +86,8 @@ BOOL trackNeedConversion(FourCharCode format) {
         }
     }
 
-    return NO;}
+    return NO;
+}
 
 int isHdVideo(uint64_t width, uint64_t height)
 {

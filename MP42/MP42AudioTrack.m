@@ -119,7 +119,6 @@ extern u_int8_t MP4AV_AacConfigGetChannels(u_int8_t* pConfig);
 {
     if ((self = [super init]))
     {
-        _name = [self defaultName];
         _language = @"Unknown";
         _volume = 1;
         _mixdownType = SBDolbyPlIIMixdown;
@@ -198,10 +197,6 @@ extern u_int8_t MP4AV_AacConfigGetChannels(u_int8_t* pConfig);
     return (_trackId > 0);
 }
 
-- (NSString *)defaultName {
-    return @"Sound Track";
-}
-
 - (void)dealloc
 {
     [_mixdownType release];
@@ -249,7 +244,7 @@ extern u_int8_t MP4AV_AacConfigGetChannels(u_int8_t* pConfig);
 
 - (NSString *)formatSummary
 {
-    return [NSString stringWithFormat:@"%@, %u ch", @(FourCC2Str(_format)), (unsigned int)_channels];
+    return [NSString stringWithFormat:@"%@, %u ch", localizedDisplayName(_mediaType, _format), (unsigned int)_channels];
 }
 
 - (NSString *)description {

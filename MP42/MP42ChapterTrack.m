@@ -21,7 +21,6 @@
 - (instancetype)init
 {
     if ((self = [super init])) {
-        _name = [self defaultName];
         _format = kMP42SubtitleCodecType_Text;
         _language = @"English";
         _isEdited = NO;
@@ -40,10 +39,6 @@
     self = [super initWithSourceURL:URL trackID:trackID fileHandle:fileHandle];
 
     if (self) {
-
-        if (!_name || [_name isEqualToString:@"Text Track"]) {
-            _name = [self defaultName];
-        }
 
         if (!_format) {
             _format = kMP42SubtitleCodecType_Text;
@@ -86,7 +81,6 @@
 - (instancetype)initWithTextFile:(NSURL *)URL
 {
     if ((self = [super init])) {
-        _name = [self defaultName];
         _format = kMP42SubtitleCodecType_Text;
         _sourceURL = [URL retain];
         _language = @"English";
@@ -284,10 +278,6 @@
 	}
 
 	return [file writeToURL:url atomically:YES encoding:NSUTF8StringEncoding error:error];
-}
-
-- (NSString *)defaultName {
-    return @"Chapter Track";
 }
 
 - (BOOL)updateFromCSVFile:(NSURL *)URL error:(NSError **)outError {
