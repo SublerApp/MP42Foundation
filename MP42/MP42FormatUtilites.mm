@@ -802,3 +802,114 @@ CFDataRef createCookie_EAC3(void *context)
 
     return cookieData;
 }
+
+#pragma mark - HEVC
+
+struct NAL_units{
+    UInt8 array_completeness;
+    UInt8 NAL_unit_type;
+    UInt16 numNalus;
+};
+
+
+struct hvcC_info {
+    UInt8 configurationVersion;
+
+    UInt8 general_profile_space;
+    UInt8 general_tier_flag;
+    UInt8 general_profile_idc;
+    UInt32 general_profile_compatibility_flags;
+    UInt64 general_constraint_indicator_flags;
+    UInt8 general_level_idc;
+
+    UInt16 min_spatial_segmentation_idc;
+    UInt8 parallelismType;
+
+    UInt8 chromaFormat;
+    UInt8 bitDepthLumaMinus8;
+    UInt8 bitDepthChromaMinus8;
+
+    UInt16 avgFrameRate;
+    UInt8 constantFrameRate;
+
+    UInt8 numTemporalLayers;
+    UInt8 temporalIdNested;
+
+    UInt8 lengthSizeMinusOne;
+    UInt8 numOfArrays;
+
+    struct NAL_units *NAL_units;
+};
+
+int analyze_HEVC(const uint8_t *cookie, uint32_t cookieLen, bool *completeness)
+{
+    int result = 0;
+    bool complete = true;
+
+    struct hvcC_info *info = (struct hvcC_info *)malloc (sizeof(struct hvcC_info));
+    bzero(info, sizeof(struct hvcC_info));
+
+    CMemoryBitstream b;
+    b.SetBytes((uint8_t *)cookie, cookieLen);
+
+    try {
+        info->configurationVersion = b.GetBits(8);
+        info->general_profile_space = b.GetBits(2);
+        info->general_tier_flag = b.GetBits(1);
+        info->general_profile_idc = b.GetBits(5);
+        info->general_profile_compatibility_flags = b.GetBits(32);
+
+        info->general_constraint_indicator_flags = b.GetBits(32) << 16;
+        info->general_constraint_indicator_flags += b.GetBits(16);
+        info->general_level_idc = b.GetBits(8);
+
+        b.SkipBits(4); // reserved 1111b
+        info->min_spatial_segmentation_idc = b.GetBits(12);
+        b.SkipBits(6); // reserved 111111b
+        info->parallelismType = b.GetBits(2);
+        b.SkipBits(6); // reserved 111111b
+        info->chromaFormat = b.GetBits(2);
+        b.SkipBits(5); // reserved 11111b
+        info->bitDepthLumaMinus8 = b.GetBits(3);
+        b.SkipBits(5); // reserved 11111b
+        info->bitDepthChromaMinus8 = b.GetBits(3);
+
+        info->avgFrameRate = b.GetBits(16);
+        info->constantFrameRate = b.GetBits(2);
+
+        info->numTemporalLayers = b.GetBits(3);
+        info->temporalIdNested = b.GetBits(1);
+
+        info->lengthSizeMinusOne = b.GetBits(2);
+        info->numOfArrays = b.GetBits(8);
+
+        info->NAL_units = (struct NAL_units *)malloc(sizeof(struct NAL_units) * info->numOfArrays);
+
+        for (UInt8 j = 0; j < info->numOfArrays; j++) {
+            info->NAL_units[j].array_completeness = b.GetBits(1);
+            if (info->NAL_units[j].array_completeness == 0) {
+                complete = false;
+            }
+
+            b.SkipBits(1); // reserved 0
+
+            info->NAL_units[j].NAL_unit_type = b.GetBits(6);
+            info->NAL_units[j].numNalus = b.GetBits(16);
+
+            for (UInt8 i = 0; i < info->NAL_units[j].numNalus; i++) {
+                UInt16 nalUnitLength = b.GetBits(16);
+                b.SkipBits(8 * nalUnitLength);
+            }
+        }
+    }
+    catch (int e) {
+        result = 1;
+    }
+
+    free(info->NAL_units);
+    free(info);
+
+    *completeness = complete;
+
+    return 0;
+}

@@ -17,6 +17,7 @@
 #import "MP42BitmapSubConverter.h"
 
 #import "mp4v2.h"
+#import "MP42FormatUtilites.h"
 #import "MP42PrivateUtilities.h"
 #import "MP42Track+Muxer.h"
 
@@ -189,19 +190,29 @@
         else if ([track isMemberOfClass:[MP42VideoTrack class]] &&
                  (track.format == kMP42VideoCodecType_HEVC || track.format == kMP42VideoCodecType_HEVC_2)) {
 
-            if (magicCookie.length < sizeof(uint8_t) * 6) {
+            // Check whether we can use hvc1 or hev1 fourcc.
+            bool completeness = 0;
+            if (magicCookie.length && !analyze_HEVC(magicCookie.bytes, magicCookie.length, &completeness)) {
+                NSSize size = [helper->importer sizeForTrack:track];
+
+                dstTrackId = MP4AddH265VideoTrack(_fileHandle, timeScale, MP4_INVALID_DURATION, size.width, size.height, completeness);
+
+                if (dstTrackId) {
+                    if (completeness) {
+                        MP4SetTrackBytesProperty(_fileHandle, dstTrackId, "mdia.minf.stbl.stsd.hvc1.hvcC.content", magicCookie.bytes, magicCookie.length);
+                    }
+                    else {
+                        MP4SetTrackBytesProperty(_fileHandle, dstTrackId, "mdia.minf.stbl.stsd.hev1.hvcC.content", magicCookie.bytes, magicCookie.length);
+                    }
+                    [helper->importer setActiveTrack:track];
+                }
+                else {
+                    continue;
+                }
+            }
+            else {
                 continue;
             }
-
-            NSSize size = [helper->importer sizeForTrack:track];
-
-            dstTrackId = MP4AddH265VideoTrack(_fileHandle, timeScale, MP4_INVALID_DURATION, size.width, size.height);
-
-            if (dstTrackId) {
-                MP4SetTrackBytesProperty(_fileHandle, dstTrackId, "mdia.minf.stbl.stsd.hev1.hvcC.content", magicCookie.bytes, magicCookie.length);
-            }
-
-            [helper->importer setActiveTrack:track];
         }
 
         // MPEG-4 Visual video track

@@ -196,6 +196,9 @@ FourCharCode getTrackMediaFormat(MP4FileHandle fileHandle, MP4TrackId Id)
         if (!strcmp(dataName, "avc1")) {
             return kMP42VideoCodecType_H264;
         }
+        else if (!strcmp(dataName, "hvc1")) {
+            return kMP42VideoCodecType_HEVC;
+        }
         else if (!strcmp(dataName, "hev1")) {
             return kMP42VideoCodecType_HEVC_2;
         }

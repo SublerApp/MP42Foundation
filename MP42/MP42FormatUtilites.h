@@ -19,6 +19,8 @@ extern "C" {
     int analyze_EAC3(void **context ,uint8_t *frame, uint32_t size);
     CFDataRef createCookie_EAC3(void *context);
 
+    int analyze_HEVC(const uint8_t *frame, uint32_t cookieLen, bool *completeness);
+
 #ifdef __cplusplus
 }
 #endif
