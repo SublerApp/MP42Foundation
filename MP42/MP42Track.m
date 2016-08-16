@@ -22,6 +22,7 @@
 
     uint64_t    _size;
     uint32_t    _bitrate;
+    NSString   *_name;
 
     NSSet<NSString *> *_mediaCharacteristicTags;
 
@@ -55,7 +56,11 @@
 
         if (fileHandle) {
             _format = getTrackMediaFormat(fileHandle, _trackId);
-            _name = [getTrackName(fileHandle, _trackId) retain];
+
+            NSString *trackName = getTrackName(fileHandle, _trackId);
+            if (trackName) {
+                _name = [trackName copy];
+            }
             _language = [getHumanReadableTrackLanguage(fileHandle, _trackId) retain];
 
             // Extended language tag
@@ -179,8 +184,7 @@
     }
 
     if (_updatedProperty[@"name"] || !_muxed) {
-        NSString *defaultName = localizedMediaDisplayName(_mediaType);
-        if (![_name isEqualToString:defaultName] &&  _name != nil) {
+        if (_name != nil && ![_name isEqualToString:self.defaultName]) {
 
             MP4SetTrackName(fileHandle, _trackId, _name.UTF8String);
         }
@@ -237,7 +241,7 @@
 
 - (NSString *)name {
     if (_name == nil) {
-        _name = localizedMediaDisplayName(_mediaType);
+        _name = [[self defaultName] copy];
     }
     return [[_name copy] autorelease];
 }
@@ -337,7 +341,7 @@
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
-    [coder encodeInt:2 forKey:@"MP42TrackVersion"];
+    [coder encodeInt:3 forKey:@"MP42TrackVersion"];
 
     [coder encodeInt64:_trackId forKey:@"Id"];
     [coder encodeInt64:_sourceId forKey:@"sourceId"];

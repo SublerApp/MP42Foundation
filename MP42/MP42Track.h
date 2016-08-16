@@ -23,7 +23,6 @@ NS_ASSUME_NONNULL_BEGIN
     FourCharCode  _sourceFormat;
     MP42MediaType _mediaType;
 
-    NSString    *_name;
     NSString    *_language;
     NSString    *_extendedLanguageTag;
 

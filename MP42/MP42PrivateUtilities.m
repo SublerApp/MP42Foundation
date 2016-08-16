@@ -182,10 +182,7 @@ NSString * getTrackName(MP4FileHandle fileHandle, MP4TrackId Id)
         free(trackName);
         return name;
     }
-
-    const char *type = MP4GetTrackType(fileHandle, Id);
-    FourCharCode code = Str2FourCC(type);
-    return localizedMediaDisplayName(code);
+    return nil;
 }
 
 FourCharCode getTrackMediaFormat(MP4FileHandle fileHandle, MP4TrackId Id)
@@ -247,8 +244,8 @@ FourCharCode getTrackMediaFormat(MP4FileHandle fileHandle, MP4TrackId Id)
             return kMP42SubtitleCodecType_PGS;
 
         else {
-            // FIXME
-            return kMP42MediaType_Unknown;
+            FourCharCode code = Str2FourCC(dataName);
+            return code;
         }
     }
 

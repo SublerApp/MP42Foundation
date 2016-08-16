@@ -103,6 +103,10 @@
     return [[[MP42ChapterTrack alloc] initWithTextFile:URL] autorelease];
 }
 
+- (NSString *)defaultName {
+    return NSLocalizedString(@"Chapter Track", nil);
+}
+
 - (NSUInteger)addChapter:(MP42TextSample *)chapter
 {
     self.isEdited = YES;
