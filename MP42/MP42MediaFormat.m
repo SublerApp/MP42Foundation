@@ -226,11 +226,11 @@ NSString *localizedAudioDisplayName(FourCharCode mediaSubtype)
             break;
 
         case kMP42AudioCodecType_AC3:
-            result = NSLocalizedString(@"AC-3", nil);
+            result = NSLocalizedString(@"AC3", nil);
             break;
 
         case kMP42AudioCodecType_EnhancedAC3:
-            result = NSLocalizedString(@"Enhanced AC-3", nil);
+            result = NSLocalizedString(@"E-AC3", nil);
             break;
 
         case kMP42AudioCodecType_DTS:
@@ -371,11 +371,15 @@ NSString *localizedDisplayName(FourCharCode mediaType, FourCharCode mediaSubtype
         case kMP42MediaType_Audio:
             result = localizedAudioDisplayName(mediaSubtype);
             break;
+        case kMP42MediaType_Text:
         case kMP42MediaType_Subtitle:
             result = localizedSubtitlesDisplayName(mediaSubtype);
             break;
         case kMP42MediaType_ClosedCaption:
             result = localizedClosedCaptionDisplayName(mediaSubtype);
+            break;
+        case kMP42MediaType_TimeCode:
+            result = localizedTimeCodeDisplayName(mediaSubtype);
             break;
 
 

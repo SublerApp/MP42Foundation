@@ -164,7 +164,7 @@ enum : MP42SubtitleCodecType
     kMP42SubtitleCodecType_VobSub    = 'subp',
     kMP42SubtitleCodecType_PGS       = 'PGS ',
     kMP42SubtitleCodecType_SSA       = 'SSA ',
-    kMP42SubtitleCodecType_FairPlay  = 'drmi', //FIXME
+    kMP42SubtitleCodecType_FairPlay  = 'drmt'
 };
 
 // Closed Caption Fromat
