@@ -214,6 +214,10 @@ NSString *localizedAudioDisplayName(FourCharCode mediaSubtype)
             break;
 
         case kMP42AudioCodecType_MPEGLayer3:
+            result = NSLocalizedString(@"MP3", nil);
+            break;
+
+        case kMP42AudioCodecType_Vorbis:
             result = NSLocalizedString(@"Vorbis", nil);
             break;
 
