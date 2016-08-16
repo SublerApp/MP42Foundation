@@ -122,7 +122,7 @@
 	]
 },
 {
-	"country" : "México",
+	"country" : "Mexico",
 	"ratings" : [
         { "media" : "movie", "prefix" : "mx-movie", 	"itunes-code" : "AA", 	"itunes-value" : "000",  "description" : "AA" },
         { "media" : "movie", "prefix" : "mx-movie", 	"itunes-code" : "A", 	"itunes-value" : "100",  "description" : "A" },

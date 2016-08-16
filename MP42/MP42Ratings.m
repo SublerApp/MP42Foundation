@@ -128,7 +128,7 @@
 - (NSUInteger) ratingIndexForiTunesCountry:(NSString *)aCountry media:(NSString *)aMedia ratingString:(NSString *)aRatingString {
 	NSString *target1 = [[NSString stringWithFormat:@"%@ %@: %@", aCountry, aMedia, aRatingString] lowercaseString];
 	NSString *target2 = [[NSString stringWithFormat:@"%@ %@: %@", aCountry, @"movie & TV", aRatingString] lowercaseString];
-	for (NSUInteger i = 0; i < [ratings count]; i++) {
+	for (NSUInteger i = 0; i < ratings.count; i++) {
 		if ([[[ratings objectAtIndex:i] lowercaseString] isEqualToString:target1] || [[[ratings objectAtIndex:i] lowercaseString] isEqualToString:target2]) {
 			return i;
 		}
