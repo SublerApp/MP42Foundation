@@ -135,6 +135,7 @@
         if ([track isMemberOfClass:[MP42VideoTrack class]] && track.format == kMP42VideoCodecType_H264) {
 
             if (magicCookie.length < sizeof(uint8_t) * 6) {
+                [unsupportedTracks addObject:track];
                 continue;
             }
 
@@ -207,10 +208,12 @@
                     [helper->importer setActiveTrack:track];
                 }
                 else {
+                    [unsupportedTracks addObject:track];
                     continue;
                 }
             }
             else {
+                [unsupportedTracks addObject:track];
                 continue;
             }
         }
@@ -260,8 +263,10 @@
 
         // AC-3 audio track
         else if ([track isMemberOfClass:[MP42AudioTrack class]] && track.format == kMP42AudioCodecType_AC3) {
-            if ([magicCookie length] < sizeof(uint64_t) * 6)
+            if (magicCookie.length < sizeof(uint64_t) * 6) {
+                [unsupportedTracks addObject:track];
                 continue;
+            }
 
             const uint64_t *ac3Info = (const uint64_t *)[magicCookie bytes];
 
@@ -399,8 +404,10 @@
 
         // VobSub bitmap track
         else if ([track isMemberOfClass:[MP42SubtitleTrack class]] && track.format == kMP42SubtitleCodecType_VobSub) {
-            if (magicCookie.length < sizeof(uint32_t) * 16)
+            if (magicCookie.length < sizeof(uint32_t) * 16) {
+                [unsupportedTracks addObject:track];
                 continue;
+            }
 
             dstTrackId = MP4AddSubpicTrack(_fileHandle, timeScale, 640, 480);
 

@@ -237,6 +237,14 @@
             free(ppValue);
             return magicCookie;
         }
+        else if (!strcmp(media_data_name, "hvc1")) {
+            uint8_t    *ppValue;
+            uint32_t    pValueSize;
+            MP4GetTrackBytesProperty(_fileHandle, srcTrackId, "mdia.minf.stbl.stsd.hvc1.hvcC.content", &ppValue, &pValueSize);
+            magicCookie = [NSData dataWithBytes:ppValue length:pValueSize];
+            free(ppValue);
+            return magicCookie;
+        }
         else if (!strcmp(media_data_name, "mp4v")) {
             uint8_t *ppConfig; uint32_t pConfigSize;
             MP4GetTrackESConfiguration(_fileHandle, srcTrackId, &ppConfig, &pConfigSize);
