@@ -90,7 +90,7 @@ typedef struct MP42DecodeContext MP42DecodeContext;
 
         if (_avctx && magicCookie) {
 
-            _avctx->extradata = (uint8_t*)av_malloc(magicCookie.length + AV_INPUT_BUFFER_PADDING_SIZE);
+            _avctx->extradata = (uint8_t *)av_malloc(magicCookie.length + AV_INPUT_BUFFER_PADDING_SIZE);
             if (!_avctx->extradata) {
                 NSLog(@"Could not av_malloc extradata");
                 av_freep(&_avctx);
@@ -361,7 +361,7 @@ static int resample(MP42DecodeContext *context, AVFrame *frame, uint8_t **output
     return ret;
 }
 
-static int decode(MP42DecodeContext *context, MP42SampleBuffer *inSample, MP42SampleBuffer **outSample)
+static int send_packet(MP42DecodeContext *context, MP42SampleBuffer *inSample)
 {
     int ret;
 
@@ -375,6 +375,12 @@ static int decode(MP42DecodeContext *context, MP42SampleBuffer *inSample, MP42Sa
         printf("%s\n", av_err2str(ret));
         return ret == AVERROR_EOF ? 0 : ret;
     }
+    return ret;
+}
+
+static int receive_frame(MP42DecodeContext *context, MP42SampleBuffer **outSample)
+{
+    int ret;
 
     AVFrame *frame = av_frame_alloc();
     ret = avcodec_receive_frame(context->avctx, frame);
@@ -393,7 +399,7 @@ static int decode(MP42DecodeContext *context, MP42SampleBuffer *inSample, MP42Sa
         return ret;
     }
 
-    return 0;
+    return ret;
 }
 
 static inline void enqueue(MP42AudioDecoder *self, MP42SampleBuffer *outSample)
@@ -423,12 +429,14 @@ static inline void enqueue(MP42AudioDecoder *self, MP42SampleBuffer *outSample)
                     return;
                 }
                 else {
-                    decode(_context, sampleBuffer, &outSample);
-                    if (_context->configured == NO && outSample) {
-                        [_outputUnit reconfigure];
-                        _context->configured = YES;
+                    send_packet(_context, sampleBuffer);
+                    while (!receive_frame(_context, &outSample)) {
+                        if (_context->configured == NO && outSample) {
+                            [_outputUnit reconfigure];
+                            _context->configured = YES;
+                        }
+                        enqueue(self, outSample);
                     }
-                    enqueue(self, outSample);
                 }
             }
         }
