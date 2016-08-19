@@ -180,7 +180,7 @@ static bool LoadNextAc3Header(FILE* inFile, u_int8_t* hdr)
  *
  * Note: Frames are padded to byte boundaries
  */
-static bool LoadNextAc3Frame(FILE* inFile, u_int8_t* pBuf, u_int32_t* pBufSize, bool stripAc3)
+static bool LoadNextAc3Frame(FILE* inFile, u_int8_t** pBuf, size_t* pBufSize, bool stripAc3)
 {
 	u_int16_t frameSize;
 	u_int16_t hdrBitSize, hdrByteSize;
@@ -193,19 +193,23 @@ static bool LoadNextAc3Frame(FILE* inFile, u_int8_t* pBuf, u_int32_t* pBufSize, 
 	
 	/* get frame size from header */
 	frameSize = MP4AV_Ac3GetFrameSize(hdrBuf);
-	*pBufSize = frameSize;
 	/* get header size in bits and bytes from header */
 	hdrBitSize = MP4AV_Ac3GetHeaderBitSize(hdrBuf);
 	hdrByteSize = MP4AV_Ac3GetHeaderByteSize(hdrBuf);
 	
 	/* adjust the frame size to what remains to be read */
 	frameSize -= hdrByteSize;
+
+    if (frameSize && frameSize > *pBufSize) {
+        *pBuf = realloc(*pBuf, frameSize + 1024);
+    }
+    *pBufSize = frameSize + hdrByteSize;
     
 	if (stripAc3) {
 		if ((hdrBitSize % 8) == 0) {
 			/* header is byte aligned, i.e. MPEG-2 Ac3 */
 			/* read the frame data into the buffer */
-			if (fread(pBuf, 1, frameSize, inFile) != frameSize) {
+			if (fread(*pBuf, 1, frameSize, inFile) != frameSize) {
 				return false;
 			}
 			(*pBufSize) = frameSize;
@@ -216,20 +220,20 @@ static bool LoadNextAc3Frame(FILE* inFile, u_int8_t* pBuf, u_int32_t* pBufSize, 
 			int upShift = hdrBitSize % 8;
 			int downShift = 8 - upShift;
             
-			pBuf[0] = hdrBuf[hdrBitSize / 8] << upShift;
+			*pBuf[0] = hdrBuf[hdrBitSize / 8] << upShift;
             
 			for (i = 0; i < frameSize; i++) {
 				if (fread(&newByte, 1, 1, inFile) != 1) {
 					return false;
 				}
-				pBuf[i] |= (newByte >> downShift);
-				pBuf[i+1] = (newByte << upShift);
+				*pBuf[i] |= (newByte >> downShift);
+				*pBuf[i+1] = (newByte << upShift);
 			}
 			(*pBufSize) = frameSize + 1;
 		}
 	} else { /* don't strip Ac3 headers */
-		memcpy(pBuf, hdrBuf, hdrByteSize);
-		if (fread(&pBuf[hdrByteSize], 1, frameSize, inFile) != frameSize) {
+		memcpy(*pBuf, hdrBuf, hdrByteSize);
+		if (fread(*pBuf + hdrByteSize, 1, frameSize, inFile) != frameSize) {
 			return false;
 		}
 	}
@@ -358,22 +362,21 @@ static bool GetFirstHeader(FILE* inFile)
         MP4TrackId trackId = self.inputTracks.lastObject.sourceId;
 
         // parse the Ac3 frames, and write the MP4 samples
-        u_int8_t sampleBuffer[8 * 1024];
-        u_int32_t sampleSize = sizeof(sampleBuffer);
+        u_int8_t *pBuf = malloc(sizeof(u_int8_t) * 1024);
+        size_t pBufSize = 0;
         MP4SampleId sampleId = 1;
 
         int64_t currentSize = 0;
 
-        while (LoadNextAc3Frame(inFile, sampleBuffer, &sampleSize, false) && !_cancelled) {
+        while (LoadNextAc3Frame(inFile, &pBuf, &pBufSize, false) && !_cancelled) {
             MP42SampleBuffer *sample = [[MP42SampleBuffer alloc] init];
 
-            void * sampleDataBuffer = malloc(sampleSize);
-            memcpy(sampleDataBuffer, sampleBuffer, sampleSize);
+            void *sampleDataBuffer = malloc(pBufSize);
+            memcpy(sampleDataBuffer, pBuf, pBufSize);
 
             sample->data = sampleDataBuffer;
-            sample->size = sampleSize;
+            sample->size = pBufSize;
             sample->duration = MP4_INVALID_DURATION;
-            sample->offset = 0;
             sample->flags |= MP42SampleBufferFlagIsSync;
             sample->trackId = trackId;
 
@@ -381,11 +384,12 @@ static bool GetFirstHeader(FILE* inFile)
             [sample release];
 
             sampleId++;
-            sampleSize = sizeof(sampleBuffer);
-            
-            currentSize += sampleSize;
+
+            currentSize += pBufSize;
             _progress = (currentSize / (CGFloat) size) * 100;
         }
+
+        free(pBuf);
         
         [self setDone];
     }
