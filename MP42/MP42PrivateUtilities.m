@@ -185,11 +185,21 @@ NSString * getTrackName(MP4FileHandle fileHandle, MP4TrackId Id)
     return nil;
 }
 
-FourCharCode getTrackMediaFormat(MP4FileHandle fileHandle, MP4TrackId Id)
+FourCharCode getTrackMediaType(MP4FileHandle fileHandle, MP4TrackId Id)
 {
-    const char* type = MP4GetTrackType(fileHandle, Id);
-    const char* dataName = MP4GetTrackMediaDataName(fileHandle, Id);
-    if (dataName) {
+    const char *type = MP4GetTrackType(fileHandle, Id);
+    if (type && strlen(type) == 4) {
+        FourCharCode code = Str2FourCC(type);
+        return code;
+    }
+    return kMP42MediaType_Unknown;
+}
+
+FourCharCode getTrackMediaSubType(MP4FileHandle fileHandle, MP4TrackId Id)
+{
+    const char *type = MP4GetTrackType(fileHandle, Id);
+    const char *dataName = MP4GetTrackMediaDataName(fileHandle, Id);
+    if (dataName && strlen(dataName) == 4) {
         if (!strcmp(dataName, "avc1")) {
             return kMP42VideoCodecType_H264;
         }
@@ -241,7 +251,7 @@ FourCharCode getTrackMediaFormat(MP4FileHandle fileHandle, MP4TrackId Id)
         else if (!strcmp(dataName, "tmcd"))
             return kMP42TimeCodeFormatType_TimeCode32;
         else if (!strcmp(dataName, "mp4s") && !strcmp(type, "subp"))
-            return kMP42SubtitleCodecType_PGS;
+            return kMP42SubtitleCodecType_VobSub;
 
         else {
             FourCharCode code = Str2FourCC(dataName);

@@ -342,7 +342,7 @@ NSString *localizedTimeCodeDisplayName(FourCharCode mediaSubtype)
 
     switch (mediaSubtype) {
         case kMP42TimeCodeFormatType_TimeCode32:
-            result = NSLocalizedString(@"TimeCode 32", nil);
+            result = NSLocalizedString(@"TimeCode", nil);
             break;
 
         case kMP42TimeCodeFormatType_TimeCode64:
@@ -385,7 +385,18 @@ NSString *localizedDisplayName(FourCharCode mediaType, FourCharCode mediaSubtype
         case kMP42MediaType_TimeCode:
             result = localizedTimeCodeDisplayName(mediaSubtype);
             break;
-
+        case kMP42MediaType_OD:
+            result = NSLocalizedString(@"MPEG-4 ODSM", nil);
+            break;
+        case kMP42MediaType_Scene:
+            result = NSLocalizedString(@"MPEG-4 SDSM", nil);
+            break;
+        case kMP42MediaType_Control:
+            result = NSLocalizedString(@"MPEG-4 Control", nil);
+            break;
+        case kMP42MediaType_Hint:
+            result = NSLocalizedString(@"Hint", nil);
+            break;
 
         default:
             break;

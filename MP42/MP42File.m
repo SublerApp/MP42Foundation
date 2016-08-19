@@ -850,7 +850,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
     for (MP42Track *track in tracksToUpdate) {
         if (track.isEdited) {
             if (![track writeToFile:self.fileHandle error:outError]) {
-                if (*outError) {
+                if (outError && *outError) {
                     [_logger writeErrorToLog:*outError];
                 }
             }

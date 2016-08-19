@@ -45,6 +45,15 @@
     return self;
 }
 
+- (instancetype)initWithMediaType:(MP42MediaType)mediaType
+{
+    self = [self init];
+    if (self) {
+        _mediaType = mediaType;
+    }
+    return self;
+}
+
 - (instancetype)initWithSourceURL:(NSURL *)URL trackID:(NSInteger)trackID fileHandle:(MP4FileHandle)fileHandle
 {
 	if ((self = [super init])) {
@@ -55,7 +64,8 @@
         _updatedProperty = [[NSMutableDictionary alloc] init];
 
         if (fileHandle) {
-            _format = getTrackMediaFormat(fileHandle, _trackId);
+            _format = getTrackMediaSubType(fileHandle, _trackId);
+            _mediaType = getTrackMediaType(fileHandle, _trackId);
 
             NSString *trackName = getTrackName(fileHandle, _trackId);
             if (trackName) {

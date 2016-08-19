@@ -16,6 +16,7 @@
 #import "mp4v2.h"
 #import "MP42PrivateUtilities.h"
 #import "MP42Track+Muxer.h"
+#import "MP42Track+Private.h"
 
 #import "MP42EditListsReconstructor.h"
 
@@ -219,7 +220,11 @@
             }
             else {
                 // Unknown type
-                newTrack = [[MP42Track alloc] init];
+                FourCharCode mediaType = kMP42MediaType_Unknown;
+                if (formatDescription) {
+                    mediaType = CMFormatDescriptionGetMediaType(formatDescription);
+                }
+                newTrack = [[MP42Track alloc] initWithMediaType:mediaType];
             }
 
             // Set the usual track properties

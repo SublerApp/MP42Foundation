@@ -41,7 +41,8 @@ MP4TrackId findFirstVideoTrack(MP4FileHandle fileHandle);
 uint16_t getFixedVideoWidth(MP4FileHandle fileHandle, MP4TrackId videoTrack);
 
 NSString* getTrackName(MP4FileHandle fileHandle, MP4TrackId videoTrack);
-FourCharCode getTrackMediaFormat(MP4FileHandle fileHandle, MP4TrackId Id);
+FourCharCode getTrackMediaType(MP4FileHandle fileHandle, MP4TrackId Id);
+FourCharCode getTrackMediaSubType(MP4FileHandle fileHandle, MP4TrackId Id);
 NSString* getHumanReadableTrackLanguage(MP4FileHandle fileHandle, MP4TrackId videoTrack);
 NSString* getFilenameLanguage(CFStringRef filename);
 
