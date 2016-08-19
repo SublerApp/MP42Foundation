@@ -75,7 +75,9 @@ static int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, ui
     uint32_t iSize = *FrameSize;
 
     if (fseeko(ioStream->fp, FilePos, SEEK_SET)) {
+#ifdef DEBUG
         fprintf(stderr,"fseeko(): %s\n", strerror(errno));
+#endif
         return 0;
     }
 
@@ -94,12 +96,21 @@ static int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, ui
     size_t rd = fread(packet + trackInfo->CompMethodPrivateSize, 1, iSize, ioStream->fp);
     if (rd != iSize) {
         if (rd == 0) {
-            if (feof(ioStream->fp))
+            if (feof(ioStream->fp)) {
+#ifdef DEBUG
                 fprintf(stderr,"Unexpected EOF while reading frame\n");
-            else
+#endif
+            }
+            else {
+#ifdef DEBUG
                 fprintf(stderr,"Error reading frame: %s\n",strerror(errno));
-        } else
-            fprintf(stderr,"Short read while reading audio frame\n");
+#endif
+            }
+        } else {
+#ifdef DEBUG
+            fprintf(stderr,"Short read while reading frame\n");
+#endif
+        }
 
         free(packet);
         return 0;
