@@ -1189,9 +1189,9 @@ static const genreType_t genreType_strings[] = {
                 MP4ItmfData *data = &item->dataList.elements[j];
                 NSData *xmlData = [NSData dataWithBytes:data->value length:data->valueSize];
                 NSDictionary *dma = (NSDictionary *)[NSPropertyListSerialization propertyListWithData:xmlData
-                                                                                              options:NSPropertyListMutableContainersAndLeaves
+                                                                                              options:NSPropertyListImmutable
                                                                                                format:nil error:NULL];
-                
+
                 NSString *tag = nil;
 
                 if ([tag = [self stringFromArray:dma[@"cast"] key:@"name"] length]) {

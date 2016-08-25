@@ -151,7 +151,9 @@ enum : MP42AudioCodecType
     kMP42AudioCodecType_Opus                    = 'Opus',
     kMP42AudioCodecType_TTA                     = 'TTA1',
 
-    kMP42AudioCodecType_FairPlay                = 'drms'
+    kMP42AudioCodecType_FairPlay                = 'drms',
+    kMP42AudioCodecType_FairPlay_AAC            = 'paac',
+    kMP42AudioCodecType_FairPlay_AC3            = 'pac3'
 };
 
 // Subtitle Format

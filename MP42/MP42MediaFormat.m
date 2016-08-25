@@ -184,6 +184,9 @@ NSString *localizedVideoDisplayName(FourCharCode mediaSubtype)
             result = NSLocalizedString(@"DVC Pro PAL", nil);
             break;
 
+        case kMP42VideoCodecType_FairPlay:
+            result = NSLocalizedString(@"FairPlay Video", nil);
+            break;
 
         default:
             break;
@@ -255,6 +258,14 @@ NSString *localizedAudioDisplayName(FourCharCode mediaSubtype)
 
         case kMP42AudioCodecType_FairPlay:
             result = NSLocalizedString(@"FairPlay Sound", nil);
+            break;
+
+        case kMP42AudioCodecType_FairPlay_AAC:
+            result = NSLocalizedString(@"FairPlay AAC", nil);
+            break;
+
+        case kMP42AudioCodecType_FairPlay_AC3:
+            result = NSLocalizedString(@"FairPlay AC3", nil);
             break;
 
         case kMP42AudioCodecType_LinearPCM:

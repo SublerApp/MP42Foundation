@@ -290,6 +290,31 @@
     return self;
 }
 
+#pragma mark - Metadata
+
+/**
+ *  Converts an array of NSDictionary to a single string
+ *  with the components separated by ", ".
+ *
+ *  @param array the array of strings.
+ *
+ *  @return a concatenated string.
+ */
+- (NSString *)stringFromArray:(NSArray<NSDictionary *> *)array key:(id)key {
+    NSMutableString *result = [NSMutableString string];
+
+    for (NSDictionary *name in array) {
+
+        if (result.length) {
+            [result appendString:@", "];
+        }
+
+        [result appendString:name[key]];
+    }
+
+    return [[result copy] autorelease];
+}
+
 /**
  *  Converts the AVAsset metadata to the MP42Metadata format
  */
@@ -367,6 +392,7 @@
                                             MP42MetadataKeyComposer,            AVMetadataiTunesMetadataKeyComposer,
                                             MP42MetadataKeyAlbumArtist,         AVMetadataiTunesMetadataKeyAlbumArtist,
                                             MP42MetadataKeyAccountKind,         AVMetadataiTunesMetadataKeyAccountKind,
+                                            MP42MetadataKeyAccountCountry,      @"sfID",
                                             MP42MetadataKeyAppleID,             AVMetadataiTunesMetadataKeyAppleID,
                                             MP42MetadataKeyArtistID,            AVMetadataiTunesMetadataKeyArtistID,
                                             MP42MetadataKeyContentID,           AVMetadataiTunesMetadataKeySongID,
@@ -388,6 +414,7 @@
                                             MP42MetadataKeySongDescription,     AVMetadataiTunesMetadataKeyDescription,
                                             MP42MetadataKeyDescription,         @"desc",
                                             MP42MetadataKeyLongDescription,     @"ldes",
+                                            MP42MetadataKeySeriesDescription,   @"sdes",
                                             @"Media Kind",                      @"stik",
                                             MP42MetadataKeyTVShow,              @"tvsh",
                                             MP42MetadataKeyTVEpisodeNumber,     @"tves",
@@ -423,22 +450,47 @@
                                             nil];
 
         for (NSString *itunesKey in itunesMetadataDict.allKeys) {
-            items = [AVMetadataItem metadataItemsFromArray:itunesMetadata withKey:itunesKey keySpace:AVMetadataKeySpaceiTunes];
+            items = [AVMetadataItem metadataItemsFromArray:itunesMetadata withKey:itunesKey keySpace:nil];
             if (items.count) {
-                [self.metadata setTag:items.lastObject.value forKey:itunesMetadataDict[itunesKey]];
+                self.metadata[itunesMetadataDict[itunesKey]] = items.lastObject.value;
             }
         }
 
-        /*items = [AVMetadataItem metadataItemsFromArray:itunesMetadata withKey:AVMetadataiTunesMetadataKeyCoverArt keySpace:AVMetadataKeySpaceiTunes];
-        if ([items count]) {
-            id artworkData = [[items lastObject] value];
-            if ([artworkData isKindOfClass:[NSData class]]) {
-                NSImage *image = [[NSImage alloc] initWithData:artworkData];
-                [_metadata.artworks addObject:[[[MP42Image alloc] initWithImage:image] autorelease]];
-                [image release];
+        // iTunMovi is a property list that contains more metadata, for some weird reasons.
+        AVMetadataItem *iTunMovi = [[AVMetadataItem metadataItemsFromArray:itunesMetadata withKey:@"com.apple.iTunes.iTunMOVI" keySpace:nil] firstObject];
+
+        if (iTunMovi) {
+            NSData *data = [iTunMovi.stringValue dataUsingEncoding:NSUTF8StringEncoding];
+            NSDictionary *dma = (NSDictionary *)[NSPropertyListSerialization propertyListWithData:data
+                                                                                          options:NSPropertyListImmutable
+                                                                                           format:nil error:NULL];
+            NSString *value;
+            if ([value = [self stringFromArray:dma[@"cast"] key:@"name"] length]) {
+                self.metadata[MP42MetadataKeyCast] = value;
             }
-        }*/
+
+            if ([value = [self stringFromArray:dma[@"directors"] key:@"name"] length]) {
+                self.metadata[MP42MetadataKeyDirector] = value;
+            }
+
+            if ([value = [self stringFromArray:dma[@"codirectors"] key:@"name"] length]) {
+                self.metadata[MP42MetadataKeyCodirector] = value;
+            }
+
+            if ([value = [self stringFromArray:dma[@"producers"] key:@"name"] length]) {
+                self.metadata[MP42MetadataKeyProducer] = value;
+            }
+
+            if ([value = [self stringFromArray:dma[@"screenwriters"] key:@"name"] length]) {
+                self.metadata[MP42MetadataKeyScreenwriters] = value;
+            }
+
+            if ([value = dma[@"studio"] length]) {
+                self.metadata[MP42MetadataKeyStudio] = value;
+            }
+        }
     }
+
     if ([availableMetadataFormats containsObject:AVMetadataFormatQuickTimeMetadata]) {
         NSArray<AVMetadataItem *> *quicktimeMetadata = [_localAsset metadataForFormat:AVMetadataFormatQuickTimeMetadata];
         
@@ -475,6 +527,7 @@
             }
         }
     }
+
     if ([availableMetadataFormats containsObject:AVMetadataFormatQuickTimeUserData]) {
         NSArray<AVMetadataItem *> *quicktimeUserDataMetadata = [_localAsset metadataForFormat:AVMetadataFormatQuickTimeUserData];
         
