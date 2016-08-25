@@ -160,7 +160,7 @@
 		A9B9C2851823923200416A4E /* MP42MediaFormat.h in Headers */ = {isa = PBXBuildFile; fileRef = A9B9C23A1823923100416A4E /* MP42MediaFormat.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A9B9C2861823923200416A4E /* MP42MediaFormat.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C23B1823923100416A4E /* MP42MediaFormat.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		A9B9C2871823923200416A4E /* MP42Metadata.h in Headers */ = {isa = PBXBuildFile; fileRef = A9B9C23C1823923100416A4E /* MP42Metadata.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		A9B9C2881823923200416A4E /* MP42Metadata.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C23D1823923100416A4E /* MP42Metadata.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		A9B9C2881823923200416A4E /* MP42Metadata.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C23D1823923100416A4E /* MP42Metadata.m */; };
 		A9B9C2891823923200416A4E /* MP42MkvImporter.h in Headers */ = {isa = PBXBuildFile; fileRef = A9B9C23E1823923100416A4E /* MP42MkvImporter.h */; };
 		A9B9C28A1823923200416A4E /* MP42MkvImporter.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C23F1823923100416A4E /* MP42MkvImporter.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		A9B9C28B1823923200416A4E /* MP42Mp4Importer.h in Headers */ = {isa = PBXBuildFile; fileRef = A9B9C2401823923100416A4E /* MP42Mp4Importer.h */; };

@@ -320,8 +320,9 @@ static int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, ui
     MP42Metadata *mkvMetadata = [[MP42Metadata alloc] init];
 
     SegmentInfo *segInfo = mkv_GetFileInfo(_matroskaFile);
-    if (segInfo->Title)
-        [mkvMetadata setTag:[NSString stringWithUTF8String:segInfo->Title] forKey:@"Name"];
+    if (segInfo->Title) {
+        [mkvMetadata setTag:[NSString stringWithUTF8String:segInfo->Title] forKey:MP42MetadataKeyName];
+    }
     
     Tag *tags;
     unsigned count;
@@ -332,25 +333,25 @@ static int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, ui
         for (xi = 0; xi < tags->nSimpleTags; xi++) {
 
             if (!strcmp(tags->SimpleTags[xi].Name, "TITLE"))
-                [mkvMetadata setTag:[NSString stringWithUTF8String:tags->SimpleTags[xi].Value] forKey:@"Name"];
+                [mkvMetadata setTag:[NSString stringWithUTF8String:tags->SimpleTags[xi].Value] forKey:MP42MetadataKeyName];
             
             if (!strcmp(tags->SimpleTags[xi].Name, "DATE_RELEASED"))
-                [mkvMetadata setTag:[NSString stringWithUTF8String:tags->SimpleTags[xi].Value] forKey:@"Release Date"];
+                [mkvMetadata setTag:[NSString stringWithUTF8String:tags->SimpleTags[xi].Value] forKey:MP42MetadataKeyReleaseDate];
 
             if (!strcmp(tags->SimpleTags[xi].Name, "COMMENT"))
-                [mkvMetadata setTag:[NSString stringWithUTF8String:tags->SimpleTags[xi].Value] forKey:@"Comments"];
+                [mkvMetadata setTag:[NSString stringWithUTF8String:tags->SimpleTags[xi].Value] forKey:MP42MetadataKeyUserComment];
 
             if (!strcmp(tags->SimpleTags[xi].Name, "DIRECTOR"))
-                [mkvMetadata setTag:[NSString stringWithUTF8String:tags->SimpleTags[xi].Value] forKey:@"Director"];
+                [mkvMetadata setTag:[NSString stringWithUTF8String:tags->SimpleTags[xi].Value] forKey:MP42MetadataKeyDirector];
 
             if (!strcmp(tags->SimpleTags[xi].Name, "COPYRIGHT"))
-                [mkvMetadata setTag:[NSString stringWithUTF8String:tags->SimpleTags[xi].Value] forKey:@"Copyright"];
+                [mkvMetadata setTag:[NSString stringWithUTF8String:tags->SimpleTags[xi].Value] forKey:MP42MetadataKeyCopyright];
 
             if (!strcmp(tags->SimpleTags[xi].Name, "ARTIST"))
-                [mkvMetadata setTag:[NSString stringWithUTF8String:tags->SimpleTags[xi].Value] forKey:@"Artist"];
+                [mkvMetadata setTag:[NSString stringWithUTF8String:tags->SimpleTags[xi].Value] forKey:MP42MetadataKeyArtist];
 
             if (!strcmp(tags->SimpleTags[xi].Name, "ENCODER"))
-                [mkvMetadata setTag:[NSString stringWithUTF8String:tags->SimpleTags[xi].Value] forKey:@"Encoding Tool"];
+                [mkvMetadata setTag:[NSString stringWithUTF8String:tags->SimpleTags[xi].Value] forKey:MP42MetadataKeyEncodingTool];
 
         }
     }

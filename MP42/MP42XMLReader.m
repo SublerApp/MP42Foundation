@@ -55,28 +55,28 @@
     NSError *err;
     // initial fields from general movie search
     tag = [node nodesForXPath:@"./title" error:&err];
-    if ([tag count]) [metadata setTag:[[tag objectAtIndex:0] stringValue] forKey:@"Name"];
+    if ([tag count]) [metadata setTag:[[tag objectAtIndex:0] stringValue] forKey:MP42MetadataKeyName];
     tag = [node nodesForXPath:@"./year" error:&err];
-    if ([tag count]) [metadata setTag:[[tag objectAtIndex:0] stringValue] forKey:@"Release Date"];
+    if ([tag count]) [metadata setTag:[[tag objectAtIndex:0] stringValue] forKey:MP42MetadataKeyReleaseDate];
     tag = [node nodesForXPath:@"./outline" error:&err];
-    if ([tag count]) [metadata setTag:[[tag objectAtIndex:0] stringValue] forKey:@"Description"];
+    if ([tag count]) [metadata setTag:[[tag objectAtIndex:0] stringValue] forKey:MP42MetadataKeyDescription];
     tag = [node nodesForXPath:@"./plot" error:&err];
-    if ([tag count]) [metadata setTag:[[tag objectAtIndex:0] stringValue] forKey:@"Long Description"];
+    if ([tag count]) [metadata setTag:[[tag objectAtIndex:0] stringValue] forKey:MP42MetadataKeyLongDescription];
     tag = [node nodesForXPath:@"./certification" error:&err];
-    if ([tag count] && [[[tag objectAtIndex:0] stringValue] length]) [metadata setTag:[[tag objectAtIndex:0] stringValue] forKey:@"Rating"];
+    if ([tag count] && [[[tag objectAtIndex:0] stringValue] length]) [metadata setTag:[[tag objectAtIndex:0] stringValue] forKey:MP42MetadataKeyRating];
     tag = [node nodesForXPath:@"./genre" error:&err];
-    if ([tag count]) [metadata setTag:[[tag objectAtIndex:0] stringValue] forKey:@"Genre"];
+    if ([tag count]) [metadata setTag:[[tag objectAtIndex:0] stringValue] forKey:MP42MetadataKeyUserGenre];
     tag = [node nodesForXPath:@"./credits" error:&err];
-    if ([tag count]) [metadata setTag:[[tag objectAtIndex:0] stringValue] forKey:@"Artist"];
+    if ([tag count]) [metadata setTag:[[tag objectAtIndex:0] stringValue] forKey:MP42MetadataKeyArtist];
     tag = [node nodesForXPath:@"./director" error:&err];
-    if ([tag count]) [metadata setTag:[[tag objectAtIndex:0] stringValue] forKey:@"Director"];
+    if ([tag count]) [metadata setTag:[[tag objectAtIndex:0] stringValue] forKey:MP42MetadataKeyDirector];
     tag = [node nodesForXPath:@"./studio" error:&err];
-    if ([tag count]) [metadata setTag:[[tag objectAtIndex:0] stringValue] forKey:@"Studio"];
+    if ([tag count]) [metadata setTag:[[tag objectAtIndex:0] stringValue] forKey:MP42MetadataKeyStudio];
 
     // additional fields from detailed movie info
     NSString *joined;
     joined = [self nodes:node forXPath:@"./cast/actor/@name" joinedBy:@","];
-    if (joined) [metadata setTag:joined forKey:@"Cast"];
+    if (joined) [metadata setTag:joined forKey:MP42MetadataKeyCast];
 
     return metadata;
 }
@@ -87,37 +87,37 @@
     NSError *err;
     // initial fields from general movie search
     tag = [node nodesForXPath:@"./content_id" error:&err];
-    if ([tag count]) [metadata setTag:[[tag objectAtIndex:0] stringValue] forKey:@"contentID"];
+    if ([tag count]) [metadata setTag:[[tag objectAtIndex:0] stringValue] forKey:MP42MetadataKeyContentID];
     tag = [node nodesForXPath:@"./genre" error:&err];
-    if ([tag count]) [metadata setTag:[[tag objectAtIndex:0] stringValue] forKey:@"Genre"];
+    if ([tag count]) [metadata setTag:[[tag objectAtIndex:0] stringValue] forKey:MP42MetadataKeyUserGenre];
     tag = [node nodesForXPath:@"./name" error:&err];
-    if ([tag count]) [metadata setTag:[[tag objectAtIndex:0] stringValue] forKey:@"Name"];
+    if ([tag count]) [metadata setTag:[[tag objectAtIndex:0] stringValue] forKey:MP42MetadataKeyName];
     tag = [node nodesForXPath:@"./release_date" error:&err];
-    if ([tag count]) [metadata setTag:[[tag objectAtIndex:0] stringValue] forKey:@"Release Date"];
+    if ([tag count]) [metadata setTag:[[tag objectAtIndex:0] stringValue] forKey:MP42MetadataKeyReleaseDate];
     tag = [node nodesForXPath:@"./encoding_tool" error:&err];
-    if ([tag count]) [metadata setTag:[[tag objectAtIndex:0] stringValue] forKey:@"Encoding Tool"];
+    if ([tag count]) [metadata setTag:[[tag objectAtIndex:0] stringValue] forKey:MP42MetadataKeyEncodingTool];
     tag = [node nodesForXPath:@"./copyright" error:&err];
-    if ([tag count]) [metadata setTag:[[tag objectAtIndex:0] stringValue] forKey:@"Copyright"];
+    if ([tag count]) [metadata setTag:[[tag objectAtIndex:0] stringValue] forKey:MP42MetadataKeyCopyright];
 
     NSString *joined;
     joined = [self nodes:node forXPath:@"./producers/producer_name" joinedBy:@","];
-    if (joined) [metadata setTag:joined forKey:@"Producers"];
+    if (joined) [metadata setTag:joined forKey:MP42MetadataKeyProducer];
     
     joined = [self nodes:node forXPath:@"./directors/director_name" joinedBy:@","];
-    if (joined) [metadata setTag:joined forKey:@"Director"], [metadata setTag:joined forKey:@"Artist"];
+    if (joined) [metadata setTag:joined forKey:MP42MetadataKeyDirector], [metadata setTag:joined forKey:MP42MetadataKeyArtist];
     
     joined = [self nodes:node forXPath:@"./casts/cast" joinedBy:@","];
-    if (joined) [metadata setTag:joined forKey:@"Cast"];
+    if (joined) [metadata setTag:joined forKey:MP42MetadataKeyCast];
 
     tag = [node nodesForXPath:@"./studio" error:&err];
-    if ([tag count]) [metadata setTag:[[tag objectAtIndex:0] stringValue] forKey:@"Studio"];
+    if ([tag count]) [metadata setTag:[[tag objectAtIndex:0] stringValue] forKey:MP42MetadataKeyStudio];
     tag = [node nodesForXPath:@"./description" error:&err];
-    if ([tag count]) [metadata setTag:[[tag objectAtIndex:0] stringValue] forKey:@"Description"];
+    if ([tag count]) [metadata setTag:[[tag objectAtIndex:0] stringValue] forKey:MP42MetadataKeyDescription];
     tag = [node nodesForXPath:@"./long_description" error:&err];
-    if ([tag count]) [metadata setTag:[[tag objectAtIndex:0] stringValue] forKey:@"Long Description"];
+    if ([tag count]) [metadata setTag:[[tag objectAtIndex:0] stringValue] forKey:MP42MetadataKeyLongDescription];
 
     joined = [self nodes:node forXPath:@"./categories/category" joinedBy:@","];
-    if (joined) [metadata setTag:joined forKey:@"Category"];
+    if (joined) [metadata setTag:joined forKey:MP42MetadataKeyCategory];
     
     return metadata;
 }

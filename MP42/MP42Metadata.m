@@ -14,35 +14,126 @@
 
 #import "NSString+MP42Additions.h"
 
+NSString *const MP42MetadataKeyName = @"Name";
+NSString *const MP42MetadataKeyTrackSubTitle = @"Track Sub-Title";
+
+NSString *const MP42MetadataKeyAlbum = @"Album";
+NSString *const MP42MetadataKeyAlbumArtist = @"Album Artist";
+NSString *const MP42MetadataKeyArtist = @"Artist";
+
+NSString *const MP42MetadataKeyGrouping = @"Grouping";
+NSString *const MP42MetadataKeyUserComment = @"Comments";
+NSString *const MP42MetadataKeyUserGenre = @"Genre";
+NSString *const MP42MetadataKeyReleaseDate = @"Release Date";
+
+NSString *const MP42MetadataKeyTrackNumber = @"Track #";
+NSString *const MP42MetadataKeyDiscNumber = @"Disk #";
+NSString *const MP42MetadataKeyBeatsPerMin = @"Tempo";
+
+NSString *const MP42MetadataKeyKeywords = @"Keywords";
+NSString *const MP42MetadataKeyCategory = @"Category";
+NSString *const MP42MetadataKeyCredits = @"Credits";
+NSString *const MP42MetadataKeyThanks = @"Thanks";
+NSString *const MP42MetadataKeyCopyright = @"Copyright";
+
+NSString *const MP42MetadataKeyDescription = @"Description";
+NSString *const MP42MetadataKeyLongDescription = @"Long Description";
+NSString *const MP42MetadataKeySeriesDescription = @"Series Description";
+NSString *const MP42MetadataKeySongDescription = @"Song Description";
+
+NSString *const MP42MetadataKeyRating = @"Rating";
+NSString *const MP42MetadataKeyRatingAnnotation = @"Rating Annotation";
+NSString *const MP42MetadataKeyContentRating = @"Content Rating";
+
+NSString *const MP42MetadataKeyEncodedBy = @"Encoded By";
+NSString *const MP42MetadataKeyEncodingTool = @"Encoding Tool";
+
+NSString *const MP42MetadataKeyStudio = @"Studio";
+NSString *const MP42MetadataKeyCast = @"Cast";
+NSString *const MP42MetadataKeyDirector = @"Director";
+NSString *const MP42MetadataKeyCodirector = @"Codirector";
+NSString *const MP42MetadataKeyProducer = @"Producers";
+NSString *const MP42MetadataKeyExecProducer = @"Executive Producer";
+NSString *const MP42MetadataKeyScreenwriters = @"Screenwriters";
+
+NSString *const MP42MetadataKeyTVShow = @"TV Show";
+NSString *const MP42MetadataKeyTVEpisodeNumber = @"TV Episode #";
+NSString *const MP42MetadataKeyTVNetwork = @"TV Network";
+NSString *const MP42MetadataKeyTVEpisodeID = @"TV Episode ID";
+NSString *const MP42MetadataKeyTVSeason = @"TV Season";
+
+NSString *const MP42MetadataKeyArtDirector = @"Art Director";
+NSString *const MP42MetadataKeyComposer = @"Composer";
+NSString *const MP42MetadataKeyArranger = @"Arranger";
+NSString *const MP42MetadataKeyAuthor = @"Lyricist";
+NSString *const MP42MetadataKeyLyrics = @"Lyrics";
+NSString *const MP42MetadataKeyAcknowledgement = @"Acknowledgement";
+NSString *const MP42MetadataKeyConductor = @"Conductor";
+NSString *const MP42MetadataKeyLinerNotes = @"Linear Notes";
+NSString *const MP42MetadataKeyRecordCompany = @"Record Company";
+NSString *const MP42MetadataKeyOriginalArtist = @"Original Artist";
+NSString *const MP42MetadataKeyPhonogramRights = @"Phonogram Rights";
+NSString *const MP42MetadataKeySongProducer = @"Song Producer";
+NSString *const MP42MetadataKeyPerformer = @"Performer";
+NSString *const MP42MetadataKeyPublisher = @"Publisher";
+NSString *const MP42MetadataKeySoundEngineer = @"Sound Engineer";
+NSString *const MP42MetadataKeySoloist = @"Soloist";
+
+NSString *const MP42MetadataKeyWorkName = @"Work Name";
+NSString *const MP42MetadataKeyMovementName = @"Movement Name";
+NSString *const MP42MetadataKeyMovementNumber = @"Movement Number";
+NSString *const MP42MetadataKeyMovementCount = @"Movement Count";
+NSString *const MP42MetadataKeyShowWorkAndMovement = @"Show Work And Movement";
+
+NSString *const MP42MetadataKeyXID = @"XID";
+NSString *const MP42MetadataKeyArtistID = @"artist ID";
+NSString *const MP42MetadataKeyComposerID = @"composer ID";
+NSString *const MP42MetadataKeyContentID = @"content ID";
+NSString *const MP42MetadataKeyGenreID = @"genre ID";
+NSString *const MP42MetadataKeyPlaylistID = @"playlist ID";
+NSString *const MP42MetadataKeyAppleID = @"iTunes Account";
+NSString *const MP42MetadataKeyAccountKind = @"iTunes Account Type";
+NSString *const MP42MetadataKeyAccountCountry = @"iTunes Country";
+NSString *const MP42MetadataKeyPurchasedDate = @"Purchase Date";
+NSString *const MP42MetadataKeyOnlineExtras = @"Online Extras";
+
+NSString *const MP42MetadataKeySortName = @"Sort Name";
+NSString *const MP42MetadataKeySortArtist = @"Sort Artist";
+NSString *const MP42MetadataKeySortAlbumArtist = @"Sort Album Artist";
+NSString *const MP42MetadataKeySortAlbum = @"Sort Album";
+NSString *const MP42MetadataKeySortComposer = @"Sort Composer";
+NSString *const MP42MetadataKeySortTVShow = @"Sort TV Show";
+
+
 typedef struct mediaKind_t {
     uint8_t stik;
-    NSString *english_name;
+    const char *english_name;
 } mediaKind_t;
 
 static const mediaKind_t mediaKind_strings[] = {
-    {0, @"Home Video"},
-    {1, @"Music"},
-    {2, @"Audiobook"},
-    {6, @"Music Video"},
-    {9, @"Movie"},
-    {10, @"TV Show"},
-    {11, @"Booklet"},
-    {14, @"Ringtone"},
-    {21, @"Podcast"},
-    {23, @"iTunes U"},
-    {27, @"Alert Tone"},
+    {0, "Home Video"},
+    {1, "Music"},
+    {2, "Audiobook"},
+    {6, "Music Video"},
+    {9, "Movie"},
+    {10, "TV Show"},
+    {11, "Booklet"},
+    {14, "Ringtone"},
+    {21, "Podcast"},
+    {23, "iTunes U"},
+    {27, "Alert Tone"},
     {0, NULL},
 };
 
 typedef struct contentRating_t {
     uint8_t rtng;
-    NSString *english_name;
+    const char *english_name;
 } contentRating_t;
 
 static const contentRating_t contentRating_strings[] = {
-    {0, @"None"},
-    {2, @"Clean"},
-    {4, @"Explicit"},
+    {0, "None"},
+    {2, "Clean"},
+    {4, "Explicit"},
     {0, NULL},
 };
 
@@ -225,7 +316,7 @@ static const genreType_t genreType_strings[] = {
 {
 	if ((self = [super init]))
 	{
-        presetName = @"Unnamed Set";
+        presetName = NSLocalizedString(@"Unnamed Set", nil);
         tagsDict = [[NSMutableDictionary alloc] init];
         artworks = [[NSMutableArray alloc] init];
         isEdited = NO;
@@ -249,22 +340,9 @@ static const genreType_t genreType_strings[] = {
     if ((self = [self init])) {
         MP42XMLReader *xmlReader = [[MP42XMLReader alloc] initWithURL:URL error:NULL];
         [self mergeMetadata:[xmlReader mMetadata]];
-        [xmlReader release];
 	}
     
     return self;
-}
-
--(void)dealloc
-{
-    [presetName release];
-
-    [artworks release];
-
-    [ratingiTunesCode release];
-    [tagsDict release];
-
-    [super dealloc];
 }
 
 #pragma mark - Supported metadata
@@ -272,149 +350,160 @@ static const genreType_t genreType_strings[] = {
 + (NSArray<NSString *> *) availableMetadata
 {
     return @[
-            @"Name",
-            @"Artist",
-            @"Album Artist",
-            @"Album",
-            @"Grouping",
-            @"Composer",
-			@"Comments",
-            @"Genre",
-            @"Release Date",
-            @"Track #",
-            @"Disk #",
-            @"Tempo",
-            @"TV Show",
-            @"TV Episode #",
-			@"TV Network",
-            @"TV Episode ID",
-            @"TV Season",
-            @"Description",
-            @"Long Description",
-            @"Series Description",
-            @"Rating",
-            @"Rating Annotation",
-            @"Studio",
-            @"Cast",
-            @"Director",
-            @"Codirector",
-            @"Producers",
-            @"Screenwriters",
-            @"Lyrics",
-            @"Copyright",
-            @"Encoding Tool",
-            @"Encoded By",
-            @"Keywords",
-            @"Category",
-            @"contentID",
-            @"artistID",
-            @"playlistID",
-            @"genreID",
-            @"composerID",
-            @"XID",
-            @"iTunes Account",
-            @"iTunes Account Type",
-            @"iTunes Country",
-            @"Track Sub-Title",
-            @"Song Description",
-            @"Art Director",
-            @"Arranger",
-            @"Lyricist",
-            @"Acknowledgement",
-            @"Conductor",
-            @"Linear Notes",
-            @"Record Company",
-            @"Original Artist",
-            @"Phonogram Rights",
-            @"Producer",
-            @"Performer",
-            @"Publisher",
-            @"Sound Engineer",
-            @"Soloist",
-            @"Credits",
-            @"Thanks",
-            @"Online Extras",
-            @"Executive Producer",
-            @"Sort Name",
-            @"Sort Artist",
-            @"Sort Album Artist",
-            @"Sort Album",
-            @"Sort Composer",
-            @"Sort TV Show"];
+            MP42MetadataKeyName,
+            MP42MetadataKeyTrackSubTitle,
+            MP42MetadataKeyArtist,
+            MP42MetadataKeyAlbumArtist,
+            MP42MetadataKeyAlbum,
+            MP42MetadataKeyGrouping,
+			MP42MetadataKeyUserComment,
+            MP42MetadataKeyUserGenre,
+            MP42MetadataKeyReleaseDate,
+            MP42MetadataKeyTrackNumber,
+            MP42MetadataKeyDiscNumber,
+            MP42MetadataKeyBeatsPerMin,
+            MP42MetadataKeyTVShow,
+            MP42MetadataKeyTVEpisodeNumber,
+			MP42MetadataKeyTVNetwork,
+            MP42MetadataKeyTVEpisodeID,
+            MP42MetadataKeyTVSeason,
+            MP42MetadataKeyDescription,
+            MP42MetadataKeyLongDescription,
+            MP42MetadataKeySeriesDescription,
+            MP42MetadataKeyRating,
+            MP42MetadataKeyRatingAnnotation,
+            MP42MetadataKeyContentRating,
+            MP42MetadataKeyStudio,
+            MP42MetadataKeyCast,
+            MP42MetadataKeyDirector,
+            MP42MetadataKeyCodirector,
+            MP42MetadataKeyProducer,
+            MP42MetadataKeyExecProducer,
+            MP42MetadataKeyScreenwriters,
+            MP42MetadataKeyCopyright,
+            MP42MetadataKeyEncodingTool,
+            MP42MetadataKeyEncodedBy,
+            MP42MetadataKeyKeywords,
+            MP42MetadataKeyCategory,
+            MP42MetadataKeyContentID,
+            MP42MetadataKeyArtistID,
+            MP42MetadataKeyPlaylistID,
+            MP42MetadataKeyGenreID,
+            MP42MetadataKeyComposerID,
+            MP42MetadataKeyXID,
+            MP42MetadataKeyAppleID,
+            MP42MetadataKeyAccountKind,
+            MP42MetadataKeyAccountCountry,
+            MP42MetadataKeyPurchasedDate,
+            MP42MetadataKeyOnlineExtras,
+            MP42MetadataKeySongDescription,
+            MP42MetadataKeyArtDirector,
+            MP42MetadataKeyComposer,
+            MP42MetadataKeyArranger,
+            MP42MetadataKeyAuthor,
+            MP42MetadataKeyLyrics,
+            MP42MetadataKeyAcknowledgement,
+            MP42MetadataKeyConductor,
+            MP42MetadataKeyLinerNotes,
+            MP42MetadataKeyRecordCompany,
+            MP42MetadataKeyOriginalArtist,
+            MP42MetadataKeyPhonogramRights,
+            MP42MetadataKeySongProducer,
+            MP42MetadataKeyPerformer,
+            MP42MetadataKeyPublisher,
+            MP42MetadataKeySoundEngineer,
+            MP42MetadataKeySoloist,
+            MP42MetadataKeyCredits,
+            MP42MetadataKeyThanks,
+            MP42MetadataKeyWorkName,
+            MP42MetadataKeyMovementName,
+            MP42MetadataKeyMovementNumber,
+            MP42MetadataKeyMovementCount,
+            MP42MetadataKeySortName,
+            MP42MetadataKeySortArtist,
+            MP42MetadataKeySortAlbumArtist,
+            MP42MetadataKeySortAlbum,
+            MP42MetadataKeySortComposer,
+            MP42MetadataKeySortTVShow];
 }
 
 + (NSArray<NSString *> *) writableMetadata
 {
     return @[
-            @"Name",
-            @"Artist",
-            @"Album Artist",
-            @"Album",
-            @"Grouping",
-            @"Composer",
-			@"Comments",
-            @"Genre",
-            @"Release Date",
-            @"Track #",
-            @"Disk #",
-            @"Tempo",
-            @"TV Show",
-            @"TV Episode #",
-			@"TV Network",
-            @"TV Episode ID",
-            @"TV Season",
-            @"Description",
-            @"Long Description",
-            @"Series Description",
-            @"Rating",
-            @"Rating Annotation",
-            @"Studio",
-            @"Cast",
-            @"Director",
-            @"Codirector",
-            @"Producers",
-            @"Screenwriters",
-            @"Lyrics",
-            @"Copyright",
-            @"Encoding Tool",
-            @"Encoded By",
-            @"Keywords",
-            @"Category",
-            @"contentID",
-            @"artistID",
-            @"playlistID",
-            @"genreID",
-            @"composerID",
-            @"XID",
-            @"iTunes Account",
-            @"iTunes Account Type",
-            @"iTunes Country",
-            @"Track Sub-Title",
-            @"Song Description",
-            @"Art Director",
-            @"Arranger",
-            @"Lyricist",
-            @"Acknowledgement",
-            @"Conductor",
-            @"Linear Notes",
-            @"Record Company",
-            @"Original Artist",
-            @"Phonogram Rights",
-            @"Producer",
-            @"Performer",
-            @"Publisher",
-            @"Sound Engineer",
-            @"Soloist",
-            @"Credits",
-            @"Thanks",
-            @"Online Extras",
-            @"Executive Producer",
-            @"Sort Name",
-            @"Sort Artist",
-            @"Sort Album Artist",
-            @"Sort Album",
-            @"Sort Composer",
-            @"Sort TV Show"];
+            MP42MetadataKeyName,
+            MP42MetadataKeyTrackSubTitle,
+            MP42MetadataKeyArtist,
+            MP42MetadataKeyAlbumArtist,
+            MP42MetadataKeyAlbum,
+            MP42MetadataKeyGrouping,
+            MP42MetadataKeyComposer,
+			MP42MetadataKeyUserComment,
+            MP42MetadataKeyUserGenre,
+            MP42MetadataKeyReleaseDate,
+            MP42MetadataKeyTrackNumber,
+            MP42MetadataKeyDiscNumber,
+            MP42MetadataKeyBeatsPerMin,
+            MP42MetadataKeyTVShow,
+            MP42MetadataKeyTVEpisodeNumber,
+			MP42MetadataKeyTVNetwork,
+            MP42MetadataKeyTVEpisodeID,
+            MP42MetadataKeyTVSeason,
+            MP42MetadataKeySongDescription,
+            MP42MetadataKeyDescription,
+            MP42MetadataKeyLongDescription,
+            MP42MetadataKeySeriesDescription,
+            MP42MetadataKeyRating,
+            MP42MetadataKeyRatingAnnotation,
+            MP42MetadataKeyStudio,
+            MP42MetadataKeyCast,
+            MP42MetadataKeyDirector,
+            MP42MetadataKeyCodirector,
+            MP42MetadataKeyProducer,
+            MP42MetadataKeyExecProducer,
+            MP42MetadataKeyScreenwriters,
+            MP42MetadataKeyLyrics,
+            MP42MetadataKeyCopyright,
+            MP42MetadataKeyEncodingTool,
+            MP42MetadataKeyEncodedBy,
+            MP42MetadataKeyKeywords,
+            MP42MetadataKeyCategory,
+            MP42MetadataKeyContentID,
+            MP42MetadataKeyArtistID,
+            MP42MetadataKeyPlaylistID,
+            MP42MetadataKeyGenreID,
+            MP42MetadataKeyComposerID,
+            MP42MetadataKeyXID,
+            MP42MetadataKeyAppleID,
+            MP42MetadataKeyAccountKind,
+            MP42MetadataKeyAccountCountry,
+            MP42MetadataKeyPurchasedDate,
+            MP42MetadataKeyOnlineExtras,
+            MP42MetadataKeyArtDirector,
+            MP42MetadataKeyArranger,
+            MP42MetadataKeyAuthor,
+            MP42MetadataKeyAcknowledgement,
+            MP42MetadataKeyConductor,
+            MP42MetadataKeyLinerNotes,
+            MP42MetadataKeyRecordCompany,
+            MP42MetadataKeyOriginalArtist,
+            MP42MetadataKeyPhonogramRights,
+            MP42MetadataKeySongProducer,
+            MP42MetadataKeyPerformer,
+            MP42MetadataKeyPublisher,
+            MP42MetadataKeySoundEngineer,
+            MP42MetadataKeySoloist,
+            MP42MetadataKeyCredits,
+            MP42MetadataKeyThanks,
+            MP42MetadataKeyWorkName,
+            MP42MetadataKeyMovementName,
+            MP42MetadataKeyMovementNumber,
+            MP42MetadataKeyMovementCount,
+            MP42MetadataKeySortName,
+            MP42MetadataKeySortArtist,
+            MP42MetadataKeySortAlbumArtist,
+            MP42MetadataKeySortAlbum,
+            MP42MetadataKeySortComposer,
+            MP42MetadataKeySortTVShow];
 }
 
 #pragma mark - Array conversion
@@ -439,7 +528,7 @@ static const genreType_t genreType_strings[] = {
         [result appendString:name[key]];
     }
 
-    return [[result copy] autorelease];
+    return [result copy];
 }
 
 /**
@@ -491,7 +580,7 @@ static const genreType_t genreType_strings[] = {
 
 - (BOOL)setMediaKindFromString:(NSString *)mediaKindString {
     for (mediaKind_t * mediaKindList = (mediaKind_t*) mediaKind_strings; mediaKindList->english_name; mediaKindList++) {
-        if ([mediaKindString isEqualToString:mediaKindList->english_name]) {
+        if ([mediaKindString isEqualToString:@(mediaKindList->english_name)]) {
             mediaKind = mediaKindList->stik;
             return YES;      
         }
@@ -501,7 +590,7 @@ static const genreType_t genreType_strings[] = {
 
 - (BOOL)setContentRatingFromString:(NSString *)contentRatingString {
     for (contentRating_t *contentRatingList = (contentRating_t*) contentRating_strings; contentRatingList->english_name; contentRatingList++) {
-        if ([contentRatingString isEqualToString:contentRatingList->english_name]) {
+        if ([contentRatingString isEqualToString:@(contentRatingList->english_name)]) {
             contentRating = contentRatingList->rtng;
             return YES;      
         }
@@ -517,18 +606,14 @@ static const genreType_t genreType_strings[] = {
         if (artworkImage.isValid) {
             MP42Image *artwork = [[MP42Image alloc] initWithImage:artworkImage];
             [artworks addObject:artwork];
-            [artworkImage release];
-            [artwork release];
             isEdited =YES;
             isArtworkEdited = YES;
             return YES;
         }
         else {
-            [artworkImage release];
             return NO;
         }
     } else {
-        [artworks release];
         artworks = nil;
         isEdited =YES;
         isArtworkEdited = YES;
@@ -567,8 +652,6 @@ static const genreType_t genreType_strings[] = {
 - (void)mergeMetadata:(MP42Metadata *)metadata {
     NSString *tagValue;
 
-    [metadata retain];
-
     for (NSString *key in [MP42Metadata writableMetadata]) {
         if ((tagValue = metadata.tagsDict[key])) {
             [tagsDict setObject:tagValue forKey:key];
@@ -590,8 +673,6 @@ static const genreType_t genreType_strings[] = {
     hdVideo = metadata.hdVideo;
 
     isEdited = YES;
-
-    [metadata release];
 }
 
 - (void)removeTagForKey:(NSString *)aKey {
@@ -618,7 +699,7 @@ static const genreType_t genreType_strings[] = {
         }
         isEdited = YES;
 
-    } else if ([key isEqualToString:@"Genre"]) {
+    } else if ([key isEqualToString:MP42MetadataKeyUserGenre]) {
         if ([value isKindOfClass:[NSNumber class]]) {
             [tagsDict setValue:[self genreFromIndex:[value integerValue]] forKey:key];
             isEdited = YES;
@@ -654,7 +735,7 @@ static const genreType_t genreType_strings[] = {
             isEdited = YES;
         }
 
-    } else if ([key isEqualToString:@"Track #"]) {
+    } else if ([key isEqualToString:MP42MetadataKeyTrackNumber]) {
         isEdited = YES;
         if ([value isKindOfClass:[NSData class]]) {
             uint8_t* bytes = (uint8_t*)malloc([value length]);
@@ -674,7 +755,7 @@ static const genreType_t genreType_strings[] = {
             NSAssert(YES, @"Invalid input");
         }
 
-    } else if ([key isEqualToString:@"Disk #"]) {
+    } else if ([key isEqualToString:MP42MetadataKeyDiscNumber]) {
         isEdited = YES;
         if ([value isKindOfClass:[NSData class]]) {
             uint8_t* bytes = (uint8_t*)malloc([value length]);
@@ -690,7 +771,7 @@ static const genreType_t genreType_strings[] = {
         } else if ([value isKindOfClass:[NSString class]]) {
             [tagsDict setValue:value forKey:key];
         }
-    } else if ([key isEqualToString:@"Rating"]) {
+    } else if ([key isEqualToString:MP42MetadataKeyRating]) {
         isEdited = YES;
         if ([value isKindOfClass:[NSString class]]) {
             NSNumber *index = @([[MP42Ratings defaultManager] ratingIndexForiTunesCode:value]);
@@ -700,7 +781,7 @@ static const genreType_t genreType_strings[] = {
             [tagsDict setValue:value forKey:key];
         }
 
-    } else if ([key isEqualToString:@"Content Rating"]) {
+    } else if ([key isEqualToString:MP42MetadataKeyContentRating]) {
         isEdited = YES;
         if ([value isKindOfClass:[NSNumber class]]) {
             contentRating = [value integerValue];
@@ -757,187 +838,207 @@ static const genreType_t genreType_strings[] = {
 
     if (tags->name)
         [tagsDict setObject:[self stringFromMetadata:tags->name]
-                     forKey:@"Name"];
+                     forKey:MP42MetadataKeyName];
 
     if (tags->artist)
         [tagsDict setObject:[self stringFromMetadata:tags->artist]
-                     forKey:@"Artist"];
+                     forKey:MP42MetadataKeyArtist];
 
     if (tags->albumArtist)
         [tagsDict setObject:[self stringFromMetadata:tags->albumArtist]
-                     forKey:@"Album Artist"];
+                     forKey:MP42MetadataKeyAlbumArtist];
 
     if (tags->album)
         [tagsDict setObject:[self stringFromMetadata:tags->album]
-                     forKey:@"Album"];
+                     forKey:MP42MetadataKeyAlbum];
 
     if (tags->grouping)
         [tagsDict setObject:[self stringFromMetadata:tags->grouping]
-                     forKey:@"Grouping"];
+                     forKey:MP42MetadataKeyGrouping];
 
     if (tags->composer)
         [tagsDict setObject:[self stringFromMetadata:tags->composer]
-                     forKey:@"Composer"];
+                     forKey:MP42MetadataKeyComposer];
 
     if (tags->comments)
         [tagsDict setObject:[self stringFromMetadata:tags->comments]
-                     forKey:@"Comments"];
+                     forKey:MP42MetadataKeyUserComment];
 
     if (tags->genre)
         [tagsDict setObject:[self stringFromMetadata:tags->genre]
-                     forKey:@"Genre"];
+                     forKey:MP42MetadataKeyUserGenre];
     
     if (tags->genreType && !tags->genre) {
         NSString *genre = [self genreFromIndex:*tags->genreType];
         if (genre) {
             [tagsDict setObject:genre
-                         forKey:@"Genre"];
+                         forKey:MP42MetadataKeyUserGenre];
         }
     }
 
     if (tags->releaseDate)
         [tagsDict setObject:[self stringFromMetadata:tags->releaseDate]
-                     forKey:@"Release Date"];
+                     forKey:MP42MetadataKeyReleaseDate];
 
     if (tags->track)
         [tagsDict setObject:[NSString stringWithFormat:@"%d/%d", tags->track->index, tags->track->total]
-                     forKey:@"Track #"];
+                     forKey:MP42MetadataKeyTrackNumber];
     
     if (tags->disk)
         [tagsDict setObject:[NSString stringWithFormat:@"%d/%d", tags->disk->index, tags->disk->total]
-                     forKey:@"Disk #"];
+                     forKey:MP42MetadataKeyDiscNumber];
 
     if (tags->tempo)
         [tagsDict setObject:[NSString stringWithFormat:@"%d", *tags->tempo]
-                     forKey:@"Tempo"];
+                     forKey:MP42MetadataKeyBeatsPerMin];
 
     if (tags->trackSubTitle)
         [tagsDict setObject:[self stringFromMetadata:tags->trackSubTitle]
-                     forKey:@"Track Sub-Title"];
+                     forKey:MP42MetadataKeyTrackSubTitle];
 
     if (tags->songDescription)
         [tagsDict setObject:[self stringFromMetadata:tags->songDescription]
-                     forKey:@"Song Description"];
+                     forKey:MP42MetadataKeySongDescription];
 
     if (tags->artDirector)
         [tagsDict setObject:[self stringFromMetadata:tags->artDirector]
-                     forKey:@"Art Director"];
+                     forKey:MP42MetadataKeyArtDirector];
 
     if (tags->arranger)
         [tagsDict setObject:[self stringFromMetadata:tags->arranger]
-                     forKey:@"Arranger"];
+                     forKey:MP42MetadataKeyArranger];
 
     if (tags->lyricist)
         [tagsDict setObject:[self stringFromMetadata:tags->lyricist]
-                     forKey:@"Lyricist"];
+                     forKey:MP42MetadataKeyAuthor];
 
     if (tags->acknowledgement)
         [tagsDict setObject:[self stringFromMetadata:tags->acknowledgement]
-                     forKey:@"Acknowledgement"];
+                     forKey:MP42MetadataKeyAcknowledgement];
 
     if (tags->conductor)
         [tagsDict setObject:[self stringFromMetadata:tags->conductor]
-                     forKey:@"Conductor"];
+                     forKey:MP42MetadataKeyConductor];
+
+    if (tags->workName)
+        [tagsDict setObject:[self stringFromMetadata:tags->workName]
+                     forKey:MP42MetadataKeyWorkName];
+
+    if (tags->movementName)
+        [tagsDict setObject:[self stringFromMetadata:tags->movementName]
+                     forKey:MP42MetadataKeyMovementName];
+
+    if (tags->movementCount)
+        [tagsDict setObject:[NSString stringWithFormat:@"%d", *tags->movementCount]
+                     forKey:MP42MetadataKeyMovementCount];
+
+    if (tags->movementNumber)
+        [tagsDict setObject:[NSString stringWithFormat:@"%d", *tags->movementNumber]
+                     forKey:MP42MetadataKeyMovementNumber];
+
+    if (tags->showWorkAndMovement)
+        [tagsDict setObject:[NSString stringWithFormat:@"%d", *tags->showWorkAndMovement]
+                     forKey:MP42MetadataKeyShowWorkAndMovement];
 
     if (tags->linearNotes)
         [tagsDict setObject:[self stringFromMetadata:tags->linearNotes]
-                     forKey:@"Linear Notes"];
+                     forKey:MP42MetadataKeyLinerNotes];
 
     if (tags->recordCompany)
         [tagsDict setObject:[self stringFromMetadata:tags->recordCompany]
-                     forKey:@"Record Company"];
+                     forKey:MP42MetadataKeyRecordCompany];
 
     if (tags->originalArtist)
         [tagsDict setObject:[self stringFromMetadata:tags->originalArtist]
-                     forKey:@"Original Artist"];
+                     forKey:MP42MetadataKeyOriginalArtist];
 
     if (tags->phonogramRights)
         [tagsDict setObject:[self stringFromMetadata:tags->phonogramRights]
-                     forKey:@"Phonogram Rights"];
+                     forKey:MP42MetadataKeyPhonogramRights];
     
     if (tags->producer)
         [tagsDict setObject:[self stringFromMetadata:tags->producer]
-                     forKey:@"Producer"];
+                     forKey:MP42MetadataKeySongProducer];
 
     if (tags->performer)
         [tagsDict setObject:[self stringFromMetadata:tags->performer]
-                     forKey:@"Performer"];
+                     forKey:MP42MetadataKeyPerformer];
 
     if (tags->publisher)
         [tagsDict setObject:[self stringFromMetadata:tags->publisher]
-                     forKey:@"Publisher"];
+                     forKey:MP42MetadataKeyPublisher];
 
     if (tags->soundEngineer)
         [tagsDict setObject:[self stringFromMetadata:tags->soundEngineer]
-                     forKey:@"Sound Engineer"];
+                     forKey:MP42MetadataKeySoundEngineer];
 
     if (tags->soloist)
         [tagsDict setObject:[self stringFromMetadata:tags->soloist]
-                     forKey:@"Soloist"];
+                     forKey:MP42MetadataKeySoloist];
 
     if (tags->credits)
         [tagsDict setObject:[self stringFromMetadata:tags->credits]
-                     forKey:@"Credits"];
+                     forKey:MP42MetadataKeyCredits];
 
     if (tags->thanks)
         [tagsDict setObject:[self stringFromMetadata:tags->thanks]
-                     forKey:@"Thanks"];
+                     forKey:MP42MetadataKeyThanks];
 
     if (tags->onlineExtras)
         [tagsDict setObject:[self stringFromMetadata:tags->onlineExtras]
-                     forKey:@"Online Extras"];
+                     forKey:MP42MetadataKeyOnlineExtras];
     
     if (tags->executiveProducer)
         [tagsDict setObject:[self stringFromMetadata:tags->executiveProducer]
-                     forKey:@"Executive Producer"];
+                     forKey:MP42MetadataKeyExecProducer];
 
     if (tags->tvShow)
         [tagsDict setObject:[self stringFromMetadata:tags->tvShow]
-                     forKey:@"TV Show"];
+                     forKey:MP42MetadataKeyTVShow];
 
     if (tags->tvEpisodeID)
         [tagsDict setObject:[self stringFromMetadata:tags->tvEpisodeID]
-                     forKey:@"TV Episode ID"];
+                     forKey:MP42MetadataKeyTVEpisodeID];
 
     if (tags->tvSeason)
         [tagsDict setObject:[NSString stringWithFormat:@"%d", *tags->tvSeason]
-                     forKey:@"TV Season"];
+                     forKey:MP42MetadataKeyTVSeason];
 
     if (tags->tvEpisode)
         [tagsDict setObject:[NSString stringWithFormat:@"%d", *tags->tvEpisode]
-                     forKey:@"TV Episode #"];
+                     forKey:MP42MetadataKeyTVEpisodeNumber];
 
     if (tags->tvNetwork)
         [tagsDict setObject:[self stringFromMetadata:tags->tvNetwork]
-                     forKey:@"TV Network"];
+                     forKey:MP42MetadataKeyTVNetwork];
 
     if (tags->description)
         [tagsDict setObject:[self stringFromMetadata:tags->description]
-                     forKey:@"Description"];
+                     forKey:MP42MetadataKeyDescription];
 
     if (tags->longDescription)
         [tagsDict setObject:[self stringFromMetadata:tags->longDescription]
-                     forKey:@"Long Description"];
+                     forKey:MP42MetadataKeyLongDescription];
 
     if (tags->seriesDescription)
         [tagsDict setObject:[self stringFromMetadata:tags->seriesDescription]
-                     forKey:@"Series Description"];
+                     forKey:MP42MetadataKeySeriesDescription];
 
     if (tags->lyrics)
         [tagsDict setObject:[self stringFromMetadata:tags->lyrics]
-                     forKey:@"Lyrics"];
+                     forKey:MP42MetadataKeyLyrics];
 
     if (tags->copyright)
         [tagsDict setObject:[self stringFromMetadata:tags->copyright]
-                     forKey:@"Copyright"];
+                     forKey:MP42MetadataKeyCopyright];
 
     if (tags->encodingTool)
         [tagsDict setObject:[self stringFromMetadata:tags->encodingTool]
-                     forKey:@"Encoding Tool"];
+                     forKey:MP42MetadataKeyEncodingTool];
 
     if (tags->encodedBy)
         [tagsDict setObject:[self stringFromMetadata:tags->encodedBy]
-                     forKey:@"Encoded By"];
+                     forKey:MP42MetadataKeyEncodedBy];
 
     if (tags->hdVideo)
         hdVideo = *tags->hdVideo;
@@ -953,84 +1054,83 @@ static const genreType_t genreType_strings[] = {
 
     if (tags->purchaseDate)
         [tagsDict setObject:[self stringFromMetadata:tags->purchaseDate]
-                     forKey:@"Purchase Date"];
+                     forKey:MP42MetadataKeyPurchasedDate];
 
     if (tags->iTunesAccount)
         [tagsDict setObject:[self stringFromMetadata:tags->iTunesAccount]
-                     forKey:@"iTunes Account"];
+                     forKey:MP42MetadataKeyAppleID];
 
     if( tags->iTunesAccountType )
         [tagsDict setObject:[NSString stringWithFormat:@"%d", *tags->iTunesAccountType]
-                     forKey:@"iTunes Account Type"];
+                     forKey:MP42MetadataKeyAccountKind];
 
     if (tags->iTunesCountry)
         [tagsDict setObject:[NSString stringWithFormat:@"%d", *tags->iTunesCountry]
-                     forKey:@"iTunes Country"];
+                     forKey:MP42MetadataKeyAccountCountry];
 
     if (tags->contentID)
         [tagsDict setObject:[NSString stringWithFormat:@"%d", *tags->contentID]
-                     forKey:@"contentID"];
+                     forKey:MP42MetadataKeyContentID];
 
     if (tags->artistID)
         [tagsDict setObject:[NSString stringWithFormat:@"%d", *tags->artistID]
-                     forKey:@"artistID"];
+                     forKey:MP42MetadataKeyArtistID];
 
     if (tags->playlistID)
         [tagsDict setObject:[NSString stringWithFormat:@"%lld", *tags->playlistID]
-                     forKey:@"playlistID"];
+                     forKey:MP42MetadataKeyPlaylistID];
 
     if (tags->genreID)
         [tagsDict setObject:[NSString stringWithFormat:@"%d", *tags->genreID]
-                     forKey:@"genreID"];
+                     forKey:MP42MetadataKeyGenreID];
 
     if (tags->composerID)
         [tagsDict setObject:[NSString stringWithFormat:@"%d", *tags->composerID]
-                     forKey:@"composerID"];
+                     forKey:MP42MetadataKeyComposerID];
 
     if (tags->xid)
         [tagsDict setObject:[self stringFromMetadata:tags->xid]
-                     forKey:@"XID"];    
+                     forKey:MP42MetadataKeyXID];    
 
     if (tags->sortName)
         [tagsDict setObject:[self stringFromMetadata:tags->sortName]
-                     forKey:@"Sort Name"];
+                     forKey:MP42MetadataKeySortName];
 
     if (tags->sortArtist)
         [tagsDict setObject:[self stringFromMetadata:tags->sortArtist]
-                     forKey:@"Sort Artist"];
+                     forKey:MP42MetadataKeySortArtist];
 
     if (tags->sortAlbumArtist)
         [tagsDict setObject:[self stringFromMetadata:tags->sortAlbumArtist]
-                     forKey:@"Sort Album Artist"];
+                     forKey:MP42MetadataKeySortAlbumArtist];
 
     if (tags->sortAlbum)
         [tagsDict setObject:[self stringFromMetadata:tags->sortAlbum]
-                     forKey:@"Sort Album"];
+                     forKey:MP42MetadataKeySortAlbum];
 
     if (tags->sortComposer)
         [tagsDict setObject:[self stringFromMetadata:tags->sortComposer]
-                     forKey:@"Sort Composer"];
+                     forKey:MP42MetadataKeySortComposer];
 
     if (tags->sortTVShow)
         [tagsDict setObject:[self stringFromMetadata:tags->sortTVShow]
-                     forKey:@"Sort TV Show"];
+                     forKey:MP42MetadataKeySortTVShow];
 
     if (tags->podcast)
         podcast = *tags->podcast;
 
     if (tags->keywords)
         [tagsDict setObject:[self stringFromMetadata:tags->keywords]
-                     forKey:@"Keywords"];
+                     forKey:MP42MetadataKeyKeywords];
 
     if (tags->category)
         [tagsDict setObject:[self stringFromMetadata:tags->category]
-                     forKey:@"Category"];
+                     forKey:MP42MetadataKeyCategory];
 
     if (tags->artwork) {
         for (uint32_t i = 0; i < tags->artworkCount; i++) {
             MP42Image *artwork = [[MP42Image alloc] initWithBytes:tags->artwork[i].data length:tags->artwork[i].size type:tags->artwork[i].type];
             [artworks addObject:artwork];
-            [artwork release];
         }
     }
 
@@ -1053,24 +1153,23 @@ static const genreType_t genreType_strings[] = {
                 NSString *splitElements  = @"\\|";
                 NSArray *ratingItems = [ratingString MP42_componentsSeparatedByRegex:splitElements];
 
-                [ratingString release];
 
                 if (ratingItems.count > 2) {
-                    ratingiTunesCode = [[NSString stringWithFormat:@"%@|%@|%@|", ratingItems[0], ratingItems[1], ratingItems[2]] retain];
+                    ratingiTunesCode = [NSString stringWithFormat:@"%@|%@|%@|", ratingItems[0], ratingItems[1], ratingItems[2]];
                 }
                 else {
                     ratingiTunesCode = nil;
                 }
 
                 if (ratingiTunesCode) {
-                    tagsDict[@"Rating"] = [NSNumber numberWithUnsignedInteger:[[MP42Ratings defaultManager] ratingIndexForiTunesCode:ratingiTunesCode]];
+                    tagsDict[MP42MetadataKeyRating] = [NSNumber numberWithUnsignedInteger:[[MP42Ratings defaultManager] ratingIndexForiTunesCode:ratingiTunesCode]];
                 }
                 else {
-                    tagsDict[@"Rating"] = @(0);
+                    tagsDict[MP42MetadataKeyRating] = @(0);
                 }
 
                 if (ratingItems.count >= 4) {
-                    tagsDict[@"Rating Annotation"] = ratingItems[3];
+                    tagsDict[MP42MetadataKeyRatingAnnotation] = ratingItems[3];
                 }
             }
         }
@@ -1096,27 +1195,27 @@ static const genreType_t genreType_strings[] = {
                 NSString *tag = nil;
 
                 if ([tag = [self stringFromArray:dma[@"cast"] key:@"name"] length]) {
-                    tagsDict[@"Cast"] = tag;
+                    tagsDict[MP42MetadataKeyCast] = tag;
                 }
 
                 if ([tag = [self stringFromArray:dma[@"directors"] key:@"name"] length]) {
-                    tagsDict[@"Director"] = tag;
+                    tagsDict[MP42MetadataKeyDirector] = tag;
                 }
 
                 if ([tag = [self stringFromArray:dma[@"codirectors"] key:@"name"] length]) {
-                    tagsDict[@"Codirector"] = tag;
+                    tagsDict[MP42MetadataKeyCodirector] = tag;
                 }
 
                 if ([tag = [self stringFromArray:dma[@"producers"] key:@"name"] length]) {
-                    tagsDict[@"Producers"] = tag;
+                    tagsDict[MP42MetadataKeyProducer] = tag;
                 }
 
                 if ([tag = [self stringFromArray:dma[@"screenwriters"] key:@"name"] length]) {
-                    tagsDict[@"Screenwriters"] = tag;
+                    tagsDict[MP42MetadataKeyScreenwriters] = tag;
                 }
 
                 if ([tag = dma[@"studio"] length]) {
-                    tagsDict[@"Studio"] = tag;
+                    tagsDict[MP42MetadataKeyStudio] = tag;
                 }
             }
         }
@@ -1132,31 +1231,31 @@ static const genreType_t genreType_strings[] = {
     const MP4Tags *tags = MP4TagsAlloc();
     MP4TagsFetch(tags, fileHandle);
 
-    MP4TagsSetName          (tags, [tagsDict[@"Name"] UTF8String]);
-    MP4TagsSetArtist        (tags, [tagsDict[@"Artist"] UTF8String]);
-    MP4TagsSetAlbumArtist   (tags, [tagsDict[@"Album Artist"] UTF8String]);
-    MP4TagsSetAlbum         (tags, [tagsDict[@"Album"] UTF8String]);
-    MP4TagsSetGrouping      (tags, [tagsDict[@"Grouping"] UTF8String]);
-    MP4TagsSetComposer      (tags, [tagsDict[@"Composer"] UTF8String]);
-    MP4TagsSetComments      (tags, [tagsDict[@"Comments"] UTF8String]);
+    MP4TagsSetName          (tags, [tagsDict[MP42MetadataKeyName] UTF8String]);
+    MP4TagsSetArtist        (tags, [tagsDict[MP42MetadataKeyArtist] UTF8String]);
+    MP4TagsSetAlbumArtist   (tags, [tagsDict[MP42MetadataKeyAlbumArtist] UTF8String]);
+    MP4TagsSetAlbum         (tags, [tagsDict[MP42MetadataKeyAlbum] UTF8String]);
+    MP4TagsSetGrouping      (tags, [tagsDict[MP42MetadataKeyGrouping] UTF8String]);
+    MP4TagsSetComposer      (tags, [tagsDict[MP42MetadataKeyComposer] UTF8String]);
+    MP4TagsSetComments      (tags, [tagsDict[MP42MetadataKeyUserComment] UTF8String]);
 
-    uint16_t genreType = [self genreIndexFromString:tagsDict[@"Genre"]];
+    uint16_t genreType = [self genreIndexFromString:tagsDict[MP42MetadataKeyUserGenre]];
     if (genreType) {
         MP4TagsSetGenre(tags, NULL);
         MP4TagsSetGenreType(tags, &genreType);
     }
     else {
         MP4TagsSetGenreType(tags, NULL);
-        MP4TagsSetGenre(tags, [tagsDict[@"Genre"] UTF8String]);
+        MP4TagsSetGenre(tags, [tagsDict[MP42MetadataKeyUserGenre] UTF8String]);
     }
 
-    MP4TagsSetReleaseDate(tags, [tagsDict[@"Release Date"] UTF8String]);
+    MP4TagsSetReleaseDate(tags, [tagsDict[MP42MetadataKeyReleaseDate] UTF8String]);
 
-    if (tagsDict[@"Track #"]) {
+    if (tagsDict[MP42MetadataKeyTrackNumber]) {
         MP4TagTrack dtrack; int trackNum = 0, totalTrackNum = 0;
         char separator[3];
 
-        sscanf([tagsDict[@"Track #"] UTF8String],"%u%[/- ]%u", &trackNum, separator, &totalTrackNum);
+        sscanf([tagsDict[MP42MetadataKeyTrackNumber] UTF8String],"%u%[/- ]%u", &trackNum, separator, &totalTrackNum);
         dtrack.index = trackNum;
         dtrack.total = totalTrackNum;
 
@@ -1166,11 +1265,11 @@ static const genreType_t genreType_strings[] = {
         MP4TagsSetTrack(tags, NULL);
     }
     
-    if (tagsDict[@"Disk #"]) {
+    if (tagsDict[MP42MetadataKeyDiscNumber]) {
         MP4TagDisk ddisk; int diskNum = 0, totalDiskNum = 0;
         char separator[3];
 
-        sscanf([tagsDict[@"Disk #"] UTF8String],"%u%[/- ]%u", &diskNum, separator, &totalDiskNum);
+        sscanf([tagsDict[MP42MetadataKeyDiscNumber] UTF8String],"%u%[/- ]%u", &diskNum, separator, &totalDiskNum);
         ddisk.index = diskNum;
         ddisk.total = totalDiskNum;
 
@@ -1180,63 +1279,63 @@ static const genreType_t genreType_strings[] = {
         MP4TagsSetDisk(tags, NULL);
     }
     
-    if (tagsDict[@"Tempo"]) {
-        const uint16_t i = [tagsDict[@"Tempo"] integerValue];
+    if (tagsDict[MP42MetadataKeyBeatsPerMin]) {
+        const uint16_t i = [tagsDict[MP42MetadataKeyBeatsPerMin] integerValue];
         MP4TagsSetTempo(tags, &i);
     }
     else {
         MP4TagsSetTempo(tags, NULL);
     }
 
-    MP4TagsSetTrackSubTitle    (tags, [tagsDict[@"Track Sub-Title"] UTF8String]);
-    MP4TagsSetSongDescription  (tags, [tagsDict[@"Song Description"] UTF8String]);
-    MP4TagsSetArtDirector      (tags, [tagsDict[@"Art Director"] UTF8String]);
-    MP4TagsSetArranger         (tags, [tagsDict[@"Arranger"] UTF8String]);
-    MP4TagsSetLyricist         (tags, [tagsDict[@"Lyricist"] UTF8String]);
-    MP4TagsSetAcknowledgement  (tags, [tagsDict[@"Acknowledgement"] UTF8String]);
-    MP4TagsSetConductor        (tags, [tagsDict[@"Conductor"] UTF8String]);
-    MP4TagsSetLinearNotes      (tags, [tagsDict[@"Linear Notes"] UTF8String]);
-    MP4TagsSetRecordCompany    (tags, [tagsDict[@"Record Company"] UTF8String]);
-    MP4TagsSetOriginalArtist   (tags, [tagsDict[@"Original Artist"] UTF8String]);
-    MP4TagsSetPhonogramRights  (tags, [tagsDict[@"Phonogram Rights"] UTF8String]);
-    MP4TagsSetProducer         (tags, [tagsDict[@"Producer"] UTF8String]);
-    MP4TagsSetPerformer        (tags, [tagsDict[@"Performer"] UTF8String]);
-    MP4TagsSetPublisher        (tags, [tagsDict[@"Publisher"] UTF8String]);
-    MP4TagsSetSoundEngineer    (tags, [tagsDict[@"Sound Engineer"] UTF8String]);
-    MP4TagsSetSoloist          (tags, [tagsDict[@"Soloist"] UTF8String]);
-    MP4TagsSetCredits          (tags, [tagsDict[@"Credits"] UTF8String]);
-    MP4TagsSetThanks           (tags, [tagsDict[@"Thanks"] UTF8String]);
-    MP4TagsSetOnlineExtras     (tags, [tagsDict[@"Online Extras"] UTF8String]);
-    MP4TagsSetExecutiveProducer(tags, [tagsDict[@"Executive Producer"] UTF8String]);
-    MP4TagsSetTVShow           (tags, [tagsDict[@"TV Show"] UTF8String]);
-    MP4TagsSetTVNetwork        (tags, [tagsDict[@"TV Network"] UTF8String]);
-    MP4TagsSetTVEpisodeID      (tags, [tagsDict[@"TV Episode ID"] UTF8String]);
+    MP4TagsSetTrackSubTitle    (tags, [tagsDict[MP42MetadataKeyTrackSubTitle] UTF8String]);
+    MP4TagsSetSongDescription  (tags, [tagsDict[MP42MetadataKeySongDescription] UTF8String]);
+    MP4TagsSetArtDirector      (tags, [tagsDict[MP42MetadataKeyArtDirector] UTF8String]);
+    MP4TagsSetArranger         (tags, [tagsDict[MP42MetadataKeyArranger] UTF8String]);
+    MP4TagsSetLyricist         (tags, [tagsDict[MP42MetadataKeyAuthor] UTF8String]);
+    MP4TagsSetAcknowledgement  (tags, [tagsDict[MP42MetadataKeyAcknowledgement] UTF8String]);
+    MP4TagsSetConductor        (tags, [tagsDict[MP42MetadataKeyConductor] UTF8String]);
+    MP4TagsSetLinearNotes      (tags, [tagsDict[MP42MetadataKeyLinerNotes] UTF8String]);
+    MP4TagsSetRecordCompany    (tags, [tagsDict[MP42MetadataKeyRecordCompany] UTF8String]);
+    MP4TagsSetOriginalArtist   (tags, [tagsDict[MP42MetadataKeyOriginalArtist] UTF8String]);
+    MP4TagsSetPhonogramRights  (tags, [tagsDict[MP42MetadataKeyPhonogramRights] UTF8String]);
+    MP4TagsSetProducer         (tags, [tagsDict[MP42MetadataKeySongProducer] UTF8String]);
+    MP4TagsSetPerformer        (tags, [tagsDict[MP42MetadataKeyPerformer] UTF8String]);
+    MP4TagsSetPublisher        (tags, [tagsDict[MP42MetadataKeyPublisher] UTF8String]);
+    MP4TagsSetSoundEngineer    (tags, [tagsDict[MP42MetadataKeySoundEngineer] UTF8String]);
+    MP4TagsSetSoloist          (tags, [tagsDict[MP42MetadataKeySoloist] UTF8String]);
+    MP4TagsSetCredits          (tags, [tagsDict[MP42MetadataKeyCredits] UTF8String]);
+    MP4TagsSetThanks           (tags, [tagsDict[MP42MetadataKeyThanks] UTF8String]);
+    MP4TagsSetOnlineExtras     (tags, [tagsDict[MP42MetadataKeyOnlineExtras] UTF8String]);
+    MP4TagsSetExecutiveProducer(tags, [tagsDict[MP42MetadataKeyExecProducer] UTF8String]);
+    MP4TagsSetTVShow           (tags, [tagsDict[MP42MetadataKeyTVShow] UTF8String]);
+    MP4TagsSetTVNetwork        (tags, [tagsDict[MP42MetadataKeyTVNetwork] UTF8String]);
+    MP4TagsSetTVEpisodeID      (tags, [tagsDict[MP42MetadataKeyTVEpisodeID] UTF8String]);
 
-    if (tagsDict[@"TV Season"]) {
-        const uint32_t i = [tagsDict[@"TV Season"] intValue];
+    if (tagsDict[MP42MetadataKeyTVSeason]) {
+        const uint32_t i = [tagsDict[MP42MetadataKeyTVSeason] intValue];
         MP4TagsSetTVSeason(tags, &i);
     }
     else {
         MP4TagsSetTVSeason(tags, NULL);
     }
 
-    if (tagsDict[@"TV Episode #"]) {
-        const uint32_t i = [tagsDict[@"TV Episode #"] intValue];
+    if (tagsDict[MP42MetadataKeyTVEpisodeNumber]) {
+        const uint32_t i = [tagsDict[MP42MetadataKeyTVEpisodeNumber] intValue];
         MP4TagsSetTVEpisode(tags, &i);
     }
     else {
         MP4TagsSetTVEpisode(tags, NULL);
     }
 
-    MP4TagsSetDescription       (tags, [tagsDict[@"Description"] UTF8String]);
-    MP4TagsSetLongDescription   (tags, [tagsDict[@"Long Description"] UTF8String]);
-    MP4TagsSetSeriesDescription (tags, [tagsDict[@"Series Description"] UTF8String]);
-    MP4TagsSetLyrics            (tags, [tagsDict[@"Lyrics"] UTF8String]);
-    MP4TagsSetCopyright         (tags, [tagsDict[@"Copyright"] UTF8String]);
-    MP4TagsSetEncodingTool      (tags, [tagsDict[@"Encoding Tool"] UTF8String]);
-    MP4TagsSetEncodedBy         (tags, [tagsDict[@"Encoded By"] UTF8String]);
-    MP4TagsSetPurchaseDate      (tags, [tagsDict[@"Purchase Date"] UTF8String]);
-    MP4TagsSetITunesAccount     (tags, [tagsDict[@"iTunes Account"] UTF8String]);
+    MP4TagsSetDescription       (tags, [tagsDict[MP42MetadataKeyDescription] UTF8String]);
+    MP4TagsSetLongDescription   (tags, [tagsDict[MP42MetadataKeyLongDescription] UTF8String]);
+    MP4TagsSetSeriesDescription (tags, [tagsDict[MP42MetadataKeySeriesDescription] UTF8String]);
+    MP4TagsSetLyrics            (tags, [tagsDict[MP42MetadataKeyLyrics] UTF8String]);
+    MP4TagsSetCopyright         (tags, [tagsDict[MP42MetadataKeyCopyright] UTF8String]);
+    MP4TagsSetEncodingTool      (tags, [tagsDict[MP42MetadataKeyEncodingTool] UTF8String]);
+    MP4TagsSetEncodedBy         (tags, [tagsDict[MP42MetadataKeyEncodedBy] UTF8String]);
+    MP4TagsSetPurchaseDate      (tags, [tagsDict[MP42MetadataKeyPurchasedDate] UTF8String]);
+    MP4TagsSetITunesAccount     (tags, [tagsDict[MP42MetadataKeyAppleID] UTF8String]);
 
     if (mediaKind != 0) {
         MP4TagsSetMediaType(tags, &mediaKind);
@@ -1282,66 +1381,66 @@ static const genreType_t genreType_strings[] = {
         MP4TagsSetPodcast(tags, NULL);
     }
 
-    MP4TagsSetKeywords(tags, [tagsDict[@"Keywords"] UTF8String]);
-    MP4TagsSetCategory(tags, [tagsDict[@"Category"] UTF8String]);
+    MP4TagsSetKeywords(tags, [tagsDict[MP42MetadataKeyKeywords] UTF8String]);
+    MP4TagsSetCategory(tags, [tagsDict[MP42MetadataKeyCategory] UTF8String]);
 
     MP4TagsSetContentRating(tags, &contentRating);
 
-    if (tagsDict[@"iTunes Country"] && [tagsDict[@"iTunes Country"] length]) {
-        const uint32_t i = [tagsDict[@"iTunes Country"] integerValue];
+    if (tagsDict[MP42MetadataKeyAccountCountry] && [tagsDict[MP42MetadataKeyAccountCountry] length]) {
+        const uint32_t i = [tagsDict[MP42MetadataKeyAccountCountry] integerValue];
         MP4TagsSetITunesCountry(tags, &i);
     }
     else {
         MP4TagsSetITunesCountry(tags, NULL);
     }
 
-    if (tagsDict[@"contentID"] && [tagsDict[@"contentID"] length]) {
-        const uint32_t i = [tagsDict[@"contentID"] integerValue];
+    if (tagsDict[MP42MetadataKeyContentID] && [tagsDict[MP42MetadataKeyContentID] length]) {
+        const uint32_t i = [tagsDict[MP42MetadataKeyContentID] integerValue];
         MP4TagsSetContentID(tags, &i);
     }
     else {
         MP4TagsSetContentID(tags, NULL);
     }
 
-    if (tagsDict[@"genreID"] && [tagsDict[@"genreID"] length]) {
-        const uint32_t i = [tagsDict[@"genreID"] integerValue];
+    if (tagsDict[MP42MetadataKeyGenreID] && [tagsDict[MP42MetadataKeyGenreID] length]) {
+        const uint32_t i = [tagsDict[MP42MetadataKeyGenreID] integerValue];
         MP4TagsSetGenreID(tags, &i);
     }
     else {
         MP4TagsSetGenreID(tags, NULL);
     }
 
-    if (tagsDict[@"artistID"] && [tagsDict[@"artistID"] length]) {
-        const uint32_t i = [tagsDict[@"artistID"] integerValue];
+    if (tagsDict[MP42MetadataKeyArtistID] && [tagsDict[MP42MetadataKeyArtistID] length]) {
+        const uint32_t i = [tagsDict[MP42MetadataKeyArtistID] integerValue];
         MP4TagsSetArtistID(tags, &i);
     }
     else {
         MP4TagsSetArtistID(tags, NULL);
     }
 
-    if (tagsDict[@"playlistID"] && [tagsDict[@"playlistID"] length]) {
-        const uint64_t i = [tagsDict[@"playlistID"] integerValue];
+    if (tagsDict[MP42MetadataKeyPlaylistID] && [tagsDict[MP42MetadataKeyPlaylistID] length]) {
+        const uint64_t i = [tagsDict[MP42MetadataKeyPlaylistID] integerValue];
         MP4TagsSetPlaylistID(tags, &i);
     }
     else {
         MP4TagsSetPlaylistID(tags, NULL);
     }
 
-    if (tagsDict[@"composerID"] && [tagsDict[@"composerID"] length]) {
-        const uint32_t i = [tagsDict[@"composerID"] integerValue];
+    if (tagsDict[MP42MetadataKeyComposerID] && [tagsDict[MP42MetadataKeyComposerID] length]) {
+        const uint32_t i = [tagsDict[MP42MetadataKeyComposerID] integerValue];
         MP4TagsSetComposerID(tags, &i);
     }
     else {
         MP4TagsSetComposerID(tags, NULL);
     }
 
-    MP4TagsSetXID            (tags, [tagsDict[@"XID"] UTF8String]);
-    MP4TagsSetSortName       (tags, [tagsDict[@"Sort Name"] UTF8String]);
-    MP4TagsSetSortArtist     (tags, [tagsDict[@"Sort Artist"] UTF8String]);
-    MP4TagsSetSortAlbumArtist(tags, [tagsDict[@"Sort Album Artist"] UTF8String]);
-    MP4TagsSetSortAlbum      (tags, [tagsDict[@"Sort Album"] UTF8String]);
-    MP4TagsSetSortComposer   (tags, [tagsDict[@"Sort Composer"] UTF8String]);
-    MP4TagsSetSortTVShow     (tags, [tagsDict[@"Sort TV Show"] UTF8String]);
+    MP4TagsSetXID            (tags, [tagsDict[MP42MetadataKeyXID] UTF8String]);
+    MP4TagsSetSortName       (tags, [tagsDict[MP42MetadataKeySortName] UTF8String]);
+    MP4TagsSetSortArtist     (tags, [tagsDict[MP42MetadataKeySortArtist] UTF8String]);
+    MP4TagsSetSortAlbumArtist(tags, [tagsDict[MP42MetadataKeySortAlbumArtist] UTF8String]);
+    MP4TagsSetSortAlbum      (tags, [tagsDict[MP42MetadataKeySortAlbum] UTF8String]);
+    MP4TagsSetSortComposer   (tags, [tagsDict[MP42MetadataKeySortComposer] UTF8String]);
+    MP4TagsSetSortTVShow     (tags, [tagsDict[MP42MetadataKeySortTVShow] UTF8String]);
 
     if (isArtworkEdited) {
 
@@ -1391,7 +1490,7 @@ static const genreType_t genreType_strings[] = {
 
     // Rewrite extended metadata using the generic iTMF api
 
-    if (tagsDict[@"Rating"]) {
+    if (tagsDict[MP42MetadataKeyRating]) {
 
         MP4ItmfItemList *list = MP4ItmfGetItemsByMeaning(fileHandle, "com.apple.iTunes", "iTunEXTC");
         if (list) {
@@ -1412,20 +1511,20 @@ static const genreType_t genreType_strings[] = {
         NSArray *iTunesCodes = [[MP42Ratings defaultManager] iTunesCodes];
 
         // This whole thing is extremely convoluted and wrong in some cases.
-        if (![tagsDict[@"Rating"] isKindOfClass:[NSNumber class]] ||
-            [tagsDict[@"Rating"] unsignedIntegerValue] == [[MP42Ratings defaultManager] unknownIndex]) {
+        if (![tagsDict[MP42MetadataKeyRating] isKindOfClass:[NSNumber class]] ||
+            [tagsDict[MP42MetadataKeyRating] unsignedIntegerValue] == [[MP42Ratings defaultManager] unknownIndex]) {
             if (!ratingString) {
                 ratingString = [iTunesCodes objectAtIndex:[[MP42Ratings defaultManager] unknownIndex]];
             }
         } else {
-            NSUInteger index = [tagsDict[@"Rating"] unsignedIntegerValue];
+            NSUInteger index = [tagsDict[MP42MetadataKeyRating] unsignedIntegerValue];
             if (iTunesCodes.count > index) {
-                ratingString = [iTunesCodes objectAtIndex:[tagsDict[@"Rating"] unsignedIntegerValue]];
+                ratingString = [iTunesCodes objectAtIndex:[tagsDict[MP42MetadataKeyRating] unsignedIntegerValue]];
             }
         }
 
-        if ([tagsDict[@"Rating Annotation"] length] && [ratingString length]) {
-			ratingString = [NSString stringWithFormat:@"%@%@", ratingString, tagsDict[@"Rating Annotation"]];
+        if ([tagsDict[MP42MetadataKeyRatingAnnotation] length] && [ratingString length]) {
+			ratingString = [NSString stringWithFormat:@"%@%@", ratingString, tagsDict[MP42MetadataKeyRatingAnnotation]];
 		}
 
         if (ratingString) {
@@ -1464,7 +1563,6 @@ static const genreType_t genreType_strings[] = {
                 NSDictionary *dma = (NSDictionary *)[NSPropertyListSerialization propertyListWithData:xmlData
                                                                                               options:NSPropertyListMutableContainersAndLeaves
                                                                                                format:nil error:NULL];
-                [iTunMovi release];
                 iTunMovi = [dma mutableCopy];
             }
         }
@@ -1472,43 +1570,43 @@ static const genreType_t genreType_strings[] = {
     }
 
     if (iTunMovi) {
-        if (tagsDict[@"Cast"]) {
-            [iTunMovi setObject:[self dictArrayFromString:tagsDict[@"Cast"] key:@"name"] forKey:@"cast"];
+        if (tagsDict[MP42MetadataKeyCast]) {
+            [iTunMovi setObject:[self dictArrayFromString:tagsDict[MP42MetadataKeyCast] key:@"name"] forKey:@"cast"];
         }
         else {
             [iTunMovi removeObjectForKey:@"cast"];
         }
 
-        if (tagsDict[@"Director"]) {
-            [iTunMovi setObject:[self dictArrayFromString:tagsDict[@"Director"] key:@"name"] forKey:@"directors"];
+        if (tagsDict[MP42MetadataKeyDirector]) {
+            [iTunMovi setObject:[self dictArrayFromString:tagsDict[MP42MetadataKeyDirector] key:@"name"] forKey:@"directors"];
         }
         else {
             [iTunMovi removeObjectForKey:@"directors"];
         }
 
-        if (tagsDict[@"Codirector"]) {
-            [iTunMovi setObject:[self dictArrayFromString:tagsDict[@"Codirector"] key:@"name"] forKey:@"codirectors"];
+        if (tagsDict[MP42MetadataKeyCodirector]) {
+            [iTunMovi setObject:[self dictArrayFromString:tagsDict[MP42MetadataKeyCodirector] key:@"name"] forKey:@"codirectors"];
         }
         else {
             [iTunMovi removeObjectForKey:@"codirectors"];
         }
 
-        if (tagsDict[@"Producers"]) {
-            [iTunMovi setObject:[self dictArrayFromString:tagsDict[@"Producers"] key:@"name"] forKey:@"producers"];
+        if (tagsDict[MP42MetadataKeyProducer]) {
+            [iTunMovi setObject:[self dictArrayFromString:tagsDict[MP42MetadataKeyProducer] key:@"name"] forKey:@"producers"];
         }
         else {
             [iTunMovi removeObjectForKey:@"producers"];
         }
 
-        if (tagsDict[@"Screenwriters"]) {
-            [iTunMovi setObject:[self dictArrayFromString:tagsDict[@"Screenwriters"] key:@"name"] forKey:@"screenwriters"];
+        if (tagsDict[MP42MetadataKeyScreenwriters]) {
+            [iTunMovi setObject:[self dictArrayFromString:tagsDict[MP42MetadataKeyScreenwriters] key:@"name"] forKey:@"screenwriters"];
         }
         else {
             [iTunMovi removeObjectForKey:@"screenwriters"];
         }
 
-        if (tagsDict[@"Studio"]) {
-            [iTunMovi setObject:tagsDict[@"Studio"] forKey:@"studio"];
+        if (tagsDict[MP42MetadataKeyStudio]) {
+            [iTunMovi setObject:tagsDict[MP42MetadataKeyStudio] forKey:@"studio"];
         }
         else {
             [iTunMovi removeObjectForKey:@"studio"];
@@ -1554,8 +1652,6 @@ static const genreType_t genreType_strings[] = {
         }
     }
 
-    [iTunMovi release];
-
     return YES;
 }
 
@@ -1585,8 +1681,8 @@ static const genreType_t genreType_strings[] = {
 
     NSInteger version = [decoder decodeIntForKey:@"MP42TagEncodeVersion"];
 
-    presetName = [[decoder decodeObjectForKey:@"MP42SetName"] retain];
-    tagsDict = [[decoder decodeObjectForKey:@"MP42TagsDict"] retain];
+    presetName = [decoder decodeObjectForKey:@"MP42SetName"];
+    tagsDict = [decoder decodeObjectForKey:@"MP42TagsDict"];
 
     // Subler 0.19 and previous sets
     if (version < 2) {
@@ -1595,11 +1691,11 @@ static const genreType_t genreType_strings[] = {
         if (image) {
             MP42Image *artwork = [[MP42Image alloc] initWithImage:image];
             [artworks addObject: artwork];
-            [artwork release];
         }
     }
-    else
-        artworks = [[decoder decodeObjectForKey:@"MP42Artwork"] retain];
+    else {
+        artworks = [decoder decodeObjectForKey:@"MP42Artwork"];
+    }
 
     isArtworkEdited = [decoder decodeBoolForKey:@"MP42ArtworkEdited"];
 
