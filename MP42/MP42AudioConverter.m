@@ -97,6 +97,14 @@
     return _encoder.magicCookie;
 }
 
+- (double)sampleRate {
+    double sampleRate = self.decoder.outputFormat.mSampleRate;
+    if (sampleRate > 48000) {
+        return 48000;
+    }
+    return sampleRate;
+}
+
 - (void)dealloc {
     [_decoder release];
     [_encoder release];

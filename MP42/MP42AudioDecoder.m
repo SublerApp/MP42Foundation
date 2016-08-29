@@ -269,13 +269,20 @@ static void configureDescriptors(MP42DecodeContext *context, AVFrame *frame)
 {
     // Get real channels number and layout
     int nb_channels = av_get_channel_layout_nb_channels(frame->channel_layout);
+    int sample_rate = frame->sample_rate;
 
-    // Reset the channels per frame
+    // Reset the channels per frame and sample rate
     if (context->inputFormat->mChannelsPerFrame == context->outputFormat->mChannelsPerFrame) {
         context->outputFormat->mChannelsPerFrame = nb_channels;
         context->inputFormat->mChannelsPerFrame = nb_channels;
     }
-    context->outputFormat->mChannelsPerFrame = context->outputFormat->mChannelsPerFrame;
+    context->inputFormat->mSampleRate = sample_rate;
+
+    if (sample_rate > 48000) {
+        sample_rate = 48000;
+    }
+
+    context->outputFormat->mSampleRate = sample_rate;
     context->outputFormat->mBytesPerPacket = 4 * context->outputFormat->mChannelsPerFrame;
     context->outputFormat->mBytesPerFrame = context->outputFormat->mBytesPerPacket * context->outputFormat->mFramesPerPacket;
 
@@ -313,6 +320,7 @@ static int resample(MP42DecodeContext *context, AVFrame *frame, uint8_t **output
         context->resampler = hb_audio_resample_init(AV_SAMPLE_FMT_FLT,
                                                     context->out_layout,
                                                     context->matrix_encoding,
+                                                    context->outputFormat->mSampleRate,
                                                     0);
     }
 
@@ -327,7 +335,7 @@ static int resample(MP42DecodeContext *context, AVFrame *frame, uint8_t **output
         double          surround_mix_level, center_mix_level;
         AVDownmixInfo * downmix_info;
 
-        downmix_info = (AVDownmixInfo*)side_data->data;
+        downmix_info = (AVDownmixInfo *)side_data->data;
         if (context->matrix_encoding == AV_MATRIX_ENCODING_DOLBY ||
             context->matrix_encoding == AV_MATRIX_ENCODING_DPLII)
         {
@@ -346,6 +354,8 @@ static int resample(MP42DecodeContext *context, AVFrame *frame, uint8_t **output
     }
     hb_audio_resample_set_channel_layout(context->resampler,
                                          frame->channel_layout);
+    hb_audio_resample_set_sample_rate(context->resampler,
+                                      frame->sample_rate);
     hb_audio_resample_set_sample_fmt(context->resampler,
                                      frame->format);
     if (hb_audio_resample_update(context->resampler))

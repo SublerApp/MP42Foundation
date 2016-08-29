@@ -33,6 +33,7 @@ typedef struct
     struct
     {
         uint64_t channel_layout;
+        double sample_rate;
         double lfe_mix_level;
         double center_mix_level;
         double surround_mix_level;
@@ -43,6 +44,7 @@ typedef struct
     {
         int channels;
         uint64_t channel_layout;
+        double sample_rate;
         double lfe_mix_level;
         double center_mix_level;
         double surround_mix_level;
@@ -55,6 +57,7 @@ typedef struct
         int sample_size;
         int normalize_mix_level;
         uint64_t channel_layout;
+        double sample_rate;
         enum AVSampleFormat sample_fmt;
         enum AVMatrixEncoding matrix_encoding;
     } out;
@@ -68,7 +71,7 @@ typedef struct
  */
 hb_audio_resample_t* hb_audio_resample_init(enum AVSampleFormat sample_fmt,
                                             uint64_t channel_layout, int matrix_encoding,
-                                            int normalize_mix);
+                                            double sample_rate, int normalize_mix);
 
 /* The following functions set the audio input characteristics.
  *
@@ -78,6 +81,9 @@ hb_audio_resample_t* hb_audio_resample_init(enum AVSampleFormat sample_fmt,
 
 void                 hb_audio_resample_set_channel_layout(hb_audio_resample_t *resample,
                                                           uint64_t channel_layout);
+
+void                 hb_audio_resample_set_sample_rate(hb_audio_resample_t *resample,
+                                                          double sample_rate);
 
 void                 hb_audio_resample_set_mix_levels(hb_audio_resample_t *resample,
                                                       double surround_mix_level,

@@ -18,7 +18,7 @@
 
 hb_audio_resample_t* hb_audio_resample_init(enum AVSampleFormat sample_fmt,
                                             uint64_t channel_layout, int matrix_encoding,
-                                            int normalize_mix)
+                                            double sample_rate, int normalize_mix)
 {
     hb_audio_resample_t *resample = calloc(1, sizeof(hb_audio_resample_t));
     if (resample == NULL)
@@ -60,6 +60,7 @@ hb_audio_resample_t* hb_audio_resample_init(enum AVSampleFormat sample_fmt,
     // requested output channel_layout, sample_fmt
     resample->out.channels = av_get_channel_layout_nb_channels(channel_layout);
     resample->out.channel_layout      = channel_layout;
+    resample->out.sample_rate         = sample_rate;
     resample->out.matrix_encoding     = matrix_encoding;
     resample->out.normalize_mix_level = normalize_mix;
     resample->out.sample_fmt          = sample_fmt;
@@ -68,6 +69,7 @@ hb_audio_resample_t* hb_audio_resample_init(enum AVSampleFormat sample_fmt,
     // set default input characteristics
     resample->in.sample_fmt         = resample->out.sample_fmt;
     resample->in.channel_layout     = resample->out.channel_layout;
+    resample->in.sample_rate        = resample->out.sample_rate;
     resample->in.lfe_mix_level      = HB_MIXLEV_ZERO;
     resample->in.center_mix_level   = HB_MIXLEV_DEFAULT;
     resample->in.surround_mix_level = HB_MIXLEV_DEFAULT;
@@ -92,6 +94,15 @@ void hb_audio_resample_set_channel_layout(hb_audio_resample_t *resample,
             channel_layout = AV_CH_LAYOUT_STEREO;
         }
         resample->in.channel_layout = channel_layout;
+    }
+}
+
+void hb_audio_resample_set_sample_rate(hb_audio_resample_t *resample,
+                                       double sample_rate)
+{
+    if (resample != NULL)
+    {
+        resample->in.sample_rate = sample_rate;
     }
 }
 
@@ -135,6 +146,7 @@ int hb_audio_resample_update(hb_audio_resample_t *resample)
         (resample->resample_needed &&
          (resample->resample.sample_fmt != resample->in.sample_fmt ||
           resample->resample.channel_layout != resample->in.channel_layout ||
+          resample->resample.sample_rate != resample->in.sample_rate ||
           resample->resample.lfe_mix_level != resample->in.lfe_mix_level ||
           resample->resample.center_mix_level != resample->in.center_mix_level ||
           resample->resample.surround_mix_level != resample->in.surround_mix_level));
@@ -155,6 +167,8 @@ int hb_audio_resample_update(hb_audio_resample_t *resample)
                            resample->out.sample_fmt, 0);
             av_opt_set_int(resample->avresample, "out_channel_layout",
                            resample->out.channel_layout, 0);
+            av_opt_set_int(resample->avresample, "out_sample_rate",
+                           resample->out.sample_rate, 0);
             av_opt_set_int(resample->avresample, "matrix_encoding",
                            resample->out.matrix_encoding, 0);
             av_opt_set_int(resample->avresample, "normalize_mix_level",
@@ -169,6 +183,8 @@ int hb_audio_resample_update(hb_audio_resample_t *resample)
                        resample->in.sample_fmt, 0);
         av_opt_set_int(resample->avresample, "in_channel_layout",
                        resample->in.channel_layout, 0);
+        av_opt_set_int(resample->avresample, "in_sample_rate",
+                       resample->in.sample_rate, 0);
         av_opt_set_double(resample->avresample, "lfe_mix_level",
                           resample->in.lfe_mix_level, 0);
         av_opt_set_double(resample->avresample, "center_mix_level",
@@ -191,6 +207,7 @@ int hb_audio_resample_update(hb_audio_resample_t *resample)
         resample->resample.channel_layout     = resample->in.channel_layout;
         resample->resample.channels           =
             av_get_channel_layout_nb_channels(resample->in.channel_layout);
+        resample->resample.sample_rate        = resample->in.sample_rate;
         resample->resample.lfe_mix_level      = resample->in.lfe_mix_level;
         resample->resample.center_mix_level   = resample->in.center_mix_level;
         resample->resample.surround_mix_level = resample->in.surround_mix_level;
@@ -237,14 +254,18 @@ int hb_audio_resample(hb_audio_resample_t *resample,
         av_samples_get_buffer_size(&in_linesize,
                                    resample->resample.channels, nsamples,
                                    resample->resample.sample_fmt, 0);
+        int out_samples = avresample_available(resample->avresample) +
+                            av_rescale_rnd(avresample_get_delay(resample->avresample) +
+                                           nsamples, resample->out.sample_rate, resample->in.sample_rate, AV_ROUND_UP);
+
         out_size = av_samples_get_buffer_size(&out_linesize,
-                                              resample->out.channels, nsamples,
+                                              resample->out.channels, out_samples,
                                               resample->out.sample_fmt, 0);
         out = malloc(out_size + AV_INPUT_BUFFER_PADDING_SIZE);
 
         out_samples = avresample_convert(resample->avresample,
-                                         &out, out_linesize, nsamples,
-                                         samples,     in_linesize, nsamples);
+                                         &out, out_linesize, out_samples,
+                                         samples, in_linesize, nsamples);
 
         if (out_samples <= 0)
         {

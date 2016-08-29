@@ -26,7 +26,8 @@ extern NSString * const SBDolbyPlIIMixdown;
 - (void)addSample:(MP42SampleBuffer *)sample;
 - (nullable MP42SampleBuffer *)copyEncodedSample;
 
-- (NSData *)magicCookie;
+@property (nonatomic, readonly) NSData *magicCookie;
+@property (nonatomic, readonly) double sampleRate;
 
 NS_ASSUME_NONNULL_END
 

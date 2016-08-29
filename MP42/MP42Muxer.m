@@ -113,6 +113,9 @@
             }
 
             helper->converter = audioConverter;
+            // The audio converter might downsample the audio,
+            // so update the track timescale here.
+            timeScale = audioConverter.sampleRate;
         }
         if ([track isMemberOfClass:[MP42SubtitleTrack class]] && (track.sourceFormat == kMP42SubtitleCodecType_VobSub || track.sourceFormat == kMP42SubtitleCodecType_PGS) && track.needConversion) {
             MP42BitmapSubConverter *subConverter = [[MP42BitmapSubConverter alloc] initWithTrack:(MP42SubtitleTrack *)track
@@ -248,14 +251,15 @@
         // AAC audio track
         else if ([track isMemberOfClass:[MP42AudioTrack class]] &&
                  (track.format == kMP42AudioCodecType_MPEG4AAC || track.format == kMP42AudioCodecType_MPEG4AAC_HE)) {
+
             dstTrackId = MP4AddAudioTrack(_fileHandle,
                                           timeScale,
                                           1024, MP4_MPEG4_AUDIO_TYPE);
 
-            if (!track.needConversion && [magicCookie length]) {
+            if (!track.needConversion && magicCookie.length) {
                 MP4SetTrackESConfiguration(_fileHandle, dstTrackId,
-                                           [magicCookie bytes],
-                                           [magicCookie length]);
+                                           magicCookie.bytes,
+                                           magicCookie.length);
             }
             
             [helper->importer setActiveTrack:track];
