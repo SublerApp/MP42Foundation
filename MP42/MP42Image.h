@@ -18,7 +18,7 @@ typedef enum MP42TagArtworkType_e {
     MP42_ART_PNG       = 4
 } MP42TagArtworkType;
 
-@interface MP42Image : NSObject <NSCoding, NSCopying>
+@interface MP42Image : NSObject <NSSecureCoding, NSCopying>
 
 - (instancetype)initWithURL:(NSURL *)url type:(NSInteger)type;
 - (instancetype)initWithImage:(NSImage *)image;

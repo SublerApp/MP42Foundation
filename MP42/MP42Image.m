@@ -34,7 +34,7 @@
 - (instancetype)initWithURL:(NSURL *)url type:(NSInteger)type
 {
     if (self = [super init]) {
-        _url = [url retain];
+        _url = url;
         _type = type;
     }
 
@@ -44,7 +44,7 @@
 - (instancetype)initWithImage:(NSImage *)image
 {
     if (self = [super init])
-        _image = [image retain];
+        _image = [image copy];
     
     return self;
 }
@@ -52,7 +52,7 @@
 - (instancetype)initWithData:(NSData *)data type:(NSInteger)type
 {
     if (self = [super init]) {
-        _data = [data retain];
+        _data = [data copy];
         _type = type;
     }
     
@@ -93,7 +93,7 @@
         [image addRepresentation:imageRep];
     }
 
-    return [image autorelease];
+    return image;
 }
 
 - (NSData *)data {
@@ -102,7 +102,7 @@
             return _data;
         } else if (_url) {
             NSError *outError = nil;
-            _data = [[NSData dataWithContentsOfURL:_url options:NSDataReadingUncached error:&outError] retain];
+            _data = [NSData dataWithContentsOfURL:_url options:NSDataReadingUncached error:&outError];
         }
     }
 
@@ -115,7 +115,7 @@
         if (_image)
             return _image;
         else if (self.data) {
-            _image = [[self imageFromData:_data] retain];
+            _image = [self imageFromData:_data];
         }
     }
 
@@ -131,7 +131,7 @@
 {
     @synchronized(self) {
         if (_uuid == nil) {
-            _uuid = [[[NSProcessInfo processInfo] globallyUniqueString] retain];
+            _uuid = [[NSProcessInfo processInfo] globallyUniqueString];
         }
     }
 
@@ -148,12 +148,19 @@
     return self.image;
 }
 
++ (BOOL)supportsSecureCoding
+{
+    return YES;
+}
+
 - (void)encodeWithCoder:(NSCoder *)coder
 {
-    if (_data)
+    if (_data) {
         [coder encodeObject:_data forKey:@"MP42Image_Data"];
-    else
+    }
+    else {
         [coder encodeObject:_image forKey:@"MP42Image"];
+    }
     
     [coder encodeInteger:_type forKey:@"MP42ImageType"];
 }
@@ -162,21 +169,12 @@
 {
     self = [super init];
 
-    _image = [[decoder decodeObjectForKey:@"MP42Image"] retain];
-    _data = [[decoder decodeObjectForKey:@"MP42Image_Data"] retain];
+    _image = [decoder decodeObjectOfClass:[NSImage class] forKey:@"MP42Image"];
+    _data = [decoder decodeObjectOfClass:[NSData class] forKey:@"MP42Image_Data"];
 
     _type = [decoder decodeIntForKey:@"MP42ImageType"];
 
     return self;
-}
-
-- (void)dealloc
-{
-    [_image release];
-    [_data release];
-    [_uuid release];
-    
-    [super dealloc];
 }
 
 @end
