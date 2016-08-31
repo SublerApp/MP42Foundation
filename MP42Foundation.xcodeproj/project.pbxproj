@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A9022A941D6F3FD9005F0920 /* MP42MetadataItem.h in Headers */ = {isa = PBXBuildFile; fileRef = A9022A921D6F3FD9005F0920 /* MP42MetadataItem.h */; };
+		A9022A951D6F3FD9005F0920 /* MP42MetadataItem.h in Headers */ = {isa = PBXBuildFile; fileRef = A9022A921D6F3FD9005F0920 /* MP42MetadataItem.h */; };
+		A9022A961D6F3FD9005F0920 /* MP42MetadataItem.m in Sources */ = {isa = PBXBuildFile; fileRef = A9022A931D6F3FD9005F0920 /* MP42MetadataItem.m */; };
+		A9022A971D6F3FD9005F0920 /* MP42MetadataItem.m in Sources */ = {isa = PBXBuildFile; fileRef = A9022A931D6F3FD9005F0920 /* MP42MetadataItem.m */; };
 		A90800FD1D4B82E8002B6950 /* libmp4v2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A99DB6A41D4648A800C6E56C /* libmp4v2.a */; };
 		A90800FE1D4B82FB002B6950 /* libjpeg.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A99DB6A61D4648B700C6E56C /* libjpeg.a */; };
 		A90800FF1D4B82FB002B6950 /* liblept.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A99DB6A71D4648B700C6E56C /* liblept.a */; };
@@ -273,6 +277,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		A9022A921D6F3FD9005F0920 /* MP42MetadataItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MP42MetadataItem.h; sourceTree = "<group>"; };
+		A9022A931D6F3FD9005F0920 /* MP42MetadataItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MP42MetadataItem.m; sourceTree = "<group>"; };
 		A90801051D4B830A002B6950 /* libavfilter.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavfilter.a; path = contrib/ffmpeg/lib/libavfilter.a; sourceTree = "<group>"; };
 		A90801061D4B830A002B6950 /* libavformat.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavformat.a; path = contrib/ffmpeg/lib/libavformat.a; sourceTree = "<group>"; };
 		A908010C1D4B83A3002B6950 /* MP42AudioDecoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MP42AudioDecoder.h; sourceTree = "<group>"; };
@@ -554,6 +560,8 @@
 				A9B9C22C1823923100416A4E /* MP42ClosedCaptionTrack.m */,
 				A9B9C23C1823923100416A4E /* MP42Metadata.h */,
 				A9B9C23D1823923100416A4E /* MP42Metadata.m */,
+				A9022A921D6F3FD9005F0920 /* MP42MetadataItem.h */,
+				A9022A931D6F3FD9005F0920 /* MP42MetadataItem.m */,
 				A96D28921BAD390400403327 /* MP42Metadata+Private.h */,
 				A9B9C23A1823923100416A4E /* MP42MediaFormat.h */,
 				A9B9C23B1823923100416A4E /* MP42MediaFormat.m */,
@@ -744,6 +752,7 @@
 				A9AEFE161B9B111B00771292 /* MP42FileImporter+Private.h in Headers */,
 				A96523461BAC315900E994E0 /* NSString+MP42Additions.h in Headers */,
 				A908011A1D4B83A3002B6950 /* MP42AudioUnit.h in Headers */,
+				A9022A951D6F3FD9005F0920 /* MP42MetadataItem.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -774,6 +783,7 @@
 				A9B9C2AA1823923200416A4E /* MatroskaParser.h in Headers */,
 				A9B9C26E1823923200416A4E /* MP42AVFImporter.h in Headers */,
 				A9B9C2791823923200416A4E /* MP42Fifo.h in Headers */,
+				A9022A941D6F3FD9005F0920 /* MP42MetadataItem.h in Headers */,
 				A9AEFE151B9B111B00771292 /* MP42FileImporter+Private.h in Headers */,
 				A9B9C2A31823923200416A4E /* MP42XMLReader.h in Headers */,
 				A90801151D4B83A3002B6950 /* MP42AudioEncoder.h in Headers */,
@@ -963,6 +973,7 @@
 				A910B5C818394EB20064028F /* MP42Track.m in Sources */,
 				A910B5CA18394EB20064028F /* MP42VideoTrack.m in Sources */,
 				A910B5CC18394EB20064028F /* MP42AudioTrack.m in Sources */,
+				A9022A971D6F3FD9005F0920 /* MP42MetadataItem.m in Sources */,
 				A910B5CE18394EB20064028F /* MP42ChapterTrack.m in Sources */,
 				A910B5D018394EB20064028F /* MP42SubtitleTrack.m in Sources */,
 				A910B5D218394EB20064028F /* MP42ClosedCaptionTrack.m in Sources */,
@@ -1018,6 +1029,7 @@
 				A9B9C27A1823923200416A4E /* MP42Fifo.m in Sources */,
 				A9B9C2801823923200416A4E /* MP42H264Importer.mm in Sources */,
 				A9B9C26B1823923200416A4E /* MP42AudioConverter.m in Sources */,
+				A9022A961D6F3FD9005F0920 /* MP42MetadataItem.m in Sources */,
 				A9B9C2961823923200416A4E /* MP42SrtImporter.m in Sources */,
 				A9B9C2AB1823923200416A4E /* mbs.cpp in Sources */,
 				A9B9C2AE1823923200416A4E /* sfifo.c in Sources */,

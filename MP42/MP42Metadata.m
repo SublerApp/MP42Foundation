@@ -48,6 +48,12 @@ NSString *const MP42MetadataKeyContentRating = @"Content Rating";
 NSString *const MP42MetadataKeyEncodedBy = @"Encoded By";
 NSString *const MP42MetadataKeyEncodingTool = @"Encoding Tool";
 
+NSString *const MP42MetadataKeyCoverArt = @"Cover Art";
+NSString *const MP42MetadataKeyMediaKind = @"Media Kind";
+NSString *const MP42MetadataKeyGapless = @"Gapless";
+NSString *const MP42MetadataKeyHDVideo = @"HD Video";
+NSString *const MP42MetadataKeyiTunesU = @"iTunes U";
+
 NSString *const MP42MetadataKeyStudio = @"Studio";
 NSString *const MP42MetadataKeyCast = @"Cast";
 NSString *const MP42MetadataKeyDirector = @"Director";
@@ -78,6 +84,7 @@ NSString *const MP42MetadataKeyPerformer = @"Performer";
 NSString *const MP42MetadataKeyPublisher = @"Publisher";
 NSString *const MP42MetadataKeySoundEngineer = @"Sound Engineer";
 NSString *const MP42MetadataKeySoloist = @"Soloist";
+NSString *const MP42MetadataKeyDiscCompilation = @"Compilation";
 
 NSString *const MP42MetadataKeyWorkName = @"Work Name";
 NSString *const MP42MetadataKeyMovementName = @"Movement Name";
@@ -1489,7 +1496,6 @@ static const genreType_t genreType_strings[] = {
     MP4TagsFree(tags);
 
     // Rewrite extended metadata using the generic iTMF api
-
     if (tagsDict[MP42MetadataKeyRating]) {
 
         MP4ItmfItemList *list = MP4ItmfGetItemsByMeaning(fileHandle, "com.apple.iTunes", "iTunEXTC");

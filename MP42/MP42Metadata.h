@@ -49,6 +49,13 @@ extern NSString *const MP42MetadataKeyContentRating;
 extern NSString *const MP42MetadataKeyEncodedBy;
 extern NSString *const MP42MetadataKeyEncodingTool;
 
+// TODO
+extern NSString *const MP42MetadataKeyCoverArt;
+extern NSString *const MP42MetadataKeyMediaKind;
+extern NSString *const MP42MetadataKeyGapless;
+extern NSString *const MP42MetadataKeyHDVideo;
+extern NSString *const MP42MetadataKeyiTunesU;
+
 // Movie and TV Show Specific keys
 extern NSString *const MP42MetadataKeyStudio;
 extern NSString *const MP42MetadataKeyCast;
@@ -103,8 +110,6 @@ extern NSString *const MP42MetadataKeyAccountKind;
 extern NSString *const MP42MetadataKeyAccountCountry;
 extern NSString *const MP42MetadataKeyPurchasedDate;
 extern NSString *const MP42MetadataKeyOnlineExtras;
-
-extern NSString *const MP42MetadataKeyCoverArt; // TO-DO
 
 // Sort Metadata Keys
 extern NSString *const MP42MetadataKeySortName;
