@@ -61,8 +61,8 @@ unsigned ParseSubTime(const char *time, unsigned secondScale, BOOL hasSign);
 
 @class MP42SampleBuffer;
 
-MP42SampleBuffer * copySubtitleSample(MP4TrackId subtitleTrackId, NSString *string, MP4Duration duration, BOOL forced, BOOL verticalPlacement, BOOL styles, CGSize trackSize, int top);
-MP42SampleBuffer * copyEmptySubtitleSample(MP4TrackId subtitleTrackId, MP4Duration duration, BOOL forced);
+MP42SampleBuffer * copySubtitleSample(MP4TrackId subtitleTrackId, NSString *string, MP4Duration duration, BOOL forced, BOOL verticalPlacement, BOOL styles, CGSize trackSize, int top) NS_RETURNS_RETAINED;
+MP42SampleBuffer * copyEmptySubtitleSample(MP4TrackId subtitleTrackId, MP4Duration duration, BOOL forced) NS_RETURNS_RETAINED;
 
 typedef struct {
 	// color format is 32-bit ARGB

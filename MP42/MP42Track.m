@@ -257,15 +257,6 @@
     return StringFromTime(_duration, 1000);
 }
 
-@synthesize sourceURL = _sourceURL;
-@synthesize trackId = _trackId;
-@synthesize sourceId = _sourceId;
-
-@synthesize format = _format;
-@synthesize sourceFormat = _sourceFormat;
-@synthesize name = _name;
-@synthesize extendedLanguageTag = _extendedLanguageTag;
-
 - (NSString *)name {
     if (_name == nil) {
         _name = [[self defaultName] copy];

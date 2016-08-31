@@ -58,7 +58,7 @@
     dispatch_semaphore_signal(_empty);
 }
 
-- (nullable id)dequeue {
+- (nullable id)dequeue NS_RETURNS_RETAINED {
     if (!_count) return nil;
 
     id item = _array[_head++];
@@ -73,7 +73,7 @@
     return item;
 }
 
-- (nullable id)dequeueAndWait {
+- (nullable id)dequeueAndWait NS_RETURNS_RETAINED {
     id item = [self dequeue];
 
     while (!item) {
