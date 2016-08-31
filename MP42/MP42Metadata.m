@@ -1314,13 +1314,45 @@ static const genreType_t genreType_strings[] = {
     MP4TagsSetThanks           (tags, [tagsDict[MP42MetadataKeyThanks] UTF8String]);
     MP4TagsSetOnlineExtras     (tags, [tagsDict[MP42MetadataKeyOnlineExtras] UTF8String]);
     MP4TagsSetExecutiveProducer(tags, [tagsDict[MP42MetadataKeyExecProducer] UTF8String]);
+
+    // Movements keys
+
+    if ([tagsDict[MP42MetadataKeyMovementName] length]) {
+        const uint8_t value = 1;
+        MP4TagsSetShowWorkAndMovement(tags, &value);
+    }
+    else {
+        MP4TagsSetShowWorkAndMovement(tags, NULL);
+    }
+
+    MP4TagsSetWorkName(tags, [tagsDict[MP42MetadataKeyWorkName] UTF8String]);
+    MP4TagsSetMovementName (tags, [tagsDict[MP42MetadataKeyMovementName] UTF8String]);
+
+    if (tagsDict[MP42MetadataKeyMovementNumber]) {
+        const uint16_t value = [tagsDict[MP42MetadataKeyMovementNumber] intValue];
+        MP4TagsSetMovementNumber(tags, &value);
+    }
+    else {
+        MP4TagsSetMovementNumber(tags, NULL);
+    }
+
+    if (tagsDict[MP42MetadataKeyMovementCount]) {
+        const uint16_t value = [tagsDict[MP42MetadataKeyMovementCount] intValue];
+        MP4TagsSetMovementCount(tags, &value);
+    }
+    else {
+        MP4TagsSetMovementCount(tags, NULL);
+    }
+
+    // TV Show Specifics
+
     MP4TagsSetTVShow           (tags, [tagsDict[MP42MetadataKeyTVShow] UTF8String]);
     MP4TagsSetTVNetwork        (tags, [tagsDict[MP42MetadataKeyTVNetwork] UTF8String]);
     MP4TagsSetTVEpisodeID      (tags, [tagsDict[MP42MetadataKeyTVEpisodeID] UTF8String]);
 
     if (tagsDict[MP42MetadataKeyTVSeason]) {
-        const uint32_t i = [tagsDict[MP42MetadataKeyTVSeason] intValue];
-        MP4TagsSetTVSeason(tags, &i);
+        const uint32_t value = [tagsDict[MP42MetadataKeyTVSeason] intValue];
+        MP4TagsSetTVSeason(tags, &value);
     }
     else {
         MP4TagsSetTVSeason(tags, NULL);
