@@ -15,9 +15,6 @@
     NSMutableArray<NSString *> *iTunesCodes;
 }
 
-@synthesize ratings;
-@synthesize iTunesCodes;
-
 + (MP42Ratings *) defaultManager {
     static dispatch_once_t sharedRatingsPred;
     static MP42Ratings *sharedRatingsManager = nil;
@@ -29,54 +26,18 @@
 	if (self = [super init]) {
 		NSString *ratingsJSON = [[NSBundle bundleForClass:[MP42Ratings class]] pathForResource:@"Ratings" ofType:@"json"];
         if (!ratingsJSON) {
-            [self release];
             return nil;
         }
 
         NSData *data = [NSData dataWithContentsOfFile:ratingsJSON];
 
         if (data) {
-            ratingsDictionary = [[NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil] retain];
+            ratingsDictionary = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil];
         } else {
             ratingsDictionary = [[NSMutableArray alloc] init];
         }
 
-		// construct movie ratings
-		ratings = [[NSMutableArray alloc] init];
-		iTunesCodes = [[NSMutableArray alloc] init];
-
-		// if a specific country is picked, include the USA ratings at the end
-        NSString *selectedCountry = [[NSUserDefaults standardUserDefaults] valueForKey:@"SBRatingsCountry"];
-		NSDictionary *usaRatings = nil;
-
-		for (NSDictionary *countryRatings in ratingsDictionary) {
-			NSString *countryName = [countryRatings valueForKey:@"country"];
-
-			if ([countryName isEqualToString:@"USA"]) {
-				usaRatings = countryRatings;
-			}
-
-			if (![selectedCountry isEqualToString:@"All countries"]) {
-				if (![countryName isEqualToString:@"Unknown"] && ![countryName isEqualToString:selectedCountry]) {
-					continue;
-				}
-																								
-			}
-
-			for (NSDictionary *rating in [countryRatings valueForKey:@"ratings"]) {
-				[ratings addObject:[NSString stringWithFormat:@"%@ %@: %@", countryName, [rating valueForKey:@"media"], [rating valueForKey:@"description"]]];
-				[iTunesCodes addObject:[NSString stringWithFormat:@"%@|%@|%@|", [rating valueForKey:@"prefix"], [rating valueForKey:@"itunes-code"], [rating valueForKey:@"itunes-value"]]];
-			}
-		}
-
-		if (![selectedCountry isEqualToString:@"All countries"] && ![selectedCountry isEqualToString:@"USA"]) {
-            if (usaRatings) {
-                for (NSDictionary *rating in [usaRatings valueForKey:@"ratings"]) {
-                    [ratings addObject:[NSString stringWithFormat:@"%@ %@: %@", @"USA", [rating valueForKey:@"media"], [rating valueForKey:@"description"]]];
-                    [iTunesCodes addObject:[NSString stringWithFormat:@"%@|%@|%@|", [rating valueForKey:@"prefix"], [rating valueForKey:@"itunes-code"], [rating valueForKey:@"itunes-value"]]];
-                }
-            }
-		}
+        [self updateRatingsCountry];
 	}
 	return self;
 }
@@ -91,13 +52,46 @@
 			[countries addObject:countryName];
 		}
 	}
-	return [countries autorelease];
+	return countries;
 }
 
 - (void)updateRatingsCountry {
-	[ratings release];
-	[iTunesCodes release];
-	[self init];
+    // construct movie ratings
+    ratings = [[NSMutableArray alloc] init];
+    iTunesCodes = [[NSMutableArray alloc] init];
+
+    // if a specific country is picked, include the USA ratings at the end
+    NSString *selectedCountry = [[NSUserDefaults standardUserDefaults] valueForKey:@"SBRatingsCountry"];
+    NSDictionary *usaRatings = nil;
+
+    for (NSDictionary *countryRatings in ratingsDictionary) {
+        NSString *countryName = [countryRatings valueForKey:@"country"];
+
+        if ([countryName isEqualToString:@"USA"]) {
+            usaRatings = countryRatings;
+        }
+
+        if (![selectedCountry isEqualToString:@"All countries"]) {
+            if (![countryName isEqualToString:@"Unknown"] && ![countryName isEqualToString:selectedCountry]) {
+                continue;
+            }
+
+        }
+
+        for (NSDictionary *rating in [countryRatings valueForKey:@"ratings"]) {
+            [ratings addObject:[NSString stringWithFormat:@"%@ %@: %@", countryName, [rating valueForKey:@"media"], [rating valueForKey:@"description"]]];
+            [iTunesCodes addObject:[NSString stringWithFormat:@"%@|%@|%@|", [rating valueForKey:@"prefix"], [rating valueForKey:@"itunes-code"], [rating valueForKey:@"itunes-value"]]];
+        }
+    }
+
+    if (![selectedCountry isEqualToString:@"All countries"] && ![selectedCountry isEqualToString:@"USA"]) {
+        if (usaRatings) {
+            for (NSDictionary *rating in [usaRatings valueForKey:@"ratings"]) {
+                [ratings addObject:[NSString stringWithFormat:@"%@ %@: %@", @"USA", [rating valueForKey:@"media"], [rating valueForKey:@"description"]]];
+                [iTunesCodes addObject:[NSString stringWithFormat:@"%@|%@|%@|", [rating valueForKey:@"prefix"], [rating valueForKey:@"itunes-code"], [rating valueForKey:@"itunes-value"]]];
+            }
+        }
+    }
 }
 
 - (NSArray *) ratings {

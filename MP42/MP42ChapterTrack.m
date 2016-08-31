@@ -59,9 +59,9 @@
 
             char *title = chapter_list[i-1].title;
             if ((title[0] == '\xfe' && title[1] == '\xff') || (title[0] == '\xff' && title[1] == '\xfe')) {
-                chapter.title = [[[NSString alloc] initWithBytes:title
-														  length:chapter_list[i-1].titleLength
-														encoding:NSUTF16StringEncoding] autorelease];
+                chapter.title = [[NSString alloc] initWithBytes:title
+                                                         length:chapter_list[i-1].titleLength
+                                                       encoding:NSUTF16StringEncoding];
             } else {
                 chapter.title = [NSString stringWithCString:chapter_list[i-1].title encoding: NSUTF8StringEncoding];
             }
@@ -69,7 +69,6 @@
             chapter.timestamp = sum;
             sum = chapter_list[i-1].duration + sum;
             [chapters addObject:chapter];
-            [chapter release];
             i++;
         }
         MP4Free(chapter_list);
@@ -82,7 +81,7 @@
 {
     if ((self = [super init])) {
         _format = kMP42SubtitleCodecType_Text;
-        _sourceURL = [URL retain];
+        _sourceURL = URL;
         _language = @"English";
         _isEdited = YES;
         _muxed = NO;
@@ -100,7 +99,7 @@
 
 + (instancetype)chapterTrackFromFile:(NSURL *)URL
 {
-    return [[[MP42ChapterTrack alloc] initWithTextFile:URL] autorelease];
+    return [[MP42ChapterTrack alloc] initWithTextFile:URL];
 }
 
 - (NSString *)defaultName {
@@ -125,7 +124,6 @@
     newChapter.timestamp = timestamp;
 
     NSUInteger idx = [self addChapter:newChapter];
-    [newChapter release];
 
     return idx;
 }
@@ -137,7 +135,6 @@
     newChapter.timestamp = timestamp;
 
     NSUInteger idx = [self addChapter:newChapter];
-    [newChapter release];
 
     return idx;
 }
@@ -210,7 +207,6 @@
                 st.timestamp = 0;
                 st.title = @"Chapter 0";
                 [chapters insertObject:st atIndex:0];
-                [st release];
                 chapterCount++;
             }
 
@@ -273,7 +269,7 @@
 
 - (BOOL)exportToURL:(NSURL *)url error:(NSError **)error
 {
-	NSMutableString* file = [[[NSMutableString alloc] init] autorelease];
+	NSMutableString* file = [[NSMutableString alloc] init];
 	NSUInteger x = 0;
 
 	for (MP42TextSample * chapter in chapters) {
@@ -321,15 +317,11 @@
 {
     self = [super initWithCoder:decoder];
 
-    chapters = [[decoder decodeObjectOfClass:[NSMutableArray class] forKey:@"chapters"] retain];
+    if (self) {
+        chapters = [decoder decodeObjectOfClass:[NSMutableArray class] forKey:@"chapters"];
+    }
 
     return self;
-}
-
-- (void)dealloc
-{
-    [chapters release];
-    [super dealloc];
 }
 
 @end

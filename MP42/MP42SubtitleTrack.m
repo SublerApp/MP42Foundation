@@ -263,7 +263,7 @@ static void insertTagsFromStyleRecord(style_record record, NSMutableString *samp
     uint32_t timeScale = MP4GetTrackTimeScale(fileHandle, srcTrackId);
     uint64_t samples = MP4GetTrackNumberOfSamples(fileHandle, srcTrackId);
 
-    NSMutableString *srtFile = [[[NSMutableString alloc] init] autorelease];
+    NSMutableString *srtFile = [[NSMutableString alloc] init];
     
     uint64_t r, g, b, a;
     MP4GetTrackIntegerProperty(fileHandle, srcTrackId, "mdia.minf.stbl.stsd.tx3g.fontColorRed", &r);
@@ -296,9 +296,9 @@ static void insertTagsFromStyleRecord(style_record record, NSMutableString *samp
         NSUInteger textSampleLength = ((pBytes[0] << 8) & 0xff00) + pBytes[1];
 
         if (textSampleLength) {
-            sampleText = [[[NSMutableString alloc] initWithBytes:(pBytes + 2)
-                                                          length:textSampleLength
-                                                        encoding:NSUTF8StringEncoding] autorelease];
+            sampleText = [[NSMutableString alloc] initWithBytes:(pBytes + 2)
+                                                         length:textSampleLength
+                                                       encoding:NSUTF8StringEncoding];
         }
 
         // Let's see if there is an atom after the text sample
@@ -450,11 +450,6 @@ static void insertTagsFromStyleRecord(style_record record, NSMutableString *samp
     _forcedTrackId = (MP4TrackId)[decoder decodeInt64ForKey:@"forcedTrackId"];
 
     return self;
-}
-
-- (void)dealloc
-{
-    [super dealloc];
 }
 
 @end

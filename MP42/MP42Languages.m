@@ -634,10 +634,9 @@ iso639_lang_t * lang_for_english( const char * english )
             [languagesArray insertObject:lang atIndex:0];
         }
         _languagesArray = [languagesArray copy];
-        [languagesArray release];
     }
 
-    return [[_languagesArray copy] autorelease];
+    return [_languagesArray copy];
 }
 
 - (NSArray<NSString *> *)iso6391languages {
@@ -656,10 +655,9 @@ iso639_lang_t * lang_for_english( const char * english )
             [languagesArray insertObject:lang atIndex:0];
         }
         _iso6391languagesArray = [languagesArray copy];
-        [languagesArray release];
     }
 
-    return [[_iso6391languagesArray copy] autorelease];
+    return [_iso6391languagesArray copy];
 }
 
 + (NSString *)iso6391CodeFor:(NSString *)aLanguage {

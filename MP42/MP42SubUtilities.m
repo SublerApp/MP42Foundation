@@ -24,15 +24,9 @@
 	return self;
 }
 
--(void)dealloc
-{
-	[lines release];
-	[super dealloc];
-}
-
 static CFComparisonResult CompareLinesByBeginTime(const void *a, const void *b, void *unused)
 {
-	SBSubLine *al = (SBSubLine*)a, *bl = (SBSubLine*)b;
+	SBSubLine *al = (__bridge SBSubLine*)a, *bl = (__bridge SBSubLine*)b;
 	
 	if (al->begin_time > bl->begin_time) return kCFCompareGreaterThan;
 	if (al->begin_time < bl->begin_time) return kCFCompareLessThan;
@@ -57,7 +51,7 @@ static CFComparisonResult CompareLinesByBeginTime(const void *a, const void *b, 
 	if (!nlines || line->begin_time > ((SBSubLine*)[lines objectAtIndex:nlines-1])->begin_time) {
 		[lines addObject:line];
 	} else {
-		CFIndex i = CFArrayBSearchValues((CFArrayRef)lines, CFRangeMake(0, nlines), line, CompareLinesByBeginTime, NULL);
+		CFIndex i = CFArrayBSearchValues((CFArrayRef)lines, CFRangeMake(0, nlines), (__bridge const void *)(line), CompareLinesByBeginTime, NULL);
 
 		if (i >= nlines)
 			[lines addObject:line];
@@ -126,7 +120,7 @@ canOutput:
 		}
 	}
 	
-	return [[[SBSubLine alloc] initWithLine:str start:begin_time end:end_time top_pos:top_pos forced:frcd] autorelease];
+	return [[SBSubLine alloc] initWithLine:str start:begin_time end:end_time top_pos:top_pos forced:frcd];
 }
 
 -(SBSubLine*)getSerializedPacket
@@ -138,7 +132,7 @@ canOutput:
 	SBSubLine *nextline = [lines objectAtIndex:0], *ret;
 	
 	if (nextline->begin_time > last_end_time) {
-		ret = [[[SBSubLine alloc] initWithLine:@"\n" start:last_end_time end:nextline->begin_time] autorelease];
+		ret = [[SBSubLine alloc] initWithLine:@"\n" start:last_end_time end:nextline->begin_time];
 	} else {
 		ret = [self getNextRealSerializedPacket];
 	}
@@ -195,11 +189,11 @@ canOutput:
 
 @implementation SBSubLine
 
--(instancetype)initWithLine:(NSString*)l start:(unsigned)s end:(unsigned)e
+-(instancetype)initWithLine:(NSString *)l start:(unsigned)s end:(unsigned)e
 {
 	if ((self = [super init])) {
 		if ([l characterAtIndex:[l length]-1] != '\n') l = [l stringByAppendingString:@"\n"];
-		line = [l retain];
+		line = l;
 		begin_time = s;
 		end_time = e;
 		no = 0;
@@ -216,12 +210,6 @@ canOutput:
 	}
 	
 	return self;
-}
-
--(void)dealloc
-{
-	[line release];
-	[super dealloc];
 }
 
 -(NSString *)description
@@ -337,20 +325,19 @@ extern NSString *STLoadFileWithUnknownEncoding(NSURL *url)
 		NSLog(@"Guessed encoding \"%s\" for \"%s\", but not sure (confidence %f%%).\n", enc_str.UTF8String, url.path.UTF8String, conf*100.);
 	}
 
-	res = [[[NSString alloc] initWithData:data encoding:enc] autorelease];
+	res = [[NSString alloc] initWithData:data encoding:enc];
 
 	if (!res) {
 		if (latin2) {
 			NSLog(@"Encoding %s failed, retrying.\n",[enc_str UTF8String]);
 			enc = (enc == NSWindowsCP1252StringEncoding) ? NSWindowsCP1250StringEncoding : NSWindowsCP1252StringEncoding;
-			res = [[[NSString alloc] initWithData:data encoding:enc] autorelease];
+			res = [[NSString alloc] initWithData:data encoding:enc];
 			if (!res) NSLog(@"Both of latin1/2 failed.\n");
 		} else {
-            res = [[[NSString alloc] initWithData:data encoding:NSASCIIStringEncoding] autorelease];
+            res = [[NSString alloc] initWithData:data encoding:NSASCIIStringEncoding];
             if (!res) NSLog(@"ASCII failed."), NSLog(@"Failed to load file as guessed encoding %@.",enc_str);
         }
 	}
-	[ud release];
 
 	return res;
 }
@@ -432,7 +419,7 @@ int LoadSRTFromURL(NSURL *url, SBSubSerializer *ss, MP4Duration *duration)
 				[sc scanUpToString:@"\n\n" intoString:&res];
 				[sc scanString:@"\n\n" intoString:nil];
 				SBSubLine *sl = [[SBSubLine alloc] initWithLine:res start:startTime end:endTime top_pos:position forced:forced];
-				[ss addLine:[sl autorelease]];
+				[ss addLine:sl];
 				state = INITIAL;
 				break;
 		};
@@ -494,7 +481,6 @@ int LoadChaptersFromURL(NSURL *url, NSMutableArray *ss)
                     [ss addObject:chapter];
                     count++;
 
-                    [chapter release];
                     state = TIMESTAMP;
                     break;
             };
@@ -524,7 +510,6 @@ int LoadChaptersFromURL(NSURL *url, NSMutableArray *ss)
                     [ss addObject:chapter];
                     count++;
 
-                    [chapter release];
                     state = TIMESTAMP;
                     break;
             };
@@ -710,7 +695,7 @@ int LoadSMIFromURL(NSURL *url, SBSubSerializer *ss, int subCount)
 						[cmt insertString:@"{\\an8}" atIndex:0];
 					if ((subCount == 1 && cc == 1) || (subCount == 2 && cc == 2)) {
 						SBSubLine *sl = [[SBSubLine alloc] initWithLine:cmt start:startTime end:endTime];
-						[ss addLine:[sl autorelease]];
+						[ss addLine:sl];
 					}
 				}
 				startTime = syncTime;
@@ -950,13 +935,11 @@ NSString* createStyleAtomForString(NSString* string, u_int8_t** buffer, size_t *
         styleCount++;
     }
 
-    if (styleCount)
+    if (styleCount) {
         *size = closeStyleAtom(styleCount, *buffer);
+    }
 
-    string = [parser.text retain];
-    [parser release];
-
-    return [string autorelease];
+    return parser.text;
 }
 
 NSString* removeNewLines(NSString* string) {

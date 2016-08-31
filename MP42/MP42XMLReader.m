@@ -26,7 +26,6 @@
             if ([nodes count] == 1)
                 [self metadata2:_mMetadata forNode:[nodes objectAtIndex:0]];
         }
-        [xml release];
     }
     return self;
 }
@@ -37,7 +36,7 @@
     NSError *err;
     NSArray *tag = [node nodesForXPath:query error:&err];
     if ([tag count]) {
-        NSMutableArray *elements = [[[NSMutableArray alloc] initWithCapacity:[tag count]] autorelease];
+        NSMutableArray *elements = [[NSMutableArray alloc] initWithCapacity:tag.count];
         NSEnumerator *tagEnum = [tag objectEnumerator];
         NSXMLNode *element;
         while ((element = [tagEnum nextObject])) {
@@ -120,13 +119,6 @@
     if (joined) [metadata setTag:joined forKey:MP42MetadataKeyCategory];
     
     return metadata;
-}
-
-
-- (void)dealloc
-{
-    [_mMetadata release];
-    [super dealloc];
 }
 
 @end

@@ -186,7 +186,6 @@ int compare_color(rgba_color c1, rgba_color c2) {
 
     if (style) {
         [_styles addObject:style];
-        [style release];
     }
 
     [_text deleteCharactersInRange:contentRange];
@@ -204,7 +203,7 @@ int compare_color(rgba_color c1, rgba_color c2) {
             currentStyle.length = nextStyle.location - currentStyle.location;
             if (currentStyle.style || compare_color(currentStyle.color, nextStyle.color)) {
                 if (currentStyle.length) {
-                    [serializedStyles addObject:[[currentStyle copy] autorelease]];
+                    [serializedStyles addObject:[currentStyle copy]];
                 }
             }
             currentStyle.location = nextStyle.location;
@@ -231,25 +230,11 @@ int compare_color(rgba_color c1, rgba_color c2) {
     if (currentStyle.style || compare_color(currentStyle.color, _defaultColor)) {
         currentStyle.length = _text.length - currentStyle.location;
         if (currentStyle.length) {
-            [serializedStyles addObject:[[currentStyle copy] autorelease]];
+            [serializedStyles addObject:[currentStyle copy]];
         }
     }
 
-    [currentStyle release];
-    [_styles release];
     _styles = serializedStyles;
-}
-
-@synthesize text = _text;
-@synthesize styles = _styles;
-@synthesize defaultColor = _defaultColor;
-
-- (void)dealloc
-{
-    [_text release];
-    [_styles release];
-
-    [super dealloc];
 }
 
 @end

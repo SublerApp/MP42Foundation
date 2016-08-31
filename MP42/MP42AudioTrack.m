@@ -197,13 +197,6 @@ extern u_int8_t MP4AV_AacConfigGetChannels(u_int8_t* pConfig);
     return (_trackId > 0);
 }
 
-- (void)dealloc
-{
-    [_mixdownType release];
-
-    [super dealloc];
-}
-
 - (void)setVolume:(float)newVolume
 {
     _volume = newVolume;
@@ -280,7 +273,7 @@ extern u_int8_t MP4AV_AacConfigGetChannels(u_int8_t* pConfig);
 
     _fallbackTrackId = [decoder decodeInt64ForKey:@"fallbackTrackId"];
 
-    _mixdownType = [[decoder decodeObjectOfClass:[NSString class] forKey:@"mixdownType"] retain];
+    _mixdownType = [decoder decodeObjectOfClass:[NSString class] forKey:@"mixdownType"];
 
     return self;
 }

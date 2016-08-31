@@ -144,8 +144,6 @@ protected:
     OCRWrapper *ocr = (OCRWrapper *)tess_base;
     ocr->End();
     delete ocr;
-
-    [super dealloc];
 }
 
 @end

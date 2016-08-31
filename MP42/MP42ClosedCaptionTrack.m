@@ -44,9 +44,4 @@
     return (_trackId > 0);
 }
 
-- (void)dealloc
-{
-    [super dealloc];
-}
-
 @end

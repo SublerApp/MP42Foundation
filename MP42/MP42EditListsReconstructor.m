@@ -60,7 +60,6 @@
 }
 
 - (void)addSample:(MP42SampleBuffer *)sample {
-    [sample retain];
 
     if (sample->attachments) {
         // Flush the current queue, because pts time is going to be reset
@@ -75,7 +74,6 @@
     if ([_priorityQueue isFull]) {
         MP42SampleBuffer *extractedSample = [_priorityQueue extract];
         [self analyzeSample:extractedSample];
-        [extractedSample release];
     }
 }
 
@@ -84,7 +82,6 @@
     while (!_priorityQueue.isEmpty) {
         MP42SampleBuffer *extractedSample = [_priorityQueue extract];
         [self analyzeSample:extractedSample];
-        [extractedSample release];
     }
 
     if (_editOpen == YES) {
@@ -212,11 +209,6 @@
         _editsCount++;
     }
     _editOpen = NO;
-}
-
-- (void)dealloc {
-    [_priorityQueue release];
-    [super dealloc];
 }
 
 @end
