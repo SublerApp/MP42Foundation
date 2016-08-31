@@ -254,17 +254,17 @@ int hb_audio_resample(hb_audio_resample_t *resample,
         av_samples_get_buffer_size(&in_linesize,
                                    resample->resample.channels, nsamples,
                                    resample->resample.sample_fmt, 0);
-        int out_samples = avresample_available(resample->avresample) +
-                            av_rescale_rnd(avresample_get_delay(resample->avresample) +
+        int expected_out_samples = avresample_available(resample->avresample) +
+                                        av_rescale_rnd(avresample_get_delay(resample->avresample) +
                                            nsamples, resample->out.sample_rate, resample->in.sample_rate, AV_ROUND_UP);
 
         out_size = av_samples_get_buffer_size(&out_linesize,
-                                              resample->out.channels, out_samples,
+                                              resample->out.channels, expected_out_samples,
                                               resample->out.sample_fmt, 0);
         out = malloc(out_size + AV_INPUT_BUFFER_PADDING_SIZE);
 
         out_samples = avresample_convert(resample->avresample,
-                                         &out, out_linesize, out_samples,
+                                         &out, out_linesize, expected_out_samples,
                                          samples, in_linesize, nsamples);
 
         if (out_samples <= 0)
