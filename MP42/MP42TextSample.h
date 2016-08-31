@@ -12,7 +12,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface MP42TextSample : NSObject <NSCoding>
+@interface MP42TextSample : NSObject <NSSecureCoding>
 
 @property (nonatomic, readwrite, copy) NSString *title;
 @property (nonatomic, readwrite, retain, nullable) MP42Image *image;

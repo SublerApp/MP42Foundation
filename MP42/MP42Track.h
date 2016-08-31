@@ -14,7 +14,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  *  MP42Track
  */
-@interface MP42Track : NSObject <NSCoding, NSCopying> {
+@interface MP42Track : NSObject <NSSecureCoding, NSCopying> {
 @protected
     MP42TrackId  _trackId;
 

@@ -247,6 +247,8 @@
     }
 }
 
+#pragma mark - NSSecureCoding
+
 - (void)encodeWithCoder:(NSCoder *)coder
 {
     [super encodeWithCoder:coder];

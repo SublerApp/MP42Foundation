@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "MP42Track.h"
 
-@interface MP42VideoTrack : MP42Track <NSCoding>
+@interface MP42VideoTrack : MP42Track <NSSecureCoding>
 
 @property(nonatomic, readwrite) uint64_t width;
 @property(nonatomic, readwrite) uint64_t height;

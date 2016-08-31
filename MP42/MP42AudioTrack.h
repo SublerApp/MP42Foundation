@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "MP42Track.h"
 
-@interface MP42AudioTrack : MP42Track <NSCoding, NSCopying>
+@interface MP42AudioTrack : MP42Track <NSSecureCoding, NSCopying>
 
 @property(nonatomic, readwrite) float volume;
 @property(nonatomic, readwrite) UInt32 channels;

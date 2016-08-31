@@ -8,12 +8,7 @@
 
 #import "MP42TextSample.h"
 
-@implementation MP42TextSample {
-@private
-    MP42Duration _timestamp;
-    MP42Image *_image;
-    NSString *_title;
-}
+@implementation MP42TextSample
 
 - (NSComparisonResult)compare:(MP42TextSample *)otherObject
 {
@@ -27,17 +22,6 @@
     return NSOrderedSame;
 }
 
-- (void)dealloc
-{
-    [_image release];
-    [_title release];
-    [super dealloc];
-}
-
-@synthesize timestamp = _timestamp;
-@synthesize title = _title;
-@synthesize image = _image;
-
 - (void)setTitle:(NSString *)title
 {
     if (title == nil) {
@@ -45,6 +29,11 @@
     } else {
         _title = [title copy];
     }
+}
+
++ (BOOL)supportsSecureCoding
+{
+    return YES;
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder
@@ -58,7 +47,7 @@
     self = [super init];
 
     _timestamp = [decoder decodeInt64ForKey:@"timestamp"];
-    _title = [[decoder decodeObjectForKey:@"title"] retain];
+    _title = [decoder decodeObjectOfClass:[NSString class] forKey:@"title"];
 
     return self;
 }

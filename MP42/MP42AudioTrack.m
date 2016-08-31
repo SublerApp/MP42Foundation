@@ -251,12 +251,7 @@ extern u_int8_t MP4AV_AacConfigGetChannels(u_int8_t* pConfig);
     return [[super description] stringByAppendingFormat:@", %u ch", (unsigned int)_channels];
 }
 
-@synthesize channels = _channels;
-@synthesize sourceChannels = _sourceChannels;
-@synthesize mixdownType = _mixdownType;
-@synthesize channelLayoutTag = _channelLayoutTag;
-@synthesize fallbackTrackId = _fallbackTrackId;
-@synthesize followsTrackId = _followsTrackId;
+#pragma mark - NSSecureCoding
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
@@ -285,7 +280,7 @@ extern u_int8_t MP4AV_AacConfigGetChannels(u_int8_t* pConfig);
 
     _fallbackTrackId = [decoder decodeInt64ForKey:@"fallbackTrackId"];
 
-    _mixdownType = [[decoder decodeObjectForKey:@"mixdownType"] retain];
+    _mixdownType = [[decoder decodeObjectOfClass:[NSString class] forKey:@"mixdownType"] retain];
 
     return self;
 }

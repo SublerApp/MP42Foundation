@@ -141,6 +141,23 @@
     return self;
 }
 
+- (NSString *)description {
+    return [NSString stringWithFormat:@"Track: %d, %@, %@, %llu kbit/s, %@", self.trackId, self.name, self.timeString, self.dataLength / self.duration * 8, localizedDisplayName(self.mediaType, self.format)];
+}
+
+- (void)dealloc {
+    free(_helper);
+
+    [_updatedProperty release];
+    [_mediaCharacteristicTags release];
+    [_sourceURL release];
+    [_name release];
+    [_language release];
+    [_extendedLanguageTag release];
+
+    [super dealloc];
+}
+
 - (instancetype)copyWithZone:(NSZone *)zone
 {
     MP42Track *copy = [[[self class] alloc] init];
@@ -349,6 +366,13 @@
     return localizedDisplayName(_mediaType, _format);
 }
 
+#pragma mark - NSSecureCoding
+
++ (BOOL)supportsSecureCoding
+{
+    return YES;
+}
+
 - (void)encodeWithCoder:(NSCoder *)coder
 {
     [coder encodeInt:3 forKey:@"MP42TrackVersion"];
@@ -411,7 +435,7 @@
     _trackId = (MP4TrackId)[decoder decodeInt64ForKey:@"Id"];
     _sourceId = (MP4TrackId)[decoder decodeInt64ForKey:@"sourceId"];
 
-    NSData *bookmarkData = [decoder decodeObjectForKey:@"bookmark"];
+    NSData *bookmarkData = [decoder decodeObjectOfClass:[NSData class] forKey:@"bookmark"];
     if (bookmarkData) {
         BOOL bookmarkDataIsStale;
         NSError *error;
@@ -422,14 +446,14 @@
                     bookmarkDataIsStale:&bookmarkDataIsStale
                     error:&error] retain];
     } else {
-        _sourceURL = [[decoder decodeObjectForKey:@"sourceURL"] retain];
+        _sourceURL = [[decoder decodeObjectOfClass:[NSURL class] forKey:@"sourceURL"] retain];
     }
 
     _sourceFormat = [decoder decodeIntegerForKey:@"sourceFormat"];
     _format = [decoder decodeIntegerForKey:@"format"];
-    _name = [[decoder decodeObjectForKey:@"name"] retain];
-    _language = [[decoder decodeObjectForKey:@"language"] retain];
-    _extendedLanguageTag = [[decoder decodeObjectForKey:@"extendedLanguageTag"] retain];
+    _name = [[decoder decodeObjectOfClass:[NSString class] forKey:@"name"] retain];
+    _language = [[decoder decodeObjectOfClass:[NSString class] forKey:@"language"] retain];
+    _extendedLanguageTag = [[decoder decodeObjectOfClass:[NSString class] forKey:@"extendedLanguageTag"] retain];
 
     _enabled = [decoder decodeBoolForKey:@"enabled"];
 
@@ -444,40 +468,14 @@
     _bitrate = [decoder decodeInt32ForKey:@"bitrate"];
     _duration = [decoder decodeInt64ForKey:@"duration"];
     
-    if (version == 2)
+    if (version == 2) {
         _size = [decoder decodeInt64ForKey:@"dataLength"];
+    }
 
-    _updatedProperty = [[decoder decodeObjectForKey:@"updatedProperty"] retain];
-    _mediaCharacteristicTags = [[decoder decodeObjectForKey:@"mediaCharacteristicTags"] retain];
+    _updatedProperty = [[decoder decodeObjectOfClass:[NSMutableDictionary class] forKey:@"updatedProperty"] retain];
+    _mediaCharacteristicTags = [[decoder decodeObjectOfClass:[NSSet class] forKey:@"mediaCharacteristicTags"] retain];
 
     return self;
-}
-
-- (NSString *)description {
-    return [NSString stringWithFormat:@"Track: %d, %@, %@, %llu kbit/s, %@", self.trackId, self.name, self.timeString, self.dataLength / self.duration * 8, localizedDisplayName(self.mediaType, self.format)];
-}
-
-@synthesize timescale = _timescale;
-@synthesize bitrate = _bitrate;
-@synthesize duration = _duration;
-@synthesize isEdited = _isEdited;
-@synthesize muxed = _muxed;
-@synthesize needConversion = _needConversion;
-@synthesize dataLength = _size;
-@synthesize mediaType = _mediaType;
-@synthesize mediaCharacteristicTags = _mediaCharacteristicTags;
-
-- (void)dealloc {
-    free(_helper);
-
-    [_updatedProperty release];
-    [_mediaCharacteristicTags release];
-    [_sourceURL release];
-    [_name release];
-    [_language release];
-    [_extendedLanguageTag release];
-
-    [super dealloc];
 }
 
 @end
