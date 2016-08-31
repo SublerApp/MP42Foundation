@@ -424,6 +424,8 @@ static void insertTagsFromStyleRecord(style_record record, NSMutableString *samp
     return _forcedTrack;
 }
 
+#pragma mark - NSSecureCoding
+
 - (void)encodeWithCoder:(NSCoder *)coder
 {
     [super encodeWithCoder:coder];

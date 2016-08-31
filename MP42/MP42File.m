@@ -1093,10 +1093,15 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
     [needFallbackTracks release];
 }
 
-#pragma mark - NSCoding
+#pragma mark - NSSecureCoding
+
++ (BOOL)supportsSecureCoding
+{
+    return YES;
+}
 
 - (void)encodeWithCoder:(NSCoder *)coder {
-    [coder encodeInt:2 forKey:@"MP42FileVersion"];
+    [coder encodeInt:3 forKey:@"MP42FileVersion"];
 
 #ifdef SB_SANDBOX
     if ([fileURL respondsToSelector:@selector(startAccessingSecurityScopedResource)]) {
@@ -1133,7 +1138,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 - (id)initWithCoder:(NSCoder *)decoder {
     self = [super init];
 
-    NSData *bookmarkData = [decoder decodeObjectForKey:@"bookmark"];
+    NSData *bookmarkData = [decoder decodeObjectOfClass:[NSData class] forKey:@"bookmark"];
     if (bookmarkData) {
         BOOL bookmarkDataIsStale;
         NSError *error;
@@ -1144,15 +1149,15 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
                     bookmarkDataIsStale:&bookmarkDataIsStale
                     error:&error] retain];
     } else {
-        _fileURL = [[decoder decodeObjectForKey:@"fileUrl"] retain];
+        _fileURL = [[decoder decodeObjectOfClass:[NSURL class] forKey:@"fileUrl"] retain];
     }
 
-    _tracksToBeDeleted = [[decoder decodeObjectForKey:@"tracksToBeDeleted"] retain];
+    _tracksToBeDeleted = [[decoder decodeObjectOfClass:[NSMutableArray class] forKey:@"tracksToBeDeleted"] retain];
 
     _hasFileRepresentation = [decoder decodeBoolForKey:@"hasFileRepresentation"];
 
-    _tracks = [[decoder decodeObjectForKey:@"tracks"] retain];
-    _metadata = [[decoder decodeObjectForKey:@"metadata"] retain];
+    _tracks = [[decoder decodeObjectOfClass:[NSMutableArray class] forKey:@"tracks"] retain];
+    _metadata = [[decoder decodeObjectOfClass:[MP42Metadata class] forKey:@"metadata"] retain];
 
     return self;
 }

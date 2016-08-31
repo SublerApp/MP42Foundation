@@ -1670,7 +1670,7 @@ static const genreType_t genreType_strings[] = {
     return YES;
 }
 
-#pragma mark - NSCoder
+#pragma mark - NSSecureCoding
 
 + (BOOL)supportsSecureCoding
 {
@@ -1730,7 +1730,7 @@ static const genreType_t genreType_strings[] = {
     return self;
 }
 
-#pragma mark - NSCoding
+#pragma mark - NSCopying
 
 - (id)copyWithZone:(NSZone *)zone
 {

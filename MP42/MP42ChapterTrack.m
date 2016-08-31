@@ -308,6 +308,8 @@
 
 @synthesize chapters;
 
+#pragma mark - NSSecureCoding
+
 - (void)encodeWithCoder:(NSCoder *)coder
 {
     [super encodeWithCoder:coder];
@@ -319,7 +321,7 @@
 {
     self = [super initWithCoder:decoder];
 
-    chapters = [[decoder decodeObjectForKey:@"chapters"] retain];
+    chapters = [[decoder decodeObjectOfClass:[NSMutableArray class] forKey:@"chapters"] retain];
 
     return self;
 }

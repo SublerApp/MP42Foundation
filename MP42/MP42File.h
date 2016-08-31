@@ -31,7 +31,7 @@ typedef void (^MP42FileProgressHandler)(double progress);
 /**
  *  A MP42File object is an object that represents a mp4 file.
  */
-@interface MP42File : NSObject <NSCoding>
+@interface MP42File : NSObject <NSSecureCoding>
 
 + (void)setGlobalLogger:(id <MP42Logging>)logger;
 

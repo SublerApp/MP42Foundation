@@ -11,7 +11,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface MP42SubtitleTrack : MP42VideoTrack <NSCoding>
+@interface MP42SubtitleTrack : MP42VideoTrack <NSSecureCoding>
 
 - (BOOL)exportToURL:(NSURL *)url error:(NSError **)error;
 

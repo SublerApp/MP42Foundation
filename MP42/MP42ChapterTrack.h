@@ -12,7 +12,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface MP42ChapterTrack : MP42Track <NSCoding>
+@interface MP42ChapterTrack : MP42Track <NSSecureCoding>
 
 - (instancetype)initWithSourceURL:(NSURL *)URL trackID:(NSInteger)trackID fileHandle:(MP42FileHandle)fileHandle;
 + (instancetype)chapterTrackFromFile:(NSURL *)URL;
