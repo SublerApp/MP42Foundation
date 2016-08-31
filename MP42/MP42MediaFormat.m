@@ -229,7 +229,7 @@ NSString *localizedAudioDisplayName(FourCharCode mediaSubtype)
             break;
 
         case kMP42AudioCodecType_AppleLossless:
-            result = NSLocalizedString(@"Apple Loseless", nil);
+            result = NSLocalizedString(@"Apple Lossless", nil);
             break;
 
         case kMP42AudioCodecType_AC3:
