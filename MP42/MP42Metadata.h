@@ -119,7 +119,7 @@ extern NSString *const MP42MetadataKeySortAlbum;
 extern NSString *const MP42MetadataKeySortComposer;
 extern NSString *const MP42MetadataKeySortTVShow;
 
-@interface MP42Metadata : NSObject <NSCoding, NSCopying>
+@interface MP42Metadata : NSObject <NSSecureCoding, NSCopying>
 
 /**
  *  Initializes a new metadata instance by a given URL
