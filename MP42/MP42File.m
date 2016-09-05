@@ -186,6 +186,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 
             if (error) {
                 *error = MP42Error(@"The movie could not be opened.", @"The file is not a mp4 file.", 100);
+                [_logger writeErrorToLog:*error];
             }
 			return nil;
         }
@@ -201,6 +202,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 
                 if (error) {
                     *error = MP42Error(@"Invalid File Type.", @"MOV File cannot be edited.", 100);
+                    [_logger writeErrorToLog:*error];
                 }
 
                 return nil;
@@ -214,6 +216,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 
             if (error) {
                 *error = MP42Error(@"Invalid File Type.", @"Fragmented MP4 cannot be edited.", 100);
+                [_logger writeErrorToLog:*error];
             }
 
             return nil;
