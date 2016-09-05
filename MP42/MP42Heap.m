@@ -35,7 +35,7 @@ uint64 right(uint64 i) {
     NSComparator _cmptr;
 }
 
-- (instancetype)initWithCapacity:(NSUInteger)numItems andComparator:(NSComparator)cmptr {
+- (instancetype)initWithCapacity:(NSUInteger)numItems comparator:(NSComparator)cmptr {
     self = [super init];
     if (self) {
         _size = numItems;
@@ -48,6 +48,8 @@ uint64 right(uint64 i) {
 
 - (void)insert:(id)item {
     NSAssert(_len < _size, @"Heap full");
+
+    [item retain];
     _array[_len++] = item;
 
     uint64 i = _len - 1;
@@ -60,7 +62,7 @@ uint64 right(uint64 i) {
     return;
 }
 
-- (id)extract {
+- (id)extract NS_RETURNS_RETAINED {
     if (!_len)
         return nil;
 

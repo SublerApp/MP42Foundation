@@ -12,7 +12,7 @@
 
 @implementation MP42EditListsReconstructor {
 @private
-    MP42Heap *_priorityQueue;
+    MP42Heap<MP42SampleBuffer *> *_priorityQueue;
 
     uint64_t        _currentTime;
     CMTimeScale     _timescale;
@@ -30,9 +30,6 @@
     BOOL         _primingUsed;
 }
 
-@synthesize edits = _edits;
-@synthesize editsCount = _editsCount;
-
 - (instancetype)init {
     self = [self initWithMediaFormat:0];
     return self;
@@ -41,7 +38,7 @@
 - (instancetype)initWithMediaFormat:(FourCharCode)format {
     self = [super init];
     if (self) {
-        _priorityQueue = [[MP42Heap alloc] initWithCapacity:32 andComparator:^NSComparisonResult(MP42SampleBuffer * obj1, MP42SampleBuffer * obj2) {
+        _priorityQueue = [[MP42Heap alloc] initWithCapacity:32 comparator:^NSComparisonResult(MP42SampleBuffer * obj1, MP42SampleBuffer * obj2) {
             return obj2->presentationTimestamp - obj1->presentationTimestamp;
         }];
 

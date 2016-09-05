@@ -16,7 +16,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @interface MP42Heap<ObjectType> : NSObject
 
-- (instancetype)initWithCapacity:(NSUInteger)numItems andComparator:(NSComparator)cmptr;
+- (instancetype)initWithCapacity:(NSUInteger)numItems comparator:(NSComparator)cmptr;
 
 - (void)insert:(ObjectType)item;
 - (nullable ObjectType)extract NS_RETURNS_RETAINED;
