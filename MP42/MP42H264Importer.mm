@@ -1368,11 +1368,11 @@ NSData* H264Info(const char *filePath, uint32_t *pic_width, uint32_t *pic_height
         newTrack.sourceURL = self.fileURL;
 
         if (!inFile) {
-            inFile = fopen(self.fileURL.path.fileSystemRepresentation, "rb");
+            inFile = fopen(self.fileURL.fileSystemRepresentation, "rb");
         }
 
         struct stat st;
-        stat(self.fileURL.path.fileSystemRepresentation, &st);
+        stat(self.fileURL.fileSystemRepresentation, &st);
         _size = st.st_size;
 
         uint32_t tw, th;
@@ -1422,7 +1422,7 @@ NSData* H264Info(const char *filePath, uint32_t *pic_width, uint32_t *pic_height
 {
     @autoreleasepool {
         if (!inFile) {
-            inFile = fopen(self.fileURL.path.fileSystemRepresentation, "rb");
+            inFile = fopen(self.fileURL.fileSystemRepresentation, "rb");
         }
 
         MP42Track *track = self.inputTracks.lastObject;

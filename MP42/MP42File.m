@@ -128,7 +128,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 
 - (BOOL)startReading {
     NSAssert(self.fileHandle == MP4_INVALID_FILE_HANDLE, @"File Handle already open");
-    _fileHandle = MP4Read(self.URL.path.fileSystemRepresentation);
+    _fileHandle = MP4Read(self.URL.fileSystemRepresentation);
 
     if (self.fileHandle != MP4_INVALID_FILE_HANDLE) {
         self.status = MP42StatusReading;
@@ -147,7 +147,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 
 - (BOOL)startWriting {
     NSAssert(self.fileHandle == MP4_INVALID_FILE_HANDLE, @"File Handle already open");
-    _fileHandle = MP4Modify(self.URL.path.fileSystemRepresentation, 0);
+    _fileHandle = MP4Modify(self.URL.fileSystemRepresentation, 0);
 
     if (self.fileHandle != MP4_INVALID_FILE_HANDLE) {
         self.status = MP42StatusWriting;
@@ -602,7 +602,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
             unsigned long long originalFileSize = [[[fileManager attributesOfItemAtPath:self.URL.path error:nil] valueForKey:NSFileSize] unsignedLongLongValue];
 
             dispatch_async(dispatch_get_global_queue(0, 0), ^{
-                noErr = MP4Optimize(self.URL.path.fileSystemRepresentation, tempURL.path.fileSystemRepresentation);
+                noErr = MP4Optimize(self.URL.fileSystemRepresentation, tempURL.fileSystemRepresentation);
                 OSAtomicIncrement32Barrier(&done);
                 dispatch_semaphore_signal(sem);
             });
@@ -745,7 +745,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
             supportedBrandsCount = 2;
         }
 
-        self.fileHandle = MP4CreateEx(self.URL.path.fileSystemRepresentation,
+        self.fileHandle = MP4CreateEx(self.URL.fileSystemRepresentation,
                                  flags, 1, 1,
                                  majorBrand, 0,
                                  supportedBrands, supportedBrandsCount);

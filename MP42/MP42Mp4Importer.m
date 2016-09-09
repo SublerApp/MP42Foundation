@@ -74,7 +74,7 @@
 - (NSData *)magicCookieForTrack:(MP42Track *)track
 {
     if (!_fileHandle) {
-        _fileHandle = MP4Read(self.fileURL.path.fileSystemRepresentation);
+        _fileHandle = MP4Read(self.fileURL.fileSystemRepresentation);
     }
 
     NSData *magicCookie = nil;

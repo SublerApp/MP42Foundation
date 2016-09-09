@@ -281,11 +281,11 @@ static bool GetFirstHeader(FILE* inFile)
         newTrack.sourceURL = self.fileURL;
 
         if (!inFile) {
-            inFile = fopen(self.fileURL.path.fileSystemRepresentation, "rb");
+            inFile = fopen(self.fileURL.fileSystemRepresentation, "rb");
         }
 
         struct stat st;
-        stat(self.fileURL.path.fileSystemRepresentation, &st);
+        stat(self.fileURL.fileSystemRepresentation, &st);
         size = st.st_size * 8;
 
         // collect all the necessary meta information
@@ -356,7 +356,7 @@ static bool GetFirstHeader(FILE* inFile)
 {
     @autoreleasepool {
         if (!inFile) {
-            inFile = fopen(self.fileURL.path.fileSystemRepresentation, "rb");
+            inFile = fopen(self.fileURL.fileSystemRepresentation, "rb");
         }
 
         MP4TrackId trackId = self.inputTracks.lastObject.sourceId;

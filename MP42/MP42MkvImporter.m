@@ -165,7 +165,7 @@ static int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, ui
 {
     if ((self = [super initWithURL:fileURL])) {
         _ioStream = calloc(1, sizeof(StdIoStream));
-        _matroskaFile = openMatroskaFile(self.fileURL.path.fileSystemRepresentation, _ioStream);
+        _matroskaFile = openMatroskaFile(self.fileURL.fileSystemRepresentation, _ioStream);
 
         if (!_matroskaFile) {
             if (outError) {
