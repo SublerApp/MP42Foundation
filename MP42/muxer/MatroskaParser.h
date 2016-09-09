@@ -345,7 +345,7 @@ X int	      mkv_TruncFloat(MKFLOAT f);
  *  will be ignored when reading file data.
  * This call discards all parsed and queued frames
  */
-X void	      mkv_SetTrackMask(/* in */ MatroskaFile *mf,/* in */ unsigned int mask);
+X void	      mkv_SetTrackMask(/* in */ MatroskaFile *mf,/* in */ unsigned long mask);
 
 /* Read one frame from the queue.
  * mask specifies what tracks to ignore.

@@ -478,8 +478,8 @@ static NSString * TrackNameToString(TrackInfo *track)
     uint32_t Track, FrameSize, FrameFlags;
 
     // mask other tracks because we don't need them
-    unsigned int TrackMask = ~0;
-    TrackMask &= ~(1 << Id);
+    unsigned long TrackMask = ~0;
+    TrackMask &= ~(1l << Id);
 
     mkv_SetTrackMask(_matroskaFile, TrackMask);
     mkv_ReadFrame(_matroskaFile, 0, &Track, &StartTime, &EndTime, &FilePos, &FrameSize, &FrameFlags);
@@ -526,7 +526,7 @@ static NSString * TrackNameToString(TrackInfo *track)
         return [magicCookie autorelease];
     }
     else if (!strcmp(trackInfo->CodecID, "A_AC3") || !strcmp(trackInfo->CodecID, "A_EAC3")) {
-        mkv_SetTrackMask(_matroskaFile, ~(1 << track.sourceId));
+        mkv_SetTrackMask(_matroskaFile, ~(1l << track.sourceId));
 
         uint64_t        StartTime, EndTime, FilePos;
         uint32_t        rt, FrameSize, FrameFlags;
@@ -643,12 +643,12 @@ static NSString * TrackNameToString(TrackInfo *track)
     const unsigned int bufferSize = 20;
 
     /* mask other tracks because we don't need them */
-    unsigned int TrackMask = ~0;
+    unsigned long TrackMask = ~0;
 
     NSArray<MP42Track *> *inputTracks = self.inputTracks;
 
     for (MP42Track *track in inputTracks) {
-        TrackMask &= ~(1 << [track sourceId]);
+        TrackMask &= ~(1l << track.sourceId);
         track.muxer_helper->demuxer_context = [[MatroskaDemuxHelper alloc] init];
     }
 
