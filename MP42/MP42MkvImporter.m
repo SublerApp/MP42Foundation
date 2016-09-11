@@ -499,6 +499,10 @@ static NSString * TrackNameToString(TrackInfo *track)
             if (sampleRate < 24000)
                 return 48000;
         }
+        // Sample rate is not set, so just guess one.
+        if (sampleRate == 0) {
+            return 48000;
+        }
 
         return mkv_TruncFloat(trackInfo->AV.Audio.SamplingFreq);
     }

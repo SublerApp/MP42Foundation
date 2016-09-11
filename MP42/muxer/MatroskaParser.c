@@ -1265,8 +1265,6 @@ static void parseAudioInfo(MatroskaFile *mf,ulonglong toplen,struct TrackInfo *t
 
   if (ti->AV.Audio.Channels == 0)
     ti->AV.Audio.Channels = 1;
-  if (mkv_TruncFloat(ti->AV.Audio.SamplingFreq) == 0)
-    ti->AV.Audio.SamplingFreq = mkfi(8000);
   if (mkv_TruncFloat(ti->AV.Audio.OutputSamplingFreq)==0)
     ti->AV.Audio.OutputSamplingFreq = ti->AV.Audio.SamplingFreq;
 }
