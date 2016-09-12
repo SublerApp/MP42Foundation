@@ -25,8 +25,8 @@
 
 @interface AVFDemuxHelper : NSObject {
 @public
-    int64_t              currentTime;
-    int64_t         minDisplayOffset;
+    int64_t currentTime;
+    int64_t minDisplayOffset;
 
     AVAssetReaderOutput *assetReaderOutput;
     MP42EditListsReconstructor *editsConstructor;
@@ -49,7 +49,7 @@
 }
 
 + (NSArray<NSString *> *)supportedFileFormats {
-    return @[@"mov", @"mp4", @"m4v", @"m4a", @"m2ts", @"ts", @"mts", @"ac3", @"eac3", @"ec3", @"webvtt", @"vtt"];
+    return @[@"mov", @"mp4", @"m4v", @"m4a", @"m2ts", @"ts", @"mts", @"ac3", @"eac3", @"ec3", @"webvtt", @"vtt", @"caf", @"aif", @"aiff"];
 }
 
 - (FourCharCode)formatForTrack:(AVAssetTrack *)track {
@@ -725,6 +725,22 @@
     return nil;
 }
 
+- (AudioStreamBasicDescription)audioDescriptionForTrack:(MP42AudioTrack *)track
+{
+    AudioStreamBasicDescription result;
+    bzero(&result, sizeof(AudioStreamBasicDescription));
+
+    AVAssetTrack *assetTrack = [_localAsset trackWithTrackID:track.sourceId];
+    CMFormatDescriptionRef formatDescription = (CMFormatDescriptionRef)assetTrack.formatDescriptions.firstObject;
+
+    if (formatDescription) {
+        const AudioStreamBasicDescription *asbd = CMAudioFormatDescriptionGetStreamBasicDescription(formatDescription);
+        memcpy(&result, asbd, sizeof(AudioStreamBasicDescription));
+    }
+
+    return result;
+}
+
 - (void)demux {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 
@@ -754,7 +770,7 @@
             demuxHelper->assetReaderOutput = assetReaderOutput;
             demuxHelper->editsConstructor = [[MP42EditListsReconstructor alloc] initWithMediaFormat:track.format];
 
-            totalDataLength += [track dataLength];
+            totalDataLength += track.dataLength;
         }
     }
 
@@ -936,7 +952,6 @@
                                 if ([dict valueForKey:(NSString*)kCMSampleAttachmentKey_DoNotDisplay]) {
                                     doNotDisplay = YES;
                                 }
-
                             }
                         }
 

@@ -131,6 +131,12 @@ typedef struct MP42DecodeContext MP42DecodeContext;
             av_dict_set(&av_opts, "drc_scale", drc_scale, 0);
         }
 
+        if (asbd.mFormatID == kAudioFormatLinearPCM)
+        {
+            _avctx->channels = asbd.mChannelsPerFrame;
+            _avctx->sample_rate = asbd.mSampleRate;
+        }
+
         if (avcodec_open2(_avctx, _codec, &av_opts)) {
             NSLog(@"Error opening audio decoder");
             av_freep(&_avctx);
@@ -271,6 +277,11 @@ static void configureDescriptors(MP42DecodeContext *context, AVFrame *frame)
     int nb_channels = av_get_channel_layout_nb_channels(frame->channel_layout);
     int sample_rate = frame->sample_rate;
 
+    // FIXME PCM
+    if (nb_channels == 0) {
+        nb_channels = context->inputFormat->mChannelsPerFrame;
+    }
+
     // Reset the channels per frame and sample rate
     if (context->inputFormat->mChannelsPerFrame == context->outputFormat->mChannelsPerFrame) {
         context->outputFormat->mChannelsPerFrame = nb_channels;
@@ -296,7 +307,7 @@ static void configureDescriptors(MP42DecodeContext *context, AVFrame *frame)
             context->out_layout = AV_CH_LAYOUT_MONO;
         }
     }
-    else {
+    else if (frame->channel_layout) {
         context->out_layout = frame->channel_layout;
     }
 
@@ -352,12 +363,18 @@ static int resample(MP42DecodeContext *context, AVFrame *frame, uint8_t **output
                                          center_mix_level,
                                          downmix_info->lfe_mix_level);
     }
-    hb_audio_resample_set_channel_layout(context->resampler,
-                                         frame->channel_layout);
-    hb_audio_resample_set_sample_rate(context->resampler,
-                                      frame->sample_rate);
-    hb_audio_resample_set_sample_fmt(context->resampler,
-                                     frame->format);
+    if (frame->channel_layout) {
+        hb_audio_resample_set_channel_layout(context->resampler,
+                                             frame->channel_layout);
+    }
+    if (frame->sample_rate) {
+        hb_audio_resample_set_sample_rate(context->resampler,
+                                          frame->sample_rate);
+    }
+    if (frame->format) {
+        hb_audio_resample_set_sample_fmt(context->resampler,
+                                         frame->format);
+    }
     if (hb_audio_resample_update(context->resampler))
     {
         NSLog(@"decavcodec: hb_audio_resample_update() failed");

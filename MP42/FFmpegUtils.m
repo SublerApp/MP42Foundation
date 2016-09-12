@@ -65,6 +65,22 @@ void FFInitFFmpeg()
         REGISTER_DECODER(dca);
         REGISTER_DECODER(truehd);
         REGISTER_DECODER(mlp);
+        REGISTER_DECODER(pcm_f32be);
+        REGISTER_DECODER(pcm_f32le);
+        REGISTER_DECODER(pcm_f64be);
+        REGISTER_DECODER(pcm_f64le);
+        REGISTER_DECODER(pcm_s16be);
+        REGISTER_DECODER(pcm_s16le);
+        REGISTER_DECODER(pcm_s16le_planar);
+        REGISTER_DECODER(pcm_s24be);
+        REGISTER_DECODER(pcm_s24le);
+        REGISTER_DECODER(pcm_s32be);
+        REGISTER_DECODER(pcm_s32le);
+        REGISTER_DECODER(pcm_s8);
+        REGISTER_DECODER(pcm_u16be);
+        REGISTER_DECODER(pcm_u16le);
+        REGISTER_DECODER(pcm_u24be);
+        REGISTER_DECODER(pcm_u24le);
     });
 }
 
@@ -88,7 +104,7 @@ static const struct {
     { 'DTS ', AV_CODEC_ID_DTS },
     { 'trhd', AV_CODEC_ID_TRUEHD },
     { 'mlp ', AV_CODEC_ID_MLP },
-    { kAudioFormatLinearPCM, AV_CODEC_ID_PCM_S16LE },
+    { kAudioFormatLinearPCM, AV_CODEC_ID_PCM_S16BE },
     { kAudioFormatLinearPCM, AV_CODEC_ID_PCM_U8 },
     { kAudioFormatALaw, AV_CODEC_ID_PCM_ALAW },
     { kAudioFormatULaw, AV_CODEC_ID_PCM_MULAW },
