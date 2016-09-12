@@ -51,7 +51,8 @@ public:
 
 	void PutBits(u_int32_t bits, u_int32_t numBits);
 
-	u_int32_t GetBits(u_int32_t numBits);
+    u_int32_t PeakBits(u_int32_t numBits);
+    u_int32_t GetBits(u_int32_t numBits);
 
 	void SkipBytes(u_int32_t numBytes) {
 		SkipBits(numBytes << 3);
@@ -84,6 +85,11 @@ public:
 	u_int32_t GetNumberOfBits() {
 		return m_numBits;
 	}
+
+    u_int32_t GetRemainingBits() {
+        return m_numBits - m_bitPos;
+    }
+
 
 protected:
 	u_int8_t*	m_pBuf;

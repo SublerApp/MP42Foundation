@@ -72,6 +72,27 @@ void CMemoryBitstream::PutBits(u_int32_t bits, u_int32_t numBits)
 	}
 }
 
+u_int32_t CMemoryBitstream::PeakBits(u_int32_t numBits)
+{
+    if (numBits + m_bitPos > m_numBits) {
+        throw EIO;
+    }
+    if (numBits > 32) {
+        throw EIO;
+    }
+
+    u_int32_t bits = 0;
+    u_int32_t bitPos = m_bitPos;
+
+    for (u_int8_t i = 0; i < numBits; i++) {
+        bits <<= 1;
+        bits |= (m_pBuf[bitPos >> 3] >> (7 - (bitPos & 7))) & 1;
+        bitPos++;
+    }
+    
+    return bits;
+}
+
 u_int32_t CMemoryBitstream::GetBits(u_int32_t numBits)
 {
 	if (numBits + m_bitPos > m_numBits) {
