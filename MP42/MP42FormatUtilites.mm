@@ -803,6 +803,261 @@ CFDataRef createCookie_EAC3(void *context)
     return cookieData;
 }
 
+#pragma mark - MPEG 4 Audio
+
+#define ARRAY_ELEMS(a) (sizeof(a) / sizeof((a)[0]))
+#define MKBETAG(a,b,c,d) ((d) | ((c) << 8) | ((b) << 16) | ((unsigned)(a) << 24))
+
+enum AudioObjectType {
+    AOT_NULL,
+    // Support?                Name
+    AOT_AAC_MAIN,              ///< Y                       Main
+    AOT_AAC_LC,                ///< Y                       Low Complexity
+    AOT_AAC_SSR,               ///< N (code in SoC repo)    Scalable Sample Rate
+    AOT_AAC_LTP,               ///< Y                       Long Term Prediction
+    AOT_SBR,                   ///< Y                       Spectral Band Replication
+    AOT_AAC_SCALABLE,          ///< N                       Scalable
+    AOT_TWINVQ,                ///< N                       Twin Vector Quantizer
+    AOT_CELP,                  ///< N                       Code Excited Linear Prediction
+    AOT_HVXC,                  ///< N                       Harmonic Vector eXcitation Coding
+    AOT_TTSI             = 12, ///< N                       Text-To-Speech Interface
+    AOT_MAINSYNTH,             ///< N                       Main Synthesis
+    AOT_WAVESYNTH,             ///< N                       Wavetable Synthesis
+    AOT_MIDI,                  ///< N                       General MIDI
+    AOT_SAFX,                  ///< N                       Algorithmic Synthesis and Audio Effects
+    AOT_ER_AAC_LC,             ///< N                       Error Resilient Low Complexity
+    AOT_ER_AAC_LTP       = 19, ///< N                       Error Resilient Long Term Prediction
+    AOT_ER_AAC_SCALABLE,       ///< N                       Error Resilient Scalable
+    AOT_ER_TWINVQ,             ///< N                       Error Resilient Twin Vector Quantizer
+    AOT_ER_BSAC,               ///< N                       Error Resilient Bit-Sliced Arithmetic Coding
+    AOT_ER_AAC_LD,             ///< N                       Error Resilient Low Delay
+    AOT_ER_CELP,               ///< N                       Error Resilient Code Excited Linear Prediction
+    AOT_ER_HVXC,               ///< N                       Error Resilient Harmonic Vector eXcitation Coding
+    AOT_ER_HILN,               ///< N                       Error Resilient Harmonic and Individual Lines plus Noise
+    AOT_ER_PARAM,              ///< N                       Error Resilient Parametric
+    AOT_SSC,                   ///< N                       SinuSoidal Coding
+    AOT_PS,                    ///< N                       Parametric Stereo
+    AOT_SURROUND,              ///< N                       MPEG Surround
+    AOT_ESCAPE,                ///< Y                       Escape Value
+    AOT_L1,                    ///< Y                       Layer 1
+    AOT_L2,                    ///< Y                       Layer 2
+    AOT_L3,                    ///< Y                       Layer 3
+    AOT_DST,                   ///< N                       Direct Stream Transfer
+    AOT_ALS,                   ///< Y                       Audio LosslesS
+    AOT_SLS,                   ///< N                       Scalable LosslesS
+    AOT_SLS_NON_CORE,          ///< N                       Scalable LosslesS (non core)
+    AOT_ER_AAC_ELD,            ///< N                       Error Resilient Enhanced Low Delay
+    AOT_SMR_SIMPLE,            ///< N                       Symbolic Music Representation Simple
+    AOT_SMR_MAIN,              ///< N                       Symbolic Music Representation Main
+    AOT_USAC_NOSBR,            ///< N                       Unified Speech and Audio Coding (no SBR)
+    AOT_SAOC,                  ///< N                       Spatial Audio Object Coding
+    AOT_LD_SURROUND,           ///< N                       Low Delay MPEG Surround
+    AOT_USAC,                  ///< N                       Unified Speech and Audio Coding
+};
+
+const int mpeg4audio_sample_rates[16] = {
+    96000, 88200, 64000, 48000, 44100, 32000,
+    24000, 22050, 16000, 12000, 11025, 8000, 7350
+};
+
+const uint8_t  mpeg4audio_channels[] = {
+    0, 1, 2, 3, 4, 5, 6, 8, 2, 3, 4, 7, 8, 24, 8, 12, 10, 12, 14
+};
+
+static int parse_config_ALS(CMemoryBitstream &b, MPEG4AudioConfig *c)
+{
+    if (b.GetRemainingBits() < 112)
+        return -1;
+
+    if (b.GetBits(32) != MKBETAG('A','L','S','\0'))
+        return -1;
+
+    // override AudioSpecificConfig channel configuration and sample rate
+    // which are buggy in old ALS conformance files
+    c->sample_rate = b.GetBits(32);
+
+    // skip number of samples
+    b.SkipBits(32);
+
+    // read number of channels
+    c->chan_config = 0;
+    c->channels    = b.GetBits(16) + 1;
+
+    return 0;
+}
+
+static inline int get_object_type(CMemoryBitstream &b)
+{
+    int object_type = b.GetBits(5);
+    if (object_type == AOT_ESCAPE)
+        object_type = 32 + b.GetBits(6);
+    return object_type;
+}
+
+static inline int get_sample_rate(CMemoryBitstream &b, int *index)
+{
+    *index = b.GetBits(4);
+    return *index == 0x0f ? b.GetBits(24) :
+    mpeg4audio_sample_rates[*index];
+}
+
+static inline int get_program_config_element(CMemoryBitstream &b, int *channels)
+{
+    b.SkipBits(4); // element_instance_tag
+    b.SkipBits(2); // object_type
+    b.SkipBits(4); // sampling_frequency_index
+    int num_front_channel_elements  = b.GetBits(4);
+    int num_side_channel_elements   = b.GetBits(4);
+    int num_back_channel_elements   = b.GetBits(4);
+    int num_lfe_channel_elements    = b.GetBits(2);
+
+    *channels = num_front_channel_elements + num_side_channel_elements + num_back_channel_elements + num_lfe_channel_elements;
+    return 0;
+}
+
+int analyze_ESDS(MPEG4AudioConfig *c, const uint8_t *cookie, uint32_t cookieLen)
+{
+    int specific_config_bitindex;
+    int sync_extension = 1;
+
+    if (cookieLen <= 0) {
+        return 1;
+    }
+
+    bzero(c, sizeof(MPEG4AudioConfig));
+
+    CMemoryBitstream b;
+    b.SetBytes((uint8_t *)cookie, cookieLen);
+
+    try {
+        c->object_type = get_object_type(b);
+        c->sample_rate = get_sample_rate(b, &c->sampling_index);
+        c->chan_config = b.GetBits(4);
+        if (c->chan_config < ARRAY_ELEMS(mpeg4audio_channels)) {
+            c->channels = mpeg4audio_channels[c->chan_config];
+        }
+        c->sbr = -1;
+        c->ps  = -1;
+        if (c->object_type == AOT_SBR || (c->object_type == AOT_PS &&
+                                          // check for W6132 Annex YYYY draft MP3onMP4
+                                          !(b.PeakBits(3) & 0x03 && !(b.PeakBits(9) & 0x3F)))) {
+            if (c->object_type == AOT_PS) {
+                c->ps = 1;
+            }
+            c->ext_object_type = AOT_SBR;
+            c->sbr = 1;
+            c->ext_sample_rate = get_sample_rate(b, &c->ext_sampling_index);
+            c->object_type = get_object_type(b);
+            if (c->object_type == AOT_ER_BSAC) {
+                c->ext_chan_config = b.GetBits(4);
+            }
+        } else {
+            c->ext_object_type = AOT_NULL;
+            c->ext_sample_rate = 0;
+        }
+        specific_config_bitindex = b.GetBitPosition();
+
+        switch (c->object_type) {
+            case 1:
+            case 2:
+            case 3:
+            case 4:
+            case 6:
+            case 7:
+            case 17:
+            case 19:
+            case 20:
+            case 21:
+            case 22:
+            case 23:
+            {
+                b.SkipBits(1); // frameLengthFlag
+
+                int dependsOnCoreCoder = b.GetBits(1);
+                if (dependsOnCoreCoder) {
+                    b.SkipBits(14); // coreCoderDelay
+                }
+
+                int extensionFlag = b.GetBits(1);
+
+                if (!c->chan_config) {
+                    get_program_config_element(b, &c->channels);
+                }
+
+                if ((c->object_type == 6) || (c->object_type == 20)) {
+                    b.SkipBits(3);
+                }
+
+                if (extensionFlag) {
+                    if (c->object_type == 22) {
+                        b.SkipBits(5);
+                        b.SkipBits(11);
+                    }
+                    if ((c->object_type == 17)
+                        || (c->object_type == 19)
+                        || (c->object_type == 20)
+                        || (c->object_type == 23)
+                        ) {
+                        b.SkipBits(1);
+                        b.SkipBits(1);
+                        b.SkipBits(1);
+                    }
+                    /*ext_flag = */b.SkipBits(1);
+                }
+            }
+        }
+
+        if (c->object_type == AOT_ALS) {
+            b.SkipBits(5);
+            if (b.PeakBits(24) != MKBETAG('\0','A','L','S')) {
+                b.SkipBits(24);
+            }
+
+            specific_config_bitindex = b.GetBitPosition();
+
+            if (parse_config_ALS(b, c)) {
+                return -1;
+            }
+        }
+
+        if (c->ext_object_type != AOT_SBR && sync_extension) {
+            while (b.GetRemainingBits() > 15) {
+                if (b.PeakBits(11) == 0x2b7) { // sync extension
+                    b.GetBits(11);
+                    c->ext_object_type = get_object_type(b);
+                    if (c->ext_object_type == AOT_SBR && (c->sbr = b.GetBits(1)) == 1) {
+                        c->ext_sample_rate = get_sample_rate(b, &c->ext_sampling_index);
+                        if (c->ext_sample_rate == c->sample_rate) {
+                            c->sbr = -1;
+                        }
+                    }
+                    if (b.GetRemainingBits() > 11 && b.GetBits(11) == 0x548) {
+                        c->ps = b.GetBits(1);
+                    }
+                    break;
+                } else {
+                    b.SkipBits(1); // skip 1 bit
+                }
+            }
+        }
+
+        //PS requires SBR
+        if (!c->sbr) {
+            c->ps = 0;
+        }
+        //Limit implicit PS to the HE-AACv2 Profile
+        if ((c->ps == -1 && c->object_type != AOT_AAC_LC) || c->channels & ~0x01) {
+            c->ps = 0;
+        }
+
+    } catch (int e) {
+        return -1;
+
+    }
+
+    return specific_config_bitindex;
+}
+
 #pragma mark - HEVC
 
 struct NAL_units{
@@ -812,7 +1067,7 @@ struct NAL_units{
 };
 
 
-struct hvcC_info {
+typedef struct HEVCConfig {
     UInt8 configurationVersion;
 
     UInt8 general_profile_space;
@@ -839,15 +1094,15 @@ struct hvcC_info {
     UInt8 numOfArrays;
 
     struct NAL_units *NAL_units;
-};
+} HEVCConfig;
 
 int analyze_HEVC(const uint8_t *cookie, uint32_t cookieLen, bool *completeness)
 {
     int result = 0;
     bool complete = true;
 
-    struct hvcC_info *info = (struct hvcC_info *)malloc (sizeof(struct hvcC_info));
-    bzero(info, sizeof(struct hvcC_info));
+    HEVCConfig *info = (HEVCConfig *)malloc (sizeof(HEVCConfig));
+    bzero(info, sizeof(HEVCConfig));
 
     CMemoryBitstream b;
     b.SetBytes((uint8_t *)cookie, cookieLen);

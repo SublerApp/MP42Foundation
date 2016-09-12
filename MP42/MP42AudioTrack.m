@@ -13,8 +13,6 @@
 #import "MP42FormatUtilites.h"
 #import "MP42MediaFormat.h"
 
-extern u_int8_t MP4AV_AacConfigGetChannels(u_int8_t* pConfig);
-
 @implementation MP42AudioTrack {
 @private
     float _volume;
@@ -52,7 +50,9 @@ extern u_int8_t MP4AV_AacConfigGetChannels(u_int8_t* pConfig);
                                                &pAacConfig,
                                                &aacConfigLength) == true)
                     if (pAacConfig != NULL || aacConfigLength >= 2) {
-                        _channels = MP4AV_AacConfigGetChannels(pAacConfig);
+                        MPEG4AudioConfig c = {0};
+                        analyze_ESDS(&c, pAacConfig, aacConfigLength);
+                        _channels = c.channels;
                         free(pAacConfig);
                     }
             }
