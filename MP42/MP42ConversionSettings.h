@@ -16,9 +16,9 @@ NS_ASSUME_NONNULL_BEGIN
 + (instancetype)subtitlesConversion;
 
 @property (nonatomic, readonly) FourCharCode format;
-@property (nonatomic, readonly) NSUInteger   bitRate;
+@property (nonatomic, readonly) NSUInteger bitRate;
 
-@property (nonatomic, readonly) NSString    *mixDown;
+@property (nonatomic, readonly) NSString *mixDown;
 @property (nonatomic, readonly) float drc;
 
 @end

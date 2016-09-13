@@ -12,6 +12,7 @@
 #import "MP42Languages.h"
 #import "MP42File.h"
 #import "MP42Track+Muxer.h"
+#import "MP42Track+Private.h"
 
 #include <sys/stat.h>
 

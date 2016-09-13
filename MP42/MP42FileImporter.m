@@ -22,6 +22,7 @@
 
 #import "MP42AudioConverter.h"
 #import "MP42Track+Muxer.h"
+#import "MP42Track+Private.h"
 
 #import <CoreAudio/CoreAudio.h>
 

@@ -19,28 +19,27 @@ NS_ASSUME_NONNULL_BEGIN
 @protected
     MP42TrackId  _trackId;
 
-    NSURL       *_sourceURL;
+    NSURL         *_sourceURL;
     FourCharCode   _format;
     MP42MediaType  _mediaType;
 
-    NSString    *_language;
-    NSString    *_extendedLanguageTag;
+    NSString *_language;
+    NSString *_extendedLanguageTag;
 
-    BOOL        _enabled;
+    BOOL _enabled;
+    BOOL _isEdited;
+    BOOL _muxed;
 
-    BOOL    _isEdited;
-    BOOL    _muxed;
-
-    NSMutableDictionary<NSString *, NSNumber *> *_updatedProperty;
     void *_helper;
 }
 
-@property(nonatomic, readwrite) MP42TrackId trackId;
-@property(nonatomic, readwrite) MP42TrackId sourceId;
+@property(nonatomic, readonly) MP42TrackId trackId;
 
-@property(nonatomic, readwrite, copy) NSURL *sourceURL;
-@property(nonatomic, readwrite) FourCharCode format;
+@property(nonatomic, readonly, copy) NSURL *sourceURL;
+@property(nonatomic, readonly) FourCharCode format;
 @property(nonatomic, readonly) MP42MediaType mediaType;
+
+@property(nonatomic, readwrite, getter=isEnabled) BOOL enabled;
 
 @property(nonatomic, readwrite, copy) NSString *name;
 @property(nonatomic, readwrite, copy) NSString *language;
@@ -48,16 +47,15 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property(nonatomic, readwrite, copy) NSSet<NSString *> *mediaCharacteristicTags;
 
-@property(nonatomic, readwrite, getter=isEnabled) BOOL enabled;
 @property(nonatomic, readwrite) uint64_t alternate_group;
 @property(nonatomic, readwrite) int64_t  startOffset;
 
-@property(nonatomic, readonly)  uint32_t timescale;
-@property(nonatomic, readonly)  uint32_t bitrate;
-@property(nonatomic, readwrite) MP42Duration duration;
+@property(nonatomic, readonly) uint32_t timescale;
+@property(nonatomic, readonly) uint32_t bitrate;
+@property(nonatomic, readonly) MP42Duration duration;
 
 @property(nonatomic, readwrite) BOOL isEdited;
-@property(nonatomic, readwrite) BOOL muxed;
+@property(nonatomic, readonly) BOOL muxed;
 
 @property(nonatomic, readwrite, copy) MP42ConversionSettings *conversionSettings;
 

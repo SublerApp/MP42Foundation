@@ -20,6 +20,7 @@
 #import "MP42PrivateUtilities.h"
 #import "MP42FormatUtilites.h"
 #import "MP42Track+Muxer.h"
+#import "MP42Track+Private.h"
 
 #define SCALE_FACTOR 1000000.f
 

@@ -15,6 +15,7 @@
 #import "MP42FormatUtilites.h"
 #import "MP42Fifo.h"
 #import "MP42Sample.h"
+#import "MP42Track+Private.h"
 
 #include <sys/stat.h>
 

@@ -14,7 +14,7 @@
 #import "MP42File.h"
 #import "MP42Sample.h"
 #import "NSString+MP42Additions.h"
-
+#import "MP42Track+Private.h"
 
 @implementation MP42CCImporter
 

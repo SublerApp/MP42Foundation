@@ -427,14 +427,8 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
         }
     }
 
-    // FIXME
-    if (trackNeedConversion(track.format) || track.conversionSettings) {
-
-        /*if ([track isMemberOfClass:[MP42AudioTrack class]]) {
-            track.format = kMP42AudioCodecType_MPEG4AAC;
-        } else if ([track isMemberOfClass:[MP42SubtitleTrack class]]) {
-            track.format = kMP42SubtitleCodecType_3GText;
-        }*/
+    if (trackNeedConversion(track.format)) {
+        NSAssert(track.conversionSettings, @"Missing conversion settings");
     }
 
     if (track.muxer_helper->importer && track.sourceURL) {
@@ -450,6 +444,10 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
         if (![self.itracks containsObject:audioTrack.fallbackTrack]) {
             audioTrack.fallbackTrack = nil;
         }
+    }
+
+    if ([track isMemberOfClass:[MP42ChapterTrack class]]) {
+        track.duration = self.duration;
     }
 
     [self.itracks addObject:track];
@@ -1097,7 +1095,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder {
-    [coder encodeInt:3 forKey:@"MP42FileVersion"];
+    [coder encodeInt:4 forKey:@"MP42FileVersion"];
 
 #ifdef SB_SANDBOX
     if ([fileURL respondsToSelector:@selector(startAccessingSecurityScopedResource)]) {

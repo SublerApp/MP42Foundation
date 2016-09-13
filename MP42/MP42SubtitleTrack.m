@@ -89,7 +89,7 @@
         }
     }
 
-    if (_updatedProperty[@"forced"] || !_muxed) {
+    if (self.updatedProperty[@"forced"] || !_muxed) {
 
         if (_forcedTrack) {
             _forcedTrackId = _forcedTrack.trackId;
@@ -162,7 +162,7 @@
     _someSamplesAreForced = value;
     _isEdited = YES;
 
-    _updatedProperty[@"forcedSubtitles"] = @YES;
+    self.updatedProperty[@"forcedSubtitles"] = @YES;
 }
 
 - (BOOL)allSamplesAreForced {
@@ -174,7 +174,7 @@
     _allSamplesAreForced = value;
     _isEdited = YES;
 
-    _updatedProperty[@"forcedSubtitles"] = @YES;
+    self.updatedProperty[@"forcedSubtitles"] = @YES;
 }
 
 @synthesize forcedTrackId = _forcedTrackId;
@@ -416,12 +416,29 @@ static void insertTagsFromStyleRecord(style_record record, NSMutableString *samp
     _forcedTrack = newForcedTrack;
     _forcedTrackId = 0;
     _isEdited = YES;
-    _updatedProperty[@"forced"] = @YES;
+    self.updatedProperty[@"forced"] = @YES;
 }
 
 - (MP42Track *)forcedTrack
 {
     return _forcedTrack;
+}
+
+#pragma mark - NSCopying
+
+- (instancetype)copyWithZone:(NSZone *)zone
+{
+    MP42SubtitleTrack *copy = [super copyWithZone:zone];
+
+    if (copy) {
+        copy->_verticalPlacement = _verticalPlacement;
+        copy->_someSamplesAreForced = _someSamplesAreForced;
+        copy->_allSamplesAreForced = _allSamplesAreForced;
+
+        copy->_forcedTrackId = _forcedTrackId;
+    }
+    
+    return copy;
 }
 
 #pragma mark - NSSecureCoding
@@ -447,7 +464,7 @@ static void insertTagsFromStyleRecord(style_record record, NSMutableString *samp
     _someSamplesAreForced = [decoder decodeBoolForKey:@"someSamplesAreForced"];
     _allSamplesAreForced = [decoder decodeBoolForKey:@"allSamplesAreForced"];
 
-    _forcedTrackId = (MP4TrackId)[decoder decodeInt64ForKey:@"forcedTrackId"];
+    _forcedTrackId = [decoder decodeInt64ForKey:@"forcedTrackId"];
 
     return self;
 }

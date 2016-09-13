@@ -150,11 +150,11 @@
         [super writeToFile:fileHandle error:outError];
     }
 
-    if (_updatedProperty[@"volume"] || !_muxed) {
+    if (self.updatedProperty[@"volume"] || !_muxed) {
         MP4SetTrackFloatProperty(fileHandle, _trackId, "tkhd.volume", _volume);
     }
 
-    if (_updatedProperty[@"fallback"] || !_muxed) {
+    if (self.updatedProperty[@"fallback"] || !_muxed) {
 
         if (_fallbackTrack) {
             _fallbackTrackId = _fallbackTrack.trackId;
@@ -171,7 +171,7 @@
         }
     }
     
-    if (_updatedProperty[@"follows"] || !_muxed) {
+    if (self.updatedProperty[@"follows"] || !_muxed) {
 
         if (_followsTrack) {
             _followsTrackId = _followsTrack.trackId;
@@ -195,7 +195,7 @@
 {
     _volume = newVolume;
     _isEdited = YES;
-    _updatedProperty[@"volume"] = @YES;
+    self.updatedProperty[@"volume"] = @YES;
 }
 
 - (float)volume
@@ -208,7 +208,7 @@
     _fallbackTrack = newFallbackTrack;
     _fallbackTrackId = 0;
     _isEdited = YES;
-    _updatedProperty[@"fallback"] = @YES;
+    self.updatedProperty[@"fallback"] = @YES;
 }
 
 - (MP42Track *)fallbackTrack
@@ -221,7 +221,7 @@
     _followsTrack = newFollowsTrack;
     _followsTrackId = 0;
     _isEdited = YES;
-    _updatedProperty[@"follows"] = @YES;
+    self.updatedProperty[@"follows"] = @YES;
 }
 
 - (MP42Track *)followsTrack

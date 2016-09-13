@@ -14,6 +14,18 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithSourceURL:(NSURL *)URL trackID:(NSInteger)trackID fileHandle:(MP42FileHandle)fileHandle;
 - (BOOL)writeToFile:(MP42FileHandle)fileHandle error:(NSError **)outError;
 
+@property(nonatomic, readwrite) MP42TrackId trackId;
+@property(nonatomic, readwrite) MP42TrackId sourceId;
+
+@property(nonatomic, readwrite, copy) NSURL *sourceURL;
+
+@property(nonatomic, readwrite) FourCharCode format;
+@property(nonatomic, readwrite) MP42Duration duration;
+
+@property(nonatomic, readwrite) BOOL muxed;
+
+@property(nonatomic, readonly) NSMutableDictionary<NSString *, NSNumber *> *updatedProperty;
+
 @end
 
 NS_ASSUME_NONNULL_END

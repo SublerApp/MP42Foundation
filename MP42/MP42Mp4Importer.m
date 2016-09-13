@@ -16,6 +16,7 @@
 #import "mp4v2.h"
 #import "MP42PrivateUtilities.h"
 #import "MP42Track+Muxer.h"
+#import "MP42Track+Private.h"
 
 @interface MP4DemuxHelper : NSObject {
 @public

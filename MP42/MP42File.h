@@ -56,7 +56,7 @@ typedef void (^MP42FileProgressHandler)(double progress);
 @property(nonatomic, readonly) NSUInteger duration;
 
 /**
- * Indicates the size of the file. It can be approximated.
+ * Indicates the size of the file. It can be an approximation.
  */
 @property(nonatomic, readonly) uint64_t dataSize;
 

@@ -29,10 +29,10 @@
     uint64_t    _alternate_group;
     int64_t     _startOffset;
 
-    BOOL    _needConversion;
-
     uint32_t    _timescale;
     MP42Duration _duration;
+
+    NSMutableDictionary<NSString *, NSNumber *> *_updatedProperty;
 }
 
 - (instancetype)init
