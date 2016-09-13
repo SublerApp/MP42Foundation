@@ -16,24 +16,30 @@
 
 #import "MP42Track+Private.h"
 
-@implementation MP42Track
+@interface MP42Track ()
 {
-    MP42TrackId  _sourceId;
-
     uint64_t    _size;
-    uint32_t    _bitrate;
     NSString   *_name;
-
-    NSSet<NSString *> *_mediaCharacteristicTags;
 
     uint64_t    _alternate_group;
     int64_t     _startOffset;
-
-    uint32_t    _timescale;
-    MP42Duration _duration;
-
-    NSMutableDictionary<NSString *, NSNumber *> *_updatedProperty;
 }
+
+@property(nonatomic, readwrite) MP42TrackId trackId;
+@property(nonatomic, readwrite) MP42TrackId sourceId;
+
+@property(nonatomic, readwrite, copy) NSURL *sourceURL;
+
+@property(nonatomic, readwrite) FourCharCode format;
+@property(nonatomic, readwrite) MP42Duration duration;
+
+@property(nonatomic, readwrite) BOOL muxed;
+
+@property(nonatomic, readonly) NSMutableDictionary<NSString *, NSNumber *> *updatedProperty;
+
+@end
+
+@implementation MP42Track
 
 - (instancetype)init
 {

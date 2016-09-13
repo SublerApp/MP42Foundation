@@ -427,7 +427,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
         }
     }
 
-    if (trackNeedConversion(track.format)) {
+    if (trackNeedConversion(track.format) && ![track isMemberOfClass:[MP42ChapterTrack class]]) {
         NSAssert(track.conversionSettings, @"Missing conversion settings");
     }
 
