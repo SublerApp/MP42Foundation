@@ -227,7 +227,20 @@
 
 - (NSString *)formatSummary
 {
-    return [NSString stringWithFormat:@"%@, %u ch", localizedDisplayName(self.mediaType, self.format), (unsigned int)_channels];
+    if (self.conversionSettings && [self.conversionSettings isKindOfClass:[MP42AudioConversionSettings class]]) {
+        MP42AudioConversionSettings *settings = (MP42AudioConversionSettings *)self.conversionSettings;
+        unsigned int channels = _channels;
+        if ([settings.mixDown isEqualToString:SBMonoMixdown]) {
+            channels = 1;
+        }
+        else if (![settings.mixDown isEqualToString:SBNoneMixdown]) {
+            channels = 2;
+        }
+        return [NSString stringWithFormat:@"%@, %u ch", localizedDisplayName(self.mediaType, self.conversionSettings.format), channels];
+    }
+    else {
+        return [NSString stringWithFormat:@"%@, %u ch", localizedDisplayName(self.mediaType, self.format), (unsigned int)_channels];
+    }
 }
 
 - (NSString *)description {

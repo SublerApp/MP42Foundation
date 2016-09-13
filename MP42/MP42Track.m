@@ -59,7 +59,7 @@
 
 - (instancetype)initWithFormat:(FourCharCode)format mediaType:(MP42MediaType)mediaType enabled:(BOOL)enabled language:(NSString *)language
 {
-    self = [self init];
+    self = [super init];
     if (self) {
         _format = format;
         _mediaType = mediaType;
@@ -370,7 +370,12 @@
 
 - (NSString *)formatSummary
 {
-    return localizedDisplayName(_mediaType, _format);
+    if (self.conversionSettings) {
+        return localizedDisplayName(_mediaType, self.conversionSettings.format);
+    }
+    else {
+        return localizedDisplayName(_mediaType, _format);
+    }
 }
 
 #pragma mark - NSSecureCoding
