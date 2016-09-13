@@ -44,12 +44,12 @@
 @end
 
 @implementation MP42AVFImporter {
-@private
     AVAsset *_localAsset;
 }
 
 + (NSArray<NSString *> *)supportedFileFormats {
-    return @[@"mov", @"mp4", @"m4v", @"m4a", @"m2ts", @"ts", @"mts", @"ac3", @"eac3", @"ec3", @"webvtt", @"vtt", @"caf", @"aif", @"aiff"];
+    return @[@"mov", @"qt", @"mp4", @"m4v", @"m4a", @"m2ts", @"ts", @"mts",
+             @"ac3", @"eac3", @"ec3", @"webvtt", @"vtt", @"caf", @"aif", @"aiff"];
 }
 
 - (FourCharCode)formatForTrack:(AVAssetTrack *)track {
@@ -416,7 +416,7 @@
                                             MP42MetadataKeyDescription,         @"desc",
                                             MP42MetadataKeyLongDescription,     @"ldes",
                                             MP42MetadataKeySeriesDescription,   @"sdes",
-                                            MP42MetadataKeyMediaKind,            @"stik",
+                                            MP42MetadataKeyMediaKind,           @"stik",
                                             MP42MetadataKeyTVShow,              @"tvsh",
                                             MP42MetadataKeyTVEpisodeNumber,     @"tves",
                                             MP42MetadataKeyTVNetwork,           @"tvnn",

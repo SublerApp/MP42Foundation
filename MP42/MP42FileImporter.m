@@ -51,11 +51,11 @@ static NSArray<NSString *> *_supportedFileFormats;
                            [MP42Mp4Importer class],
                            [MP42SrtImporter class],
                            [MP42CCImporter class],
-                           [MP42AC3Importer class],
                            [MP42AACImporter class],
                            [MP42H264Importer class],
                            [MP42VobSubImporter class],
-                           [MP42AVFImporter class]] retain];
+                           [MP42AVFImporter class],
+                           [MP42AC3Importer class]] retain];
 
         NSMutableArray<NSString *> *formats = [[NSMutableArray alloc] init];
 
