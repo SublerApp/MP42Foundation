@@ -14,7 +14,7 @@
 #import "MP42Fifo.h"
 #import "MP42Languages.h"
 
-#import "MP42Track+Muxer.h"
+#import "MP42Track+Private.h"
 
 @implementation MP42Track
 {
@@ -57,7 +57,7 @@
 - (instancetype)initWithSourceURL:(NSURL *)URL trackID:(NSInteger)trackID fileHandle:(MP4FileHandle)fileHandle
 {
 	if ((self = [super init])) {
-		_sourceURL = [URL retain];
+		_sourceURL = URL;
 		_trackId = (MP4TrackId)trackID;
         _isEdited = NO;
         _muxed = YES;
@@ -71,13 +71,13 @@
             if (trackName) {
                 _name = [trackName copy];
             }
-            _language = [getHumanReadableTrackLanguage(fileHandle, _trackId) retain];
+            _language = getHumanReadableTrackLanguage(fileHandle, _trackId);
 
             // Extended language tag
             if (MP4HaveTrackAtom(fileHandle, _trackId, "mdia.elng")) {
                 const char *elng;
                 if (MP4GetTrackStringProperty(fileHandle, _trackId, "mdia.elng", &elng)) {
-                    _extendedLanguageTag = [[NSString stringWithCString:elng encoding:NSASCIIStringEncoding] retain];
+                    _extendedLanguageTag = [NSString stringWithCString:elng encoding:NSASCIIStringEncoding];
                 }
             }
 
@@ -123,7 +123,6 @@
                         if (tag) {
                             [mediaCharacteristicTags addObject:tag];
                         }
-                        [tag release];
                     }
 
                     count++;
@@ -134,7 +133,6 @@
             }
 
             _mediaCharacteristicTags = [mediaCharacteristicTags copy];
-            [mediaCharacteristicTags release];
         }
 	}
 
@@ -147,16 +145,6 @@
 
 - (void)dealloc {
     free(_helper);
-
-    [_updatedProperty release];
-    [_mediaCharacteristicTags release];
-    [_sourceURL release];
-    [_name release];
-    [_language release];
-    [_extendedLanguageTag release];
-    [_conversionSettings release];
-
-    [super dealloc];
 }
 
 - (instancetype)copyWithZone:(NSZone *)zone
@@ -167,7 +155,7 @@
         copy->_trackId = _trackId;
         copy->_sourceId = _sourceId;
 
-        copy->_sourceURL = [_sourceURL retain];
+        copy->_sourceURL = _sourceURL;
         copy->_format = _format;
         copy->_mediaType = _mediaType;
         copy->_name = [_name copy];
@@ -185,14 +173,12 @@
 
         copy->_conversionSettings = [_conversionSettings copy];
 
-        [copy->_updatedProperty release];
         copy->_updatedProperty = [_updatedProperty mutableCopy];
 
         copy->_mediaCharacteristicTags = [_mediaCharacteristicTags copy];
 
         if (_helper) {
-            copy->_helper = calloc(1, sizeof(muxer_helper));
-            ((muxer_helper *)copy->_helper)->importer = ((muxer_helper *)_helper)->importer;
+            copy->_helper = [self copy_muxer_helper];
         }
     }
 
@@ -264,7 +250,7 @@
     if (_name == nil) {
         _name = [[self defaultName] copy];
     }
-    return [[_name copy] autorelease];
+    return [_name copy];
 }
 
 - (NSString *)defaultName {
@@ -273,8 +259,6 @@
 
 - (void)setName:(NSString *)newName
 {
-    [_name autorelease];
-
     if (newName.length) {
         _name = [newName copy];
     }
@@ -288,12 +272,11 @@
 }
 
 - (NSString *)language {
-    return [[_language retain] autorelease];
+    return _language;
 }
 
 - (void)setLanguage:(NSString *)newLang
 {
-    [_language autorelease];
     _language = [newLang copy];
     self.isEdited = YES;
     _updatedProperty[@"language"] = @YES;
@@ -301,12 +284,11 @@
 }
 
 - (NSString *)extendedLanguageTag {
-    return [[_extendedLanguageTag copy] autorelease];
+    return [_extendedLanguageTag copy];
 }
 
 - (void)setExtendedLanguageTag:(NSString *)newExtendedLanguageTag
 {
-    [_extendedLanguageTag autorelease];
     _extendedLanguageTag = [newExtendedLanguageTag copy];
     self.isEdited = YES;
     _updatedProperty[@"extendedLanguageTag"] = @YES;
@@ -314,7 +296,6 @@
 
 - (void)setMediaCharacteristicTags:(NSSet<NSString *> *)mediaCharacteristicTags
 {
-    [_mediaCharacteristicTags autorelease];
     _mediaCharacteristicTags = [mediaCharacteristicTags copy];
     self.isEdited = YES;
     _updatedProperty[@"mediaCharacteristicTags"] = @YES;
@@ -433,21 +414,21 @@
     if (bookmarkData) {
         BOOL bookmarkDataIsStale;
         NSError *error;
-        _sourceURL = [[NSURL
+        _sourceURL = [NSURL
                     URLByResolvingBookmarkData:bookmarkData
                     options:NSURLBookmarkResolutionWithSecurityScope
                     relativeToURL:nil
                     bookmarkDataIsStale:&bookmarkDataIsStale
-                    error:&error] retain];
+                    error:&error];
     } else {
-        _sourceURL = [[decoder decodeObjectOfClass:[NSURL class] forKey:@"sourceURL"] retain];
+        _sourceURL = [decoder decodeObjectOfClass:[NSURL class] forKey:@"sourceURL"];
     }
 
     _format = [decoder decodeIntegerForKey:@"format"];
     _mediaType = [decoder decodeIntegerForKey:@"mediaType"];
-    _name = [[decoder decodeObjectOfClass:[NSString class] forKey:@"name"] retain];
-    _language = [[decoder decodeObjectOfClass:[NSString class] forKey:@"language"] retain];
-    _extendedLanguageTag = [[decoder decodeObjectOfClass:[NSString class] forKey:@"extendedLanguageTag"] retain];
+    _name = [decoder decodeObjectOfClass:[NSString class] forKey:@"name"];
+    _language = [decoder decodeObjectOfClass:[NSString class] forKey:@"language"];
+    _extendedLanguageTag = [decoder decodeObjectOfClass:[NSString class] forKey:@"extendedLanguageTag"];
 
     _enabled = [decoder decodeBoolForKey:@"enabled"];
 
@@ -456,7 +437,7 @@
 
     _isEdited = [decoder decodeBoolForKey:@"isEdited"];
     _muxed = [decoder decodeBoolForKey:@"muxed"];
-    _conversionSettings = [[decoder decodeObjectOfClass:[MP42ConversionSettings class] forKey:@"conversionSettings"] retain];
+    _conversionSettings = [decoder decodeObjectOfClass:[MP42ConversionSettings class] forKey:@"conversionSettings"];
 
     _timescale = [decoder decodeInt32ForKey:@"timescale"];
     _bitrate = [decoder decodeInt32ForKey:@"bitrate"];
@@ -466,8 +447,8 @@
         _size = [decoder decodeInt64ForKey:@"dataLength"];
     }
 
-    _updatedProperty = [[decoder decodeObjectOfClass:[NSMutableDictionary class] forKey:@"updatedProperty"] retain];
-    _mediaCharacteristicTags = [[decoder decodeObjectOfClass:[NSSet class] forKey:@"mediaCharacteristicTags"] retain];
+    _updatedProperty = [decoder decodeObjectOfClass:[NSMutableDictionary class] forKey:@"updatedProperty"];
+    _mediaCharacteristicTags = [decoder decodeObjectOfClass:[NSSet class] forKey:@"mediaCharacteristicTags"];
 
     return self;
 }

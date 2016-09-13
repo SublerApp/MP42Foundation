@@ -36,7 +36,7 @@
 		A908011A1D4B83A3002B6950 /* MP42AudioUnit.h in Headers */ = {isa = PBXBuildFile; fileRef = A90801101D4B83A3002B6950 /* MP42AudioUnit.h */; };
 		A910B5A418394E900064028F /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9B9C1F0182391DF00416A4E /* Cocoa.framework */; };
 		A910B5C618394EB20064028F /* MP42File.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2311823923100416A4E /* MP42File.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		A910B5C818394EB20064028F /* MP42Track.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2511823923100416A4E /* MP42Track.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		A910B5C818394EB20064028F /* MP42Track.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2511823923100416A4E /* MP42Track.m */; };
 		A910B5CA18394EB20064028F /* MP42VideoTrack.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2551823923100416A4E /* MP42VideoTrack.m */; };
 		A910B5CC18394EB20064028F /* MP42AudioTrack.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2221823923100416A4E /* MP42AudioTrack.m */; };
 		A910B5CE18394EB20064028F /* MP42ChapterTrack.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C22A1823923100416A4E /* MP42ChapterTrack.m */; };
@@ -184,7 +184,7 @@
 		A9B9C2991823923200416A4E /* MP42SubUtilities.h in Headers */ = {isa = PBXBuildFile; fileRef = A9B9C24E1823923100416A4E /* MP42SubUtilities.h */; };
 		A9B9C29A1823923200416A4E /* MP42SubUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C24F1823923100416A4E /* MP42SubUtilities.m */; };
 		A9B9C29B1823923200416A4E /* MP42Track.h in Headers */ = {isa = PBXBuildFile; fileRef = A9B9C2501823923100416A4E /* MP42Track.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		A9B9C29C1823923200416A4E /* MP42Track.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2511823923100416A4E /* MP42Track.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		A9B9C29C1823923200416A4E /* MP42Track.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2511823923100416A4E /* MP42Track.m */; };
 		A9B9C29D1823923200416A4E /* MP42PrivateUtilities.h in Headers */ = {isa = PBXBuildFile; fileRef = A9B9C2521823923100416A4E /* MP42PrivateUtilities.h */; };
 		A9B9C29E1823923200416A4E /* MP42PrivateUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2531823923100416A4E /* MP42PrivateUtilities.m */; };
 		A9B9C29F1823923200416A4E /* MP42VideoTrack.h in Headers */ = {isa = PBXBuildFile; fileRef = A9B9C2541823923100416A4E /* MP42VideoTrack.h */; settings = {ATTRIBUTES = (Public, ); }; };

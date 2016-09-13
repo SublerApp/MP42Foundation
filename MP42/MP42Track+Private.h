@@ -26,6 +26,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property(nonatomic, readonly) NSMutableDictionary<NSString *, NSNumber *> *updatedProperty;
 
+- (void *)copy_muxer_helper;
+
 @end
 
 NS_ASSUME_NONNULL_END
