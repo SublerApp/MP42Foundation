@@ -168,7 +168,7 @@ extern NSString *const MP42MetadataKeySortTVShow;
 @property(nonatomic, readwrite) uint8_t    gapless;
 @property(nonatomic, readwrite) uint8_t    podcast;
 
-@property(nonatomic, readwrite) BOOL       isEdited;
+@property(nonatomic, readwrite, getter=isEdited) BOOL edited;
 @property(nonatomic, readwrite) BOOL       isArtworkEdited;
 
 @property(nonatomic, readwrite, copy) NSString *presetName;

@@ -178,7 +178,7 @@
 - (void)setHSpacing:(uint64_t)newHSpacing
 {
     _hSpacing = newHSpacing;
-    self.isEdited = YES;
+    self.edited = YES;
     self.updatedProperty[@"hSpacing"] = @YES;
 }
 
@@ -189,7 +189,7 @@
 - (void)setVSpacing:(uint64_t)newVSpacing
 {
     _vSpacing = newVSpacing;
-    self.isEdited = YES;
+    self.edited = YES;
     self.updatedProperty[@"vSpacing"] = @YES;
 }
 
@@ -200,7 +200,7 @@
 - (void)setNewProfile:(uint8_t)newProfile
 {
     _newProfile = newProfile;
-    self.isEdited = YES;
+    self.edited = YES;
 
     if (_newProfile == _origProfile) {
         self.updatedProperty[@"profile"] = @NO;
@@ -217,7 +217,7 @@
 - (void)setNewLevel:(uint8_t)newLevel
 {
     _newLevel = newLevel;
-    self.isEdited = YES;
+    self.edited = YES;
 
     if (_newLevel == _origLevel) {
         self.updatedProperty[@"level"] = @NO;

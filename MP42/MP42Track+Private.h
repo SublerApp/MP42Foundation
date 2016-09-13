@@ -25,7 +25,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property(nonatomic, readwrite) uint32_t bitrate;
 @property(nonatomic, readwrite) uint64_t dataLength;
 
-@property(nonatomic, readwrite) BOOL isEdited;
+@property(nonatomic, readwrite, getter=isEdited) BOOL edited;
 @property(nonatomic, readwrite) BOOL muxed;
 
 @property(nonatomic, readonly) NSMutableDictionary<NSString *, NSNumber *> *updatedProperty;

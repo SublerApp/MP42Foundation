@@ -190,7 +190,7 @@
 - (void)setVolume:(float)newVolume
 {
     _volume = newVolume;
-    self.isEdited = YES;
+    self.edited = YES;
     self.updatedProperty[@"volume"] = @YES;
 }
 
@@ -203,7 +203,7 @@
 {
     _fallbackTrack = newFallbackTrack;
     _fallbackTrackId = 0;
-    self.isEdited = YES;
+    self.edited = YES;
     self.updatedProperty[@"fallback"] = @YES;
 }
 
@@ -216,7 +216,7 @@
 {
     _followsTrack = newFollowsTrack;
     _followsTrackId = 0;
-    self.isEdited = YES;
+    self.edited = YES;
     self.updatedProperty[@"follows"] = @YES;
 }
 

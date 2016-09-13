@@ -104,7 +104,7 @@
         }
     }
 
-    if (self.isEdited && !self.muxed) {
+    if (self.edited && !self.muxed) {
         float trackWidth, trackHeight;
         MP4GetTrackFloatProperty(fileHandle, self.trackId, "tkhd.width", &trackWidth);
         MP4GetTrackFloatProperty(fileHandle, self.trackId, "tkhd.height", &trackHeight);
@@ -158,7 +158,7 @@
 - (void)setSomeSamplesAreForced:(BOOL)value
 {
     _someSamplesAreForced = value;
-    self.isEdited = YES;
+    self.edited = YES;
 
     self.updatedProperty[@"forcedSubtitles"] = @YES;
 }
@@ -170,7 +170,7 @@
 - (void)setAllSamplesAreForced:(BOOL)value
 {
     _allSamplesAreForced = value;
-    self.isEdited = YES;
+    self.edited = YES;
 
     self.updatedProperty[@"forcedSubtitles"] = @YES;
 }
@@ -413,7 +413,7 @@ static void insertTagsFromStyleRecord(style_record record, NSMutableString *samp
 {
     _forcedTrack = newForcedTrack;
     _forcedTrackId = 0;
-    self.isEdited = YES;
+    self.edited = YES;
     self.updatedProperty[@"forced"] = @YES;
 }
 

@@ -84,7 +84,7 @@
         self.enabled = NO;
         self.language = @"English";
         self.URL = URL;
-        self.isEdited = YES;
+        self.edited = YES;
         self.muxed = NO;
         _areChaptersEdited = YES;
 
@@ -107,7 +107,7 @@
 
 - (NSUInteger)addChapter:(MP42TextSample *)chapter
 {
-    self.isEdited = YES;
+    self.edited = YES;
     _areChaptersEdited = YES;
 
     [_chapters addObject:chapter];
@@ -149,14 +149,14 @@
 
 - (void)removeChaptersAtIndexes:(NSIndexSet *)indexes
 {
-    self.isEdited = YES;
+    self.edited = YES;
     _areChaptersEdited = YES;
     [_chapters removeObjectsAtIndexes:indexes];
 }
 
 - (void)setTimestamp:(MP4Duration)timestamp forChapter:(MP42TextSample *)chapterSample
 {
-    self.isEdited = YES;
+    self.edited = YES;
     _areChaptersEdited = YES;
     [chapterSample setTimestamp:timestamp];
     [_chapters sortUsingSelector:@selector(compare:)];
@@ -164,7 +164,7 @@
 
 - (void)setTitle:(NSString *)title forChapter:(MP42TextSample *)chapterSample
 {
-    self.isEdited = YES;
+    self.edited = YES;
     _areChaptersEdited = YES;
     [chapterSample setTitle:title];
 }
@@ -178,7 +178,7 @@
 {
     BOOL success = YES;
 
-    if ((self.isEdited && _areChaptersEdited) || !self.muxed) {
+    if ((self.edited && _areChaptersEdited) || !self.muxed) {
         MP4Chapter_t * fileChapters = 0;
         MP4Duration refTrackDuration;
         uint32_t chapterCount = 0;

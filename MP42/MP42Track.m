@@ -32,15 +32,16 @@
 
 @property(nonatomic, readwrite, copy) NSURL *URL;
 
-@property(nonatomic, readwrite) FourCharCode format;
+@property(nonatomic, readwrite) MP42CodecType format;
 @property(nonatomic, readwrite) MP42MediaType mediaType;
 
 @property(nonatomic, readwrite) MP42Duration duration;
 @property(nonatomic, readwrite) uint64_t dataLength;
+@property(nonatomic, readwrite) uint32_t bitrate;
 
 @property(nonatomic, readwrite) BOOL muxed;
 
-@property(nonatomic, readwrite) BOOL isEdited;
+@property(nonatomic, readwrite, getter=isEdited) BOOL edited;
 @property(nonatomic, readonly) NSMutableDictionary<NSString *, NSNumber *> *updatedProperty;
 
 @end
@@ -63,7 +64,7 @@
 	if ((self = [super init])) {
         _URL = URL;
 		_trackId = (MP4TrackId)trackID;
-        _isEdited = NO;
+        _edited = NO;
         _muxed = YES;
         _updatedProperty = [[NSMutableDictionary alloc] init];
 
@@ -278,7 +279,7 @@
         _name = [self defaultName];
     }
 
-    self.isEdited = YES;
+    self.edited = YES;
     _updatedProperty[@"name"] = @YES;
 
 }
@@ -290,7 +291,7 @@
 - (void)setLanguage:(NSString *)newLang
 {
     _language = [newLang copy];
-    self.isEdited = YES;
+    self.edited = YES;
     _updatedProperty[@"language"] = @YES;
 
 }
@@ -302,14 +303,14 @@
 - (void)setExtendedLanguageTag:(NSString *)newExtendedLanguageTag
 {
     _extendedLanguageTag = [newExtendedLanguageTag copy];
-    self.isEdited = YES;
+    self.edited = YES;
     _updatedProperty[@"extendedLanguageTag"] = @YES;
 }
 
 - (void)setMediaCharacteristicTags:(NSSet<NSString *> *)mediaCharacteristicTags
 {
     _mediaCharacteristicTags = [mediaCharacteristicTags copy];
-    self.isEdited = YES;
+    self.edited = YES;
     _updatedProperty[@"mediaCharacteristicTags"] = @YES;
 }
 
@@ -317,7 +318,7 @@
 {
     if (_enabled != newState) {
         _enabled = newState;
-        self.isEdited = YES;
+        self.edited = YES;
         _updatedProperty[@"enabled"] = @YES;
     }
 }
@@ -333,7 +334,7 @@
 - (void)setAlternate_group:(uint64_t)newGroup
 {
     _alternate_group = newGroup;
-    self.isEdited = YES;
+    self.edited = YES;
     _updatedProperty[@"alternate_group"] = @YES;
 }
 
@@ -344,7 +345,7 @@
 - (void)setStartOffset:(int64_t)newOffset
 {
     _startOffset = newOffset;
-    self.isEdited = YES;
+    self.edited = YES;
     _updatedProperty[@"start_offset"] = @YES;
 }
 
@@ -404,7 +405,7 @@
     [coder encodeInt64:_alternate_group forKey:@"alternate_group"];
     [coder encodeInt64:_startOffset forKey:@"startOffset"];
 
-    [coder encodeBool:_isEdited forKey:@"isEdited"];
+    [coder encodeBool:_edited forKey:@"isEdited"];
     [coder encodeBool:_muxed forKey:@"muxed"];
     [coder encodeObject:_conversionSettings forKey:@"conversionSettings"];
 
@@ -452,7 +453,7 @@
     _alternate_group = [decoder decodeInt64ForKey:@"alternate_group"];
     _startOffset = [decoder decodeInt64ForKey:@"startOffset"];
 
-    _isEdited = [decoder decodeBoolForKey:@"isEdited"];
+    _edited = [decoder decodeBoolForKey:@"isEdited"];
     _muxed = [decoder decodeBoolForKey:@"muxed"];
     _conversionSettings = [decoder decodeObjectOfClass:[MP42ConversionSettings class] forKey:@"conversionSettings"];
 

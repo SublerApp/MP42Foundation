@@ -415,7 +415,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
     track.sourceId = track.trackId;
     track.trackId = 0;
     track.muxed = NO;
-    track.isEdited = YES;
+    track.edited = YES;
 
     track.language = track.language;
     track.name = track.name;

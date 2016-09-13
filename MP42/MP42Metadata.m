@@ -300,7 +300,7 @@ static const genreType_t genreType_strings[] = {
         _presetName = NSLocalizedString(@"Unnamed Set", nil);
         _tagsDict = [[NSMutableDictionary alloc] init];
         _artworks = [[NSMutableArray alloc] init];
-        _isEdited = NO;
+        _edited = NO;
         _isArtworkEdited = NO;
 	}
 
@@ -589,7 +589,7 @@ static const genreType_t genreType_strings[] = {
         if (artworkImage.isValid) {
             MP42Image *artwork = [[MP42Image alloc] initWithImage:artworkImage];
             [self.artworks addObject:artwork];
-            self.isEdited =YES;
+            self.edited =YES;
             self.isArtworkEdited = YES;
             return YES;
         }
@@ -599,7 +599,7 @@ static const genreType_t genreType_strings[] = {
     } else {
         // FIXME
         //self.artworks = nil;
-        self.isEdited = YES;
+        self.edited = YES;
         self.isArtworkEdited = YES;
         return YES;
     }
@@ -656,12 +656,12 @@ static const genreType_t genreType_strings[] = {
     self.gapless = metadata.gapless;
     self.hdVideo = metadata.hdVideo;
 
-    self.isEdited = YES;
+    self.edited = YES;
 }
 
 - (void)removeTagForKey:(NSString *)aKey {
     [self.tagsDict removeObjectForKey:aKey];
-    self.isEdited = YES;
+    self.edited = YES;
 }
 
 - (BOOL)setTag:(id)value forKey:(NSString *)key {
@@ -681,12 +681,12 @@ static const genreType_t genreType_strings[] = {
         } else {
             self.hdVideo = 0;
         }
-        self.isEdited = YES;
+        self.edited = YES;
 
     } else if ([key isEqualToString:MP42MetadataKeyUserGenre]) {
         if ([value isKindOfClass:[NSNumber class]]) {
             [self.tagsDict setValue:[self genreFromIndex:[value integerValue]] forKey:key];
-            self.isEdited = YES;
+            self.edited = YES;
         } else if ([value isKindOfClass:[NSData class]]) {
             if ([value length] >= 2) {
                 uint8_t* bytes = (uint8_t*)malloc([value length]);
@@ -696,11 +696,11 @@ static const genreType_t genreType_strings[] = {
 
                 free(bytes);
                 [self.tagsDict setValue:[self genreFromIndex:genre] forKey:key];
-                self.isEdited = YES;
+                self.edited = YES;
             }
         } else if ([value isKindOfClass:[NSString class]]) {
             [self.tagsDict setValue:value forKey:key];
-            self.isEdited = YES;
+            self.edited = YES;
         } else {
             noErr = NO;
             NSAssert(YES, @"Invalid genre input");
@@ -709,18 +709,18 @@ static const genreType_t genreType_strings[] = {
     } else if ([key isEqualToString:@"Gapless"]) {
         if ([value isKindOfClass:[NSNumber class]]) {
             self.gapless = [value integerValue];
-            self.isEdited = YES;
+            self.edited = YES;
         }
         else if ([value isKindOfClass:[NSString class]] && [value length] > 0 && [value MP42_isMatchedByRegex:regexPositive]) {
             self.gapless = 1;
-            self.isEdited = YES;
+            self.edited = YES;
         } else {
             self.gapless = 0;
-            self.isEdited = YES;
+            self.edited = YES;
         }
 
     } else if ([key isEqualToString:MP42MetadataKeyTrackNumber]) {
-        self.isEdited = YES;
+        self.edited = YES;
         if ([value isKindOfClass:[NSData class]]) {
             uint8_t* bytes = (uint8_t*)malloc([value length]);
             memcpy(bytes, [value bytes], [value length]);
@@ -740,7 +740,7 @@ static const genreType_t genreType_strings[] = {
         }
 
     } else if ([key isEqualToString:MP42MetadataKeyDiscNumber]) {
-        self.isEdited = YES;
+        self.edited = YES;
         if ([value isKindOfClass:[NSData class]]) {
             uint8_t* bytes = (uint8_t*)malloc([value length]);
             memcpy(bytes, [value bytes], [value length]);
@@ -756,7 +756,7 @@ static const genreType_t genreType_strings[] = {
             [self.tagsDict setValue:value forKey:key];
         }
     } else if ([key isEqualToString:MP42MetadataKeyRating]) {
-        self.isEdited = YES;
+        self.edited = YES;
         if ([value isKindOfClass:[NSString class]]) {
             NSNumber *index = @([[MP42Ratings defaultManager] ratingIndexForiTunesCode:value]);
             [self.tagsDict setValue:index forKey:key];
@@ -766,7 +766,7 @@ static const genreType_t genreType_strings[] = {
         }
 
     } else if ([key isEqualToString:MP42MetadataKeyContentRating]) {
-        self.isEdited = YES;
+        self.edited = YES;
         if ([value isKindOfClass:[NSNumber class]]) {
             self.contentRating = [value integerValue];
         } else if ([value isKindOfClass:[NSString class]]) {
@@ -777,7 +777,7 @@ static const genreType_t genreType_strings[] = {
         }
 
     } else if ([key isEqualToString:@"Media Kind"]) {
-        self.isEdited = YES;
+        self.edited = YES;
         if ([value isKindOfClass:[NSNumber class]]) {
             self.mediaKind = [value integerValue];
         } else if ([value isKindOfClass:[NSString class]]) {
@@ -792,7 +792,7 @@ static const genreType_t genreType_strings[] = {
 
 	} else if (![self.tagsDict[key] isEqualTo:value]) {
         [self.tagsDict setValue:value forKey:key];
-        self.isEdited = YES;
+        self.edited = YES;
 
     } else {
         noErr = NO;
@@ -1692,7 +1692,7 @@ static const genreType_t genreType_strings[] = {
     [coder encodeInt:_gapless forKey:@"MP42Gapless"];
     [coder encodeInt:_podcast forKey:@"MP42Podcast"];
 
-    [coder encodeBool:_isEdited forKey:@"MP42Edited"];
+    [coder encodeBool:_edited forKey:@"MP42Edited"];
 }
 
 - (id)initWithCoder:(NSCoder *)decoder
@@ -1725,7 +1725,7 @@ static const genreType_t genreType_strings[] = {
     _gapless = [decoder decodeIntForKey:@"MP42Gapless"];
     _podcast = [decoder decodeIntForKey:@"MP42Podcast"];
 
-    _isEdited = [decoder decodeBoolForKey:@"MP42Edited"];
+    _edited = [decoder decodeBoolForKey:@"MP42Edited"];
 
     return self;
 }
