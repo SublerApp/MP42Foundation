@@ -20,8 +20,12 @@ NS_ASSUME_NONNULL_BEGIN
 @property(nonatomic, readwrite, copy) NSURL *sourceURL;
 
 @property(nonatomic, readwrite) FourCharCode format;
-@property(nonatomic, readwrite) MP42Duration duration;
+@property(nonatomic, readwrite) MP42MediaType mediaType;
 
+@property(nonatomic, readwrite) MP42Duration duration;
+@property(nonatomic, readwrite) uint64_t dataLength;
+
+@property(nonatomic, readwrite) BOOL isEdited;
 @property(nonatomic, readwrite) BOOL muxed;
 
 @property(nonatomic, readonly) NSMutableDictionary<NSString *, NSNumber *> *updatedProperty;

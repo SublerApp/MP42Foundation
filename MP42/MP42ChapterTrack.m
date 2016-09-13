@@ -21,12 +21,11 @@
 - (instancetype)init
 {
     if ((self = [super init])) {
-        _format = kMP42SubtitleCodecType_Text;
+        self.format = kMP42SubtitleCodecType_Text;
+        self.mediaType = kMP42MediaType_Text;
         _language = @"English";
-        _isEdited = NO;
-        _muxed = NO;
+        self.muxed = NO;
         _enabled = NO;
-        _mediaType = kMP42MediaType_Text;
 
         chapters = [[NSMutableArray alloc] init];
     }
@@ -40,11 +39,11 @@
 
     if (self) {
 
-        if (!_format) {
-            _format = kMP42SubtitleCodecType_Text;
+        if (!self.format) {
+            self.format = kMP42SubtitleCodecType_Text;
         }
 
-        _mediaType = kMP42MediaType_Text;
+        self.mediaType = kMP42MediaType_Text;
         chapters = [[NSMutableArray alloc] init];
 
         MP4Chapter_t *chapter_list = NULL;
@@ -80,17 +79,17 @@
 - (instancetype)initWithTextFile:(NSURL *)URL
 {
     if ((self = [super init])) {
-        _format = kMP42SubtitleCodecType_Text;
-        _sourceURL = URL;
+        self.format = kMP42SubtitleCodecType_Text;
+        self.mediaType = kMP42MediaType_Text;
+        self.sourceURL = URL;
         _language = @"English";
-        _isEdited = YES;
-        _muxed = NO;
+        self.isEdited = YES;
+        self.muxed = NO;
         _enabled = NO;
-        _mediaType = kMP42MediaType_Text;
         _areChaptersEdited = YES;
 
         chapters = [[NSMutableArray alloc] init];
-        LoadChaptersFromURL(_sourceURL, chapters);
+        LoadChaptersFromURL(self.sourceURL, chapters);
         [chapters sortUsingSelector:@selector(compare:)];
     }
     
@@ -179,7 +178,7 @@
 {
     BOOL success = YES;
 
-    if ((_isEdited && _areChaptersEdited) || !_muxed) {
+    if ((self.isEdited && _areChaptersEdited) || !self.muxed) {
         MP4Chapter_t * fileChapters = 0;
         MP4Duration refTrackDuration;
         uint32_t chapterCount = 0;
@@ -189,7 +188,7 @@
         // get the list of chapters
         MP4GetChapters(fileHandle, &fileChapters, &chapterCount, MP4ChapterTypeQt);
 
-        MP4DeleteChapters(fileHandle, MP4ChapterTypeAny, _trackId);
+        MP4DeleteChapters(fileHandle, MP4ChapterTypeAny, self.trackId);
         updateTracksCount(fileHandle);
 
         MP4TrackId refTrack = findFirstVideoTrack(fileHandle);
@@ -244,7 +243,7 @@
             MP4SetChapters(fileHandle, fileChapters, i, MP4ChapterTypeQt);
 
             free(fileChapters);
-            success = _trackId = findChapterTrackId(fileHandle);
+            success = self.trackId = findChapterTrackId(fileHandle);
         }
     }
 
@@ -255,7 +254,7 @@
                                   120);
 
         return success;
-    } else if (_trackId) {
+    } else if (self.trackId) {
         success = [super writeToFile:fileHandle error:outError];
     }
 

@@ -17,7 +17,7 @@
     self = [super initWithSourceURL:URL trackID:trackID fileHandle:fileHandle];
 
     if (self) {
-        _mediaType = kMP42MediaType_ClosedCaption;
+        self.mediaType = kMP42MediaType_ClosedCaption;
     }
 
     return self;
@@ -26,8 +26,8 @@
 - (instancetype)init
 {
     if ((self = [super init])) {
-        _format = kMP42ClosedCaptionCodecType_CEA608;
-        _mediaType = kMP42MediaType_ClosedCaption;
+        self.format = kMP42ClosedCaptionCodecType_CEA608;
+        self.mediaType = kMP42MediaType_ClosedCaption;
     }
 
     return self;
@@ -35,13 +35,13 @@
 
 - (BOOL)writeToFile:(MP42FileHandle)fileHandle error:(NSError **)outError
 {
-    if (_isEdited && !_muxed) {
-        _muxed = YES;
+    if (self.isEdited && !self.muxed) {
+        self.muxed = YES;
     }
 
     [super writeToFile:fileHandle error:outError];
 
-    return (_trackId > 0);
+    return (self.trackId > 0);
 }
 
 @end

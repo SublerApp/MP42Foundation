@@ -17,19 +17,10 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @interface MP42Track : NSObject <NSSecureCoding, NSCopying> {
 @protected
-    MP42TrackId  _trackId;
-
-    NSURL         *_sourceURL;
-    FourCharCode   _format;
-    MP42MediaType  _mediaType;
-
     NSString *_language;
     NSString *_extendedLanguageTag;
 
     BOOL _enabled;
-    BOOL _isEdited;
-    BOOL _muxed;
-
     void *_helper;
 }
 
@@ -38,6 +29,14 @@ NS_ASSUME_NONNULL_BEGIN
 @property(nonatomic, readonly, copy) NSURL *sourceURL;
 @property(nonatomic, readonly) FourCharCode format;
 @property(nonatomic, readonly) MP42MediaType mediaType;
+
+@property(nonatomic, readonly) uint32_t timescale;
+@property(nonatomic, readonly) MP42Duration duration;
+
+@property(nonatomic, readonly) uint32_t bitrate;
+@property(nonatomic, readonly) uint64_t dataLength;
+
+@property(nonatomic, readonly) BOOL muxed;
 
 @property(nonatomic, readwrite, getter=isEnabled) BOOL enabled;
 
@@ -50,16 +49,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property(nonatomic, readwrite) uint64_t alternate_group;
 @property(nonatomic, readwrite) int64_t  startOffset;
 
-@property(nonatomic, readonly) uint32_t timescale;
-@property(nonatomic, readonly) uint32_t bitrate;
-@property(nonatomic, readonly) MP42Duration duration;
-
-@property(nonatomic, readwrite) BOOL isEdited;
-@property(nonatomic, readonly) BOOL muxed;
-
 @property(nonatomic, readwrite, copy) MP42ConversionSettings *conversionSettings;
-
-@property(nonatomic, readwrite) uint64_t dataLength;
 
 @property (nonatomic, readonly) NSString *timeString;
 @property (nonatomic, readonly) NSString *formatSummary;

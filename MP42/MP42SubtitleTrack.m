@@ -28,19 +28,19 @@
 
     if (self) {
 
-        _mediaType = kMP42MediaType_Subtitle;
+        self.mediaType = kMP42MediaType_Subtitle;
 
-        if (_format != kMP42SubtitleCodecType_VobSub) {
+        if (self.format != kMP42SubtitleCodecType_VobSub) {
             uint64_t width, height;
 
-            MP4GetTrackIntegerProperty(fileHandle, _trackId, "mdia.minf.stbl.stsd.tx3g.defTextBoxRight", &width);
-            MP4GetTrackIntegerProperty(fileHandle, _trackId, "mdia.minf.stbl.stsd.tx3g.defTextBoxBottom", &height);
+            MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.tx3g.defTextBoxRight", &width);
+            MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.tx3g.defTextBoxBottom", &height);
 
             self.width = width;
             self.height = height;
 
             uint64_t displayFlags = 0;
-            MP4GetTrackIntegerProperty(fileHandle, _trackId, "mdia.minf.stbl.stsd.tx3g.displayFlags", &displayFlags);
+            MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.tx3g.displayFlags", &displayFlags);
 
             if (displayFlags) {
                 if ((displayFlags & 0x20000000) == 0x20000000) {
@@ -56,9 +56,9 @@
                 }
             }
 
-            if (MP4HaveTrackAtom(fileHandle, _trackId, "tref.forc")) {
+            if (MP4HaveTrackAtom(fileHandle, self.trackId, "tref.forc")) {
                 uint64_t forcedId = 0;
-                MP4GetTrackIntegerProperty(fileHandle, _trackId, "tref.forc.entries.trackId", &forcedId);
+                MP4GetTrackIntegerProperty(fileHandle, self.trackId, "tref.forc.entries.trackId", &forcedId);
                 _forcedTrackId = (MP4TrackId) forcedId;
             }
         }
@@ -70,8 +70,8 @@
 - (instancetype)init
 {
     if ((self = [super init])) {
-        _format = kMP42SubtitleCodecType_3GText;
-        _mediaType = kMP42MediaType_Subtitle;
+        self.format = kMP42SubtitleCodecType_3GText;
+        self.mediaType = kMP42MediaType_Subtitle;
     }
 
     return self;
@@ -79,7 +79,7 @@
 
 - (BOOL)writeToFile:(MP4FileHandle)fileHandle error:(NSError **)outError
 {
-    if (!fileHandle || !_trackId) {
+    if (!fileHandle || !self.trackId) {
         if ( outError != NULL) {
             *outError = MP42Error(@"Error: couldn't mux subtitle track",
                                   nil,
@@ -89,27 +89,27 @@
         }
     }
 
-    if (self.updatedProperty[@"forced"] || !_muxed) {
+    if (self.updatedProperty[@"forced"] || !self.muxed) {
 
         if (_forcedTrack) {
             _forcedTrackId = _forcedTrack.trackId;
         }
 
-        if (MP4HaveTrackAtom(fileHandle, _trackId, "tref.forc") && (_forcedTrackId == 0)) {
-            MP4RemoveAllTrackReferences(fileHandle, "tref.forc", _trackId);
+        if (MP4HaveTrackAtom(fileHandle, self.trackId, "tref.forc") && (_forcedTrackId == 0)) {
+            MP4RemoveAllTrackReferences(fileHandle, "tref.forc", self.trackId);
         }
-        else if (MP4HaveTrackAtom(fileHandle, _trackId, "tref.forc") && (_forcedTrackId)) {
-            MP4SetTrackIntegerProperty(fileHandle, _trackId, "tref.forc.entries.trackId", _forcedTrackId);
+        else if (MP4HaveTrackAtom(fileHandle, self.trackId, "tref.forc") && (_forcedTrackId)) {
+            MP4SetTrackIntegerProperty(fileHandle, self.trackId, "tref.forc.entries.trackId", _forcedTrackId);
         }
         else if (_forcedTrackId) {
-            MP4AddTrackReference(fileHandle, "tref.forc", _forcedTrackId, _trackId);
+            MP4AddTrackReference(fileHandle, "tref.forc", _forcedTrackId, self.trackId);
         }
     }
 
-    if (_isEdited && !_muxed) {
+    if (self.isEdited && !self.muxed) {
         float trackWidth, trackHeight;
-        MP4GetTrackFloatProperty(fileHandle, _trackId, "tkhd.width", &trackWidth);
-        MP4GetTrackFloatProperty(fileHandle, _trackId, "tkhd.height", &trackHeight);
+        MP4GetTrackFloatProperty(fileHandle, self.trackId, "tkhd.width", &trackWidth);
+        MP4GetTrackFloatProperty(fileHandle, self.trackId, "tkhd.height", &trackHeight);
 
         self.trackWidth = trackWidth;
         self.trackHeight = trackHeight;
@@ -119,7 +119,7 @@
         uint32_t *ptr32 = (uint32_t*) nval;
         uint32_t size;
 
-        MP4GetTrackBytesProperty(fileHandle ,_trackId, "tkhd.matrix", &val, &size);
+        MP4GetTrackBytesProperty(fileHandle ,self.trackId, "tkhd.matrix", &val, &size);
         memcpy(nval, val, size);
         self.offsetX = CFSwapInt32BigToHost(ptr32[6]) / 0x10000;
         self.offsetY = CFSwapInt32BigToHost(ptr32[7]) / 0x10000;
@@ -127,15 +127,15 @@
 
         [super writeToFile:fileHandle error:outError];
 
-        return _trackId;
+        return self.trackId;
     }
     else {
         [super writeToFile:fileHandle error:outError];
     }
 
-    if (_format != kMP42SubtitleCodecType_VobSub) {
-        MP4SetTrackIntegerProperty(fileHandle, _trackId, "mdia.minf.stbl.stsd.tx3g.defTextBoxBottom", self.trackHeight);
-        MP4SetTrackIntegerProperty(fileHandle, _trackId, "mdia.minf.stbl.stsd.tx3g.defTextBoxRight", self.trackWidth);
+    if (self.format != kMP42SubtitleCodecType_VobSub) {
+        MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.tx3g.defTextBoxBottom", self.trackHeight);
+        MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.tx3g.defTextBoxRight", self.trackWidth);
 
         uint32_t displayFlags = 0;
         if (_verticalPlacement)
@@ -145,7 +145,7 @@
         if (_allSamplesAreForced)
             displayFlags |= 0x80000000;
 
-        MP4SetTrackIntegerProperty(fileHandle, _trackId, "mdia.minf.stbl.stsd.tx3g.displayFlags", displayFlags);
+        MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.tx3g.displayFlags", displayFlags);
     }
 
     return YES;
@@ -160,7 +160,7 @@
 - (void)setSomeSamplesAreForced:(BOOL)value
 {
     _someSamplesAreForced = value;
-    _isEdited = YES;
+    self.isEdited = YES;
 
     self.updatedProperty[@"forcedSubtitles"] = @YES;
 }
@@ -172,7 +172,7 @@
 - (void)setAllSamplesAreForced:(BOOL)value
 {
     _allSamplesAreForced = value;
-    _isEdited = YES;
+    self.isEdited = YES;
 
     self.updatedProperty[@"forcedSubtitles"] = @YES;
 }
@@ -250,11 +250,11 @@ static void insertTagsFromStyleRecord(style_record record, NSMutableString *samp
 
 - (BOOL)exportToURL:(NSURL *)url error:(NSError **)error
 {
-    MP4FileHandle fileHandle = MP4Read(_sourceURL.fileSystemRepresentation);
+    MP4FileHandle fileHandle = MP4Read(self.sourceURL.fileSystemRepresentation);
     if (!fileHandle)
         return NO;
 
-    MP4TrackId srcTrackId = _trackId;
+    MP4TrackId srcTrackId = self.trackId;
 
     MP4SampleId sampleId = 1;
     NSUInteger srtSampleNumber = 1;
@@ -415,7 +415,7 @@ static void insertTagsFromStyleRecord(style_record record, NSMutableString *samp
 {
     _forcedTrack = newForcedTrack;
     _forcedTrackId = 0;
-    _isEdited = YES;
+    self.isEdited = YES;
     self.updatedProperty[@"forced"] = @YES;
 }
 

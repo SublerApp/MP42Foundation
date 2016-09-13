@@ -18,7 +18,6 @@
 
 @interface MP42Track ()
 {
-    uint64_t    _size;
     NSString   *_name;
 
     uint64_t    _alternate_group;
@@ -31,10 +30,14 @@
 @property(nonatomic, readwrite, copy) NSURL *sourceURL;
 
 @property(nonatomic, readwrite) FourCharCode format;
+@property(nonatomic, readwrite) MP42MediaType mediaType;
+
 @property(nonatomic, readwrite) MP42Duration duration;
+@property(nonatomic, readwrite) uint64_t dataLength;
 
 @property(nonatomic, readwrite) BOOL muxed;
 
+@property(nonatomic, readwrite) BOOL isEdited;
 @property(nonatomic, readonly) NSMutableDictionary<NSString *, NSNumber *> *updatedProperty;
 
 @end
@@ -94,7 +97,7 @@
             _timescale = MP4GetTrackTimeScale(fileHandle, _trackId);
             _startOffset = getTrackStartOffset(fileHandle, _trackId);
 
-            _size = getTrackSize(fileHandle, _trackId);
+            _dataLength = getTrackSize(fileHandle, _trackId);
 
             // Track flags
             uint64_t temp;
@@ -171,7 +174,7 @@
         copy->_alternate_group = _alternate_group;
         copy->_startOffset = _startOffset;
 
-        copy->_size = _size;
+        copy->_dataLength = _dataLength;
 
         copy->_timescale = _timescale;
         copy->_bitrate = _bitrate;
@@ -207,7 +210,6 @@
 
     if (_updatedProperty[@"name"] || !_muxed) {
         if (_name != nil && ![_name isEqualToString:self.defaultName]) {
-
             MP4SetTrackName(fileHandle, _trackId, _name.UTF8String);
         }
         else {
@@ -224,7 +226,7 @@
     }
 
     if (_updatedProperty[@"language"] || !_muxed) {
-        MP4SetTrackLanguage(fileHandle, _trackId, lang_for_english([_language UTF8String])->iso639_2);
+        MP4SetTrackLanguage(fileHandle, _trackId, lang_for_english(_language.UTF8String)->iso639_2);
     }
 
     if ((_updatedProperty[@"extendedLanguageTag"] || !_muxed) && _extendedLanguageTag) {
@@ -401,7 +403,7 @@
     [coder encodeInt32:_bitrate forKey:@"bitrate"];
     [coder encodeInt64:_duration forKey:@"duration"];
     
-    [coder encodeInt64:_size forKey:@"dataLength"];
+    [coder encodeInt64:_dataLength forKey:@"dataLength"];
 
     [coder encodeObject:_updatedProperty forKey:@"updatedProperty"];
     [coder encodeObject:_mediaCharacteristicTags forKey:@"mediaCharacteristicTags"];
@@ -450,7 +452,7 @@
     _duration = [decoder decodeInt64ForKey:@"duration"];
     
     if (version == 2) {
-        _size = [decoder decodeInt64ForKey:@"dataLength"];
+        _dataLength = [decoder decodeInt64ForKey:@"dataLength"];
     }
 
     _updatedProperty = [decoder decodeObjectOfClass:[NSMutableDictionary class] forKey:@"updatedProperty"];

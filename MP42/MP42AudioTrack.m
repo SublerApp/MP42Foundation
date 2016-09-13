@@ -32,10 +32,10 @@
 
     if (self) {
 
-        MP4GetTrackFloatProperty(fileHandle, _trackId, "tkhd.volume", &_volume);
-        _mediaType = kMP42MediaType_Audio;
+        MP4GetTrackFloatProperty(fileHandle, self.trackId, "tkhd.volume", &_volume);
+        self.mediaType = kMP42MediaType_Audio;
 
-        u_int8_t audioType = MP4GetTrackEsdsObjectTypeId(fileHandle, _trackId);
+        u_int8_t audioType = MP4GetTrackEsdsObjectTypeId(fileHandle, self.trackId);
 
         if (audioType != MP4_INVALID_AUDIO_TYPE) {
             if (MP4_IS_AAC_AUDIO_TYPE(audioType)) {
@@ -43,7 +43,7 @@
                 u_int32_t aacConfigLength;
 
                 if (MP4GetTrackESConfiguration(fileHandle, 
-                                               _trackId,
+                                               self.trackId,
                                                &pAacConfig,
                                                &aacConfigLength) == true)
                     if (pAacConfig != NULL || aacConfigLength >= 2) {
@@ -57,10 +57,10 @@
                      (audioType == MP4_PCM16_BIG_ENDIAN_AUDIO_TYPE)) {
 
                 u_int32_t samplesPerFrame =
-                MP4GetSampleSize(fileHandle, _trackId, 1) / 2;
+                MP4GetSampleSize(fileHandle, self.trackId, 1) / 2;
 
                 MP4Duration frameDuration =
-                MP4GetSampleDuration(fileHandle, _trackId, 1);
+                MP4GetSampleDuration(fileHandle, self.trackId, 1);
 
                 if (frameDuration != 0) {
                     // assumes track time scale == sampling rate
@@ -71,39 +71,39 @@
 
         if (audioType == 0xA9) {
             uint64_t channels_count = 0;
-            MP4GetTrackIntegerProperty(fileHandle, _trackId, "mdia.minf.stbl.stsd.mp4a.channels", &channels_count);
+            MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.mp4a.channels", &channels_count);
             _channels = channels_count;
         }
-        else if (MP4HaveTrackAtom(fileHandle, _trackId, "mdia.minf.stbl.stsd.ac-3.dac3")) {
+        else if (MP4HaveTrackAtom(fileHandle, self.trackId, "mdia.minf.stbl.stsd.ac-3.dac3")) {
             uint64_t acmod, lfeon;
 
-            MP4GetTrackIntegerProperty(fileHandle, _trackId, "mdia.minf.stbl.stsd.ac-3.dac3.acmod", &acmod);
-            MP4GetTrackIntegerProperty(fileHandle, _trackId, "mdia.minf.stbl.stsd.ac-3.dac3.lfeon", &lfeon);
+            MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.ac-3.dac3.acmod", &acmod);
+            MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.ac-3.dac3.lfeon", &lfeon);
 
             readAC3Config(acmod, lfeon, &_channels, &_channelLayoutTag);
         }
-        else if (MP4HaveTrackAtom(fileHandle, _trackId, "mdia.minf.stbl.stsd.ec-3.dec3")) {
+        else if (MP4HaveTrackAtom(fileHandle, self.trackId, "mdia.minf.stbl.stsd.ec-3.dec3")) {
             uint8_t    *ppValue;
             uint32_t    pValueSize;
-            MP4GetTrackBytesProperty(fileHandle, _trackId, "mdia.minf.stbl.stsd.ec-3.dec3.content", &ppValue, &pValueSize);
+            MP4GetTrackBytesProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.ec-3.dec3.content", &ppValue, &pValueSize);
             readEAC3Config(ppValue, pValueSize, &_channels, &_channelLayoutTag);
             free(ppValue);
         }
-        else if (MP4HaveTrackAtom(fileHandle, _trackId, "mdia.minf.stbl.stsd.alac")) {
+        else if (MP4HaveTrackAtom(fileHandle, self.trackId, "mdia.minf.stbl.stsd.alac")) {
             uint64_t channels_count = 0;
-            MP4GetTrackIntegerProperty(fileHandle, _trackId, "mdia.minf.stbl.stsd.alac.channels", &channels_count);
+            MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.alac.channels", &channels_count);
             _channels = channels_count;
         }
 
-        if (MP4HaveTrackAtom(fileHandle, _trackId, "tref.fall")) {
+        if (MP4HaveTrackAtom(fileHandle, self.trackId, "tref.fall")) {
             uint64_t fallbackId = 0;
-            MP4GetTrackIntegerProperty(fileHandle, _trackId, "tref.fall.entries.trackId", &fallbackId);
+            MP4GetTrackIntegerProperty(fileHandle, self.trackId, "tref.fall.entries.trackId", &fallbackId);
             _fallbackTrackId = (MP4TrackId) fallbackId;
         }
 
-        if (MP4HaveTrackAtom(fileHandle, _trackId, "tref.folw")) {
+        if (MP4HaveTrackAtom(fileHandle, self.trackId, "tref.folw")) {
             uint64_t followsId = 0;
-            MP4GetTrackIntegerProperty(fileHandle, _trackId, "tref.folw.entries.trackId", &followsId);
+            MP4GetTrackIntegerProperty(fileHandle, self.trackId, "tref.folw.entries.trackId", &followsId);
             _followsTrackId = (MP4TrackId) followsId;
         }
 
@@ -118,7 +118,7 @@
     {
         _language = @"Unknown";
         _volume = 1;
-        _mediaType = kMP42MediaType_Audio;
+        self.mediaType = kMP42MediaType_Audio;
     }
 
     return self;
@@ -146,55 +146,55 @@
         return NO;
     }
 
-    if (_trackId) {
+    if (self.trackId) {
         [super writeToFile:fileHandle error:outError];
     }
 
-    if (self.updatedProperty[@"volume"] || !_muxed) {
-        MP4SetTrackFloatProperty(fileHandle, _trackId, "tkhd.volume", _volume);
+    if (self.updatedProperty[@"volume"] || !self.muxed) {
+        MP4SetTrackFloatProperty(fileHandle, self.trackId, "tkhd.volume", _volume);
     }
 
-    if (self.updatedProperty[@"fallback"] || !_muxed) {
+    if (self.updatedProperty[@"fallback"] || !self.muxed) {
 
         if (_fallbackTrack) {
             _fallbackTrackId = _fallbackTrack.trackId;
         }
 
-        if (MP4HaveTrackAtom(fileHandle, _trackId, "tref.fall") && (_fallbackTrackId == 0)) {
-            MP4RemoveAllTrackReferences(fileHandle, "tref.fall", _trackId);
+        if (MP4HaveTrackAtom(fileHandle, self.trackId, "tref.fall") && (_fallbackTrackId == 0)) {
+            MP4RemoveAllTrackReferences(fileHandle, "tref.fall", self.trackId);
         }
-        else if (MP4HaveTrackAtom(fileHandle, _trackId, "tref.fall") && (_fallbackTrackId)) {
-            MP4SetTrackIntegerProperty(fileHandle, _trackId, "tref.fall.entries.trackId", _fallbackTrackId);
+        else if (MP4HaveTrackAtom(fileHandle, self.trackId, "tref.fall") && (_fallbackTrackId)) {
+            MP4SetTrackIntegerProperty(fileHandle, self.trackId, "tref.fall.entries.trackId", _fallbackTrackId);
         }
         else if (_fallbackTrackId) {
-            MP4AddTrackReference(fileHandle, "tref.fall", _fallbackTrackId, _trackId);
+            MP4AddTrackReference(fileHandle, "tref.fall", _fallbackTrackId, self.trackId);
         }
     }
     
-    if (self.updatedProperty[@"follows"] || !_muxed) {
+    if (self.updatedProperty[@"follows"] || !self.muxed) {
 
         if (_followsTrack) {
             _followsTrackId = _followsTrack.trackId;
         }
 
-        if (MP4HaveTrackAtom(fileHandle, _trackId, "tref.folw") && (_followsTrackId == 0)) {
-            MP4RemoveAllTrackReferences(fileHandle, "tref.folw", _trackId);
+        if (MP4HaveTrackAtom(fileHandle, self.trackId, "tref.folw") && (_followsTrackId == 0)) {
+            MP4RemoveAllTrackReferences(fileHandle, "tref.folw", self.trackId);
         }
-        else if (MP4HaveTrackAtom(fileHandle, _trackId, "tref.folw") && (_followsTrackId)) {
-            MP4SetTrackIntegerProperty(fileHandle, _trackId, "tref.folw.entries.trackId", _followsTrackId);
+        else if (MP4HaveTrackAtom(fileHandle, self.trackId, "tref.folw") && (_followsTrackId)) {
+            MP4SetTrackIntegerProperty(fileHandle, self.trackId, "tref.folw.entries.trackId", _followsTrackId);
         }
         else if (_followsTrackId) {
-            MP4AddTrackReference(fileHandle, "tref.folw", _followsTrackId, _trackId);
+            MP4AddTrackReference(fileHandle, "tref.folw", _followsTrackId, self.trackId);
         }
     }
 
-    return (_trackId > 0);
+    return (self.trackId > 0);
 }
 
 - (void)setVolume:(float)newVolume
 {
     _volume = newVolume;
-    _isEdited = YES;
+    self.isEdited = YES;
     self.updatedProperty[@"volume"] = @YES;
 }
 
@@ -207,7 +207,7 @@
 {
     _fallbackTrack = newFallbackTrack;
     _fallbackTrackId = 0;
-    _isEdited = YES;
+    self.isEdited = YES;
     self.updatedProperty[@"fallback"] = @YES;
 }
 
@@ -220,7 +220,7 @@
 {
     _followsTrack = newFollowsTrack;
     _followsTrackId = 0;
-    _isEdited = YES;
+    self.isEdited = YES;
     self.updatedProperty[@"follows"] = @YES;
 }
 
@@ -231,7 +231,7 @@
 
 - (NSString *)formatSummary
 {
-    return [NSString stringWithFormat:@"%@, %u ch", localizedDisplayName(_mediaType, _format), (unsigned int)_channels];
+    return [NSString stringWithFormat:@"%@, %u ch", localizedDisplayName(self.mediaType, self.format), (unsigned int)_channels];
 }
 
 - (NSString *)description {
