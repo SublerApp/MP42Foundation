@@ -112,11 +112,11 @@
 
 - (instancetype)init
 {
-    if ((self = [super initWithFormat:0 mediaType:kMP42MediaType_Audio enabled:YES language:@"Unknown"]))
-    {
+    self = [super init];
+    if (self) {
+        self.mediaType = kMP42MediaType_Audio;
         _volume = 1;
     }
-
     return self;
 }
 

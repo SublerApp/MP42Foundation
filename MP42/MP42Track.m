@@ -53,27 +53,7 @@
         _enabled = YES;
         _updatedProperty = [[NSMutableDictionary alloc] init];
         _mediaCharacteristicTags = [[NSSet alloc] init];
-    }
-    return self;
-}
-
-- (instancetype)initWithFormat:(FourCharCode)format mediaType:(MP42MediaType)mediaType enabled:(BOOL)enabled language:(NSString *)language
-{
-    self = [super init];
-    if (self) {
-        _format = format;
-        _mediaType = mediaType;
-        _enabled = enabled;
-        _language = [language copy];
-    }
-    return self;
-}
-
-- (instancetype)initWithMediaType:(MP42MediaType)mediaType
-{
-    self = [self init];
-    if (self) {
-        _mediaType = mediaType;
+        _language = @"Unknown";
     }
     return self;
 }

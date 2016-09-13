@@ -10,10 +10,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MP42Track (Private)
 
-- (instancetype)initWithFormat:(MP42CodecType)format mediaType:(MP42MediaType)mediaType enabled:(BOOL)enabled language:(NSString *)language;
-
-- (instancetype)initWithMediaType:(MP42MediaType)mediaType;
-
 - (instancetype)initWithSourceURL:(NSURL *)URL trackID:(NSInteger)trackID fileHandle:(MP42FileHandle)fileHandle;
 - (BOOL)writeToFile:(MP42FileHandle)fileHandle error:(NSError **)outError;
 

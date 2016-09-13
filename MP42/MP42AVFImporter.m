@@ -224,7 +224,8 @@
                 if (formatDescription) {
                     mediaType = CMFormatDescriptionGetMediaType(formatDescription);
                 }
-                newTrack = [[MP42Track alloc] initWithMediaType:mediaType];
+                newTrack = [[MP42Track alloc] init];
+                newTrack.mediaType = mediaType;
             }
 
             // Set the usual track properties

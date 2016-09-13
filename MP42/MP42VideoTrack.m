@@ -91,7 +91,10 @@
 
 - (instancetype)init
 {
-    self = [super initWithFormat:0 mediaType:kMP42MediaType_Video enabled:YES language:@"Unknown"];
+    self = [super init];
+    if (self) {
+        self.mediaType = kMP42MediaType_Video;
+    }
     return self;
 }
 
