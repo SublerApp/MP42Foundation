@@ -240,7 +240,7 @@ static NSArray<SBVobSubTrack *> * LoadVobSubSubtitles(NSURL *theDirectory, NSStr
             MP42SubtitleTrack *newTrack = [[MP42SubtitleTrack alloc] init];
 
             newTrack.format = kMP42SubtitleCodecType_VobSub;
-            newTrack.sourceURL = self.fileURL;
+            newTrack.URL = self.fileURL;
             newTrack.alternate_group = 2;
             newTrack.trackId = count++;
             newTrack.language = [NSString stringWithFormat:@"%s", lang_for_code_s([track->language UTF8String])->eng_name];;

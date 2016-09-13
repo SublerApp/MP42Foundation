@@ -1366,7 +1366,7 @@ NSData* H264Info(const char *filePath, uint32_t *pic_width, uint32_t *pic_height
         MP42VideoTrack *newTrack = [[MP42VideoTrack alloc] init];
 
         newTrack.format = kMP42VideoCodecType_H264;
-        newTrack.sourceURL = self.fileURL;
+        newTrack.URL = self.fileURL;
 
         if (!inFile) {
             inFile = fopen(self.fileURL.fileSystemRepresentation, "rb");

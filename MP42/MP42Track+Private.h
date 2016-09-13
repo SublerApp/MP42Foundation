@@ -10,19 +10,23 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MP42Track (Private)
 
+- (instancetype)initWithFormat:(MP42CodecType)format mediaType:(MP42MediaType)mediaType enabled:(BOOL)enabled language:(NSString *)language;
+
 - (instancetype)initWithMediaType:(MP42MediaType)mediaType;
+
 - (instancetype)initWithSourceURL:(NSURL *)URL trackID:(NSInteger)trackID fileHandle:(MP42FileHandle)fileHandle;
 - (BOOL)writeToFile:(MP42FileHandle)fileHandle error:(NSError **)outError;
 
 @property(nonatomic, readwrite) MP42TrackId trackId;
 @property(nonatomic, readwrite) MP42TrackId sourceId;
 
-@property(nonatomic, readwrite, copy) NSURL *sourceURL;
+@property(nonatomic, readwrite, copy) NSURL *URL;
 
-@property(nonatomic, readwrite) FourCharCode format;
+@property(nonatomic, readwrite) MP42CodecType format;
 @property(nonatomic, readwrite) MP42MediaType mediaType;
 
 @property(nonatomic, readwrite) MP42Duration duration;
+@property(nonatomic, readwrite) uint32_t bitrate;
 @property(nonatomic, readwrite) uint64_t dataLength;
 
 @property(nonatomic, readwrite) BOOL isEdited;
@@ -31,6 +35,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property(nonatomic, readonly) NSMutableDictionary<NSString *, NSNumber *> *updatedProperty;
 
 - (void *)copy_muxer_helper;
+- (void *)create_muxer_helper;
 
 @end
 

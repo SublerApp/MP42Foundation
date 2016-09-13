@@ -230,8 +230,9 @@
             // Set the usual track properties
             newTrack.format = [self formatForTrack:track];
             newTrack.trackId = track.trackID;
-            newTrack.sourceURL = self.fileURL;
+            newTrack.URL = self.fileURL;
             newTrack.dataLength = track.totalSampleDataLength;
+            newTrack.bitrate = track.estimatedDataRate;
 
             NSArray<AVMetadataItem *> *trackMetadata = [track metadataForFormat:AVMetadataFormatQuickTimeUserData];
 

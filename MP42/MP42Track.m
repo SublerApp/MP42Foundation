@@ -18,8 +18,11 @@
 
 @interface MP42Track ()
 {
-    NSString   *_name;
+    NSString *_name;
+    NSString *_language;
+    NSString *_extendedLanguageTag;
 
+    BOOL        _enabled;
     uint64_t    _alternate_group;
     int64_t     _startOffset;
 }
@@ -27,7 +30,7 @@
 @property(nonatomic, readwrite) MP42TrackId trackId;
 @property(nonatomic, readwrite) MP42TrackId sourceId;
 
-@property(nonatomic, readwrite, copy) NSURL *sourceURL;
+@property(nonatomic, readwrite, copy) NSURL *URL;
 
 @property(nonatomic, readwrite) FourCharCode format;
 @property(nonatomic, readwrite) MP42MediaType mediaType;
@@ -54,6 +57,18 @@
     return self;
 }
 
+- (instancetype)initWithFormat:(FourCharCode)format mediaType:(MP42MediaType)mediaType enabled:(BOOL)enabled language:(NSString *)language
+{
+    self = [self init];
+    if (self) {
+        _format = format;
+        _mediaType = mediaType;
+        _enabled = enabled;
+        _language = [language copy];
+    }
+    return self;
+}
+
 - (instancetype)initWithMediaType:(MP42MediaType)mediaType
 {
     self = [self init];
@@ -66,7 +81,7 @@
 - (instancetype)initWithSourceURL:(NSURL *)URL trackID:(NSInteger)trackID fileHandle:(MP4FileHandle)fileHandle
 {
 	if ((self = [super init])) {
-		_sourceURL = URL;
+        _URL = URL;
 		_trackId = (MP4TrackId)trackID;
         _isEdited = NO;
         _muxed = YES;
@@ -164,7 +179,7 @@
         copy->_trackId = _trackId;
         copy->_sourceId = _sourceId;
 
-        copy->_sourceURL = _sourceURL;
+        copy->_URL = _URL;
         copy->_format = _format;
         copy->_mediaType = _mediaType;
         copy->_name = [_name copy];
@@ -247,6 +262,15 @@
     }
 
     return success;
+}
+
+- (void *)muxer_helper
+{
+    if (_helper == NULL) {
+        _helper = [self create_muxer_helper];
+    }
+
+    return _helper;
 }
 
 - (NSString *)timeString
@@ -381,7 +405,7 @@
         [coder encodeObject:sourceURL forKey:@"sourceURL"];
     }
 #else
-    [coder encodeObject:_sourceURL forKey:@"sourceURL"];
+    [coder encodeObject:_URL forKey:@"sourceURL"];
 #endif
 
     [coder encodeInteger:_format forKey:@"format"];
@@ -422,14 +446,14 @@
     if (bookmarkData) {
         BOOL bookmarkDataIsStale;
         NSError *error;
-        _sourceURL = [NSURL
+        _URL = [NSURL
                     URLByResolvingBookmarkData:bookmarkData
                     options:NSURLBookmarkResolutionWithSecurityScope
                     relativeToURL:nil
                     bookmarkDataIsStale:&bookmarkDataIsStale
                     error:&error];
     } else {
-        _sourceURL = [decoder decodeObjectOfClass:[NSURL class] forKey:@"sourceURL"];
+        _URL = [decoder decodeObjectOfClass:[NSURL class] forKey:@"sourceURL"];
     }
 
     _format = [decoder decodeIntegerForKey:@"format"];

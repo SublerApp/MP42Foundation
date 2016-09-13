@@ -20,13 +20,8 @@
 
 - (instancetype)init
 {
-    if ((self = [super init])) {
-        self.format = kMP42SubtitleCodecType_Text;
-        self.mediaType = kMP42MediaType_Text;
-        _language = @"English";
+    if ((self = [super initWithFormat:kMP42SubtitleCodecType_Text mediaType:kMP42MediaType_Text enabled:NO language:@"English"])) {
         self.muxed = NO;
-        _enabled = NO;
-
         chapters = [[NSMutableArray alloc] init];
     }
 
@@ -43,7 +38,6 @@
             self.format = kMP42SubtitleCodecType_Text;
         }
 
-        self.mediaType = kMP42MediaType_Text;
         chapters = [[NSMutableArray alloc] init];
 
         MP4Chapter_t *chapter_list = NULL;
@@ -78,18 +72,14 @@
 
 - (instancetype)initWithTextFile:(NSURL *)URL
 {
-    if ((self = [super init])) {
-        self.format = kMP42SubtitleCodecType_Text;
-        self.mediaType = kMP42MediaType_Text;
-        self.sourceURL = URL;
-        _language = @"English";
+    if ((self = [super initWithFormat:kMP42SubtitleCodecType_Text mediaType:kMP42MediaType_Text enabled:NO language:@"English"])) {
+        self.URL = URL;
         self.isEdited = YES;
         self.muxed = NO;
-        _enabled = NO;
         _areChaptersEdited = YES;
 
         chapters = [[NSMutableArray alloc] init];
-        LoadChaptersFromURL(self.sourceURL, chapters);
+        LoadChaptersFromURL(self.URL, chapters);
         [chapters sortUsingSelector:@selector(compare:)];
     }
     

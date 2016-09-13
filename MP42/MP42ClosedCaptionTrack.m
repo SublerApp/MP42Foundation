@@ -12,17 +12,6 @@
 
 @implementation MP42ClosedCaptionTrack
 
-- (instancetype)initWithSourceURL:(NSURL *)URL trackID:(NSInteger)trackID fileHandle:(MP42FileHandle)fileHandle
-{
-    self = [super initWithSourceURL:URL trackID:trackID fileHandle:fileHandle];
-
-    if (self) {
-        self.mediaType = kMP42MediaType_ClosedCaption;
-    }
-
-    return self;
-}
-
 - (instancetype)init
 {
     if ((self = [super init])) {

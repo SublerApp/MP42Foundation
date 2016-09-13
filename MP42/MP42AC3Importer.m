@@ -279,7 +279,7 @@ static bool GetFirstHeader(FILE* inFile)
         MP42AudioTrack *newTrack = [[MP42AudioTrack alloc] init];
 
         newTrack.format = kMP42AudioCodecType_AC3;
-        newTrack.sourceURL = self.fileURL;
+        newTrack.URL = self.fileURL;
 
         if (!inFile) {
             inFile = fopen(self.fileURL.fileSystemRepresentation, "rb");

@@ -238,7 +238,7 @@ static int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, ui
             if (newTrack) {
                 newTrack.format = CodecIDToFourCC(mkvTrack);
                 newTrack.trackId = i;
-                newTrack.sourceURL = self.fileURL;
+                newTrack.URL = self.fileURL;
                 newTrack.dataLength = trackSizes[i];
                 if (mkvTrack->Type == TT_AUDIO) {
                     newTrack.startOffset = [self matroskaTrackStartTime:mkvTrack Id:i];

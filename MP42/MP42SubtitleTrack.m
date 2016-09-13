@@ -28,8 +28,6 @@
 
     if (self) {
 
-        self.mediaType = kMP42MediaType_Subtitle;
-
         if (self.format != kMP42SubtitleCodecType_VobSub) {
             uint64_t width, height;
 
@@ -250,7 +248,7 @@ static void insertTagsFromStyleRecord(style_record record, NSMutableString *samp
 
 - (BOOL)exportToURL:(NSURL *)url error:(NSError **)error
 {
-    MP4FileHandle fileHandle = MP4Read(self.sourceURL.fileSystemRepresentation);
+    MP4FileHandle fileHandle = MP4Read(self.URL.fileSystemRepresentation);
     if (!fileHandle)
         return NO;
 

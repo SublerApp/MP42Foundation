@@ -45,8 +45,6 @@
             _width = MP4GetTrackVideoWidth(fileHandle, self.trackId);
         }
 
-        self.mediaType = kMP42MediaType_Video;
-
         MP4GetTrackFloatProperty(fileHandle, self.trackId, "tkhd.width", &_trackWidth);
         MP4GetTrackFloatProperty(fileHandle, self.trackId, "tkhd.height", &_trackHeight);
 
@@ -93,11 +91,7 @@
 
 - (instancetype)init
 {
-    if ((self = [super init])) {
-        _language = @"Unknown";
-        self.mediaType = kMP42MediaType_Video;
-    }
-
+    self = [super initWithFormat:0 mediaType:kMP42MediaType_Video enabled:YES language:@"Unknown"];
     return self;
 }
 

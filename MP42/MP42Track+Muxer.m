@@ -11,6 +11,8 @@
 
 @implementation MP42Track (MP42TrackMuxerExtentions)
 
+@dynamic muxer_helper;
+
 - (void *)copy_muxer_helper
 {
     muxer_helper *copy = calloc(1, sizeof(muxer_helper));
@@ -19,13 +21,10 @@
     return copy;
 }
 
-- (muxer_helper *)muxer_helper
+- (void *)create_muxer_helper
 {
-    if (_helper == NULL) {
-        _helper = calloc(1, sizeof(muxer_helper));
-    }
-
-    return _helper;
+    muxer_helper *helper = calloc(1, sizeof(muxer_helper));
+    return helper;
 }
 
 - (MP42SampleBuffer *)copyNextSample {

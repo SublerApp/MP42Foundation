@@ -37,7 +37,7 @@
         MP42SubtitleTrack *newTrack = [[MP42SubtitleTrack alloc] init];
 
         newTrack.format = kMP42SubtitleCodecType_3GText;
-        newTrack.sourceURL = self.fileURL;
+        newTrack.URL = self.fileURL;
         newTrack.alternate_group = 2;
         newTrack.language = getFilenameLanguage((CFStringRef)self.fileURL.path);
 

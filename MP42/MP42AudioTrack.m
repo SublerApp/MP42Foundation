@@ -31,9 +31,7 @@
     self = [super initWithSourceURL:URL trackID:trackID fileHandle:fileHandle];
 
     if (self) {
-
         MP4GetTrackFloatProperty(fileHandle, self.trackId, "tkhd.volume", &_volume);
-        self.mediaType = kMP42MediaType_Audio;
 
         u_int8_t audioType = MP4GetTrackEsdsObjectTypeId(fileHandle, self.trackId);
 
@@ -114,11 +112,9 @@
 
 - (instancetype)init
 {
-    if ((self = [super init]))
+    if ((self = [super initWithFormat:0 mediaType:kMP42MediaType_Audio enabled:YES language:@"Unknown"]))
     {
-        _language = @"Unknown";
         _volume = 1;
-        self.mediaType = kMP42MediaType_Audio;
     }
 
     return self;

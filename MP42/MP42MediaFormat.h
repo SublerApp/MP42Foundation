@@ -33,13 +33,13 @@ NSString *localizedDisplayName(FourCharCode mediaType, FourCharCode mediaSubtype
 #define Str2FourCC(str) (str[0] << 24) + (str[1] << 16) + (str[2] << 8) + str[3]
 
 
-enum : FourCharCode
+typedef FourCharCode MP42MediaType;
+enum : MP42MediaType
 {
     kMP42MediaType_Unknown = 'unkn'
 };
 
 // Media Type
-typedef FourCharCode MP42MediaType;
 enum : MP42MediaType
 {
     kMP42MediaType_Video            = 'vide',
@@ -56,6 +56,8 @@ enum : MP42MediaType
     kMP42MediaType_Hint             = 'hint',
     kMP42MediaType_Control          = 'cnlt'
 };
+
+typedef FourCharCode MP42CodecType;
 
 // Video Format
 typedef FourCharCode MP42VideoCodecType;

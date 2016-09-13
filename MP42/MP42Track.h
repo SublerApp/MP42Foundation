@@ -17,17 +17,13 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @interface MP42Track : NSObject <NSSecureCoding, NSCopying> {
 @protected
-    NSString *_language;
-    NSString *_extendedLanguageTag;
-
-    BOOL _enabled;
     void *_helper;
 }
 
 @property(nonatomic, readonly) MP42TrackId trackId;
 
-@property(nonatomic, readonly, copy) NSURL *sourceURL;
-@property(nonatomic, readonly) FourCharCode format;
+@property(nonatomic, readonly, copy) NSURL *URL;
+@property(nonatomic, readonly) MP42CodecType format;
 @property(nonatomic, readonly) MP42MediaType mediaType;
 
 @property(nonatomic, readonly) uint32_t timescale;
@@ -35,8 +31,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property(nonatomic, readonly) uint32_t bitrate;
 @property(nonatomic, readonly) uint64_t dataLength;
-
-@property(nonatomic, readonly) BOOL muxed;
+@property(nonatomic, readonly, getter=isMuxed) BOOL muxed;
 
 @property(nonatomic, readwrite, getter=isEnabled) BOOL enabled;
 

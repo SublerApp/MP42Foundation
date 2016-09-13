@@ -431,11 +431,11 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
         NSAssert(track.conversionSettings, @"Missing conversion settings");
     }
 
-    if (track.muxer_helper->importer && track.sourceURL) {
-        if (self.importers[track.sourceURL.path]) {
-            track.muxer_helper->importer = self.importers[track.sourceURL.path];
+    if (track.muxer_helper->importer && track.URL) {
+        if (self.importers[track.URL.path]) {
+            track.muxer_helper->importer = self.importers[track.URL.path];
         } else {
-            self.importers[track.sourceURL.path] = track.muxer_helper->importer;
+            self.importers[track.URL.path] = track.muxer_helper->importer;
         }
     }
 
@@ -659,7 +659,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
     }
 
     for (MP42Track *track in self.tracks) {
-        NSURL *sourceURL = track.sourceURL.filePathURL;
+        NSURL *sourceURL = track.URL.filePathURL;
         if ([sourceURL isEqualTo:url]) {
             if (outError) {
                 *outError = MP42Error(@"Invalid destination.", @"Can't overwrite the source movie.", 100);
@@ -782,13 +782,13 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
             // Reopen the file importer is they are not already open
             // this happens when the object was unarchived from a file.
             if (![track isMemberOfClass:[MP42ChapterTrack class]]) {
-                if (!track.muxer_helper->importer && track.sourceURL) {
-                    MP42FileImporter *fileImporter = [self.importers valueForKey:track.sourceURL.path];
+                if (!track.muxer_helper->importer && track.URL) {
+                    MP42FileImporter *fileImporter = [self.importers valueForKey:track.URL.path];
 
                     if (!fileImporter) {
-                        fileImporter = [[[MP42FileImporter alloc] initWithURL:track.sourceURL error:outError] autorelease];
+                        fileImporter = [[[MP42FileImporter alloc] initWithURL:track.URL error:outError] autorelease];
                         if (fileImporter) {
-                            self.importers[track.sourceURL.path] = fileImporter;
+                            self.importers[track.URL.path] = fileImporter;
                         }
                     }
 
