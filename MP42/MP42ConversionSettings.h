@@ -12,14 +12,28 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MP42ConversionSettings : NSObject <NSCopying, NSSecureCoding>
 
-+ (instancetype)audioConversionWithBitRate:(NSUInteger)bitrate mixDown:(NSString *)mixDown drc:(float)drc;
 + (instancetype)subtitlesConversion;
 
 @property (nonatomic, readonly) FourCharCode format;
+
+@end
+
+@interface MP42AudioConversionSettings : MP42ConversionSettings <NSCopying, NSSecureCoding>
+
++ (instancetype)audioConversionWithBitRate:(NSUInteger)bitrate mixDown:(NSString *)mixDown drc:(float)drc;
+
 @property (nonatomic, readonly) NSUInteger bitRate;
 
 @property (nonatomic, readonly) NSString *mixDown;
 @property (nonatomic, readonly) float drc;
+
+@end
+
+@interface MP42RawConversionSettings : MP42ConversionSettings <NSCopying, NSSecureCoding>
+
++ (instancetype)rawConversionWithFrameRate:(NSUInteger)frameRate;
+
+@property (nonatomic, readonly) NSUInteger frameRate;
 
 @end
 

@@ -30,7 +30,7 @@
 
 #pragma mark - Init
 
-- (instancetype)initWithTrack:(MP42AudioTrack *)track settings:(MP42ConversionSettings *)settings error:(NSError **)error
+- (instancetype)initWithTrack:(MP42AudioTrack *)track settings:(MP42AudioConversionSettings *)settings error:(NSError **)error
 {
     self = [super init];
 

@@ -1429,12 +1429,14 @@ NSData* H264Info(const char *filePath, uint32_t *pic_width, uint32_t *pic_height
         MP42Track *track = self.inputTracks.lastObject;
         MP4TrackId trackId = track.sourceId;
 
-        framerate_t * framerate;
+        framerate_t *framerate;
         int64_t currentSize = 0;
 
-        for (framerate = (framerate_t*) framerates; framerate->code; framerate++)
-            if([track sourceId] == framerate->code)
+        for (framerate = (framerate_t *)framerates; framerate->code; framerate++) {
+            if ([track.conversionSettings frameRate] == framerate->code) {
                 break;
+            }
+        }
 
         timescale = framerate->timescale;
         mp4FrameDuration = framerate->duration;

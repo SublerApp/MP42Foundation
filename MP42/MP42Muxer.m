@@ -103,7 +103,7 @@
         // Setup the converters
         if ([track isMemberOfClass:[MP42AudioTrack class]] && track.conversionSettings) {
             MP42AudioConverter *audioConverter = [[MP42AudioConverter alloc] initWithTrack:(MP42AudioTrack *)track
-                                                                                  settings:track.conversionSettings
+                                                                                  settings:(MP42AudioConversionSettings *)track.conversionSettings
                                                                                      error:outError];
 
             if (audioConverter == nil) {

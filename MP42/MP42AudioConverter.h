@@ -13,11 +13,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 @class MP42SampleBuffer;
 @class MP42AudioTrack;
-@class MP42ConversionSettings;
+@class MP42AudioConversionSettings;
 
 @interface MP42AudioConverter : NSObject <MP42ConverterProtocol>
 
-- (instancetype)initWithTrack:(MP42AudioTrack *)track settings:(MP42ConversionSettings *)settings error:(NSError **)error;
+- (instancetype)initWithTrack:(MP42AudioTrack *)track settings:(MP42AudioConversionSettings *)settings error:(NSError **)error;
 
 - (void)addSample:(MP42SampleBuffer *)sample;
 - (nullable MP42SampleBuffer *)copyEncodedSample;
