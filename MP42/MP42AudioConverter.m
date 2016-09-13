@@ -30,25 +30,26 @@
 
 #pragma mark - Init
 
-- (instancetype)initWithTrack:(MP42AudioTrack *)track andMixdownType:(NSString *)mixdownType error:(NSError **)error {
-
+- (instancetype)initWithTrack:(MP42AudioTrack *)track settings:(MP42ConversionSettings *)settings error:(NSError **)error
+{
     self = [super init];
 
     if (self) {
         NSData *magicCookie = [track.muxer_helper->importer magicCookieForTrack:track];
-        UInt32 bitRate = [[[NSUserDefaults standardUserDefaults] valueForKey:@"SBAudioBitrate"] integerValue];
         AudioStreamBasicDescription asbd = [self basicDescriptorForTrack:track];
 
         _decoder = [[MP42AudioDecoder alloc] initWithAudioFormat:asbd
-                                                     mixdownType:mixdownType
-                                                             drc:1.5
+                                                     mixdownType:settings.mixDown
+                                                             drc:settings.drc
                                                      magicCookie:magicCookie error:error];
 
         if (!_decoder) {
             return nil;
         }
 
-        _encoder = [[MP42AudioEncoder alloc] initWithInputUnit:_decoder bitRate:bitRate error:error];
+        _encoder = [[MP42AudioEncoder alloc] initWithInputUnit:_decoder
+                                                       bitRate:settings.bitRate
+                                                         error:error];
         _encoder.outputUnit = self;
         _encoder.outputType = MP42AudioUnitOutputPull;
 
@@ -65,9 +66,9 @@
     AudioStreamBasicDescription asbd;
     bzero(&asbd, sizeof(AudioStreamBasicDescription));
     asbd.mSampleRate = [track.muxer_helper->importer timescaleForTrack:track];;
-    asbd.mChannelsPerFrame = track.sourceChannels;
+    asbd.mChannelsPerFrame = track.channels;
 
-    if (track.sourceFormat == kMP42AudioCodecType_LinearPCM) {
+    if (track.format == kMP42AudioCodecType_LinearPCM) {
         AudioStreamBasicDescription temp = [track.muxer_helper->importer audioDescriptionForTrack:track];
         if (temp.mFormatID) {
             asbd = temp;
@@ -77,7 +78,7 @@
         }
     }
     else {
-        asbd.mFormatID = track.sourceFormat;
+        asbd.mFormatID = track.format;
     }
 
     return asbd;

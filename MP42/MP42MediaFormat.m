@@ -16,6 +16,7 @@ NSString *const MP42FileTypeM4B = @"m4b";
 NSString *const MP42FileTypeM4R = @"m4r";
 
 // Audio Downmixes
+NSString * const SBNoneMixdown = @"SBNoneMixdown";
 NSString * const SBMonoMixdown = @"SBMonoMixdown";
 NSString * const SBStereoMixdown = @"SBStereoMixdown";
 NSString * const SBDolbyMixdown = @"SBDolbyMixdown";

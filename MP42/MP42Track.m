@@ -154,6 +154,7 @@
     [_name release];
     [_language release];
     [_extendedLanguageTag release];
+    [_conversionSettings release];
 
     [super dealloc];
 }
@@ -167,8 +168,8 @@
         copy->_sourceId = _sourceId;
 
         copy->_sourceURL = [_sourceURL retain];
-        copy->_sourceFormat = _sourceFormat;
         copy->_format = _format;
+        copy->_mediaType = _mediaType;
         copy->_name = [_name copy];
         copy->_language = [_language copy];
         copy->_extendedLanguageTag = [_extendedLanguageTag copy];
@@ -181,6 +182,8 @@
         copy->_timescale = _timescale;
         copy->_bitrate = _bitrate;
         copy->_duration = _duration;
+
+        copy->_conversionSettings = [_conversionSettings copy];
 
         [copy->_updatedProperty release];
         copy->_updatedProperty = [_updatedProperty mutableCopy];
@@ -392,8 +395,8 @@
     [coder encodeObject:_sourceURL forKey:@"sourceURL"];
 #endif
 
-    [coder encodeInteger:_sourceFormat forKey:@"sourceFormat"];
     [coder encodeInteger:_format forKey:@"format"];
+    [coder encodeInteger:_mediaType forKey:@"mediaType"];
     [coder encodeObject:_name forKey:@"name"];
     [coder encodeObject:_language forKey:@"language"];
     [coder encodeObject:_extendedLanguageTag forKey:@"extendedLanguageTag"];
@@ -405,7 +408,7 @@
 
     [coder encodeBool:_isEdited forKey:@"isEdited"];
     [coder encodeBool:_muxed forKey:@"muxed"];
-    [coder encodeBool:_needConversion forKey:@"needConversion"];
+    [coder encodeObject:_conversionSettings forKey:@"conversionSettings"];
 
     [coder encodeInt32:_timescale forKey:@"timescale"];
     [coder encodeInt32:_bitrate forKey:@"bitrate"];
@@ -440,8 +443,8 @@
         _sourceURL = [[decoder decodeObjectOfClass:[NSURL class] forKey:@"sourceURL"] retain];
     }
 
-    _sourceFormat = [decoder decodeIntegerForKey:@"sourceFormat"];
     _format = [decoder decodeIntegerForKey:@"format"];
+    _mediaType = [decoder decodeIntegerForKey:@"mediaType"];
     _name = [[decoder decodeObjectOfClass:[NSString class] forKey:@"name"] retain];
     _language = [[decoder decodeObjectOfClass:[NSString class] forKey:@"language"] retain];
     _extendedLanguageTag = [[decoder decodeObjectOfClass:[NSString class] forKey:@"extendedLanguageTag"] retain];
@@ -453,7 +456,7 @@
 
     _isEdited = [decoder decodeBoolForKey:@"isEdited"];
     _muxed = [decoder decodeBoolForKey:@"muxed"];
-    _needConversion = [decoder decodeBoolForKey:@"needConversion"];
+    _conversionSettings = [[decoder decodeObjectOfClass:[MP42ConversionSettings class] forKey:@"conversionSettings"] retain];
 
     _timescale = [decoder decodeInt32ForKey:@"timescale"];
     _bitrate = [decoder decodeInt32ForKey:@"bitrate"];

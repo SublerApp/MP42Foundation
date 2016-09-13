@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "MP42MediaFormat.h"
+#import "MP42ConversionSettings.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -20,8 +21,7 @@ NS_ASSUME_NONNULL_BEGIN
 
     NSURL       *_sourceURL;
     FourCharCode   _format;
-    FourCharCode  _sourceFormat;
-    MP42MediaType _mediaType;
+    MP42MediaType  _mediaType;
 
     NSString    *_language;
     NSString    *_extendedLanguageTag;
@@ -40,7 +40,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property(nonatomic, readwrite, copy) NSURL *sourceURL;
 @property(nonatomic, readwrite) FourCharCode format;
-@property(nonatomic, readwrite) FourCharCode sourceFormat;
 @property(nonatomic, readonly) MP42MediaType mediaType;
 
 @property(nonatomic, readwrite, copy) NSString *name;
@@ -59,7 +58,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property(nonatomic, readwrite) BOOL isEdited;
 @property(nonatomic, readwrite) BOOL muxed;
-@property(nonatomic, readwrite) BOOL needConversion;
+
+@property(nonatomic, readwrite, copy) MP42ConversionSettings *conversionSettings;
 
 @property(nonatomic, readwrite) uint64_t dataLength;
 

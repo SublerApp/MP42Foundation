@@ -17,7 +17,6 @@
 @private
     float _volume;
     UInt32 _channels;
-    UInt32 _sourceChannels;
     UInt32 _channelLayoutTag;
 
     MP42TrackId  _fallbackTrackId;
@@ -25,8 +24,6 @@
 
     MP42Track  *_fallbackTrack;
     MP42Track  *_followsTrack;
-
-    NSString *_mixdownType;
 }
 
 - (instancetype)initWithSourceURL:(NSURL *)URL trackID:(NSInteger)trackID fileHandle:(MP4FileHandle)fileHandle
@@ -121,7 +118,6 @@
     {
         _language = @"Unknown";
         _volume = 1;
-        _mixdownType = SBDolbyPlIIMixdown;
         _mediaType = kMP42MediaType_Audio;
     }
 
@@ -139,8 +135,6 @@
 
         copy->_fallbackTrackId = _fallbackTrackId;
         copy->_followsTrackId = _followsTrackId;
-
-        copy->_mixdownType = [_mixdownType copy];
     }
     
     return copy;
@@ -258,8 +252,6 @@
     [coder encodeInt64:_channelLayoutTag forKey:@"channelLayoutTag"];
 
     [coder encodeInt64:_fallbackTrackId forKey:@"fallbackTrackId"];
-
-    [coder encodeObject:_mixdownType forKey:@"mixdownType"];
 }
 
 - (id)initWithCoder:(NSCoder *)decoder
@@ -272,8 +264,6 @@
     _channelLayoutTag = [decoder decodeInt64ForKey:@"channelLayoutTag"];
 
     _fallbackTrackId = [decoder decodeInt64ForKey:@"fallbackTrackId"];
-
-    _mixdownType = [decoder decodeObjectOfClass:[NSString class] forKey:@"mixdownType"];
 
     return self;
 }

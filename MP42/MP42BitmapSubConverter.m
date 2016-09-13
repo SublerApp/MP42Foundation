@@ -385,7 +385,7 @@
 {
     if ((self = [super init])) {
         FFInitFFmpeg();
-        MP42SubtitleCodecType format = track.sourceFormat;
+        MP42SubtitleCodecType format = track.format;
 
         if (format == kMP42SubtitleCodecType_VobSub) {
             avCodec = avcodec_find_decoder(AV_CODEC_ID_DVD_SUBTITLE);

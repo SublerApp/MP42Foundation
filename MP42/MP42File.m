@@ -427,21 +427,14 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
         }
     }
 
-    if (trackNeedConversion(track.format) || track.needConversion) {
-        track.needConversion = YES;
-        track.sourceFormat = track.format;
-        if ([track isMemberOfClass:[MP42AudioTrack class]]) {
-            MP42AudioTrack *audioTrack = (MP42AudioTrack *)track;
+    // FIXME
+    if (trackNeedConversion(track.format) || track.conversionSettings) {
+
+        /*if ([track isMemberOfClass:[MP42AudioTrack class]]) {
             track.format = kMP42AudioCodecType_MPEG4AAC;
-            audioTrack.sourceChannels = audioTrack.channels;
-            if ([audioTrack.mixdownType isEqualToString:SBMonoMixdown] || audioTrack.sourceChannels == 1) {
-                audioTrack.channels = 1;
-            } else if (audioTrack.mixdownType) {
-                audioTrack.channels = 2;
-            }
         } else if ([track isMemberOfClass:[MP42SubtitleTrack class]]) {
             track.format = kMP42SubtitleCodecType_3GText;
-        }
+        }*/
     }
 
     if (track.muxer_helper->importer && track.sourceURL) {

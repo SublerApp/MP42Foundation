@@ -78,6 +78,7 @@ BOOL trackNeedConversion(FourCharCode format) {
                                                  kMP42SubtitleCodecType_SSA,
                                                  kMP42SubtitleCodecType_Text,
                                                  kMP42SubtitleCodecType_PGS,
+                                                 kMP42AudioCodecType_LinearPCM,
                                                  0};
 
     for (FourCharCode *currentFormat = supportedConversionFormats; *currentFormat; currentFormat++) {

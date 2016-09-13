@@ -190,6 +190,7 @@ enum : MP42TimeCodeFormatType
 };
 
 // Audio downmixes
+extern NSString * const SBNoneMixdown;
 extern NSString * const SBMonoMixdown;
 extern NSString * const SBStereoMixdown;
 extern NSString * const SBDolbyMixdown;

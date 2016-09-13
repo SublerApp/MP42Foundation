@@ -13,15 +13,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 @class MP42SampleBuffer;
 @class MP42AudioTrack;
-
-extern NSString * const SBMonoMixdown;
-extern NSString * const SBStereoMixdown;
-extern NSString * const SBDolbyMixdown;
-extern NSString * const SBDolbyPlIIMixdown;
+@class MP42ConversionSettings;
 
 @interface MP42AudioConverter : NSObject <MP42ConverterProtocol>
 
-- (instancetype)initWithTrack:(MP42AudioTrack *)track andMixdownType:(NSString *)mixdownType error:(NSError **)error;
+- (instancetype)initWithTrack:(MP42AudioTrack *)track settings:(MP42ConversionSettings *)settings error:(NSError **)error;
 
 - (void)addSample:(MP42SampleBuffer *)sample;
 - (nullable MP42SampleBuffer *)copyEncodedSample;
