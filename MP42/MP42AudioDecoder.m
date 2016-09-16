@@ -63,10 +63,12 @@ typedef struct MP42DecodeContext MP42DecodeContext;
 @synthesize outputType = _outputType;
 
 - (instancetype)initWithAudioFormat:(AudioStreamBasicDescription)asbd
+                      channelLayout:(AudioChannelLayout *)channelLayout
+                  channelLayoutSize:(UInt32)channelLayoutSize
                         mixdownType:(NSString *)mixdownType
                                 drc:(float)drc
                         magicCookie:(NSData *)magicCookie
-                              error:(NSError **)error;
+                              error:(NSError **)error
 {
     self = [super init];
 
@@ -75,7 +77,7 @@ typedef struct MP42DecodeContext MP42DecodeContext;
 
         _inputFormat = asbd;
 
-        enum AVCodecID codecID = FourCCToCodecID(asbd.mFormatID);
+        enum AVCodecID codecID = ASBDToCodecID(asbd);
         _codec = avcodec_find_decoder(codecID);
 
         if (!_codec) {
@@ -131,9 +133,17 @@ typedef struct MP42DecodeContext MP42DecodeContext;
             av_dict_set(&av_opts, "drc_scale", drc_scale, 0);
         }
 
+        // Copy the input channels layout
+        if (channelLayout && channelLayoutSize) {
+            _inputLayoutSize = channelLayoutSize;
+            _inputLayout = malloc(_inputLayoutSize);
+            memcpy(_inputLayout, channelLayout, _inputLayoutSize);
+        }
+
         if (asbd.mFormatID == kAudioFormatLinearPCM)
         {
             _avctx->channels = asbd.mChannelsPerFrame;
+            _avctx->channel_layout = convert_layout_to_av(_inputLayout, _inputLayoutSize);
             _avctx->sample_rate = asbd.mSampleRate;
         }
 
@@ -189,6 +199,8 @@ typedef struct MP42DecodeContext MP42DecodeContext;
 
         _context->avctx = _avctx;
         _context->inputFormat = &_inputFormat;
+        _context->inputLayout = &_inputLayout;
+        _context->inputLayoutSize = &_inputLayoutSize;
         _context->outputFormat = &_outputFormat;
         _context->outputLayout = &_outputLayout;
         _context->outputLayoutSize = &_outputLayoutSize;
@@ -271,16 +283,59 @@ static MP42SampleBuffer * sampleBufferFromFrame(uint8_t *output_data, int output
     return sample;
 }
 
+static void convertChannelLayout(MP42DecodeContext *context)
+{
+    // Create the AudioChannelLayout from the FFmpeg channel layout
+    UInt32 layout_size = sizeof(AudioChannelLayout) +
+    sizeof(AudioChannelDescription) * context->outputFormat->mChannelsPerFrame;
+    AudioChannelLayout *outputLayout = malloc(layout_size);
+    bzero(outputLayout, layout_size);
+    remap_layout(outputLayout, context->out_layout, context->outputFormat->mChannelsPerFrame);
+
+    *context->outputLayoutSize = layout_size;
+    *context->outputLayout = outputLayout;
+}
+
+static void configurePCMDescriptors(MP42DecodeContext *context, AVFrame *frame)
+{
+    AudioChannelLayout *inputLayout = *context->inputLayout;
+
+    int nb_channels = AudioChannelLayoutTag_GetNumberOfChannels(inputLayout->mChannelLayoutTag);
+
+    if (nb_channels == 1) {
+        context->out_layout = AV_CH_LAYOUT_MONO;
+    }
+    else {
+        context->out_layout = AV_CH_LAYOUT_STEREO;
+    }
+
+    // Set the output channel layout
+    context->out_layout = AV_CH_LAYOUT_STEREO;
+    if (context->outputFormat->mChannelsPerFrame < context->inputFormat->mChannelsPerFrame) {
+        if (context->outputFormat->mChannelsPerFrame == 2) {
+            context->out_layout = AV_CH_LAYOUT_STEREO;
+        }
+        else if (context->outputFormat->mChannelsPerFrame == 1) {
+            context->out_layout = AV_CH_LAYOUT_MONO;
+        }
+    }
+    else if (frame->channel_layout) {
+        context->out_layout = convert_layout_to_av(*context->inputLayout, *context->inputLayoutSize);;
+    }
+
+    // Create the AudioChannelLayout from the FFmpeg channel layout
+    convertChannelLayout(context);
+
+    if (context->inputFormat->mSampleRate > 48000) {
+        context->outputFormat->mSampleRate = 48000;
+    }
+}
+
 static void configureDescriptors(MP42DecodeContext *context, AVFrame *frame)
 {
     // Get real channels number and layout
     int nb_channels = av_get_channel_layout_nb_channels(frame->channel_layout);
     int sample_rate = frame->sample_rate;
-
-    // FIXME PCM
-    if (nb_channels == 0) {
-        nb_channels = context->inputFormat->mChannelsPerFrame;
-    }
 
     // Reset the channels per frame and sample rate
     if (context->inputFormat->mChannelsPerFrame == context->outputFormat->mChannelsPerFrame) {
@@ -312,21 +367,19 @@ static void configureDescriptors(MP42DecodeContext *context, AVFrame *frame)
     }
 
     // Create the AudioChannelLayout from the FFmpeg channel layout
-    UInt32 layout_size = sizeof(AudioChannelLayout) +
-    sizeof(AudioChannelDescription) * context->outputFormat->mChannelsPerFrame;
-    AudioChannelLayout *outputLayout = malloc(layout_size);
-    bzero(outputLayout, layout_size);
-    remap_layout(outputLayout, context->out_layout, context->outputFormat->mChannelsPerFrame);
-
-    *context->outputLayoutSize = layout_size;
-    *context->outputLayout = outputLayout;
+    convertChannelLayout(context);
 }
 
 static int resample(MP42DecodeContext *context, AVFrame *frame, uint8_t **output_data, int *output_data_size)
 {
     int ret = 0;
     if (!context->configured) {
-        configureDescriptors(context, frame);
+        if (context->inputFormat->mFormatID == kAudioFormatLinearPCM) {
+            configurePCMDescriptors(context, frame);
+        }
+        else {
+            configureDescriptors(context, frame);
+        }
         // We want float interleaved.
         context->resampler = hb_audio_resample_init(AV_SAMPLE_FMT_FLT,
                                                     context->out_layout,
@@ -363,20 +416,15 @@ static int resample(MP42DecodeContext *context, AVFrame *frame, uint8_t **output
                                          center_mix_level,
                                          downmix_info->lfe_mix_level);
     }
-    if (frame->channel_layout) {
-        hb_audio_resample_set_channel_layout(context->resampler,
-                                             frame->channel_layout);
-    }
-    if (frame->sample_rate) {
-        hb_audio_resample_set_sample_rate(context->resampler,
-                                          frame->sample_rate);
-    }
-    if (frame->format) {
-        hb_audio_resample_set_sample_fmt(context->resampler,
-                                         frame->format);
-    }
-    if (hb_audio_resample_update(context->resampler))
-    {
+
+    hb_audio_resample_set_channel_layout(context->resampler,
+                                        frame->channel_layout);
+    hb_audio_resample_set_sample_rate(context->resampler,
+                                    frame->sample_rate);
+    hb_audio_resample_set_sample_fmt(context->resampler,
+                                    frame->format);
+
+    if (hb_audio_resample_update(context->resampler)) {
         NSLog(@"decavcodec: hb_audio_resample_update() failed");
         return 1;
     }

@@ -37,8 +37,13 @@
     if (self) {
         NSData *magicCookie = [track.muxer_helper->importer magicCookieForTrack:track];
         AudioStreamBasicDescription asbd = [self basicDescriptorForTrack:track];
+        UInt32 channelLayoutSize = sizeof(AudioChannelLayout);
+        AudioChannelLayout *channelLayout = calloc(channelLayoutSize, 1);
+        channelLayout->mChannelLayoutTag = track.channelLayoutTag;
 
         _decoder = [[MP42AudioDecoder alloc] initWithAudioFormat:asbd
+                                                   channelLayout:channelLayout
+                                               channelLayoutSize:channelLayoutSize
                                                      mixdownType:settings.mixDown
                                                              drc:settings.drc
                                                      magicCookie:magicCookie error:error];

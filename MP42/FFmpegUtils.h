@@ -15,10 +15,11 @@
 
 void FFInitFFmpeg();
 
+enum AVCodecID ASBDToCodecID(AudioStreamBasicDescription asbd);
 enum AVCodecID FourCCToCodecID(OSType formatID);
 OSType CodecIDToFourCC(enum AVCodecID codecID);
 
 int remap_layout(AudioChannelLayout *layout, uint64_t in_layout, int count);
-int get_aac_tag(uint64_t in_layout);
+int convert_layout_to_av(AudioChannelLayout *layout, UInt32 layoutSize);
 
 #endif /* FFmpegUtils_h */
