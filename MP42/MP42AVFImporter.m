@@ -184,6 +184,7 @@
                     }
                     else {
                         audioTrack.channels = 1;
+                        audioTrack.channelLayoutTag = kAudioChannelLayoutTag_Mono;
                     }
                 }
                 newTrack = audioTrack;
@@ -898,49 +899,18 @@
                     CMBlockBufferRef buffer = CMSampleBufferGetDataBuffer(sampleBuffer);
                     size_t bufferSize = CMBlockBufferGetDataLength(buffer);
 
-                    int pos = 0;
-                    for (int i = 0; i < samplesNum; i++) {
-                        CMSampleTimingInfo sampleTimingInfo;
-                        __unused CMTime decodeTimeStamp;
-                        CMTime presentationTimeStamp;
-                        CMTime presentationOutputTimeStamp = CMSampleBufferGetOutputPresentationTimeStamp(sampleBuffer);
-
-                        size_t sampleSize;
-
-                        // If the size of sample timing array is equal to 1, it means every sample has got the same timing
-                        if (timingArrayEntries == 1) {
-                            sampleTimingInfo = timingArrayOut[0];
-                            decodeTimeStamp = sampleTimingInfo.decodeTimeStamp;
-                            decodeTimeStamp.value = decodeTimeStamp.value + ( sampleTimingInfo.duration.value * i);
-
-                            presentationTimeStamp = sampleTimingInfo.presentationTimeStamp;
-                            presentationTimeStamp.value = presentationTimeStamp.value + ( sampleTimingInfo.duration.value * i);
-                        } else {
-                            sampleTimingInfo = timingArrayOut[i];
-                            decodeTimeStamp = sampleTimingInfo.decodeTimeStamp;
-                            presentationTimeStamp = sampleTimingInfo.presentationTimeStamp;
-                        }
-
-                        presentationOutputTimeStamp.value = presentationOutputTimeStamp.value + (sampleTimingInfo.duration.value * i /
-                                                                                                 ((double) sampleTimingInfo.duration.timescale / presentationOutputTimeStamp.timescale));
-
-                        // If the size of sample size array is equal to 1, it means every sample has got the same size
-                        if (sizeArrayEntries ==  1) {
-                            sampleSize = sizeArrayOut[0];
-                        } else {
-                            sampleSize = sizeArrayOut[i];
-                        }
-
-                        if (!sampleSize) {
-                            continue;
-                        }
-
+                    // Don't split the buffer if the format is PCM
+                    if (track.format == kMP42AudioCodecType_LinearPCM) {
+                        size_t sampleSize = bufferSize;
                         void *sampleData = malloc(sampleSize);
 
-                        if (pos < bufferSize) {
-                            CMBlockBufferCopyDataBytes(buffer, pos, sampleSize, sampleData);
-                            pos += sampleSize;
-                        }
+                        CMBlockBufferCopyDataBytes(buffer, 0, sampleSize, sampleData);
+
+                        CMTime duration = CMSampleBufferGetDuration(sampleBuffer);
+                        CMTime decodeTimeStamp = CMSampleBufferGetDecodeTimeStamp(sampleBuffer);
+                        CMTime presentationTimeStamp = CMSampleBufferGetPresentationTimeStamp(sampleBuffer);
+                        CMTime presentationOutputTimeStamp = CMSampleBufferGetOutputPresentationTimeStamp(sampleBuffer);
+                        CMTime currentOutputTimeStamp = CMTimeConvertScale(presentationOutputTimeStamp, duration.timescale, kCMTimeRoundingMethod_QuickTime);
 
                         // Read sample attachment, sync to mark the frame as sync
                         BOOL sync = 1;
@@ -957,35 +927,118 @@
                             }
                         }
 
-#ifdef SB_AVF_DEBUG
-                        NSLog(@"D: %lld, P: %lld, PO: %lld", decodeTimeStamp.value, presentationTimeStamp.value, presentationOutputTimeStamp.value);
-#endif
-
                         // Enqueues the new sample
                         MP42SampleBuffer *sample = [[MP42SampleBuffer alloc] init];
                         sample->data = sampleData;
                         sample->size = sampleSize;
-                        sample->duration = sampleTimingInfo.duration.value;
-                        // FIXME
-                        //sample->offset = -decodeTimeStamp.value + presentationTimeStamp.value;
+                        sample->duration = duration.value;
+                        sample->offset = -decodeTimeStamp.value + presentationTimeStamp.value;
                         sample->presentationTimestamp = presentationTimeStamp.value;
-                        sample->presentationOutputTimestamp = presentationTimeStamp.value;
-                        sample->timescale = sampleTimingInfo.duration.timescale;
+                        sample->presentationOutputTimestamp = currentOutputTimeStamp.value;
+                        sample->timescale = duration.timescale;
                         sample->flags |= sync ? MP42SampleBufferFlagIsSync : 0;
                         sample->flags |= doNotDisplay ? MP42SampleBufferFlagDoNotDisplay : 0;
                         sample->trackId = track.sourceId;
 
-                        if (attachmentsSent == NO) {
-                            sample->attachments = (void *)attachments;
-                            attachmentsSent = YES;
-                        }
+                        sample->attachments = (void *)attachments;
 
                         [demuxHelper->editsConstructor addSample:sample];
                         [self enqueue:sample];
                         [sample release];
 
-                        demuxHelper->currentTime += sampleTimingInfo.duration.value;
+                        demuxHelper->currentTime += duration.value;
                         currentDataLength += sampleSize;
+                    }
+                    else {
+                        int pos = 0;
+                        for (int i = 0; i < samplesNum; i++) {
+                            CMSampleTimingInfo sampleTimingInfo;
+                            __unused CMTime decodeTimeStamp;
+                            CMTime presentationTimeStamp;
+                            CMTime presentationOutputTimeStamp = CMSampleBufferGetOutputPresentationTimeStamp(sampleBuffer);
+
+                            size_t sampleSize;
+
+                            // If the size of sample timing array is equal to 1, it means every sample has got the same timing
+                            if (timingArrayEntries == 1) {
+                                sampleTimingInfo = timingArrayOut[0];
+                                decodeTimeStamp = sampleTimingInfo.decodeTimeStamp;
+                                decodeTimeStamp.value = decodeTimeStamp.value + ( sampleTimingInfo.duration.value * i);
+
+                                presentationTimeStamp = sampleTimingInfo.presentationTimeStamp;
+                                presentationTimeStamp.value = presentationTimeStamp.value + ( sampleTimingInfo.duration.value * i);
+                            } else {
+                                sampleTimingInfo = timingArrayOut[i];
+                                decodeTimeStamp = sampleTimingInfo.decodeTimeStamp;
+                                presentationTimeStamp = sampleTimingInfo.presentationTimeStamp;
+                            }
+
+                            presentationOutputTimeStamp.value = presentationOutputTimeStamp.value + (sampleTimingInfo.duration.value * i /
+                                                                                                     ((double) sampleTimingInfo.duration.timescale / presentationOutputTimeStamp.timescale));
+
+                            // If the size of sample size array is equal to 1, it means every sample has got the same size
+                            if (sizeArrayEntries ==  1) {
+                                sampleSize = sizeArrayOut[0];
+                            } else {
+                                sampleSize = sizeArrayOut[i];
+                            }
+
+                            if (!sampleSize) {
+                                continue;
+                            }
+
+                            void *sampleData = malloc(sampleSize);
+
+                            if (pos < bufferSize) {
+                                CMBlockBufferCopyDataBytes(buffer, pos, sampleSize, sampleData);
+                                pos += sampleSize;
+                            }
+
+                            // Read sample attachment, sync to mark the frame as sync
+                            BOOL sync = 1;
+                            BOOL doNotDisplay = NO;
+                            CFArrayRef attachmentsArray = CMSampleBufferGetSampleAttachmentsArray(sampleBuffer, NO);
+                            if (attachmentsArray) {
+                                for (NSDictionary *dict in (NSArray *)attachmentsArray) {
+                                    if ([dict valueForKey:(NSString *)kCMSampleAttachmentKey_NotSync]) {
+                                        sync = 0;
+                                    }
+                                    if ([dict valueForKey:(NSString*)kCMSampleAttachmentKey_DoNotDisplay]) {
+                                        doNotDisplay = YES;
+                                    }
+                                }
+                            }
+
+#ifdef SB_AVF_DEBUG
+                            NSLog(@"D: %lld, P: %lld, PO: %lld", decodeTimeStamp.value, presentationTimeStamp.value, presentationOutputTimeStamp.value);
+#endif
+
+                            // Enqueues the new sample
+                            MP42SampleBuffer *sample = [[MP42SampleBuffer alloc] init];
+                            sample->data = sampleData;
+                            sample->size = sampleSize;
+                            sample->duration = sampleTimingInfo.duration.value;
+                            // FIXME
+                            //sample->offset = -decodeTimeStamp.value + presentationTimeStamp.value;
+                            sample->presentationTimestamp = presentationTimeStamp.value;
+                            sample->presentationOutputTimestamp = presentationTimeStamp.value;
+                            sample->timescale = sampleTimingInfo.duration.timescale;
+                            sample->flags |= sync ? MP42SampleBufferFlagIsSync : 0;
+                            sample->flags |= doNotDisplay ? MP42SampleBufferFlagDoNotDisplay : 0;
+                            sample->trackId = track.sourceId;
+                            
+                            if (attachmentsSent == NO) {
+                                sample->attachments = (void *)attachments;
+                                attachmentsSent = YES;
+                            }
+                            
+                            [demuxHelper->editsConstructor addSample:sample];
+                            [self enqueue:sample];
+                            [sample release];
+                            
+                            demuxHelper->currentTime += sampleTimingInfo.duration.value;
+                            currentDataLength += sampleSize;
+                        }
                     }
 
                     free(timingArrayOut);

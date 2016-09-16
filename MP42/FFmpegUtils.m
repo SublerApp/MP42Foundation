@@ -3,7 +3,8 @@
 //  MP42Foundation
 //
 //  Created by Damiano Galassi on 23/07/2016.
-//  Copyright © 2016 Damiano Galassi. All rights reserved.
+//
+//  Useful utilites from FFmpeg source code.
 //
 
 #include "FFmpegUtils.h"
@@ -114,7 +115,7 @@ static const struct {
 static const struct {
     AudioFormatFlags mFormatFlags;
     UInt32           mBitsPerChannel;
-    enum AVCodecID codecID;
+    enum AVCodecID   codecID;
 } kAudioPCMCodecMap[] =
 {
     { kLinearPCMFormatFlagIsSignedInteger | kLinearPCMFormatFlagIsPacked,                                    16, AV_CODEC_ID_PCM_S16LE },
