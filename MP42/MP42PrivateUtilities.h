@@ -49,6 +49,8 @@ NSString* getFilenameLanguage(CFStringRef filename);
 uint8_t *CreateEsdsFromSetupData(uint8_t *codecPrivate, size_t vosLen, size_t *esdsLen, int trackID, bool audio, bool write_version);
 ComponentResult ReadESDSDescExt(void* descExt, UInt8 **buffer, int *size, int versionFlags);
 
+MP4Duration getTrackDuration(MP4FileHandle fileHandle, MP4TrackId trackId);
+
 int64_t getTrackStartOffset(MP4FileHandle fileHandle, MP4TrackId Id);
 void setTrackStartOffset(MP4FileHandle fileHandle, MP4TrackId Id, int64_t offset);
 int copyTrackEditLists (MP4FileHandle fileHandle, MP4TrackId srcTrackId, MP4TrackId dstTrackId);

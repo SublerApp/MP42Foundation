@@ -12,6 +12,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+    UInt32 getDefaultChannelLayout(UInt32 channelsCount);
 
     int readAC3Config(uint64_t acmod, uint64_t lfeon, UInt32 *channelsCount, UInt32 *channelLayoutTag);
     int readEAC3Config(const uint8_t *cookie, uint32_t cookieLen, UInt32 *channelsCount, UInt32 *channelLayoutTag);

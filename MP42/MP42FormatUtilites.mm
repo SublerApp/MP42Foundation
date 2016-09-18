@@ -11,6 +11,32 @@
 
 #import <CoreAudio/CoreAudio.h>
 
+UInt32 getDefaultChannelLayout(UInt32 channelsCount)
+{
+    // Guess a channel layout
+    switch (channelsCount) {
+        case 1:
+            return kAudioChannelLayoutTag_Mono;
+        case 2:
+            return kAudioChannelLayoutTag_Stereo;
+        case 3:
+            return kAudioChannelLayoutTag_MPEG_3_0_A;
+        case 4:
+            return kAudioChannelLayoutTag_MPEG_4_0_A;
+        case 5:
+            return kAudioChannelLayoutTag_MPEG_5_0_A;
+        case 6:
+            return kAudioChannelLayoutTag_MPEG_5_1_A;
+        case 7:
+            return kAudioChannelLayoutTag_MPEG_6_1_A;
+        case 8:
+            return kAudioChannelLayoutTag_MPEG_7_1_A;
+
+        default:
+            return kAudioChannelLayoutTag_Mono;
+    }
+}
+
 #pragma mark - AC3
 
 static const int ac3_layout_no_lfe[8] = {

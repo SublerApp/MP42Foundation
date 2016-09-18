@@ -15,6 +15,7 @@
 
 #import "mp4v2.h"
 #import "MP42PrivateUtilities.h"
+#import "MP42FormatUtilites.h"
 #import "MP42Track+Muxer.h"
 #import "MP42Track+Private.h"
 
@@ -183,8 +184,10 @@
                         audioTrack.channelLayoutTag = layout->mChannelLayoutTag;
                     }
                     else {
-                        audioTrack.channels = 1;
-                        audioTrack.channelLayoutTag = kAudioChannelLayoutTag_Mono;
+                        // Guess the layout.
+                        const AudioStreamBasicDescription *asbd = CMAudioFormatDescriptionGetStreamBasicDescription(formatDescription);
+                        audioTrack.channels = asbd->mChannelsPerFrame;
+                        audioTrack.channelLayoutTag = getDefaultChannelLayout(asbd->mChannelsPerFrame);
                     }
                 }
                 newTrack = audioTrack;

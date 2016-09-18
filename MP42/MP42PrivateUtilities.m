@@ -18,7 +18,7 @@
 #include "intreadwrite.h"
 #include "avcodec.h"
 
-NSString* SRTStringFromTime( long long time, long timeScale , const char separator)
+NSString * SRTStringFromTime( long long time, long timeScale , const char separator)
 {
     NSString *SRT_string;
     int hour, minute, second, msecond;

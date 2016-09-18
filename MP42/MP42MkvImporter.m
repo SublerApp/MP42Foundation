@@ -215,7 +215,8 @@ static int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, ui
             // Audio
             else if (mkvTrack->Type == TT_AUDIO) {
                 newTrack = [[MP42AudioTrack alloc] init];
-                [(MP42AudioTrack*)newTrack setChannels:mkvTrack->AV.Audio.Channels];
+                [(MP42AudioTrack *)newTrack setChannels:mkvTrack->AV.Audio.Channels];
+                [(MP42AudioTrack *)newTrack setChannelLayoutTag:getDefaultChannelLayout(mkvTrack->AV.Audio.Channels)];
                 [newTrack setAlternate_group:1];
 
                 for (MP42Track *audioTrack in self.tracks) {
@@ -443,7 +444,10 @@ static const struct {
     { "A_MPEG/L1",          kMP42AudioCodecType_MPEGLayer1 },
     { "A_MPEG/L2",          kMP42AudioCodecType_MPEGLayer2 },
     { "A_MPEG/L3",          kMP42AudioCodecType_MPEGLayer3 },
-    { "A_TTA1",             kMP42AudioCodecType_TTA },
+    { "A_PCM/INT/BIG",      kMP42AudioCodecType_LinearPCM },
+    { "A_PCM/INT/LIT",      kMP42AudioCodecType_LinearPCM },
+    { "A_PCM/FLOAT/IEEE",   kMP42AudioCodecType_LinearPCM },
+
 
     { "S_TEXT/UTF8",        kMP42SubtitleCodecType_Text },
     { "S_TEXT/WEBVTT",      kMP42SubtitleCodecType_WebVTT },
@@ -630,6 +634,32 @@ static NSString * TrackNameToString(TrackInfo *track)
     }
 
     return nil;
+}
+
+- (AudioStreamBasicDescription)audioDescriptionForTrack:(MP42AudioTrack *)track
+{
+    TrackInfo *trackInfo = mkv_GetTrackInfo(_matroskaFile, track.sourceId);
+
+    AudioStreamBasicDescription result;
+    bzero(&result, sizeof(AudioStreamBasicDescription));
+
+    result.mSampleRate = mkv_TruncFloat(trackInfo->AV.Audio.SamplingFreq);
+    result.mBitsPerChannel = trackInfo->AV.Audio.BitDepth;
+    result.mChannelsPerFrame = trackInfo->AV.Audio.Channels;
+
+    if (!strcmp(trackInfo->CodecID, "A_PCM/INT/BIG")) {
+        result.mFormatID = kAudioFormatLinearPCM;
+        result.mFormatFlags +=  kLinearPCMFormatFlagIsSignedInteger | kLinearPCMFormatFlagIsPacked | kAudioFormatFlagIsBigEndian;
+    }
+    else if (!strcmp(trackInfo->CodecID, "A_PCM/INT/LIT")) {
+        result.mFormatID = kAudioFormatLinearPCM;
+        result.mFormatFlags += kLinearPCMFormatFlagIsSignedInteger | kLinearPCMFormatFlagIsPacked;
+    }
+    else if (!strcmp(trackInfo->CodecID, "A_PCM/FLOAT/IEEE")) {
+        result.mFormatID = kAudioFormatLinearPCM;
+        result.mFormatFlags += kAudioFormatFlagIsFloat | kLinearPCMFormatFlagIsPacked;
+    }
+    return result;
 }
 
 // Methods to extract all the samples from the active tracks at the same time

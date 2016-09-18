@@ -86,13 +86,13 @@
                 }
             }
 
-            _bitrate = MP4GetTrackBitRate(fileHandle, _trackId);
+            _timescale = MP4GetTrackTimeScale(fileHandle, _trackId);
             _duration = MP4ConvertFromTrackDuration(fileHandle, _trackId,
                                                    MP4GetTrackDuration(fileHandle, _trackId),
                                                    MP4_MSECS_TIME_SCALE);
-            _timescale = MP4GetTrackTimeScale(fileHandle, _trackId);
             _startOffset = getTrackStartOffset(fileHandle, _trackId);
 
+            _bitrate = MP4GetTrackBitRate(fileHandle, _trackId);
             _dataLength = getTrackSize(fileHandle, _trackId);
 
             // Track flags
