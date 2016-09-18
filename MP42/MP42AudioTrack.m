@@ -230,7 +230,7 @@
     if (self.conversionSettings && [self.conversionSettings isKindOfClass:[MP42AudioConversionSettings class]]) {
         MP42AudioConversionSettings *settings = (MP42AudioConversionSettings *)self.conversionSettings;
         unsigned int channels = _channels;
-        if ([settings.mixDown isEqualToString:SBMonoMixdown]) {
+        if ([settings.mixDown isEqualToString:SBMonoMixdown] || self.channels == 1) {
             channels = 1;
         }
         else if (![settings.mixDown isEqualToString:SBNoneMixdown]) {
