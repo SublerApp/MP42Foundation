@@ -811,7 +811,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
                         [self.muxer addTrack:track];
                     } else {
                         // We don't know how to handle this type of track.
-                        // FIXME
+                        // Just drop it.
                         NSError *error = MP42Error(@"Unsupported track",
                                                    [NSString stringWithFormat:@"%@, %u, has not been muxed.", track.name, (unsigned int)track.format],
                                                    201);

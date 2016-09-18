@@ -597,8 +597,7 @@ static const genreType_t genreType_strings[] = {
             return NO;
         }
     } else {
-        // FIXME
-        //self.artworks = nil;
+        [self.artworks removeAllObjects];
         self.edited = YES;
         self.isArtworkEdited = YES;
         return YES;

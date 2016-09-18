@@ -171,8 +171,28 @@
     return (self.trackId > 0);
 }
 
-- (uint64_t)hSpacing {
-    return _hSpacing;
+- (void)setTrackWidth:(float)trackWidth
+{
+    _trackWidth = trackWidth;
+    self.edited = YES;
+}
+
+- (void)setTrackHeight:(float)trackHeight
+{
+    _trackHeight = trackHeight;
+    self.edited = YES;
+}
+
+- (void)setOffsetX:(uint32_t)offsetX
+{
+    _offsetX = offsetX;
+    self.edited = YES;
+}
+
+- (void)setOffsetY:(uint32_t)offsetY
+{
+    _offsetY = offsetY;
+    self.edited = YES;
 }
 
 - (void)setHSpacing:(uint64_t)newHSpacing
@@ -182,19 +202,11 @@
     self.updatedProperty[@"hSpacing"] = @YES;
 }
 
-- (uint64_t)vSpacing {
-    return _vSpacing;
-}
-
 - (void)setVSpacing:(uint64_t)newVSpacing
 {
     _vSpacing = newVSpacing;
     self.edited = YES;
     self.updatedProperty[@"vSpacing"] = @YES;
-}
-
-- (uint8_t)newProfile {
-    return _newProfile;
 }
 
 - (void)setNewProfile:(uint8_t)newProfile
@@ -208,10 +220,6 @@
     else {
         self.updatedProperty[@"profile"] = @YES;
     }
-}
-
-- (uint8_t)newLevel {
-    return _newLevel;
 }
 
 - (void)setNewLevel:(uint8_t)newLevel
