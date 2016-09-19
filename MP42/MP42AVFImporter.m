@@ -572,6 +572,17 @@
 
 - (NSUInteger)timescaleForTrack:(MP42Track *)track {
     AVAssetTrack *assetTrack = [_localAsset trackWithTrackID:track.sourceId];
+
+    // Prefer the asbd sample rate, naturalTimeScale might not be
+    // the right one if we are reading for .ts
+    if ([assetTrack.mediaType isEqualToString:AVMediaTypeAudio]) {
+        CMFormatDescriptionRef formatDescription = (CMFormatDescriptionRef)assetTrack.formatDescriptions.firstObject;
+
+        if (formatDescription) {
+            const AudioStreamBasicDescription *asbd = CMAudioFormatDescriptionGetStreamBasicDescription(formatDescription);
+            return asbd->mSampleRate;
+        }
+    }
     return assetTrack.naturalTimeScale;
 }
 
