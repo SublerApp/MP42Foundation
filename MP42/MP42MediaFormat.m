@@ -389,6 +389,7 @@ NSString *localizedDisplayName(FourCharCode mediaType, FourCharCode mediaSubtype
             break;
         case kMP42MediaType_Text:
         case kMP42MediaType_Subtitle:
+        case kMP42MediaType_Subpic:
             result = localizedSubtitlesDisplayName(mediaSubtype);
             break;
         case kMP42MediaType_ClosedCaption:
