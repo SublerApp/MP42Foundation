@@ -283,13 +283,6 @@ static const genreType_t genreType_strings[] = {
     {0, "undefined" } // must be last
 };
 
-
-@interface MP42Metadata ()
-
-@property (nonatomic, copy, nullable) NSString *ratingiTunesCode;
-
-@end
-
 @implementation MP42Metadata
 
 - (instancetype)init
@@ -756,14 +749,14 @@ static const genreType_t genreType_strings[] = {
         }
     } else if ([key isEqualToString:MP42MetadataKeyRating]) {
         self.edited = YES;
+
         if ([value isKindOfClass:[NSString class]]) {
-            NSNumber *index = @([[MP42Ratings defaultManager] ratingIndexForiTunesCode:value]);
-            [self.tagsDict setValue:index forKey:key];
-        }
-        else {
             [self.tagsDict setValue:value forKey:key];
         }
-
+        else {
+            noErr = NO;
+            NSAssert(YES, @"Invalid input");
+        }
     } else if ([key isEqualToString:MP42MetadataKeyContentRating]) {
         self.edited = YES;
         if ([value isKindOfClass:[NSNumber class]]) {
@@ -1138,17 +1131,7 @@ static const genreType_t genreType_strings[] = {
 
 
                 if (ratingItems.count > 2) {
-                    self.ratingiTunesCode = [NSString stringWithFormat:@"%@|%@|%@|", ratingItems[0], ratingItems[1], ratingItems[2]];
-                }
-                else {
-                    self.ratingiTunesCode = nil;
-                }
-
-                if (self.ratingiTunesCode) {
-                    self.tagsDict[MP42MetadataKeyRating] = [NSNumber numberWithUnsignedInteger:[[MP42Ratings defaultManager] ratingIndexForiTunesCode:self.ratingiTunesCode]];
-                }
-                else {
-                    self.tagsDict[MP42MetadataKeyRating] = @(0);
+                    self.tagsDict[MP42MetadataKeyRating] = [NSString stringWithFormat:@"%@|%@|%@|", ratingItems[0], ratingItems[1], ratingItems[2]];
                 }
 
                 if (ratingItems.count >= 4) {
@@ -1521,31 +1504,18 @@ static const genreType_t genreType_strings[] = {
 
         MP4ItmfData *data = &newItem->dataList.elements[0];
 
-        NSString *ratingString = self.ratingiTunesCode;
-        NSArray *iTunesCodes = [[MP42Ratings defaultManager] iTunesCodes];
+        NSString *ratingString = self.tagsDict[MP42MetadataKeyRating];
+        NSString *ratingAnnotation = self.tagsDict[MP42MetadataKeyRatingAnnotation];
 
-        // This whole thing is extremely convoluted and wrong in some cases.
-        if (![self.tagsDict[MP42MetadataKeyRating] isKindOfClass:[NSNumber class]] ||
-            [self.tagsDict[MP42MetadataKeyRating] unsignedIntegerValue] == [[MP42Ratings defaultManager] unknownIndex]) {
-            if (!ratingString) {
-                ratingString = [iTunesCodes objectAtIndex:[[MP42Ratings defaultManager] unknownIndex]];
-            }
-        } else {
-            NSUInteger index = [self.tagsDict[MP42MetadataKeyRating] unsignedIntegerValue];
-            if (iTunesCodes.count > index) {
-                ratingString = [iTunesCodes objectAtIndex:[self.tagsDict[MP42MetadataKeyRating] unsignedIntegerValue]];
-            }
-        }
-
-        if ([self.tagsDict[MP42MetadataKeyRatingAnnotation] length] && [ratingString length]) {
-			ratingString = [NSString stringWithFormat:@"%@%@", ratingString, self.tagsDict[MP42MetadataKeyRatingAnnotation]];
+        if (ratingAnnotation.length && ratingString.length) {
+			ratingString = [NSString stringWithFormat:@"%@%@", ratingString, ratingAnnotation];
 		}
 
         if (ratingString) {
             data->typeCode = MP4_ITMF_BT_UTF8;
-            data->valueSize = strlen([ratingString UTF8String]);
-            data->value = (uint8_t*)malloc( data->valueSize );
-            memcpy( data->value, [ratingString UTF8String], data->valueSize );
+            data->valueSize = strlen(ratingString.UTF8String);
+            data->value = (uint8_t *)malloc(data->valueSize);
+            memcpy(data->value, ratingString.UTF8String, data->valueSize);
 
             MP4ItmfAddItem(fileHandle, newItem);
         }
