@@ -316,11 +316,11 @@ int convert_layout_to_av(AudioChannelLayout *layout, UInt32 layoutSize)
         return AVERROR(ENOMEM);
     for (i = 0; i < layout_copy->mNumberChannelDescriptions; i++) {
         int channel_id = get_channel_id(layout_copy->mChannelDescriptions[i].mChannelLabel);
-        if (channel_id < 0)
+        if (channel_id < 0 || channel_id > 64)
             goto done;
-        if (layout_mask & (1 << channel_id))
+        if (layout_mask & (1UL << channel_id))
             goto done;
-        layout_mask |= 1 << channel_id;
+        layout_mask |= 1UL << channel_id;
         layout_copy->mChannelDescriptions[i].mChannelFlags = i; // Abusing flags as index
     }
 done:
