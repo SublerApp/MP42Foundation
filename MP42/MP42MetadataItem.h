@@ -10,28 +10,33 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-
 typedef NS_ENUM(NSUInteger, MP42MetadataItemDataType) {
     MP42MetadataItemDataTypeString,
     MP42MetadataItemDataTypeBool,
     MP42MetadataItemDataTypeInteger,
+    MP42MetadataItemDataTypeDate,
     MP42MetadataItemDataTypePlist,
     MP42MetadataItemDataTypeImage,
 };
 
 @interface MP42MetadataItem : NSObject
 
++ (instancetype)metadataItemWithIdentifier:(NSString *)identifier
+                                     value:(id<NSObject, NSCopying>)value
+                                  dataType:(MP42MetadataItemDataType)dataType
+                       extendedLanguageTag:(nullable NSString *)extendedLanguageTag;
+
 /* Indicates the identifier of the metadata item. Publicly defined identifiers are declared in AVMetadataIdentifiers.h. */
 @property (nonatomic, readonly, copy) NSString *identifier;
-
-/* indicates the IETF BCP 47 (RFC 4646) language identifier of the metadata item; may be nil if no language tag information is available */
-@property (nonatomic, readonly, copy, nullable) NSString *extendedLanguageTag;
 
 /* provides the value of the metadata item */
 @property (nonatomic, readonly, copy, nullable) id<NSObject, NSCopying> value;
 
 /* indicates the data type of the metadata item's value. */
 @property (nonatomic, readonly) MP42MetadataItemDataType dataType;
+
+/* indicates the IETF BCP 47 (RFC 4646) language identifier of the metadata item; may be nil if no language tag information is available */
+@property (nonatomic, readonly, copy, nullable) NSString *extendedLanguageTag;
 
 @end
 
@@ -50,6 +55,5 @@ typedef NS_ENUM(NSUInteger, MP42MetadataItemDataType) {
 @property (nonatomic, readonly, nullable) NSData *dataValue;
 
 @end
-
 
 NS_ASSUME_NONNULL_END

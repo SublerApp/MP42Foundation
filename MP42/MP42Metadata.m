@@ -53,6 +53,7 @@ NSString *const MP42MetadataKeyMediaKind = @"Media Kind";
 NSString *const MP42MetadataKeyGapless = @"Gapless";
 NSString *const MP42MetadataKeyHDVideo = @"HD Video";
 NSString *const MP42MetadataKeyiTunesU = @"iTunes U";
+NSString *const MP42MetadataKeyPodcast = @"Podcast";
 
 NSString *const MP42MetadataKeyStudio = @"Studio";
 NSString *const MP42MetadataKeyCast = @"Cast";

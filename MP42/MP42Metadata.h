@@ -7,7 +7,6 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "MP42MediaFormat.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -55,6 +54,7 @@ extern NSString *const MP42MetadataKeyMediaKind;
 extern NSString *const MP42MetadataKeyGapless;
 extern NSString *const MP42MetadataKeyHDVideo;
 extern NSString *const MP42MetadataKeyiTunesU;
+extern NSString *const MP42MetadataKeyPodcast;
 
 // Movie and TV Show Specific keys
 extern NSString *const MP42MetadataKeyStudio;
