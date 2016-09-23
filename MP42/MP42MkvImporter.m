@@ -319,7 +319,7 @@ static int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, ui
 
 - (MP42Metadata *)readMatroskaMetadata
 {
-    MP42Metadata *mkvMetadata = [[MP42Metadata alloc] init];
+    MP42Metadata *mkvMetadata = [[[MP42Metadata alloc] init] autorelease];
 
     SegmentInfo *segInfo = mkv_GetFileInfo(_matroskaFile);
     if (segInfo->Title) {
@@ -358,10 +358,10 @@ static int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, ui
         }
     }
 
-    if ([mkvMetadata.tagsDict count])
-        return [mkvMetadata autorelease];
+    if (mkvMetadata.tagsDict.count) {
+        return mkvMetadata;
+    }
     else {
-        [mkvMetadata release];
         return nil;
     }
 }
