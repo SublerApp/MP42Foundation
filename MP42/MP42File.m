@@ -1063,13 +1063,13 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
     NSMutableArray<MP42AudioTrack *> *needFallbackTracks = [[NSMutableArray alloc] init];
 
     for (MP42AudioTrack *track in [self tracksWithMediaType:kMP42MediaType_Audio] ) {
-        if ((track.format == kMP42AudioCodecType_AC3 ||
-            track.format == kMP42AudioCodecType_EnhancedAC3) &&
+        if ((track.targetFormat == kMP42AudioCodecType_AC3 ||
+            track.targetFormat == kMP42AudioCodecType_EnhancedAC3) &&
             track.fallbackTrack == nil) {
             [needFallbackTracks addObject:track];
         }
-        else if (track.format == kMP42AudioCodecType_MPEG4AAC ||
-                 track.format == kMP42AudioCodecType_MPEG4AAC_HE) {
+        else if (track.targetFormat == kMP42AudioCodecType_MPEG4AAC ||
+                 track.targetFormat == kMP42AudioCodecType_MPEG4AAC_HE) {
             [availableFallbackTracks addObject:track];
         }
     }

@@ -63,7 +63,7 @@
 
 - (BOOL)canAddTrack:(MP42Track *)track
 {
-    if (isTrackMuxable(track.format) || isTrackMuxable(track.conversionSettings.format)) {
+    if (isTrackMuxable(track.targetFormat)) {
         if ([track isMemberOfClass:[MP42AudioTrack class]]) {
             // TO-DO Check if we can initialize the audio converter
         }

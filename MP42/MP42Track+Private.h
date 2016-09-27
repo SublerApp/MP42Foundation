@@ -18,6 +18,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property(nonatomic, readwrite, copy) NSURL *URL;
 
+@property(nonatomic, readonly) MP42CodecType targetFormat;
 @property(nonatomic, readwrite) MP42CodecType format;
 @property(nonatomic, readwrite) MP42MediaType mediaType;
 

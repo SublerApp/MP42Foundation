@@ -349,14 +349,18 @@
     _updatedProperty[@"start_offset"] = @YES;
 }
 
-- (NSString *)formatSummary
+- (MP42CodecType)targetFormat
 {
     if (self.conversionSettings) {
-        return localizedDisplayName(_mediaType, self.conversionSettings.format);
+        return self.conversionSettings.format;
+    } else {
+        return self.format;
     }
-    else {
-        return localizedDisplayName(_mediaType, _format);
-    }
+}
+
+- (NSString *)formatSummary
+{
+    return localizedDisplayName(_mediaType, self.targetFormat);
 }
 
 #pragma mark - NSSecureCoding
