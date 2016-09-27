@@ -50,7 +50,7 @@
 
 + (NSArray<NSString *> *)supportedFileFormats {
     return @[@"mov", @"qt", @"mp4", @"m4v", @"m4a", @"m2ts", @"ts", @"mts",
-             @"ac3", @"eac3", @"ec3", @"webvtt", @"vtt", @"caf", @"aif", @"aiff", @"wav"];
+             @"ac3", @"eac3", @"ec3", @"webvtt", @"vtt", @"caf", @"aif", @"aiff", @"aifc", @"wav"];
 }
 
 - (FourCharCode)formatForTrack:(AVAssetTrack *)track {
