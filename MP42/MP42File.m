@@ -673,34 +673,41 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
         __block BOOL noErr = YES;
 
         if (![self.URL isEqualTo:url]) {
-            __block BOOL done = NO;
+            __block int32_t done = 0;
+            dispatch_semaphore_t sem = dispatch_semaphore_create(0);
+
             NSFileManager *fileManager = [[NSFileManager alloc] init];
-            unsigned long long originalFileSize = [[[fileManager attributesOfItemAtPath:[self.URL path] error:NULL] valueForKey:NSFileSize] unsignedLongLongValue];
+            unsigned long long originalFileSize = [[[fileManager attributesOfItemAtPath:self.URL.path error:NULL] valueForKey:NSFileSize] unsignedLongLongValue];
 
             dispatch_async(dispatch_get_global_queue(0, 0), ^{
                 noErr = [fileManager copyItemAtURL:self.URL toURL:url error:outError];
                 if (!noErr && *outError) {
                     [*outError retain];
                 }
-                done = YES;
+                OSAtomicIncrement32Barrier(&done);
+                dispatch_semaphore_signal(sem);
             });
 
             while (!done) {
-                unsigned long long fileSize = [[[fileManager attributesOfItemAtPath:[url path] error:NULL] valueForKey:NSFileSize] unsignedLongLongValue];
+                unsigned long long fileSize = [[[fileManager attributesOfItemAtPath:url.path error:NULL] valueForKey:NSFileSize] unsignedLongLongValue];
                 [self progressStatus:((double)fileSize / originalFileSize) * 100];
                 usleep(450000);
             }
+            dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);
+            dispatch_release(sem);
             [fileManager release];
         }
 
         if (noErr) {
             self.URL = url;
             success = [self updateMP4FileWithOptions:options error:outError];
-        } else {
+        }
+        else {
             success = NO;
             [*outError autorelease];
         }
-    } else {
+    }
+    else {
         self.URL = url;
 
         NSString *fileExtension = self.URL.pathExtension;
