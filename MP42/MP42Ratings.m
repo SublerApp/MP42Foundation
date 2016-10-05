@@ -103,7 +103,7 @@
 }
 
 - (NSUInteger) unknownIndex {
-	return 0;
+	return iTunesCodes.count - 1;
 }
 
 - (NSUInteger) ratingIndexForiTunesCode:(NSString *)aiTunesCode {

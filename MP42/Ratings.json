@@ -1,11 +1,5 @@
 [
 {
-	"country" : "Unknown",
-	"ratings" : [
-	   { "media" : "movie & TV", 	"prefix" : "mpaa", 	"itunes-code" : "Unrated", 	"itunes-value" : "???", "description" : "Unknown" }
-	]
-},
-{
 	"country" : "USA",
 	"ratings" : [
 	   { "media" : "movie", "prefix" : "mpaa", 	"itunes-code" : "NR", 		"itunes-value" : "000", "description" : "NR" },
@@ -225,6 +219,12 @@
 	   { "media" : "movie & TV", 	"prefix" : "ru-movie", 	"itunes-code" : "16+",	 	"itunes-value" : "375", "description" : "16+" },
 	   { "media" : "movie & TV", 	"prefix" : "ru-movie", 	"itunes-code" : "18+", 		"itunes-value" : "400", "description" : "18+" },
 	   { "media" : "movie & TV", 	"prefix" : "ru-movie", 	"itunes-code" : "Unrated", 	"itunes-value" : "???", "description" : "Unrated" }
+	]
+},
+{
+	"country" : "Unknown",
+	"ratings" : [
+	   { "media" : "movie & TV", 	"prefix" : "mpaa", 	"itunes-code" : "Unrated", 	"itunes-value" : "???", "description" : "Unknown" }
 	]
 }
 ]
