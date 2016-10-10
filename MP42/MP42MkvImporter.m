@@ -323,7 +323,7 @@ static int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, ui
 
     SegmentInfo *segInfo = mkv_GetFileInfo(_matroskaFile);
     if (segInfo->Title) {
-        [mkvMetadata setTag:[NSString stringWithUTF8String:segInfo->Title] forKey:MP42MetadataKeyName];
+        //[mkvMetadata setTag:[NSString stringWithUTF8String:segInfo->Title] forKey:MP42MetadataKeyName];
     }
     
     Tag *tags;
@@ -334,7 +334,7 @@ static int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, ui
         unsigned int xi = 0;
         for (xi = 0; xi < tags->nSimpleTags; xi++) {
 
-            if (!strcmp(tags->SimpleTags[xi].Name, "TITLE"))
+            /*if (!strcmp(tags->SimpleTags[xi].Name, "TITLE"))
                 [mkvMetadata setTag:[NSString stringWithUTF8String:tags->SimpleTags[xi].Value] forKey:MP42MetadataKeyName];
             
             if (!strcmp(tags->SimpleTags[xi].Name, "DATE_RELEASED"))
@@ -353,12 +353,12 @@ static int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, ui
                 [mkvMetadata setTag:[NSString stringWithUTF8String:tags->SimpleTags[xi].Value] forKey:MP42MetadataKeyArtist];
 
             if (!strcmp(tags->SimpleTags[xi].Name, "ENCODER"))
-                [mkvMetadata setTag:[NSString stringWithUTF8String:tags->SimpleTags[xi].Value] forKey:MP42MetadataKeyEncodingTool];
+                [mkvMetadata setTag:[NSString stringWithUTF8String:tags->SimpleTags[xi].Value] forKey:MP42MetadataKeyEncodingTool];*/
 
         }
     }
 
-    if (mkvMetadata.tagsDict.count) {
+    if (mkvMetadata.items.count) {
         return mkvMetadata;
     }
     else {

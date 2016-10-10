@@ -10,8 +10,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MP42Metadata (Private)
 
-- (instancetype) initWithFileHandle:(MP42FileHandle)fileHandle;
-- (BOOL) writeMetadataWithFileHandle: (MP42FileHandle) fileHandle;
+- (instancetype)initWithFileHandle:(MP42FileHandle)fileHandle;
+- (void)writeMetadataWithFileHandle:(MP42FileHandle)fileHandle;
 
 @end
 

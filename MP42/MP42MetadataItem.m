@@ -7,6 +7,8 @@
 //
 
 #import "MP42MetadataItem.h"
+#import "MP42Metadata.h"
+#import "MP42Image.h"
 
 @implementation MP42MetadataItem
 
@@ -40,6 +42,36 @@
 
 @implementation MP42MetadataItem (MP42MetadataItemTypeCoercion)
 
+- (NSString *)stringFromStringArray:(NSArray<NSString *> *)array {
+    NSMutableString *result = [NSMutableString string];
+
+    for (NSString *text in array) {
+
+        if (result.length) {
+            [result appendString:@", "];
+        }
+
+        [result appendString:text];
+    }
+
+    return [result copy];
+}
+
+- (NSString *)stringFromIntegerArray:(NSArray<NSNumber *> *)array {
+    NSMutableString *result = [NSMutableString string];
+
+    for (NSNumber *number in array) {
+
+        if (result.length) {
+            [result appendString:@"/"];
+        }
+
+        [result appendString:number.stringValue];
+    }
+
+    return [result copy];
+}
+
 - (NSString *)stringValue
 {
     switch (_dataType) {
@@ -53,6 +85,10 @@
             NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
             return  [formatter stringFromDate:(NSDate *)_value];
         }
+        case MP42MetadataItemDataTypeStringArray:
+            return [self stringFromStringArray:(NSArray *)_value];
+        case MP42MetadataItemDataTypeIntegerArray:
+            return [self stringFromIntegerArray:(NSArray *)_value];
         default:
             return nil;
     }
@@ -81,9 +117,37 @@
     }
 }
 
+- (NSArray *)arrayValue
+{
+    switch (_dataType) {
+        case MP42MetadataItemDataTypeIntegerArray:
+        case MP42MetadataItemDataTypeStringArray:
+            return (NSArray *)_value;
+
+        default:
+            return nil;
+    }
+}
+
+- (MP42Image *)imageValue
+{
+    switch (_dataType) {
+        case MP42MetadataItemDataTypeImage:
+            return (MP42Image *)_value;
+
+        default:
+            return nil;
+    }
+}
+
 - (NSData *)dataValue
 {
     return nil;
+}
+
+- (NSString *)description
+{
+    return [NSString stringWithFormat:@"<MP42MetadataItem: %@>", _value];
 }
 
 @end

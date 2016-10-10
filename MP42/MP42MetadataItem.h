@@ -7,16 +7,21 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "MP42MetadataFormat.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
+@class MP42Image;
+
 typedef NS_ENUM(NSUInteger, MP42MetadataItemDataType) {
-    MP42MetadataItemDataTypeString,
-    MP42MetadataItemDataTypeBool,
-    MP42MetadataItemDataTypeInteger,
-    MP42MetadataItemDataTypeDate,
-    MP42MetadataItemDataTypePlist,
-    MP42MetadataItemDataTypeImage,
+    MP42MetadataItemDataTypeUnspecied       = 1 << 0,
+    MP42MetadataItemDataTypeString          = 1 << 1,
+    MP42MetadataItemDataTypeStringArray     = 1 << 2,
+    MP42MetadataItemDataTypeBool            = 1 << 3,
+    MP42MetadataItemDataTypeInteger         = 1 << 4,
+    MP42MetadataItemDataTypeIntegerArray    = 1 << 5,
+    MP42MetadataItemDataTypeDate            = 1 << 6,
+    MP42MetadataItemDataTypeImage           = 1 << 7,
 };
 
 @interface MP42MetadataItem : NSObject
@@ -50,6 +55,12 @@ typedef NS_ENUM(NSUInteger, MP42MetadataItemDataType) {
 
 /* provides the value of the metadata item as an NSDate. If the metadata item's value can't be coerced to a date, @"dateValue" will be nil. */
 @property (nonatomic, readonly, nullable) NSDate *dateValue;
+
+/* provides the value of the metadata item as an NSArray. If the metadata item's value can't be coerced to a array, @"arrayValue" will be nil. */
+@property (nonatomic, readonly, nullable) NSArray *arrayValue;
+
+/* provides the value of the metadata item as an NSArray. If the metadata item's value can't be coerced to a array, @"arrayValue" will be nil. */
+@property (nonatomic, readonly, nullable) MP42Image *imageValue;
 
 /* provides the raw bytes of the value of the metadata item */
 @property (nonatomic, readonly, nullable) NSData *dataValue;

@@ -861,9 +861,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
     [tracksToUpdate release];
 
     // Update metadata
-    if (self.metadata.isEdited) {
-        [self.metadata writeMetadataWithFileHandle:self.fileHandle];
-    }
+    [self.metadata writeMetadataWithFileHandle:self.fileHandle];
 
     // Close the mp4 file handle
     if (![self stopWriting]) {

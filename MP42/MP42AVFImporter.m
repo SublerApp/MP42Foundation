@@ -372,7 +372,8 @@
 
         if ([artworkData isKindOfClass:[NSData class]]) {
             NSImage *image = [[NSImage alloc] initWithData:artworkData];
-            [self.metadata.artworks addObject:[[[MP42Image alloc] initWithImage:image] autorelease]];
+            // FIXME
+            //[self.metadata.artworks addObject:[[[MP42Image alloc] initWithImage:image] autorelease]];
             [image release];
         }
     }
@@ -459,7 +460,7 @@
         for (NSString *itunesKey in itunesMetadataDict.allKeys) {
             items = [AVMetadataItem metadataItemsFromArray:itunesMetadata withKey:itunesKey keySpace:nil];
             if (items.count) {
-                self.metadata[itunesMetadataDict[itunesKey]] = items.lastObject.value;
+                [self.metadata setTag:items.lastObject.value forKey:itunesMetadataDict[itunesKey]];
             }
         }
 
@@ -473,27 +474,27 @@
                                                                                            format:nil error:NULL];
             NSString *value;
             if ([value = [self stringFromArray:dma[@"cast"] key:@"name"] length]) {
-                self.metadata[MP42MetadataKeyCast] = value;
+                [self.metadata setTag:value forKey:MP42MetadataKeyCast];
             }
 
             if ([value = [self stringFromArray:dma[@"directors"] key:@"name"] length]) {
-                self.metadata[MP42MetadataKeyDirector] = value;
+                [self.metadata setTag:value forKey:MP42MetadataKeyDirector];
             }
 
             if ([value = [self stringFromArray:dma[@"codirectors"] key:@"name"] length]) {
-                self.metadata[MP42MetadataKeyCodirector] = value;
+                [self.metadata setTag:value forKey:MP42MetadataKeyCodirector];
             }
 
             if ([value = [self stringFromArray:dma[@"producers"] key:@"name"] length]) {
-                self.metadata[MP42MetadataKeyProducer] = value;
+                [self.metadata setTag:value forKey:MP42MetadataKeyProducer];
             }
 
             if ([value = [self stringFromArray:dma[@"screenwriters"] key:@"name"] length]) {
-                self.metadata[MP42MetadataKeyScreenwriters] = value;
+                [self.metadata setTag:value forKey:MP42MetadataKeyScreenwriters];
             }
 
             if ([value = dma[@"studio"] length]) {
-                self.metadata[MP42MetadataKeyStudio] = value;
+                [self.metadata setTag:value forKey:MP42MetadataKeyStudio];
             }
         }
     }
