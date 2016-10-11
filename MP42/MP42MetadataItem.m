@@ -66,7 +66,7 @@ static NSDictionary<NSString *, NSNumber *> *_defaultTypes;
 
         if (dataType == MP42MetadataItemDataTypeUnspecified) {
             _dataType = [MP42MetadataItem defaultDataTypeForIdentifier:identifier];
-            [self convertStringToNativeValue];
+            [self convertToNativeValue];
         }
         else {
             _dataType = dataType;
@@ -87,6 +87,19 @@ static NSDictionary<NSString *, NSNumber *> *_defaultTypes;
 {
     MP42MetadataItemDataType dataType = _defaultTypes[identifier].intValue;
     return dataType == 0 ? MP42MetadataItemDataTypeString : dataType;
+}
+
+- (void)convertToNativeValue
+{
+    if ([_value isKindOfClass:[NSString class]]) {
+        [self convertStringToNativeValue];
+    }
+    else if ([_value isKindOfClass:[NSNumber class]]) {
+        [self convertStringToNativeValue];
+    }
+    else if ([_value isKindOfClass:[NSData class]]) {
+        [self convertDataToNativeValue];
+    }
 }
 
 - (void)convertStringToNativeValue
@@ -115,6 +128,66 @@ static NSDictionary<NSString *, NSNumber *> *_defaultTypes;
         case MP42MetadataItemDataTypeIntegerArray:
             _value = [self numbersArrayFromString:stringValue];
             break;
+        default:
+            NSAssert(NO, @"Unhandled conversion");
+    }
+}
+
+- (void)convertNumberToNativeValue
+{
+    NSNumber *numberValue = (NSNumber *)_value;
+    switch (_dataType) {
+        case MP42MetadataItemDataTypeString:
+            _value = numberValue.stringValue;
+            break;
+        case MP42MetadataItemDataTypeBool:
+            _value = @(numberValue.boolValue);
+            break;
+        case MP42MetadataItemDataTypeInteger:
+            break;
+        case MP42MetadataItemDataTypeDate:
+            NSAssert(NO, @"Unhandled conversion");
+            break;
+        case MP42MetadataItemDataTypeStringArray:
+            _value = @[numberValue.stringValue];
+            break;
+        case MP42MetadataItemDataTypeIntegerArray:
+            _value = @[numberValue, @0];
+            break;
+        default:
+            NSAssert(NO, @"Unhandled conversion");
+    }
+}
+
+- (void)convertDataToNativeValue
+{
+    NSData *dataValue = (NSData *)_value;
+    switch (_dataType) {
+        case MP42MetadataItemDataTypeString:
+            NSAssert(NO, @"Unhandled conversion");
+            break;
+        case MP42MetadataItemDataTypeBool:
+            NSAssert(NO, @"Unhandled conversion");
+            break;
+        case MP42MetadataItemDataTypeInteger:
+            NSAssert(NO, @"Unhandled conversion");
+            break;
+        case MP42MetadataItemDataTypeDate:
+            NSAssert(NO, @"Unhandled conversion");
+            break;
+        case MP42MetadataItemDataTypeStringArray:
+            NSAssert(NO, @"Unhandled conversion");
+            break;
+        case MP42MetadataItemDataTypeIntegerArray:
+        {
+            if (dataValue.length >= 6) {
+                uint8_t *bytes = (uint8_t *)dataValue.bytes;
+                int index = ((bytes[2]) <<  8) | ((bytes[3]));
+                int total = ((bytes[4]) <<  8) | ((bytes[5]));
+                _value = @[@(index), @(total)];
+            }
+            break;
+        }
         default:
             NSAssert(NO, @"Unhandled conversion");
     }

@@ -321,6 +321,15 @@
     return [[result copy] autorelease];
 }
 
+- (MP42MetadataItem *)metadataItemWithValue:(id)value identifier:(NSString *)identifier
+{
+    MP42MetadataItem *item = [MP42MetadataItem metadataItemWithIdentifier:identifier
+                                                                    value:value
+                                                                 dataType:MP42MetadataItemDataTypeUnspecified
+                                                      extendedLanguageTag:nil];
+    return item;
+}
+
 /**
  *  Converts the AVAsset metadata to the MP42Metadata format
  */
@@ -358,7 +367,7 @@
                                                                           withKey:commonKey
                                                                          keySpace:AVMetadataKeySpaceCommon];
         if (items.count) {
-            [self.metadata setTag:items.lastObject.value forKey:commonItemsDict[commonKey]];
+            [self.metadata addMetadataItem:[self metadataItemWithValue:items.lastObject.value identifier:commonItemsDict[commonKey]]];
         }
     }
 
@@ -371,10 +380,11 @@
         NSData *artworkData = item.dataValue;
 
         if ([artworkData isKindOfClass:[NSData class]]) {
-            NSImage *image = [[NSImage alloc] initWithData:artworkData];
-            // FIXME
-            //[self.metadata.artworks addObject:[[[MP42Image alloc] initWithImage:image] autorelease]];
+            NSImage *imageData = [[NSImage alloc] initWithData:artworkData];
+            MP42Image *image = [[MP42Image alloc] initWithImage:imageData];
+            [self.metadata addMetadataItem:[self metadataItemWithValue:image identifier:MP42MetadataKeyCoverArt]];
             [image release];
+            [imageData release];
         }
     }
 
@@ -460,7 +470,7 @@
         for (NSString *itunesKey in itunesMetadataDict.allKeys) {
             items = [AVMetadataItem metadataItemsFromArray:itunesMetadata withKey:itunesKey keySpace:nil];
             if (items.count) {
-                [self.metadata setTag:items.lastObject.value forKey:itunesMetadataDict[itunesKey]];
+                [self.metadata addMetadataItem:[self metadataItemWithValue:items.lastObject.value identifier:itunesMetadataDict[itunesKey]]];
             }
         }
 
@@ -474,27 +484,27 @@
                                                                                            format:nil error:NULL];
             NSString *value;
             if ([value = [self stringFromArray:dma[@"cast"] key:@"name"] length]) {
-                [self.metadata setTag:value forKey:MP42MetadataKeyCast];
+                [self.metadata addMetadataItem:[self metadataItemWithValue:value identifier:MP42MetadataKeyCast]];
             }
 
             if ([value = [self stringFromArray:dma[@"directors"] key:@"name"] length]) {
-                [self.metadata setTag:value forKey:MP42MetadataKeyDirector];
+                [self.metadata addMetadataItem:[self metadataItemWithValue:value identifier:MP42MetadataKeyDirector]];
             }
 
             if ([value = [self stringFromArray:dma[@"codirectors"] key:@"name"] length]) {
-                [self.metadata setTag:value forKey:MP42MetadataKeyCodirector];
+                [self.metadata addMetadataItem:[self metadataItemWithValue:value identifier:MP42MetadataKeyCodirector]];
             }
 
             if ([value = [self stringFromArray:dma[@"producers"] key:@"name"] length]) {
-                [self.metadata setTag:value forKey:MP42MetadataKeyProducer];
+                [self.metadata addMetadataItem:[self metadataItemWithValue:value identifier:MP42MetadataKeyProducer]];
             }
 
             if ([value = [self stringFromArray:dma[@"screenwriters"] key:@"name"] length]) {
-                [self.metadata setTag:value forKey:MP42MetadataKeyScreenwriters];
+                [self.metadata addMetadataItem:[self metadataItemWithValue:value identifier:MP42MetadataKeyScreenwriters]];
             }
 
             if ([value = dma[@"studio"] length]) {
-                [self.metadata setTag:value forKey:MP42MetadataKeyStudio];
+                [self.metadata addMetadataItem:[self metadataItemWithValue:value identifier:MP42MetadataKeyStudio]];
             }
         }
     }
@@ -531,7 +541,7 @@
         for (NSString *qtKey in quicktimeMetadataDict.allKeys) {
             items = [AVMetadataItem metadataItemsFromArray:quicktimeMetadata withKey:qtKey keySpace:AVMetadataKeySpaceQuickTimeUserData];
             if (items.count) {
-                [self.metadata setTag:items.lastObject.value forKey:quicktimeMetadataDict[qtKey]];
+                [self.metadata addMetadataItem:[self metadataItemWithValue:items.lastObject.value identifier:quicktimeMetadataDict[qtKey]]];
             }
         }
     }
@@ -565,7 +575,7 @@
         for (NSString *qtUserDataKey in quicktimeUserDataMetadataDict.allKeys) {
             items = [AVMetadataItem metadataItemsFromArray:quicktimeUserDataMetadata withKey:qtUserDataKey keySpace:AVMetadataKeySpaceQuickTimeUserData];
             if (items.count) {
-                [self.metadata setTag:items.lastObject.value forKey:quicktimeUserDataMetadataDict[qtUserDataKey]];
+                [self.metadata addMetadataItem:[self metadataItemWithValue:items.lastObject.value identifier:quicktimeUserDataMetadataDict[qtUserDataKey]]];
             }
         }
     }
@@ -576,7 +586,7 @@
 
     // Prefer the asbd sample rate, naturalTimeScale might not be
     // the right one if we are reading for .ts
-    if ([assetTrack.mediaType isEqualToString:AVMediaTypeAudio]) {
+    if ([assetTrack.mediaType isEqualToString:AVMediaTypeAudio] && assetTrack.naturalTimeScale == 90000) {
         CMFormatDescriptionRef formatDescription = (CMFormatDescriptionRef)assetTrack.formatDescriptions.firstObject;
 
         if (formatDescription) {
