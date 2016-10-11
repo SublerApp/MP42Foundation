@@ -9,107 +9,107 @@
 #import <Foundation/Foundation.h>
 
 // Common Metadata keys
-extern NSString *const MP42MetadataKeyName;
-extern NSString *const MP42MetadataKeyTrackSubTitle;
+extern NSString *const MP42MetadataKeyName;                     // String
+extern NSString *const MP42MetadataKeyTrackSubTitle;            // String
 
-extern NSString *const MP42MetadataKeyAlbum;
-extern NSString *const MP42MetadataKeyAlbumArtist;
-extern NSString *const MP42MetadataKeyArtist;
+extern NSString *const MP42MetadataKeyAlbum;                    // String
+extern NSString *const MP42MetadataKeyAlbumArtist;              // String
+extern NSString *const MP42MetadataKeyArtist;                   // String
 
-extern NSString *const MP42MetadataKeyGrouping;
-extern NSString *const MP42MetadataKeyUserComment;
-extern NSString *const MP42MetadataKeyUserGenre;
-extern NSString *const MP42MetadataKeyReleaseDate;
+extern NSString *const MP42MetadataKeyGrouping;                 // String
+extern NSString *const MP42MetadataKeyUserComment;              // String
+extern NSString *const MP42MetadataKeyUserGenre;                // String
+extern NSString *const MP42MetadataKeyReleaseDate;              // Date
 
-extern NSString *const MP42MetadataKeyTrackNumber;
-extern NSString *const MP42MetadataKeyDiscNumber;
-extern NSString *const MP42MetadataKeyBeatsPerMin;
+extern NSString *const MP42MetadataKeyTrackNumber;              // Array<Int>
+extern NSString *const MP42MetadataKeyDiscNumber;               // Array<Int>
+extern NSString *const MP42MetadataKeyBeatsPerMin;              // Int
 
-extern NSString *const MP42MetadataKeyKeywords;
-extern NSString *const MP42MetadataKeyCategory;
-extern NSString *const MP42MetadataKeyCredits;
-extern NSString *const MP42MetadataKeyThanks;
-extern NSString *const MP42MetadataKeyCopyright;
+extern NSString *const MP42MetadataKeyKeywords;                 // String
+extern NSString *const MP42MetadataKeyCategory;                 // String
+extern NSString *const MP42MetadataKeyCredits;                  // String
+extern NSString *const MP42MetadataKeyThanks;                   // String
+extern NSString *const MP42MetadataKeyCopyright;                // String
 
-extern NSString *const MP42MetadataKeyDescription;
-extern NSString *const MP42MetadataKeyLongDescription;
-extern NSString *const MP42MetadataKeySeriesDescription;
-extern NSString *const MP42MetadataKeySongDescription;
+extern NSString *const MP42MetadataKeyDescription;              // String
+extern NSString *const MP42MetadataKeyLongDescription;          // String
+extern NSString *const MP42MetadataKeySeriesDescription;        // String
+extern NSString *const MP42MetadataKeySongDescription;          // String
 
-extern NSString *const MP42MetadataKeyRating;
-extern NSString *const MP42MetadataKeyRatingAnnotation;
-extern NSString *const MP42MetadataKeyContentRating;
+extern NSString *const MP42MetadataKeyRating;                   // String
+extern NSString *const MP42MetadataKeyRatingAnnotation;         // String
+extern NSString *const MP42MetadataKeyContentRating;            // Int
 
-extern NSString *const MP42MetadataKeyCoverArt;
-extern NSString *const MP42MetadataKeyMediaKind;
-extern NSString *const MP42MetadataKeyGapless;
-extern NSString *const MP42MetadataKeyHDVideo;
-extern NSString *const MP42MetadataKeyiTunesU;
-extern NSString *const MP42MetadataKeyPodcast;
+extern NSString *const MP42MetadataKeyCoverArt;                 // MP42Image
+extern NSString *const MP42MetadataKeyMediaKind;                // Int
+extern NSString *const MP42MetadataKeyGapless;                  // Bool
+extern NSString *const MP42MetadataKeyHDVideo;                  // Int
+extern NSString *const MP42MetadataKeyiTunesU;                  // Bool
+extern NSString *const MP42MetadataKeyPodcast;                  // Bool
 
 // Encoding Metadata keys
-extern NSString *const MP42MetadataKeyEncodedBy;
-extern NSString *const MP42MetadataKeyEncodingTool;
+extern NSString *const MP42MetadataKeyEncodedBy;                // String
+extern NSString *const MP42MetadataKeyEncodingTool;             // String
 
 // Movie and TV Show Specific keys
-extern NSString *const MP42MetadataKeyStudio;
-extern NSString *const MP42MetadataKeyCast;
-extern NSString *const MP42MetadataKeyDirector;
-extern NSString *const MP42MetadataKeyCodirector;
-extern NSString *const MP42MetadataKeyProducer;
-extern NSString *const MP42MetadataKeyExecProducer;
-extern NSString *const MP42MetadataKeyScreenwriters;
+extern NSString *const MP42MetadataKeyStudio;                   // String
+extern NSString *const MP42MetadataKeyCast;                     // Array<String>
+extern NSString *const MP42MetadataKeyDirector;                 // Array<String>
+extern NSString *const MP42MetadataKeyCodirector;               // Array<String>
+extern NSString *const MP42MetadataKeyProducer;                 // Array<String>
+extern NSString *const MP42MetadataKeyExecProducer;             // String
+extern NSString *const MP42MetadataKeyScreenwriters;            // Array<String>
 
 // TV Show Specific Metadata keys
-extern NSString *const MP42MetadataKeyTVShow;
-extern NSString *const MP42MetadataKeyTVEpisodeNumber;
-extern NSString *const MP42MetadataKeyTVNetwork;
-extern NSString *const MP42MetadataKeyTVEpisodeID;
-extern NSString *const MP42MetadataKeyTVSeason;
+extern NSString *const MP42MetadataKeyTVShow;                   // String
+extern NSString *const MP42MetadataKeyTVEpisodeNumber;          // Int
+extern NSString *const MP42MetadataKeyTVNetwork;                // String
+extern NSString *const MP42MetadataKeyTVEpisodeID;              // String
+extern NSString *const MP42MetadataKeyTVSeason;                 // Int
 
 // Songs Specific Metadata Keys
-extern NSString *const MP42MetadataKeyArtDirector;
-extern NSString *const MP42MetadataKeyComposer;
-extern NSString *const MP42MetadataKeyArranger;
-extern NSString *const MP42MetadataKeyAuthor;
-extern NSString *const MP42MetadataKeyLyrics;
-extern NSString *const MP42MetadataKeyAcknowledgement;
-extern NSString *const MP42MetadataKeyConductor;
-extern NSString *const MP42MetadataKeyLinerNotes;
-extern NSString *const MP42MetadataKeyRecordCompany;
-extern NSString *const MP42MetadataKeyOriginalArtist;
-extern NSString *const MP42MetadataKeyPhonogramRights;
-extern NSString *const MP42MetadataKeySongProducer;
-extern NSString *const MP42MetadataKeyPerformer;
-extern NSString *const MP42MetadataKeyPublisher;
-extern NSString *const MP42MetadataKeySoundEngineer;
-extern NSString *const MP42MetadataKeySoloist;
-extern NSString *const MP42MetadataKeyDiscCompilation;
+extern NSString *const MP42MetadataKeyArtDirector;              // String
+extern NSString *const MP42MetadataKeyComposer;                 // String
+extern NSString *const MP42MetadataKeyArranger;                 // String
+extern NSString *const MP42MetadataKeyAuthor;                   // String
+extern NSString *const MP42MetadataKeyLyrics;                   // String
+extern NSString *const MP42MetadataKeyAcknowledgement;          // String
+extern NSString *const MP42MetadataKeyConductor;                // String
+extern NSString *const MP42MetadataKeyLinerNotes;               // String
+extern NSString *const MP42MetadataKeyRecordCompany;            // String
+extern NSString *const MP42MetadataKeyOriginalArtist;           // String
+extern NSString *const MP42MetadataKeyPhonogramRights;          // String
+extern NSString *const MP42MetadataKeySongProducer;             // String
+extern NSString *const MP42MetadataKeyPerformer;                // String
+extern NSString *const MP42MetadataKeyPublisher;                // String
+extern NSString *const MP42MetadataKeySoundEngineer;            // String
+extern NSString *const MP42MetadataKeySoloist;                  // String
+extern NSString *const MP42MetadataKeyDiscCompilation;          // String
 
 // Classic Music Specific Metadata Keys
-extern NSString *const MP42MetadataKeyWorkName;
-extern NSString *const MP42MetadataKeyMovementName;
-extern NSString *const MP42MetadataKeyMovementNumber;
-extern NSString *const MP42MetadataKeyMovementCount;
-extern NSString *const MP42MetadataKeyShowWorkAndMovement;
+extern NSString *const MP42MetadataKeyWorkName;                 // String
+extern NSString *const MP42MetadataKeyMovementName;             // String
+extern NSString *const MP42MetadataKeyMovementNumber;           // Int
+extern NSString *const MP42MetadataKeyMovementCount;            // Int
+extern NSString *const MP42MetadataKeyShowWorkAndMovement;      // Bool
 
 // iTunes Store Metadata keys
-extern NSString *const MP42MetadataKeyXID;
-extern NSString *const MP42MetadataKeyArtistID;
-extern NSString *const MP42MetadataKeyComposerID;
-extern NSString *const MP42MetadataKeyContentID;
-extern NSString *const MP42MetadataKeyGenreID;
-extern NSString *const MP42MetadataKeyPlaylistID;
-extern NSString *const MP42MetadataKeyAppleID;
-extern NSString *const MP42MetadataKeyAccountKind;
-extern NSString *const MP42MetadataKeyAccountCountry;
-extern NSString *const MP42MetadataKeyPurchasedDate;
-extern NSString *const MP42MetadataKeyOnlineExtras;
+extern NSString *const MP42MetadataKeyXID;                      // String
+extern NSString *const MP42MetadataKeyArtistID;                 // Int
+extern NSString *const MP42MetadataKeyComposerID;               // Int
+extern NSString *const MP42MetadataKeyContentID;                // Int
+extern NSString *const MP42MetadataKeyGenreID;                  // Int
+extern NSString *const MP42MetadataKeyPlaylistID;               // Int
+extern NSString *const MP42MetadataKeyAppleID;                  // String
+extern NSString *const MP42MetadataKeyAccountKind;              // Int
+extern NSString *const MP42MetadataKeyAccountCountry;           // Int
+extern NSString *const MP42MetadataKeyPurchasedDate;            // Date
+extern NSString *const MP42MetadataKeyOnlineExtras;             // String
 
 // Sort Metadata Keys
-extern NSString *const MP42MetadataKeySortName;
-extern NSString *const MP42MetadataKeySortArtist;
-extern NSString *const MP42MetadataKeySortAlbumArtist;
-extern NSString *const MP42MetadataKeySortAlbum;
-extern NSString *const MP42MetadataKeySortComposer;
-extern NSString *const MP42MetadataKeySortTVShow;
+extern NSString *const MP42MetadataKeySortName;                 // String
+extern NSString *const MP42MetadataKeySortArtist;               // String
+extern NSString *const MP42MetadataKeySortAlbumArtist;          // String
+extern NSString *const MP42MetadataKeySortAlbum;                // String
+extern NSString *const MP42MetadataKeySortComposer;             // String
+extern NSString *const MP42MetadataKeySortTVShow;               // String

@@ -211,6 +211,10 @@ static const genreType_t genreType_strings[] = {
             MP42MetadataKeyAlbumArtist,
             MP42MetadataKeyAlbum,
             MP42MetadataKeyGrouping,
+            MP42MetadataKeyMediaKind,
+            MP42MetadataKeyHDVideo,
+            MP42MetadataKeyGapless,
+            MP42MetadataKeyPodcast,
 			MP42MetadataKeyUserComment,
             MP42MetadataKeyUserGenre,
             MP42MetadataKeyReleaseDate,
@@ -291,6 +295,10 @@ static const genreType_t genreType_strings[] = {
             MP42MetadataKeyAlbumArtist,
             MP42MetadataKeyAlbum,
             MP42MetadataKeyGrouping,
+            MP42MetadataKeyMediaKind,
+            MP42MetadataKeyHDVideo,
+            MP42MetadataKeyGapless,
+            MP42MetadataKeyPodcast,
             MP42MetadataKeyComposer,
 			MP42MetadataKeyUserComment,
             MP42MetadataKeyUserGenre,
@@ -309,6 +317,7 @@ static const genreType_t genreType_strings[] = {
             MP42MetadataKeySeriesDescription,
             MP42MetadataKeyRating,
             MP42MetadataKeyRatingAnnotation,
+            MP42MetadataKeyContentRating,
             MP42MetadataKeyStudio,
             MP42MetadataKeyCast,
             MP42MetadataKeyDirector,
@@ -391,6 +400,15 @@ static const genreType_t genreType_strings[] = {
 
 - (void)addMetadataItem:(MP42MetadataItem *)item
 {
+    // Only one metadata item per identifier for now,
+    // as we don't support multiple languages yet,
+    // Allow multiple MP42MetadataKeyCoverArt items.
+    if (![item.identifier isEqualToString:MP42MetadataKeyCoverArt]) {
+        MP42MetadataItem *existingItem = self.itemsMap[item.identifier];
+        if (existingItem) {
+            [self.itemsArray removeObject:existingItem];
+        }
+    }
     [self.itemsArray addObject:item];
     [self.itemsMap setObject:item forKey:item.identifier];
     self.edited = YES;

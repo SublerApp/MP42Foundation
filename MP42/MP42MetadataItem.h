@@ -14,7 +14,7 @@ NS_ASSUME_NONNULL_BEGIN
 @class MP42Image;
 
 typedef NS_ENUM(NSUInteger, MP42MetadataItemDataType) {
-    MP42MetadataItemDataTypeUnspecied       = 1 << 0,
+    MP42MetadataItemDataTypeUnspecified     = 1 << 0,
     MP42MetadataItemDataTypeString          = 1 << 1,
     MP42MetadataItemDataTypeStringArray     = 1 << 2,
     MP42MetadataItemDataTypeBool            = 1 << 3,
@@ -24,7 +24,7 @@ typedef NS_ENUM(NSUInteger, MP42MetadataItemDataType) {
     MP42MetadataItemDataTypeImage           = 1 << 7,
 };
 
-@interface MP42MetadataItem : NSObject
+@interface MP42MetadataItem : NSObject<NSCopying, NSSecureCoding>
 
 + (instancetype)metadataItemWithIdentifier:(NSString *)identifier
                                      value:(id<NSObject, NSCopying>)value
@@ -61,9 +61,6 @@ typedef NS_ENUM(NSUInteger, MP42MetadataItemDataType) {
 
 /* provides the value of the metadata item as an NSArray. If the metadata item's value can't be coerced to a array, @"arrayValue" will be nil. */
 @property (nonatomic, readonly, nullable) MP42Image *imageValue;
-
-/* provides the raw bytes of the value of the metadata item */
-@property (nonatomic, readonly, nullable) NSData *dataValue;
 
 @end
 

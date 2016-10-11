@@ -94,11 +94,11 @@
     }
 }
 
-- (NSArray *) ratings {
+- (NSArray<NSString *> *) ratings {
 	return [NSArray arrayWithArray:ratings];
 }
 
-- (NSArray *) iTunesCodes {
+- (NSArray<NSString *> *) iTunesCodes {
     return [NSArray arrayWithArray:iTunesCodes];
 }
 
