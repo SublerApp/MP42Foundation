@@ -20,11 +20,11 @@
             _mMetadata = [[MP42Metadata alloc] init];
             NSArray *nodes = [xml nodesForXPath:@"./movie" error:&err];
             if ([nodes count] == 1)
-                [self metadata:_mMetadata forNode:[nodes objectAtIndex:0]];
+                [self metadataForNode:[nodes objectAtIndex:0]];
             
             nodes = [xml nodesForXPath:@"./video" error:&err];
             if ([nodes count] == 1)
-                [self metadata2:_mMetadata forNode:[nodes objectAtIndex:0]];
+                [self metadata2ForNode:[nodes objectAtIndex:0]];
         }
     }
     return self;
@@ -48,79 +48,82 @@
     }
 }
 
-- (MP42Metadata *) metadata:(MP42Metadata *)metadata forNode:(NSXMLElement *)node {
-    // FIXME
-    //metadata.mediaKind = 9; // movie
+- (void)addMetadataItemWithString:(NSString *)value identifier:(NSString *)identifier
+{
+    MP42MetadataItem *item = [MP42MetadataItem metadataItemWithIdentifier:identifier
+                                                                    value:value
+                                                                 dataType:MP42MetadataItemDataTypeUnspecified
+                                                      extendedLanguageTag:nil];
+    [self.mMetadata addMetadataItem:item];
+}
+
+- (void)metadataForNode:(NSXMLElement *)node {
+    [self addMetadataItemWithString:@"9" identifier:MP42MetadataKeyMediaKind];
     NSArray *tag;
     NSError *err;
     // initial fields from general movie search
     tag = [node nodesForXPath:@"./title" error:&err];
-    /*if ([tag count]) [metadata setTag:[[tag objectAtIndex:0] stringValue] forKey:MP42MetadataKeyName];
+    if ([tag count]) [self addMetadataItemWithString:[[tag objectAtIndex:0] stringValue] identifier:MP42MetadataKeyName];
     tag = [node nodesForXPath:@"./year" error:&err];
-    if ([tag count]) [metadata setTag:[[tag objectAtIndex:0] stringValue] forKey:MP42MetadataKeyReleaseDate];
+    if ([tag count]) [self addMetadataItemWithString:[[tag objectAtIndex:0] stringValue] identifier:MP42MetadataKeyReleaseDate];
     tag = [node nodesForXPath:@"./outline" error:&err];
-    if ([tag count]) [metadata setTag:[[tag objectAtIndex:0] stringValue] forKey:MP42MetadataKeyDescription];
+    if ([tag count]) [self addMetadataItemWithString:[[tag objectAtIndex:0] stringValue] identifier:MP42MetadataKeyDescription];
     tag = [node nodesForXPath:@"./plot" error:&err];
-    if ([tag count]) [metadata setTag:[[tag objectAtIndex:0] stringValue] forKey:MP42MetadataKeyLongDescription];
+    if ([tag count]) [self addMetadataItemWithString:[[tag objectAtIndex:0] stringValue] identifier:MP42MetadataKeyLongDescription];
     tag = [node nodesForXPath:@"./certification" error:&err];
-    if ([tag count] && [[[tag objectAtIndex:0] stringValue] length]) [metadata setTag:[[tag objectAtIndex:0] stringValue] forKey:MP42MetadataKeyRating];
+    if ([tag count] && [[[tag objectAtIndex:0] stringValue] length]) [self addMetadataItemWithString:[[tag objectAtIndex:0] stringValue] identifier:MP42MetadataKeyRating];
     tag = [node nodesForXPath:@"./genre" error:&err];
-    if ([tag count]) [metadata setTag:[[tag objectAtIndex:0] stringValue] forKey:MP42MetadataKeyUserGenre];
+    if ([tag count]) [self addMetadataItemWithString:[[tag objectAtIndex:0] stringValue] identifier:MP42MetadataKeyUserGenre];
     tag = [node nodesForXPath:@"./credits" error:&err];
-    if ([tag count]) [metadata setTag:[[tag objectAtIndex:0] stringValue] forKey:MP42MetadataKeyArtist];
+    if ([tag count]) [self addMetadataItemWithString:[[tag objectAtIndex:0] stringValue] identifier:MP42MetadataKeyArtist];
     tag = [node nodesForXPath:@"./director" error:&err];
-    if ([tag count]) [metadata setTag:[[tag objectAtIndex:0] stringValue] forKey:MP42MetadataKeyDirector];
+    if ([tag count]) [self addMetadataItemWithString:[[tag objectAtIndex:0] stringValue] identifier:MP42MetadataKeyDirector];
     tag = [node nodesForXPath:@"./studio" error:&err];
-    if ([tag count]) [metadata setTag:[[tag objectAtIndex:0] stringValue] forKey:MP42MetadataKeyStudio];
+    if ([tag count]) [self addMetadataItemWithString:[[tag objectAtIndex:0] stringValue] identifier:MP42MetadataKeyStudio];
 
     // additional fields from detailed movie info
     NSString *joined;
     joined = [self nodes:node forXPath:@"./cast/actor/@name" joinedBy:@","];
-    if (joined) [metadata setTag:joined forKey:MP42MetadataKeyCast];*/
-
-    return metadata;
+    if (joined) [self addMetadataItemWithString:joined identifier:MP42MetadataKeyCast];
 }
 
-- (MP42Metadata *) metadata2:(MP42Metadata *)metadata forNode:(NSXMLElement *)node {
-    //FIXME
-    //metadata.mediaKind = 9; // movie
+- (void)metadata2ForNode:(NSXMLElement *)node {
+    [self addMetadataItemWithString:@"9" identifier:MP42MetadataKeyMediaKind];
     NSArray *tag;
     NSError *err;
     // initial fields from general movie search
     tag = [node nodesForXPath:@"./content_id" error:&err];
-    /*if ([tag count]) [metadata setTag:[[tag objectAtIndex:0] stringValue] forKey:MP42MetadataKeyContentID];
+    if ([tag count]) [self addMetadataItemWithString:[[tag objectAtIndex:0] stringValue] identifier:MP42MetadataKeyContentID];
     tag = [node nodesForXPath:@"./genre" error:&err];
-    if ([tag count]) [metadata setTag:[[tag objectAtIndex:0] stringValue] forKey:MP42MetadataKeyUserGenre];
+    if ([tag count]) [self addMetadataItemWithString:[[tag objectAtIndex:0] stringValue] identifier:MP42MetadataKeyUserGenre];
     tag = [node nodesForXPath:@"./name" error:&err];
-    if ([tag count]) [metadata setTag:[[tag objectAtIndex:0] stringValue] forKey:MP42MetadataKeyName];
+    if ([tag count]) [self addMetadataItemWithString:[[tag objectAtIndex:0] stringValue] identifier:MP42MetadataKeyName];
     tag = [node nodesForXPath:@"./release_date" error:&err];
-    if ([tag count]) [metadata setTag:[[tag objectAtIndex:0] stringValue] forKey:MP42MetadataKeyReleaseDate];
+    if ([tag count]) [self addMetadataItemWithString:[[tag objectAtIndex:0] stringValue] identifier:MP42MetadataKeyReleaseDate];
     tag = [node nodesForXPath:@"./encoding_tool" error:&err];
-    if ([tag count]) [metadata setTag:[[tag objectAtIndex:0] stringValue] forKey:MP42MetadataKeyEncodingTool];
+    if ([tag count]) [self addMetadataItemWithString:[[tag objectAtIndex:0] stringValue] identifier:MP42MetadataKeyEncodingTool];
     tag = [node nodesForXPath:@"./copyright" error:&err];
-    if ([tag count]) [metadata setTag:[[tag objectAtIndex:0] stringValue] forKey:MP42MetadataKeyCopyright];
+    if ([tag count]) [self addMetadataItemWithString:[[tag objectAtIndex:0] stringValue] identifier:MP42MetadataKeyCopyright];
 
     NSString *joined;
     joined = [self nodes:node forXPath:@"./producers/producer_name" joinedBy:@","];
-    if (joined) [metadata setTag:joined forKey:MP42MetadataKeyProducer];
+    if (joined) [self addMetadataItemWithString:joined identifier:MP42MetadataKeyProducer];
     
     joined = [self nodes:node forXPath:@"./directors/director_name" joinedBy:@","];
-    if (joined) [metadata setTag:joined forKey:MP42MetadataKeyDirector], [metadata setTag:joined forKey:MP42MetadataKeyArtist];
+    if (joined) [self addMetadataItemWithString:joined identifier:MP42MetadataKeyDirector], [self addMetadataItemWithString:joined identifier:MP42MetadataKeyArtist];
     
     joined = [self nodes:node forXPath:@"./casts/cast" joinedBy:@","];
-    if (joined) [metadata setTag:joined forKey:MP42MetadataKeyCast];
+    if (joined) [self addMetadataItemWithString:joined identifier:MP42MetadataKeyCast];
 
     tag = [node nodesForXPath:@"./studio" error:&err];
-    if ([tag count]) [metadata setTag:[[tag objectAtIndex:0] stringValue] forKey:MP42MetadataKeyStudio];
+    if ([tag count]) [self addMetadataItemWithString:[[tag objectAtIndex:0] stringValue] identifier:MP42MetadataKeyStudio];
     tag = [node nodesForXPath:@"./description" error:&err];
-    if ([tag count]) [metadata setTag:[[tag objectAtIndex:0] stringValue] forKey:MP42MetadataKeyDescription];
+    if ([tag count]) [self addMetadataItemWithString:[[tag objectAtIndex:0] stringValue] identifier:MP42MetadataKeyDescription];
     tag = [node nodesForXPath:@"./long_description" error:&err];
-    if ([tag count]) [metadata setTag:[[tag objectAtIndex:0] stringValue] forKey:MP42MetadataKeyLongDescription];
+    if ([tag count]) [self addMetadataItemWithString:[[tag objectAtIndex:0] stringValue] identifier:MP42MetadataKeyLongDescription];
 
     joined = [self nodes:node forXPath:@"./categories/category" joinedBy:@","];
-    if (joined) [metadata setTag:joined forKey:MP42MetadataKeyCategory];*/
-    
-    return metadata;
+    if (joined) [self addMetadataItemWithString:joined identifier:MP42MetadataKeyCategory];
 }
 
 @end

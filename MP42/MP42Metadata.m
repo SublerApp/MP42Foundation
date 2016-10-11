@@ -183,7 +183,7 @@ static const genreType_t genreType_strings[] = {
 {
     self = [self init];
     if (self) {
-        [self readMetaDataFromFileHandle: fileHandle];
+        [self readMetaDataFromFileHandle:fileHandle];
 	}
 
     return self;

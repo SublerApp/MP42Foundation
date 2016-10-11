@@ -9,6 +9,7 @@
 #import "MP42MetadataItem.h"
 #import "MP42Metadata.h"
 #import "MP42Image.h"
+#import "NSString+MP42Additions.h"
 
 @implementation MP42MetadataItem
 
@@ -109,14 +110,38 @@ static NSDictionary<NSString *, NSNumber *> *_defaultTypes;
             break;
         }
         case MP42MetadataItemDataTypeStringArray:
-            _value = @[stringValue];
+            _value = [self stringsArrayFromString:stringValue];
             break;
         case MP42MetadataItemDataTypeIntegerArray:
-            _value = @[@(stringValue.integerValue)];
+            _value = [self numbersArrayFromString:stringValue];
             break;
         default:
             NSAssert(NO, @"Unhandled conversion");
     }
+}
+
+- (NSArray<NSString *> *)stringsArrayFromString:(NSString *)string
+{
+    NSString *splitElements  = @",\\s*+";
+    NSArray *stringArray = [string MP42_componentsSeparatedByRegex:splitElements];
+
+    NSMutableArray<NSString *> *arrayElements = [NSMutableArray array];
+
+    for (NSString *element in stringArray) {
+        [arrayElements addObject:element];
+    }
+
+    return arrayElements;
+}
+
+- (NSArray<NSNumber *> *)numbersArrayFromString:(NSString *)string
+{
+    int index = 0, count = 0;
+    char separator[3];
+
+    sscanf(string.UTF8String,"%u%[/- ]%u", &index, separator, &count);
+
+    return @[@(index), @(count)];
 }
 
 #pragma mark - NSSecureCoding

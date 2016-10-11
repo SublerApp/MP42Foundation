@@ -177,9 +177,8 @@ static int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, ui
             return nil;
         }
 
-        uint64_t *trackSizes = [self copyGuessedTrackDataLength];
-
         NSInteger trackCount = mkv_GetNumTracks(_matroskaFile);
+        NSArray<NSNumber *> *trackSizes = [self guessedTrackDataLength];
 
         for (NSInteger i = 0; i < trackCount; i++) {
             TrackInfo *mkvTrack = mkv_GetTrackInfo(_matroskaFile, i);
@@ -240,7 +239,7 @@ static int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, ui
                 newTrack.format = CodecIDToFourCC(mkvTrack);
                 newTrack.trackId = i;
                 newTrack.URL = self.fileURL;
-                newTrack.dataLength = trackSizes[i];
+                newTrack.dataLength = trackSizes[i].unsignedLongLongValue;
                 if (mkvTrack->Type == TT_AUDIO) {
                     newTrack.startOffset = [self matroskaTrackStartTime:mkvTrack Id:i];
                 }
@@ -309,12 +308,19 @@ static int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, ui
             [newTrack release];
         }
 
-        free(trackSizes);
-
         self.metadata = [self readMatroskaMetadata];
     }
 
     return self;
+}
+
+- (void)addMetadataItemWithString:(NSString *)value identifier:(NSString *)identifier metadata:(MP42Metadata *)metadata
+{
+    MP42MetadataItem *item = [MP42MetadataItem metadataItemWithIdentifier:identifier
+                                                                    value:value
+                                                                 dataType:MP42MetadataItemDataTypeUnspecified
+                                                      extendedLanguageTag:nil];
+    [metadata addMetadataItem:item];
 }
 
 - (MP42Metadata *)readMatroskaMetadata
@@ -323,7 +329,7 @@ static int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, ui
 
     SegmentInfo *segInfo = mkv_GetFileInfo(_matroskaFile);
     if (segInfo->Title) {
-        //[mkvMetadata setTag:[NSString stringWithUTF8String:segInfo->Title] forKey:MP42MetadataKeyName];
+        [self addMetadataItemWithString:[NSString stringWithUTF8String:segInfo->Title] identifier:MP42MetadataKeyName metadata:mkvMetadata];
     }
     
     Tag *tags;
@@ -334,52 +340,50 @@ static int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, ui
         unsigned int xi = 0;
         for (xi = 0; xi < tags->nSimpleTags; xi++) {
 
-            /*if (!strcmp(tags->SimpleTags[xi].Name, "TITLE"))
-                [mkvMetadata setTag:[NSString stringWithUTF8String:tags->SimpleTags[xi].Value] forKey:MP42MetadataKeyName];
+            if (!strcmp(tags->SimpleTags[xi].Name, "TITLE")) {
+                [self addMetadataItemWithString:[NSString stringWithUTF8String:tags->SimpleTags[xi].Value] identifier:MP42MetadataKeyName metadata:mkvMetadata];
+            }
             
-            if (!strcmp(tags->SimpleTags[xi].Name, "DATE_RELEASED"))
-                [mkvMetadata setTag:[NSString stringWithUTF8String:tags->SimpleTags[xi].Value] forKey:MP42MetadataKeyReleaseDate];
+            if (!strcmp(tags->SimpleTags[xi].Name, "DATE_RELEASED")) {
+                [self addMetadataItemWithString:[NSString stringWithUTF8String:tags->SimpleTags[xi].Value] identifier:MP42MetadataKeyReleaseDate metadata:mkvMetadata];
+            }
 
-            if (!strcmp(tags->SimpleTags[xi].Name, "COMMENT"))
-                [mkvMetadata setTag:[NSString stringWithUTF8String:tags->SimpleTags[xi].Value] forKey:MP42MetadataKeyUserComment];
+            if (!strcmp(tags->SimpleTags[xi].Name, "COMMENT")) {
+                [self addMetadataItemWithString:[NSString stringWithUTF8String:tags->SimpleTags[xi].Value] identifier:MP42MetadataKeyUserComment metadata:mkvMetadata];
+            }
 
-            if (!strcmp(tags->SimpleTags[xi].Name, "DIRECTOR"))
-                [mkvMetadata setTag:[NSString stringWithUTF8String:tags->SimpleTags[xi].Value] forKey:MP42MetadataKeyDirector];
+            if (!strcmp(tags->SimpleTags[xi].Name, "DIRECTOR")) {
+                [self addMetadataItemWithString:[NSString stringWithUTF8String:tags->SimpleTags[xi].Value] identifier:MP42MetadataKeyDirector metadata:mkvMetadata];
+            }
 
-            if (!strcmp(tags->SimpleTags[xi].Name, "COPYRIGHT"))
-                [mkvMetadata setTag:[NSString stringWithUTF8String:tags->SimpleTags[xi].Value] forKey:MP42MetadataKeyCopyright];
+            if (!strcmp(tags->SimpleTags[xi].Name, "COPYRIGHT")) {
+                [self addMetadataItemWithString:[NSString stringWithUTF8String:tags->SimpleTags[xi].Value] identifier:MP42MetadataKeyCopyright metadata:mkvMetadata];
+            }
 
-            if (!strcmp(tags->SimpleTags[xi].Name, "ARTIST"))
-                [mkvMetadata setTag:[NSString stringWithUTF8String:tags->SimpleTags[xi].Value] forKey:MP42MetadataKeyArtist];
+            if (!strcmp(tags->SimpleTags[xi].Name, "ARTIST")) {
+                [self addMetadataItemWithString:[NSString stringWithUTF8String:tags->SimpleTags[xi].Value] identifier:MP42MetadataKeyArtist metadata:mkvMetadata];
+            }
 
-            if (!strcmp(tags->SimpleTags[xi].Name, "ENCODER"))
-                [mkvMetadata setTag:[NSString stringWithUTF8String:tags->SimpleTags[xi].Value] forKey:MP42MetadataKeyEncodingTool];*/
-
+            if (!strcmp(tags->SimpleTags[xi].Name, "ENCODER")) {
+                [self addMetadataItemWithString:[NSString stringWithUTF8String:tags->SimpleTags[xi].Value] identifier:MP42MetadataKeyEncodingTool metadata:mkvMetadata];
+            }
         }
     }
 
-    if (mkvMetadata.items.count) {
-        return mkvMetadata;
-    }
-    else {
-        return nil;
-    }
+    return (mkvMetadata.items.count) ? mkvMetadata : nil;
 }
 
-- (uint64_t *)copyGuessedTrackDataLength
+- (NSArray<NSNumber *> *)guessedTrackDataLength
 {
-    uint64_t    *trackSizes = NULL;
-    uint64_t    *trackTimestamp;
-    uint64_t    StartTime, EndTime, FilePos;
-    uint32_t    Track, FrameSize, FrameFlags;
-
     SegmentInfo *segInfo = mkv_GetFileInfo(_matroskaFile);
     NSInteger trackCount = mkv_GetNumTracks(_matroskaFile);
 
-    if (trackCount) {
-        trackSizes = (uint64_t *) malloc(sizeof(uint64_t) * trackCount);
-        trackTimestamp = (uint64_t *) malloc(sizeof(uint64_t) * trackCount);
+    uint64_t    trackSizes[trackCount];
+    uint64_t    trackTimestamp[trackCount];
+    uint64_t    StartTime, EndTime, FilePos;
+    uint32_t    Track, FrameSize, FrameFlags;
 
+    if (trackCount) {
         for (int i = 0; i < trackCount; i++) {
             trackSizes[i] = 0;
             trackTimestamp[i] = 0;
@@ -404,11 +408,15 @@ static int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, ui
             }
         }
 
-        free(trackTimestamp);
         mkv_Seek(_matroskaFile, 0, 0);
     }
 
-    return trackSizes;
+    NSMutableArray<NSNumber *> *sizes = [NSMutableArray array];
+    for (int i = 0; i < trackCount; i++) {
+        [sizes addObject:@(trackSizes[i])];
+    }
+
+    return sizes;
 }
 
 // List of codec IDs we know about and that map to fourccs
@@ -1092,7 +1100,6 @@ static NSString * TrackNameToString(TrackInfo *track)
 - (void)dealloc
 {
     closeMatroskaFile(_matroskaFile, _ioStream);
-
     [super dealloc];
 }
 
