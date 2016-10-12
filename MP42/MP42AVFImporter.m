@@ -86,6 +86,7 @@
         _localAsset = [[AVAsset assetWithURL:self.fileURL] retain];
 
         NSArray<AVAssetTrack *> *tracks = [_localAsset tracks];
+        CMTime globaDuration = _localAsset.duration;
 
         NSArray *availableChapter = [_localAsset availableChapterLocales];
         MP42ChapterTrack *chapters = nil;
@@ -236,8 +237,22 @@
             newTrack.format = [self formatForTrack:track];
             newTrack.trackId = track.trackID;
             newTrack.URL = self.fileURL;
-            newTrack.dataLength = track.totalSampleDataLength;
+
+            // Use the global duration if track duration is not available.
+            CMTimeRange timeRange = track.timeRange;
+            if (timeRange.duration.timescale > 0) {
+                newTrack.duration = timeRange.duration.value / timeRange.duration.timescale * 1000;
+            }
+            else {
+                newTrack.duration = globaDuration.value / globaDuration.timescale * 1000;
+            }
             newTrack.bitrate = track.estimatedDataRate;
+            if (track.totalSampleDataLength > 0) {
+                newTrack.dataLength = track.totalSampleDataLength;
+            }
+            else {
+                newTrack.dataLength = newTrack.duration * newTrack.bitrate / 1000;
+            }
 
             NSArray<AVMetadataItem *> *trackMetadata = [track metadataForFormat:AVMetadataFormatQuickTimeUserData];
 
@@ -279,11 +294,6 @@
                     }
                     newTrack.mediaCharacteristicTags = tags;
                 }
-            }
-
-            CMTimeRange timeRange = track.timeRange;
-            if (timeRange.duration.timescale > 0) {
-                newTrack.duration = timeRange.duration.value / timeRange.duration.timescale * 1000;
             }
 
             [self addTrack:newTrack];
