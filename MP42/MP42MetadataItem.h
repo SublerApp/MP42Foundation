@@ -22,6 +22,7 @@ typedef NS_ENUM(NSUInteger, MP42MetadataItemDataType) {
     MP42MetadataItemDataTypeIntegerArray    = 1 << 5,
     MP42MetadataItemDataTypeDate            = 1 << 6,
     MP42MetadataItemDataTypeImage           = 1 << 7,
+    MP42MetadataItemDataTypeData            = 1 << 8,
 };
 
 @interface MP42MetadataItem : NSObject<NSCopying, NSSecureCoding>
