@@ -385,6 +385,20 @@ static const genreType_t genreType_strings[] = {
     return result;
 }
 
+- (NSArray<MP42MetadataItem *> *)metadataItemsFilteredByIdentifiers:(NSArray<NSString *> *)identifiers
+{
+    NSMutableArray<MP42MetadataItem *> *result = [NSMutableArray array];
+    NSSet *identifiersSet = [NSSet setWithArray:identifiers];
+
+    for (MP42MetadataItem *item in self.itemsArray) {
+        if ([identifiersSet containsObject:item.identifier]) {
+            [result addObject:item];
+        }
+    }
+
+    return result;
+}
+
 - (NSArray<MP42MetadataItem *> *)metadataItemsFilteredByDataType:(MP42MetadataItemDataType)dataTypeMask
 {
     NSMutableArray<MP42MetadataItem *> *result = [NSMutableArray array];
@@ -403,7 +417,9 @@ static const genreType_t genreType_strings[] = {
     // Only one metadata item per identifier for now,
     // as we don't support multiple languages yet,
     // Allow multiple MP42MetadataKeyCoverArt items.
-    if (![item.identifier isEqualToString:MP42MetadataKeyCoverArt]) {
+    if ([item.identifier isEqualToString:MP42MetadataKeyCoverArt]) {
+        self.artworkEdited = YES;
+    } else {
         MP42MetadataItem *existingItem = self.itemsMap[item.identifier];
         if (existingItem) {
             [self.itemsArray removeObject:existingItem];
@@ -418,7 +434,13 @@ static const genreType_t genreType_strings[] = {
 {
     [self.itemsArray removeObject:item];
     [self.itemsMap removeObjectForKey:item.identifier];
-    self.edited = YES;
+
+    if ([item.identifier isEqualToString:MP42MetadataKeyCoverArt]) {
+        self.artworkEdited = YES;
+    }
+    else {
+        self.edited = YES;
+    }
 }
 
 - (NSArray<MP42MetadataItem *> *)items

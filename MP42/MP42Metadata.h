@@ -46,6 +46,14 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSArray<MP42MetadataItem *> *)metadataItemsFilteredByIdentifier:(NSString *)identifier;
 
 /*!
+	@abstract			Filters an array of AVMetadataItems according to a identifiers array.
+	@param			identifiers
+	The identifiers that must be matched for a metadata item to be copied to the output array. Items are considered a match not only when their identifiers are equal to the specified identifier, and also when their identifiers conform to the specified identifier.
+	@result			An instance of NSArray containing the metadata items of the target NSArray that match the specified identifier.
+ */
+- (NSArray<MP42MetadataItem *> *)metadataItemsFilteredByIdentifiers:(NSArray<NSString *> *)identifiers;
+
+/*!
 	@abstract			Filters an array of AVMetadataItems according a data type mask.
 	@param			dataType
 	The identifier that must be matched for a metadata item to be copied to the output array. Items are considered a match not only when their identifiers are equal to the specified identifier, and also when their identifiers conform to the specified identifier.
