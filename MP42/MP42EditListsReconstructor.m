@@ -85,6 +85,20 @@
         CMTime editEnd = CMTimeMake(_currentTime, _timescale);
         [self endEditListAtTime:editEnd empty:NO];
     }
+
+    if (_priming && _primingUsed == NO && _editsCount) {
+        if (_timescale <= 1000) {
+            CMTime convertedPriming = CMTimeConvertScale(CMTimeMake(_priming, _primingTimescale),
+                                                         _timescale, kCMTimeRoundingMethod_QuickTime);
+            _edits[0].start.value -= convertedPriming.value;
+            _edits[0].duration.value += convertedPriming.value;
+        }
+        else {
+            _edits[0].start.value -= _priming;
+            _edits[0].duration.value += _priming;
+        }
+        _primingUsed = YES;
+    }
 }
 
 - (void)done {
@@ -141,18 +155,6 @@
             CMTime trimStartTime = CMTimeMakeFromDictionary(trimStart);
             trimStartTime = CMTimeConvertScale(trimStartTime, _timescale, kCMTimeRoundingMethod_QuickTime);
             editStart.value += trimStartTime.value;
-        }
-
-        if (_priming && _primingUsed == NO) {
-            if (_timescale <= 1000) {
-                CMTime convertedPriming = CMTimeConvertScale(CMTimeMake(_priming, _primingTimescale),
-                                                             _timescale, kCMTimeRoundingMethod_QuickTime);
-                editStart.value -= convertedPriming.value;
-            }
-            else {
-                editStart.value -= _priming;
-            }
-            _primingUsed = YES;
         }
 
         [self startEditListAtTime:editStart];
