@@ -12,6 +12,9 @@
 
 - (void)dealloc {
     free(data);
+    if (attachments) {
+        CFRelease(attachments);
+    }
 }
 
 @end

@@ -902,6 +902,7 @@
                     CMItemCount timingArrayEntriesNeededOut = 0;
                     err = CMSampleBufferGetSampleTimingInfoArray(sampleBuffer, timingArrayEntries, NULL, &timingArrayEntriesNeededOut);
                     if (err) {
+                        CFRelease(sampleBuffer);
                         continue;
                     }
 
@@ -909,6 +910,8 @@
                     timingArrayEntries = timingArrayEntriesNeededOut;
                     err = CMSampleBufferGetSampleTimingInfoArray(sampleBuffer, timingArrayEntries, timingArrayOut, &timingArrayEntriesNeededOut);
                     if (err) {
+                        free(timingArrayOut);
+                        CFRelease(sampleBuffer);
                         continue;
                     }
 
@@ -917,6 +920,8 @@
                     CMItemCount sizeArrayEntriesNeededOut = 0;
                     err = CMSampleBufferGetSampleSizeArray(sampleBuffer, sizeArrayEntries, NULL, &sizeArrayEntriesNeededOut);
                     if (err) {
+                        free(timingArrayOut);
+                        CFRelease(sampleBuffer);
                         continue;
                     }
 
@@ -924,6 +929,9 @@
                     sizeArrayEntries = sizeArrayEntriesNeededOut;
                     err = CMSampleBufferGetSampleSizeArray(sampleBuffer, sizeArrayEntries, sizeArrayOut, &sizeArrayEntriesNeededOut);
                     if (err) {
+                        free(timingArrayOut);
+                        free(sizeArrayOut);
+                        CFRelease(sampleBuffer);
                         continue;
                     }
 

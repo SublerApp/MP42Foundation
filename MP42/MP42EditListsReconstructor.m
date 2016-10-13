@@ -56,6 +56,11 @@
     return self;
 }
 
+- (void)dealloc
+{
+    free(_edits);
+}
+
 - (void)addSample:(MP42SampleBuffer *)sample {
 
     if (sample->attachments) {

@@ -48,6 +48,8 @@
                                                              drc:settings.drc
                                                      magicCookie:magicCookie error:error];
 
+        free(channelLayout);
+
         if (!_decoder) {
             return nil;
         }
