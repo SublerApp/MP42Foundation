@@ -1047,7 +1047,6 @@ static const genreType_t genreType_strings[] = {
     MP4TagsSetTVNetwork        (tags, self.itemsMap[MP42MetadataKeyTVNetwork].stringValue.UTF8String);
     MP4TagsSetTVEpisodeID      (tags, self.itemsMap[MP42MetadataKeyTVEpisodeID].stringValue.UTF8String);
 
-    // FIXME
     if (self.itemsMap[MP42MetadataKeyTVSeason]) {
         const uint32_t value = self.itemsMap[MP42MetadataKeyTVSeason].numberValue.integerValue;
         MP4TagsSetTVSeason(tags, &value);
@@ -1407,18 +1406,77 @@ static const genreType_t genreType_strings[] = {
 
 - (id)initWithCoder:(NSCoder *)decoder
 {
-    self = [super init];
+    self = [self init];
 
     NSInteger version = [decoder decodeIntForKey:@"MP42TagEncodeVersion"];
 
+    // Subler 1.1.8 and previous sets
     if (version < 4) {
+        NSDictionary<NSString *, id> *tagsDict = [decoder decodeObjectOfClass:[NSMutableDictionary class] forKey:@"MP42TagsDict"];
 
+        [tagsDict enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
+            MP42MetadataItem *coverArtItem = [MP42MetadataItem metadataItemWithIdentifier:key value:obj
+                                                                                 dataType:MP42MetadataItemDataTypeUnspecified extendedLanguageTag:nil];
+            [self addMetadataItem:coverArtItem];
+        }];
+
+        // Subler 0.19 and previous sets
+        if (version < 2) {
+            NSImage *image = [decoder decodeObjectOfClass:[NSImage class] forKey:@"MP42Artwork"];
+            if (image) {
+                MP42Image *artwork = [[MP42Image alloc] initWithImage:image];
+                MP42MetadataItem *coverArtItem = [MP42MetadataItem metadataItemWithIdentifier:MP42MetadataKeyCoverArt value:artwork
+                                                                                          dataType:MP42MetadataItemDataTypeImage extendedLanguageTag:nil];
+                [self addMetadataItem:coverArtItem];
+            }
+        }
+        else {
+            NSArray *artworks = [decoder decodeObjectOfClass:[NSArray class] forKey:@"MP42Artwork"];
+            for (MP42Image *artwork in artworks) {
+                MP42MetadataItem *coverArtItem = [MP42MetadataItem metadataItemWithIdentifier:MP42MetadataKeyCoverArt value:artwork
+                                                                                     dataType:MP42MetadataItemDataTypeImage extendedLanguageTag:nil];
+                [self addMetadataItem:coverArtItem];
+            }
+        }
+
+        int mediaKind = [decoder decodeIntForKey:@"MP42MediaKind"];
+        MP42MetadataItem *mediaKindItem = [MP42MetadataItem metadataItemWithIdentifier:MP42MetadataKeyMediaKind value:@(mediaKind)
+                                                                              dataType:MP42MetadataItemDataTypeInteger extendedLanguageTag:nil];
+        [self addMetadataItem:mediaKindItem];
+
+        int contentRating = [decoder decodeIntForKey:@"MP42ContentRating"];
+        if (contentRating) {
+            MP42MetadataItem *contentRatingItem = [MP42MetadataItem metadataItemWithIdentifier:MP42MetadataKeyContentRating value:@(contentRating)
+                                                                                      dataType:MP42MetadataItemDataTypeInteger extendedLanguageTag:nil];
+            [self addMetadataItem:contentRatingItem];
+        }
+
+        int hdVideo = [decoder decodeIntForKey:@"MP42HDVideo"];
+        if (hdVideo) {
+            MP42MetadataItem *hdVideoItem = [MP42MetadataItem metadataItemWithIdentifier:MP42MetadataKeyHDVideo value:@(hdVideo)
+                                                                                    dataType:MP42MetadataItemDataTypeInteger extendedLanguageTag:nil];
+            [self addMetadataItem:hdVideoItem];
+        }
+
+        int gapless = [decoder decodeIntForKey:@"MP42Gapless"];
+        if (gapless) {
+            MP42MetadataItem *gaplessItem = [MP42MetadataItem metadataItemWithIdentifier:MP42MetadataKeyGapless value:@(gapless)
+                                                                                dataType:MP42MetadataItemDataTypeBool extendedLanguageTag:nil];
+            [self addMetadataItem:gaplessItem];
+        }
+
+        int podcast = [decoder decodeIntForKey:@"MP42Podcast"];
+        if (podcast) {
+            MP42MetadataItem *podcastItem = [MP42MetadataItem metadataItemWithIdentifier:MP42MetadataKeyPodcast value:@(podcast)
+                                                                            dataType:MP42MetadataItemDataTypeBool extendedLanguageTag:nil];
+            [self addMetadataItem:podcastItem];
+        }
     }
     else {
-        _presetName = [decoder decodeObjectOfClass:[NSString class] forKey:@"MP42SetName"];
         _itemsArray = [decoder decodeObjectOfClass:[NSMutableDictionary class] forKey:@"MP42Items"];
     }
 
+    _presetName = [decoder decodeObjectOfClass:[NSString class] forKey:@"MP42SetName"];
     _artworkEdited = [decoder decodeBoolForKey:@"MP42ArtworkEdited"];
     _edited = [decoder decodeBoolForKey:@"MP42Edited"];
 
