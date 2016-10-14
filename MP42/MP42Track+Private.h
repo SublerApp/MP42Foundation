@@ -8,6 +8,8 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+@class MP42FileImporter;
+
 @interface MP42Track (Private)
 
 - (instancetype)initWithSourceURL:(NSURL *)URL trackID:(NSInteger)trackID fileHandle:(MP42FileHandle)fileHandle;
@@ -30,6 +32,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property(nonatomic, readwrite) BOOL muxed;
 
 @property(nonatomic, readonly) NSMutableDictionary<NSString *, NSNumber *> *updatedProperty;
+
+@property (nonatomic, readwrite) MP42FileImporter *importer;
 
 - (void *)copy_muxer_helper;
 - (void *)create_muxer_helper;

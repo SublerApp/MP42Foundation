@@ -35,7 +35,7 @@
 		A90801191D4B83A3002B6950 /* MP42AudioUnit.h in Headers */ = {isa = PBXBuildFile; fileRef = A90801101D4B83A3002B6950 /* MP42AudioUnit.h */; };
 		A908011A1D4B83A3002B6950 /* MP42AudioUnit.h in Headers */ = {isa = PBXBuildFile; fileRef = A90801101D4B83A3002B6950 /* MP42AudioUnit.h */; };
 		A910B5A418394E900064028F /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9B9C1F0182391DF00416A4E /* Cocoa.framework */; };
-		A910B5C618394EB20064028F /* MP42File.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2311823923100416A4E /* MP42File.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		A910B5C618394EB20064028F /* MP42File.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2311823923100416A4E /* MP42File.m */; };
 		A910B5C818394EB20064028F /* MP42Track.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2511823923100416A4E /* MP42Track.m */; };
 		A910B5CA18394EB20064028F /* MP42VideoTrack.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2551823923100416A4E /* MP42VideoTrack.m */; };
 		A910B5CC18394EB20064028F /* MP42AudioTrack.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2221823923100416A4E /* MP42AudioTrack.m */; };
@@ -159,7 +159,7 @@
 		A9B9C2791823923200416A4E /* MP42Fifo.h in Headers */ = {isa = PBXBuildFile; fileRef = A9B9C22E1823923100416A4E /* MP42Fifo.h */; };
 		A9B9C27A1823923200416A4E /* MP42Fifo.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C22F1823923100416A4E /* MP42Fifo.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		A9B9C27B1823923200416A4E /* MP42File.h in Headers */ = {isa = PBXBuildFile; fileRef = A9B9C2301823923100416A4E /* MP42File.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		A9B9C27C1823923200416A4E /* MP42File.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2311823923100416A4E /* MP42File.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		A9B9C27C1823923200416A4E /* MP42File.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2311823923100416A4E /* MP42File.m */; };
 		A9B9C27D1823923200416A4E /* MP42FileImporter.h in Headers */ = {isa = PBXBuildFile; fileRef = A9B9C2321823923100416A4E /* MP42FileImporter.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A9B9C27E1823923200416A4E /* MP42FileImporter.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2331823923100416A4E /* MP42FileImporter.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		A9B9C27F1823923200416A4E /* MP42H264Importer.h in Headers */ = {isa = PBXBuildFile; fileRef = A9B9C2341823923100416A4E /* MP42H264Importer.h */; };
@@ -1043,25 +1043,24 @@
 			buildActionMask = 2147483647;
 			files = (
 				A91711E8187D547D00459495 /* MP42PreviewGenerator.m in Sources */,
+				A9B9C27C1823923200416A4E /* MP42File.m in Sources */,
 				A9B9C29C1823923200416A4E /* MP42Track.m in Sources */,
 				A9B9C2A01823923200416A4E /* MP42VideoTrack.m in Sources */,
 				A90801171D4B83A3002B6950 /* MP42AudioEncoder.m in Sources */,
 				A9B9C2981823923200416A4E /* MP42SubtitleTrack.m in Sources */,
+				A9022A961D6F3FD9005F0920 /* MP42MetadataItem.m in Sources */,
+				A9B9C2D0182396A100416A4E /* MP42Ratings.m in Sources */,
+				A941A7B61DA7B08600FB2A7C /* MP42MetadataFormat.m in Sources */,
+				A9B9C2AB1823923200416A4E /* mbs.cpp in Sources */,
+				A9B9C2AE1823923200416A4E /* sfifo.c in Sources */,
 				A9B9C27E1823923200416A4E /* MP42FileImporter.m in Sources */,
 				A9B9C27A1823923200416A4E /* MP42Fifo.m in Sources */,
 				A9DFBDA3195FF5BA00410060 /* MP42Heap.m in Sources */,
-				A9B9C2801823923200416A4E /* MP42H264Importer.mm in Sources */,
-				A9022A961D6F3FD9005F0920 /* MP42MetadataItem.m in Sources */,
-				A9B9C2D0182396A100416A4E /* MP42Ratings.m in Sources */,
-				A9B9C2AB1823923200416A4E /* mbs.cpp in Sources */,
-				A9B9C2AE1823923200416A4E /* sfifo.c in Sources */,
+				A9059DCC1D870B9C000D1B9A /* MP42ConversionSettings.m in Sources */,
 				A9B9C26B1823923200416A4E /* MP42AudioConverter.m in Sources */,
 				A9B9C2711823923200416A4E /* MP42BitmapSubConverter.m in Sources */,
-				A941A7B61DA7B08600FB2A7C /* MP42MetadataFormat.m in Sources */,
-				A9059DCC1D870B9C000D1B9A /* MP42ConversionSettings.m in Sources */,
 				A9B9C28E1823923200416A4E /* MP42Muxer.m in Sources */,
 				A991714C195AAAEF005AD68E /* MP42Track+Muxer.m in Sources */,
-				A9B9C27C1823923200416A4E /* MP42File.m in Sources */,
 				A9B9C2A21823923200416A4E /* MP42VobSubImporter.m in Sources */,
 				A9B9C2961823923200416A4E /* MP42SrtImporter.m in Sources */,
 				A9B9C2691823923200416A4E /* MP42AC3Importer.m in Sources */,
@@ -1070,6 +1069,7 @@
 				A9B9C28C1823923200416A4E /* MP42Mp4Importer.m in Sources */,
 				A9B9C28A1823923200416A4E /* MP42MkvImporter.m in Sources */,
 				A9B9C2731823923200416A4E /* MP42CCImporter.m in Sources */,
+				A9B9C2801823923200416A4E /* MP42H264Importer.mm in Sources */,
 				A9B9C2771823923200416A4E /* MP42ClosedCaptionTrack.m in Sources */,
 				A9B9C2821823923200416A4E /* MP42HtmlParser.m in Sources */,
 				A9B9C2861823923200416A4E /* MP42MediaFormat.m in Sources */,

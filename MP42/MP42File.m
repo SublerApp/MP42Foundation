@@ -9,10 +9,8 @@
 #import "MP42File.h"
 #import "MP42FileImporter.h"
 #import "MP42Muxer.h"
-#import "MP42SubUtilities.h"
 #import "MP42PrivateUtilities.h"
 #import "MP42Languages.h"
-#import "MP42Track+Muxer.h"
 #import "MP42Track+Private.h"
 #import "MP42PreviewGenerator.h"
 #import "MP42Metadata+Private.h"
@@ -75,44 +73,24 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 }
 
 @interface MP42File () <MP42MuxerDelegate> {
-@private
-    NSURL           *_fileURL;
-
-    BOOL        _cancelled;
-
-    MP42FileProgressHandler _progressHandler;
-
     NSMutableArray<__kindof MP42Track *>  *_tracks;
     NSMutableArray<MP42Track *>  *_tracksToBeDeleted;
-    MP42Metadata    *_metadata;
-
-    BOOL        _hasFileRepresentation;
 }
 
 @property(nonatomic, readwrite)  MP42FileHandle fileHandle;
-@property(nonatomic, readwrite, retain) NSURL *URL;
+@property(nonatomic, readwrite) NSURL *URL;
 
 @property(nonatomic, readonly) NSMutableArray<__kindof MP42Track *> *itracks;
 @property(nonatomic, readonly) NSMutableDictionary<NSString *, MP42FileImporter *> *importers;
 
 @property(nonatomic, readwrite) MP42Status status;
-@property(nonatomic, retain) MP42Muxer *muxer;
+@property(nonatomic) MP42Muxer *muxer;
 
 @end
 
 @implementation MP42File
 
-@synthesize fileHandle = _fileHandle;
-@synthesize URL = _fileURL;
-
 @synthesize itracks = _tracks;
-@synthesize importers = _importers;
-@synthesize metadata = _metadata;
-@synthesize hasFileRepresentation = _hasFileRepresentation;
-
-@synthesize status = _status;
-@synthesize progressHandler = _progressHandler;
-@synthesize muxer = _muxer;
 
 + (void)initialize {
     if (self == [MP42File class]) {
@@ -123,7 +101,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 
 + (void)setGlobalLogger:(id<MP42Logging>)logger
 {
-    _logger = [logger retain];
+    _logger = logger;
 }
 
 - (BOOL)startReading {
@@ -178,11 +156,10 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 - (instancetype)initWithURL:(NSURL *)URL error:(NSError * _Nullable *)error {
     self = [super init];
     if (self) {
-        _fileURL = [[URL fileReferenceURL] retain];
+        _URL = [URL fileReferenceURL];
 
         // Open the file for reading
         if (![self startReading]) {
-            [self release];
 
             if (error) {
                 *error = MP42Error(@"The movie could not be opened.", @"The file is not a mp4 file.", 100);
@@ -198,7 +175,6 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
         if (brand != NULL) {
             if (!strcmp(brand, "qt  ")) {
                 [self stopReading];
-                [self release];
 
                 if (error) {
                     *error = MP42Error(@"Invalid File Type.", @"MOV File cannot be edited.", 100);
@@ -212,7 +188,6 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
         // Refuse to open fragmented mp4
         if (MP4HaveAtom(_fileHandle, "moof")) {
             [self stopReading];
-            [self release];
 
             if (error) {
                 *error = MP42Error(@"Invalid File Type.", @"Fragmented MP4 cannot be edited.", 100);
@@ -253,9 +228,8 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
                 track = [MP42Track alloc];
             }
 
-            track = [track initWithSourceURL:_fileURL trackID:trackId fileHandle:_fileHandle];
+            track = [track initWithSourceURL:_URL trackID:trackId fileHandle:_fileHandle];
             [_tracks addObject:track];
-            [track release];
         }
 
         // Restore the tracks references in the wrapped tracks
@@ -337,11 +311,10 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
             NSData *frameData = [[NSData alloc] initWithBytes:pBytes length:numBytes];
             MP42Image *frame = [[MP42Image alloc] initWithData:frameData type:MP42_ART_JPEG];
 
-            if ([[self chapters].chapters count] >= currentSampleNum)
+            if ([[self chapters].chapters count] >= currentSampleNum) {
                 [[self chapters] chapterAtIndex:currentSampleNum - 1].image = frame;
+            }
 
-            [frameData release];
-            [frame release];
             free(pBytes);
         }
     }
@@ -370,11 +343,13 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 - (MP42ChapterTrack *)chapters {
     MP42ChapterTrack *chapterTrack = nil;
 
-    for (MP42Track *track in self.itracks)
-        if ([track isMemberOfClass:[MP42ChapterTrack class]])
+    for (MP42Track *track in self.itracks) {
+        if ([track isMemberOfClass:[MP42ChapterTrack class]]) {
             chapterTrack = (MP42ChapterTrack *)track;
+        }
+    }
 
-    return [[chapterTrack retain] autorelease];
+    return chapterTrack;
 }
 
 - (NSArray<MP42Track *> *)tracks {
@@ -431,11 +406,11 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
         NSAssert(track.conversionSettings, @"Missing conversion settings");
     }
 
-    if (track.muxer_helper->importer && track.URL) {
+    if (track.importer && track.URL) {
         if (self.importers[track.URL.path]) {
-            track.muxer_helper->importer = self.importers[track.URL.path];
+            track.importer = self.importers[track.URL.path];
         } else {
-            self.importers[track.URL.path] = track.muxer_helper->importer;
+            self.importers[track.URL.path] = track.importer;
         }
     }
 
@@ -490,14 +465,13 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 
 - (void)moveTrackAtIndex:(NSUInteger)index toIndex:(NSUInteger)newIndex {
     NSAssert(self.status != MP42StatusWriting, @"Unsupported operation: trying to move tracks while the file is open for writing");
-    id track = [[self.itracks objectAtIndex:index] retain];
+    id track = [self.itracks objectAtIndex:index];
 
     [self.itracks removeObjectAtIndex:index];
     if (newIndex > [self.itracks count] || newIndex > index) {
         newIndex--;
     }
     [self.itracks insertObject:track atIndex:newIndex];
-    [track release];
 }
 
 - (void)organizeAlternateGroupsForMediaType:(MP42MediaType)mediaType withGroupID:(NSUInteger)groupID {
@@ -608,7 +582,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
             dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);
 
             // Additional check to see if we can open the optimized file
-            if (noErr && [[[MP42File alloc] initWithURL:tempURL error:NULL] autorelease]) {
+            if (noErr && [[MP42File alloc] initWithURL:tempURL error:NULL]) {
                 // Replace the original file
                 NSURL *result = nil;
                 noErr = [fileManager replaceItemAtURL:self.URL
@@ -628,16 +602,12 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
                 [fileManager removeItemAtURL:tempURL error:NULL];
             }
         }
-
-        dispatch_release(sem);
-        [fileManager release];
     }
 
     return noErr;
 }
 
 - (void)cancel {
-    _cancelled = YES;
     [self.muxer cancel];
 }
 
@@ -682,7 +652,6 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
             dispatch_async(dispatch_get_global_queue(0, 0), ^{
                 noErr = [fileManager copyItemAtURL:self.URL toURL:url error:outError];
                 if (!noErr && *outError) {
-                    [*outError retain];
                 }
                 OSAtomicIncrement32Barrier(&done);
                 dispatch_semaphore_signal(sem);
@@ -694,8 +663,6 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
                 usleep(450000);
             }
             dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);
-            dispatch_release(sem);
-            [fileManager release];
         }
 
         if (noErr) {
@@ -704,7 +671,6 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
         }
         else {
             success = NO;
-            [*outError autorelease];
         }
     }
     else {
@@ -782,25 +748,25 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 
     // Init the muxer and prepare the work
     NSMutableArray<MP42Track *> *unsupportedTracks = [[NSMutableArray alloc] init];
-    self.muxer = [[[MP42Muxer alloc] initWithFileHandle:self.fileHandle delegate:self logger:_logger] autorelease];
+    self.muxer = [[MP42Muxer alloc] initWithFileHandle:self.fileHandle delegate:self logger:_logger];
 
     for (MP42Track *track in self.itracks) {
         if (!track.muxed) {
             // Reopen the file importer is they are not already open
             // this happens when the object was unarchived from a file.
             if (![track isMemberOfClass:[MP42ChapterTrack class]]) {
-                if (!track.muxer_helper->importer && track.URL) {
+                if (!track.importer && track.URL) {
                     MP42FileImporter *fileImporter = [self.importers valueForKey:track.URL.path];
 
                     if (!fileImporter) {
-                        fileImporter = [[[MP42FileImporter alloc] initWithURL:track.URL error:outError] autorelease];
+                        fileImporter = [[MP42FileImporter alloc] initWithURL:track.URL error:outError];
                         if (fileImporter) {
                             self.importers[track.URL.path] = fileImporter;
                         }
                     }
 
                     if (fileImporter) {
-                        track.muxer_helper->importer = fileImporter;
+                        track.importer = fileImporter;
                     } else {
                         if (outError) {
                             NSError *error = MP42Error(@"Missing sources.", @"One or more sources files are missing.", 200);
@@ -813,7 +779,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
                 }
 
                 // Add the track to the muxer
-                if (track.muxer_helper->importer) {
+                if (track.importer) {
                     if ([self.muxer canAddTrack:track]) {
                         [self.muxer addTrack:track];
                     } else {
@@ -842,7 +808,6 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
     // to update them.
     NSMutableArray<MP42Track *> *tracksToUpdate = [self.itracks mutableCopy];
     [tracksToUpdate removeObjectsInArray:unsupportedTracks];
-    [unsupportedTracks release];
 
     [self.importers removeAllObjects];
 
@@ -857,8 +822,6 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
             }
         }
     }
-
-    [tracksToUpdate release];
 
     // Update metadata
     [self.metadata writeMetadataWithFileHandle:self.fileHandle];
@@ -943,7 +906,6 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
             [NSGraphicsContext restoreGraphicsState];
 
             imageData = [bitmap representationUsingType:NSJPEGFileType properties:@{}];
-            [bitmap release];
         }
 
         MP4WriteSample(self.fileHandle,
@@ -1034,7 +996,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
         NSArray<MP42TextSample *> *chapters = chapterTrack.chapters;
         [images enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
             MP42TextSample *chapter = chapters[idx];
-            chapter.image = [[[MP42Image alloc] initWithImage:obj] autorelease];
+            chapter.image = [[MP42Image alloc] initWithImage:obj];
         }];
 
         [self muxChaptersPreviewTrackId:jpegTrack withChapterTrack:chapterTrack andRefTrack:refTrack];
@@ -1087,9 +1049,6 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
             }
         }
     }
-
-    [availableFallbackTracks release];
-    [needFallbackTracks release];
 }
 
 #pragma mark - NSSecureCoding
@@ -1141,36 +1100,24 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
     if (bookmarkData) {
         BOOL bookmarkDataIsStale;
         NSError *error;
-        _fileURL = [[NSURL
+        _URL = [NSURL
                     URLByResolvingBookmarkData:bookmarkData
                     options:NSURLBookmarkResolutionWithSecurityScope
                     relativeToURL:nil
                     bookmarkDataIsStale:&bookmarkDataIsStale
-                    error:&error] retain];
+                    error:&error];
     } else {
-        _fileURL = [[decoder decodeObjectOfClass:[NSURL class] forKey:@"fileUrl"] retain];
+        _URL = [decoder decodeObjectOfClass:[NSURL class] forKey:@"fileUrl"];
     }
 
-    _tracksToBeDeleted = [[decoder decodeObjectOfClass:[NSMutableArray class] forKey:@"tracksToBeDeleted"] retain];
+    _tracksToBeDeleted = [decoder decodeObjectOfClass:[NSMutableArray class] forKey:@"tracksToBeDeleted"];
 
     _hasFileRepresentation = [decoder decodeBoolForKey:@"hasFileRepresentation"];
 
-    _tracks = [[decoder decodeObjectOfClass:[NSMutableArray class] forKey:@"tracks"] retain];
-    _metadata = [[decoder decodeObjectOfClass:[MP42Metadata class] forKey:@"metadata"] retain];
+    _tracks = [decoder decodeObjectOfClass:[NSMutableArray class] forKey:@"tracks"];
+    _metadata = [decoder decodeObjectOfClass:[MP42Metadata class] forKey:@"metadata"];
 
     return self;
-}
-
-- (void)dealloc {
-    [_progressHandler release];
-    [_fileURL release];
-    [_tracks release];
-    [_importers release];
-    [_tracksToBeDeleted release];
-    [_metadata release];
-    [_muxer release];
-
-    [super dealloc];
 }
 
 @end

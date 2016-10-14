@@ -13,6 +13,16 @@
 
 @dynamic muxer_helper;
 
+- (MP42FileImporter *)importer
+{
+    return self.muxer_helper->importer;
+}
+
+- (void)setImporter:(MP42FileImporter *)importer
+{
+    self.muxer_helper->importer = importer;
+}
+
 - (void *)copy_muxer_helper
 {
     muxer_helper *copy = calloc(1, sizeof(muxer_helper));
