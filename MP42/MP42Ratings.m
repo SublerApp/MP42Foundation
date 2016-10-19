@@ -9,21 +9,22 @@
 #import "MP42Ratings.h"
 
 @implementation MP42Ratings {
-@private
     NSMutableArray *ratingsDictionary;
     NSMutableArray<NSString *> *ratings;
     NSMutableArray<NSString *> *iTunesCodes;
 }
 
-+ (MP42Ratings *) defaultManager {
++ (MP42Ratings *)defaultManager {
     static dispatch_once_t sharedRatingsPred;
     static MP42Ratings *sharedRatingsManager = nil;
     dispatch_once(&sharedRatingsPred, ^{ sharedRatingsManager = [[self alloc] init]; });
     return sharedRatingsManager;
 }
 
-- (instancetype) init {
-	if (self = [super init]) {
+- (instancetype)init
+{
+    self = [super init];
+	if (self) {
 		NSString *ratingsJSON = [[NSBundle bundleForClass:[MP42Ratings class]] pathForResource:@"Ratings" ofType:@"json"];
         if (!ratingsJSON) {
             return nil;
@@ -42,10 +43,10 @@
 	return self;
 }
 
-- (NSArray *) ratingsCountries {
+- (NSArray *)ratingsCountries {
 	NSMutableArray *countries = [[NSMutableArray alloc] init];
 	for (NSDictionary *countryRatings in ratingsDictionary) {
-		NSString *countryName = [countryRatings valueForKey:@"country"];
+		NSString *countryName = countryRatings[@"country"];
 		if ([countryName isEqualToString:@"Unknown"]) {
 			[countries addObject:@"All countries"];
 		} else {
@@ -61,11 +62,11 @@
     iTunesCodes = [[NSMutableArray alloc] init];
 
     // if a specific country is picked, include the USA ratings at the end
-    NSString *selectedCountry = [[NSUserDefaults standardUserDefaults] valueForKey:@"SBRatingsCountry"];
-    NSDictionary *usaRatings = nil;
+    NSString *selectedCountry = [[NSUserDefaults standardUserDefaults] stringForKey:@"SBRatingsCountry"];
+    NSDictionary<NSString *, NSDictionary *> *usaRatings = nil;
 
     for (NSDictionary *countryRatings in ratingsDictionary) {
-        NSString *countryName = [countryRatings valueForKey:@"country"];
+        NSString *countryName = countryRatings[@"country"];
 
         if ([countryName isEqualToString:@"USA"]) {
             usaRatings = countryRatings;
@@ -78,35 +79,31 @@
 
         }
 
-        for (NSDictionary *rating in [countryRatings valueForKey:@"ratings"]) {
-            [ratings addObject:[NSString stringWithFormat:@"%@ %@: %@", countryName, [rating valueForKey:@"media"], [rating valueForKey:@"description"]]];
-            [iTunesCodes addObject:[NSString stringWithFormat:@"%@|%@|%@|", [rating valueForKey:@"prefix"], [rating valueForKey:@"itunes-code"], [rating valueForKey:@"itunes-value"]]];
+        for (NSDictionary *rating in countryRatings[@"ratings"]) {
+            [ratings addObject:[NSString stringWithFormat:@"%@ %@: %@", countryName, rating[@"media"], rating[@"description"]]];
+            [iTunesCodes addObject:[NSString stringWithFormat:@"%@|%@|%@|", rating[@"prefix"], rating[@"itunes-code"], rating[@"itunes-value"]]];
         }
     }
 
     if (![selectedCountry isEqualToString:@"All countries"] && ![selectedCountry isEqualToString:@"USA"]) {
         if (usaRatings) {
-            for (NSDictionary *rating in [usaRatings valueForKey:@"ratings"]) {
-                [ratings addObject:[NSString stringWithFormat:@"%@ %@: %@", @"USA", [rating valueForKey:@"media"], [rating valueForKey:@"description"]]];
-                [iTunesCodes addObject:[NSString stringWithFormat:@"%@|%@|%@|", [rating valueForKey:@"prefix"], [rating valueForKey:@"itunes-code"], [rating valueForKey:@"itunes-value"]]];
+            for (NSDictionary *rating in usaRatings[@"ratings"]) {
+                [ratings addObject:[NSString stringWithFormat:@"%@ %@: %@", @"USA", rating[@"media"], rating[@"description"]]];
+                [iTunesCodes addObject:[NSString stringWithFormat:@"%@|%@|%@|", rating[@"prefix"], rating[@"itunes-code"], rating[@"itunes-value"]]];
             }
         }
     }
 }
 
-- (NSArray<NSString *> *) ratings {
+- (NSArray<NSString *> *)ratings {
 	return [NSArray arrayWithArray:ratings];
 }
 
-- (NSArray<NSString *> *) iTunesCodes {
+- (NSArray<NSString *> *)iTunesCodes {
     return [NSArray arrayWithArray:iTunesCodes];
 }
 
-- (NSUInteger) unknownIndex {
-	return iTunesCodes.count - 1;
-}
-
-- (NSUInteger) ratingIndexForiTunesCode:(NSString *)aiTunesCode {
+- (NSUInteger)ratingIndexForiTunesCode:(NSString *)aiTunesCode {
     NSUInteger i = 0;
 
     for (NSString *code in iTunesCodes) {
@@ -116,14 +113,14 @@
         i++;
     }
 
-	return [self unknownIndex];
+	return -1;
 }
 
 - (NSUInteger) ratingIndexForiTunesCountry:(NSString *)aCountry media:(NSString *)aMedia ratingString:(NSString *)aRatingString {
 	NSString *target1 = [[NSString stringWithFormat:@"%@ %@: %@", aCountry, aMedia, aRatingString] lowercaseString];
 	NSString *target2 = [[NSString stringWithFormat:@"%@ %@: %@", aCountry, @"movie & TV", aRatingString] lowercaseString];
 	for (NSUInteger i = 0; i < ratings.count; i++) {
-		if ([[[ratings objectAtIndex:i] lowercaseString] isEqualToString:target1] || [[[ratings objectAtIndex:i] lowercaseString] isEqualToString:target2]) {
+		if ([[ratings[i] lowercaseString] isEqualToString:target1] || [[ratings[i] lowercaseString] isEqualToString:target2]) {
 			return i;
 		}
 	}
@@ -133,16 +130,16 @@
     }
 
 	for (NSDictionary *countryRatings in ratingsDictionary) {
-		if ([[countryRatings valueForKey:@"country"] isEqualToString:aCountry]) {
-			for (NSDictionary *rating in [countryRatings valueForKey:@"ratings"]) {
-				if ([[rating valueForKey:@"itunes-value"] isEqualToString:@"???"]) {
-					return [self ratingIndexForiTunesCode:[NSString stringWithFormat:@"%@|%@|%@|", [rating valueForKey:@"prefix"], [rating valueForKey:@"itunes-code"], [rating valueForKey:@"itunes-value"]]];
+		if ([countryRatings[@"country"] isEqualToString:aCountry]) {
+			for (NSDictionary *rating in countryRatings[@"ratings"]) {
+				if ([rating[@"itunes-value"] isEqualToString:@"???"]) {
+					return [self ratingIndexForiTunesCode:[NSString stringWithFormat:@"%@|%@|%@|", rating[@"prefix"], rating[@"itunes-code"], rating[@"itunes-value"]]];
 				}
 			}
 		}
 	}
 
-	return [self unknownIndex];
+	return -1;
 }
 
 - (NSString *) ratingStringForiTunesCountry:(NSString *)aCountry media:(NSString *)aMedia ratingString:(NSString *)aRatingString {

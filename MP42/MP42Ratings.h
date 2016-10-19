@@ -12,19 +12,19 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MP42Ratings : NSObject
 
-@property (atomic, readonly) NSArray<NSString *> *ratings;
-@property (atomic, readonly) NSArray<NSString *> *iTunesCodes;
+@property (class, readonly) MP42Ratings *defaultManager;
 
-+ (MP42Ratings *)defaultManager;
+@property (nonatomic, readonly) NSArray<NSString *> *ratings;
+@property (nonatomic, readonly) NSArray<NSString *> *iTunesCodes;
+
+@property (nonatomic, readonly) NSArray<NSString *> *ratingsCountries;
 
 - (void)updateRatingsCountry;
-- (NSArray<NSString *> *) ratingsCountries;
 
-- (NSUInteger) unknownIndex;
-- (NSUInteger) ratingIndexForiTunesCode:(NSString *)aiTunesCode;
-- (NSUInteger) ratingIndexForiTunesCountry:(NSString *)aCountry media:(NSString *)aMedia ratingString:(NSString *)aRatingString;
+- (NSUInteger)ratingIndexForiTunesCode:(NSString *)aiTunesCode;
+- (NSUInteger)ratingIndexForiTunesCountry:(NSString *)aCountry media:(NSString *)aMedia ratingString:(NSString *)aRatingString;
 
-- (NSString *) ratingStringForiTunesCountry:(NSString *)aCountry media:(NSString *)aMedia ratingString:(NSString *)aRatingString;
+- (NSString *)ratingStringForiTunesCountry:(NSString *)aCountry media:(NSString *)aMedia ratingString:(NSString *)aRatingString;
 
 @end
 
