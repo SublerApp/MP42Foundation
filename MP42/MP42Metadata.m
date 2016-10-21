@@ -535,6 +535,10 @@ static const genreType_t genreType_strings[] = {
 #pragma mark - Mutators
 
 - (void)mergeMetadata:(MP42Metadata *)metadata {
+    NSArray<MP42MetadataItem *> *coverArts = [self metadataItemsFilteredByIdentifier:MP42MetadataKeyCoverArt];
+    for (MP42MetadataItem *item in coverArts) {
+        [self removeMetadataItem:item];
+    }
     for (MP42MetadataItem *item in metadata.items) {
         [self addMetadataItem:item];
     }
