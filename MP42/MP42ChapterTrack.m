@@ -102,7 +102,8 @@
 }
 
 - (NSString *)defaultName {
-    return NSLocalizedString(@"Chapter Track", nil);
+    NSBundle *bundle = [NSBundle bundleForClass:[MP42ChapterTrack class]];
+    return NSLocalizedStringFromTableInBundle(@"Chapter Track", @"Localizable", bundle, nil);
 }
 
 - (NSUInteger)addChapter:(MP42TextSample *)chapter

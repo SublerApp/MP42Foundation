@@ -7,6 +7,119 @@
 //
 
 #import "MP42MetadataFormat.h"
+#import "MP42Metadata.h"
+
+static NSDictionary<NSString *, NSString *> *localizedStrings;
+
+NSString *localizedMetadataKeyName(NSString  *key)
+{
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        NSBundle *bundle = [NSBundle bundleForClass:[MP42Metadata class]];
+
+        localizedStrings = @{MP42MetadataKeyName: NSLocalizedStringFromTableInBundle(@"Name", @"Localizable", bundle, nil),
+                             MP42MetadataKeyTrackSubTitle: NSLocalizedStringFromTableInBundle(@"Track Sub-Title", @"Localizable", bundle, nil),
+
+                             MP42MetadataKeyArtist: NSLocalizedStringFromTableInBundle(@"Album", @"Localizable", bundle, nil),
+                             MP42MetadataKeyAlbumArtist: NSLocalizedStringFromTableInBundle(@"Album Artist", @"Localizable", bundle, nil),
+                             MP42MetadataKeyAlbum: NSLocalizedStringFromTableInBundle(@"Artist", @"Localizable", bundle, nil),
+
+                             MP42MetadataKeyGrouping: NSLocalizedStringFromTableInBundle(@"Grouping", @"Localizable", bundle, nil),
+
+                             MP42MetadataKeyMediaKind: NSLocalizedStringFromTableInBundle(@"Media Kind", @"Localizable", bundle, nil),
+                             MP42MetadataKeyHDVideo: NSLocalizedStringFromTableInBundle(@"HD Video", @"Localizable", bundle, nil),
+                             MP42MetadataKeyGapless: NSLocalizedStringFromTableInBundle(@"Gapless", @"Localizable", bundle, nil),
+                             MP42MetadataKeyPodcast: NSLocalizedStringFromTableInBundle(@"Podcast", @"Localizable", bundle, nil),
+
+                             MP42MetadataKeyUserComment: NSLocalizedStringFromTableInBundle(@"Comments", @"Localizable", bundle, nil),
+                             MP42MetadataKeyUserGenre: NSLocalizedStringFromTableInBundle(@"Genre", @"Localizable", bundle, nil),
+                             MP42MetadataKeyReleaseDate: NSLocalizedStringFromTableInBundle(@"Release Date", @"Localizable", bundle, nil),
+
+                             MP42MetadataKeyTrackNumber: NSLocalizedStringFromTableInBundle(@"Track #", @"Localizable", bundle, nil),
+                             MP42MetadataKeyDiscNumber: NSLocalizedStringFromTableInBundle(@"Disk #", @"Localizable", bundle, nil),
+                             MP42MetadataKeyBeatsPerMin: NSLocalizedStringFromTableInBundle(@"Tempo", @"Localizable", bundle, nil),
+
+                             MP42MetadataKeyTVShow: NSLocalizedStringFromTableInBundle(@"TV Show", @"Localizable", bundle, nil),
+                             MP42MetadataKeyTVEpisodeNumber: NSLocalizedStringFromTableInBundle(@"TV Episode #", @"Localizable", bundle, nil),
+                             MP42MetadataKeyTVNetwork: NSLocalizedStringFromTableInBundle(@"TV Network", @"Localizable", bundle, nil),
+                             MP42MetadataKeyTVEpisodeID: NSLocalizedStringFromTableInBundle(@"TV Episode ID", @"Localizable", bundle, nil),
+                             MP42MetadataKeyTVSeason: NSLocalizedStringFromTableInBundle(@"TV Season", @"Localizable", bundle, nil),
+
+                             MP42MetadataKeyDescription: NSLocalizedStringFromTableInBundle(@"Description", @"Localizable", bundle, nil),
+                             MP42MetadataKeyLongDescription: NSLocalizedStringFromTableInBundle(@"Long Description", @"Localizable", bundle, nil),
+                             MP42MetadataKeySeriesDescription: NSLocalizedStringFromTableInBundle(@"Series Description", @"Localizable", bundle, nil),
+
+                             MP42MetadataKeyRating: NSLocalizedStringFromTableInBundle(@"Rating", @"Localizable", bundle, nil),
+                             MP42MetadataKeyRatingAnnotation: NSLocalizedStringFromTableInBundle(@"Rating Annotation", @"Localizable", bundle, nil),
+                             MP42MetadataKeyContentRating: NSLocalizedStringFromTableInBundle(@"Content Rating", @"Localizable", bundle, nil),
+
+                             MP42MetadataKeyStudio: NSLocalizedStringFromTableInBundle(@"Studio", @"Localizable", bundle, nil),
+                             MP42MetadataKeyCast: NSLocalizedStringFromTableInBundle(@"Cast", @"Localizable", bundle, nil),
+                             MP42MetadataKeyDirector: NSLocalizedStringFromTableInBundle(@"Director", @"Localizable", bundle, nil),
+                             MP42MetadataKeyCodirector: NSLocalizedStringFromTableInBundle(@"Codirector", @"Localizable", bundle, nil),
+                             MP42MetadataKeyProducer: NSLocalizedStringFromTableInBundle(@"Producers", @"Localizable", bundle, nil),
+                             MP42MetadataKeyExecProducer: NSLocalizedStringFromTableInBundle(@"Executive Producer", @"Localizable", bundle, nil),
+                             MP42MetadataKeyScreenwriters: NSLocalizedStringFromTableInBundle(@"Screenwriters", @"Localizable", bundle, nil),
+
+                             MP42MetadataKeyCopyright: NSLocalizedStringFromTableInBundle(@"Copyright", @"Localizable", bundle, nil),
+                             MP42MetadataKeyEncodingTool: NSLocalizedStringFromTableInBundle(@"Encoding Tool", @"Localizable", bundle, nil),
+                             MP42MetadataKeyEncodedBy: NSLocalizedStringFromTableInBundle(@"Encoded By", @"Localizable", bundle, nil),
+
+                             MP42MetadataKeyKeywords: NSLocalizedStringFromTableInBundle(@"Keywords", @"Localizable", bundle, nil),
+                             MP42MetadataKeyCategory: NSLocalizedStringFromTableInBundle(@"Category", @"Localizable", bundle, nil),
+
+                             MP42MetadataKeyContentID: NSLocalizedStringFromTableInBundle(@"content ID", @"Localizable", bundle, nil),
+                             MP42MetadataKeyArtistID: NSLocalizedStringFromTableInBundle(@"artist ID", @"Localizable", bundle, nil),
+                             MP42MetadataKeyPlaylistID: NSLocalizedStringFromTableInBundle(@"playlist ID", @"Localizable", bundle, nil),
+                             MP42MetadataKeyGenreID: NSLocalizedStringFromTableInBundle(@"genre ID", @"Localizable", bundle, nil),
+                             MP42MetadataKeyComposerID: NSLocalizedStringFromTableInBundle(@"composer ID", @"Localizable", bundle, nil),
+                             MP42MetadataKeyXID: NSLocalizedStringFromTableInBundle(@"XID", @"Localizable", bundle, nil),
+                             MP42MetadataKeyAppleID: NSLocalizedStringFromTableInBundle(@"iTunes Account", @"Localizable", bundle, nil),
+                             MP42MetadataKeyAccountKind: NSLocalizedStringFromTableInBundle(@"iTunes Account Type", @"Localizable", bundle, nil),
+                             MP42MetadataKeyAccountCountry: NSLocalizedStringFromTableInBundle(@"iTunes Country", @"Localizable", bundle, nil),
+                             MP42MetadataKeyPurchasedDate: NSLocalizedStringFromTableInBundle(@"Purchase Date", @"Localizable", bundle, nil),
+                             MP42MetadataKeyOnlineExtras: NSLocalizedStringFromTableInBundle(@"Online Extras", @"Localizable", bundle, nil),
+
+                             MP42MetadataKeySongDescription: NSLocalizedStringFromTableInBundle(@"Song Description", @"Localizable", bundle, nil),
+
+                             MP42MetadataKeyArtDirector: NSLocalizedStringFromTableInBundle(@"Art Director", @"Localizable", bundle, nil),
+                             MP42MetadataKeyComposer: NSLocalizedStringFromTableInBundle(@"Composer", @"Localizable", bundle, nil),
+                             MP42MetadataKeyArranger: NSLocalizedStringFromTableInBundle(@"Arranger", @"Localizable", bundle, nil),
+                             MP42MetadataKeyAuthor: NSLocalizedStringFromTableInBundle(@"Lyricist", @"Localizable", bundle, nil),
+                             MP42MetadataKeyLyrics: NSLocalizedStringFromTableInBundle(@"Lyrics", @"Localizable", bundle, nil),
+                             MP42MetadataKeyAcknowledgement: NSLocalizedStringFromTableInBundle(@"Acknowledgement", @"Localizable", bundle, nil),
+                             MP42MetadataKeyConductor: NSLocalizedStringFromTableInBundle(@"Conductor", @"Localizable", bundle, nil),
+                             MP42MetadataKeyLinerNotes: NSLocalizedStringFromTableInBundle(@"Linear Notes", @"Localizable", bundle, nil),
+                             MP42MetadataKeyRecordCompany: NSLocalizedStringFromTableInBundle(@"Record Company", @"Localizable", bundle, nil),
+                             MP42MetadataKeyOriginalArtist: NSLocalizedStringFromTableInBundle(@"Original Artist", @"Localizable", bundle, nil),
+                             MP42MetadataKeyPhonogramRights: NSLocalizedStringFromTableInBundle(@"Phonogram Rights", @"Localizable", bundle, nil),
+                             MP42MetadataKeySongProducer: NSLocalizedStringFromTableInBundle(@"Song Producer", @"Localizable", bundle, nil),
+                             MP42MetadataKeyPerformer: NSLocalizedStringFromTableInBundle(@"Performer", @"Localizable", bundle, nil),
+                             MP42MetadataKeyPublisher: NSLocalizedStringFromTableInBundle(@"Publisher", @"Localizable", bundle, nil),
+                             MP42MetadataKeySoundEngineer: NSLocalizedStringFromTableInBundle(@"Sound Engineer", @"Localizable", bundle, nil),
+                             MP42MetadataKeySoloist: NSLocalizedStringFromTableInBundle(@"Soloist", @"Localizable", bundle, nil),
+                             MP42MetadataKeyDiscCompilation: NSLocalizedStringFromTableInBundle(@"Compilation", @"Localizable", bundle, nil),
+
+                             MP42MetadataKeyCredits: NSLocalizedStringFromTableInBundle(@"Credits", @"Localizable", bundle, nil),
+                             MP42MetadataKeyThanks: NSLocalizedStringFromTableInBundle(@"Thanks", @"Localizable", bundle, nil),
+
+                             MP42MetadataKeyWorkName: NSLocalizedStringFromTableInBundle(@"Work Name", @"Localizable", bundle, nil),
+                             MP42MetadataKeyMovementName: NSLocalizedStringFromTableInBundle(@"Movement Name", @"Localizable", bundle, nil),
+                             MP42MetadataKeyMovementNumber: NSLocalizedStringFromTableInBundle(@"Movement Number", @"Localizable", bundle, nil),
+                             MP42MetadataKeyMovementCount: NSLocalizedStringFromTableInBundle(@"Movement Count", @"Localizable", bundle, nil),
+                             MP42MetadataKeyShowWorkAndMovement: NSLocalizedStringFromTableInBundle(@"Show Work And Movement", @"Localizable", bundle, nil),
+
+                             MP42MetadataKeySortName: NSLocalizedStringFromTableInBundle(@"Sort Name", @"Localizable", bundle, nil),
+                             MP42MetadataKeySortArtist: NSLocalizedStringFromTableInBundle(@"Sort Artist", @"Localizable", bundle, nil),
+                             MP42MetadataKeySortAlbumArtist: NSLocalizedStringFromTableInBundle(@"Sort Album Artist", @"Localizable", bundle, nil),
+                             MP42MetadataKeySortAlbum: NSLocalizedStringFromTableInBundle(@"Sort Album", @"Localizable", bundle, nil),
+                             MP42MetadataKeySortComposer: NSLocalizedStringFromTableInBundle(@"Sort Composer", @"Localizable", bundle, nil),
+                             MP42MetadataKeySortTVShow: NSLocalizedStringFromTableInBundle(@"Sort TV Show", @"Localizable", bundle, nil)};
+    });
+
+    NSString *localizedString = localizedStrings[key];
+    return localizedString ? localizedString : key;
+}
 
 NSString *const MP42MetadataKeyName = @"Name";
 NSString *const MP42MetadataKeyTrackSubTitle = @"Track Sub-Title";

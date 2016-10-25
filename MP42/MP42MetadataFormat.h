@@ -8,6 +8,8 @@
 
 #import <Foundation/Foundation.h>
 
+NSString *localizedMetadataKeyName(NSString  *key);
+
 // Common Metadata keys
 extern NSString *const MP42MetadataKeyName;                     // String
 extern NSString *const MP42MetadataKeyTrackSubTitle;            // String

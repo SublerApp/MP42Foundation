@@ -7,6 +7,7 @@
 //
 
 #import "MP42MediaFormat.h"
+#import "MP42File.h"
 
 // File Type
 NSString *const MP42FileTypeMP4 = @"mp4";
@@ -25,55 +26,56 @@ NSString * const SBDolbyPlIIMixdown = @"SBDolbyPlIIMixdown";
 NSString *localizedMediaDisplayName(FourCharCode mediaType)
 {
     NSString *result = @(FourCC2Str(mediaType));
+    NSBundle *bundle = [NSBundle bundleForClass:[MP42File class]];
 
     switch (mediaType) {
         case kMP42MediaType_Video:
-            result = NSLocalizedString(@"Video Track", nil);
+            result = NSLocalizedStringFromTableInBundle(@"Video Track", @"Localizable", bundle, nil);
             break;
 
         case kMP42MediaType_Audio:
-            result = NSLocalizedString(@"Sound Track", nil);
+            result = NSLocalizedStringFromTableInBundle(@"Sound Track", @"Localizable", bundle, nil);
             break;
 
         case kMP42MediaType_Muxed:
-            result = NSLocalizedString(@"Muxed Track", nil);
+            result = NSLocalizedStringFromTableInBundle(@"Muxed Track", @"Localizable", bundle, nil);;
             break;
 
         case kMP42MediaType_Text:
-            result = NSLocalizedString(@"Text Track", nil);
+            result = NSLocalizedStringFromTableInBundle(@"Text Track", @"Localizable", bundle, nil);
             break;
 
         case kMP42MediaType_ClosedCaption:
-            result = NSLocalizedString(@"Closed Caption Track", nil);
+            result = NSLocalizedStringFromTableInBundle(@"Closed Caption Track", @"Localizable", bundle, nil);
             break;
 
         case kMP42MediaType_Subtitle:
         case kMP42MediaType_Subpic:
-            result = NSLocalizedString(@"Subtitle Track", nil);
+            result = NSLocalizedStringFromTableInBundle(@"Subtitle Track", @"Localizable", bundle, nil);
             break;
 
         case kMP42MediaType_TimeCode:
-            result = NSLocalizedString(@"TimeCode Track", nil);
+            result = NSLocalizedStringFromTableInBundle(@"TimeCode Track", @"Localizable", bundle, nil);
             break;
 
         case kMP42MediaType_Metadata:
-            result = NSLocalizedString(@"Metadata Track", nil);
+            result = NSLocalizedStringFromTableInBundle(@"Metadata Track", @"Localizable", bundle, nil);
             break;
 
         case kMP42MediaType_OD:
-            result = NSLocalizedString(@"MPEG-4 ODSM Track", nil);
+            result = NSLocalizedStringFromTableInBundle(@"MPEG-4 ODSM Track", @"Localizable", bundle, nil);
             break;
 
         case kMP42MediaType_Scene:
-            result = NSLocalizedString(@"MPEG-4 SDSM Track", nil);
+            result = NSLocalizedStringFromTableInBundle(@"MPEG-4 SDSM Track", @"Localizable", bundle, nil);
             break;
 
         case kMP42MediaType_Control:
-            result = NSLocalizedString(@"MPEG-4 Control Track", nil);
+            result = NSLocalizedStringFromTableInBundle(@"MPEG-4 Control Track", @"Localizable", bundle, nil);
             break;
 
         case kMP42MediaType_Hint:
-            result = NSLocalizedString(@"Hint Track", nil);
+            result = NSLocalizedStringFromTableInBundle(@"Hint Track", @"Localizable", bundle, nil);
             break;
 
         default:
