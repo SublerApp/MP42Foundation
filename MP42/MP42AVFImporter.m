@@ -78,7 +78,7 @@
 }
 
 - (NSString *)langForTrack:(AVAssetTrack *)track {
-    return [NSString stringWithUTF8String:lang_for_qtcode(track.languageCode.integerValue)->eng_name];
+    return [NSString stringWithUTF8String:lang_for_qtcode(track.languageCode.integerValue)->iso639_2];
 }
 
 - (instancetype)initWithURL:(NSURL *)fileURL error:(NSError **)outError {

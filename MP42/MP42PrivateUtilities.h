@@ -40,11 +40,14 @@ MP4TrackId findFirstVideoTrack(MP4FileHandle fileHandle);
 
 uint16_t getFixedVideoWidth(MP4FileHandle fileHandle, MP4TrackId videoTrack);
 
-NSString* getTrackName(MP4FileHandle fileHandle, MP4TrackId videoTrack);
+NSString * getTrackName(MP4FileHandle fileHandle, MP4TrackId videoTrack);
 FourCharCode getTrackMediaType(MP4FileHandle fileHandle, MP4TrackId Id);
 FourCharCode getTrackMediaSubType(MP4FileHandle fileHandle, MP4TrackId Id);
-NSString* getHumanReadableTrackLanguage(MP4FileHandle fileHandle, MP4TrackId videoTrack);
-NSString* getFilenameLanguage(CFStringRef filename);
+
+NSString * getTrackLanguage(MP4FileHandle fileHandle, MP4TrackId Id);
+NSString * getHumanReadableTrackLanguage(MP4FileHandle fileHandle, MP4TrackId videoTrack);
+
+NSString * getFilenameLanguage(CFStringRef filename);
 
 uint8_t *CreateEsdsFromSetupData(uint8_t *codecPrivate, size_t vosLen, size_t *esdsLen, int trackID, bool audio, bool write_version);
 ComponentResult ReadESDSDescExt(void* descExt, UInt8 **buffer, int *size, int versionFlags);

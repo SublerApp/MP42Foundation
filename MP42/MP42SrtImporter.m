@@ -43,7 +43,7 @@
 
         // Check if a 10.10 only class is available, NSLinguisticTagger crashes on 10.9
         // if the string contains some characters.
-        if ([newTrack.language isEqualToString:@"Unknown"] && NSClassFromString(@"NSVisualEffectView")) {
+        if ([newTrack.language isEqualToString:@"und"] && NSClassFromString(@"NSVisualEffectView")) {
 			// we couldn't deduce language from the fileURL
 			// -> Let's look into the file itself
 
@@ -85,7 +85,7 @@
 															 value:language];
 
                     if (languageName) {
-                        newTrack.language = languageName;
+                        newTrack.language = [MP42Languages ISO_639_2CodeForLang:languageName];
                     }
                     [locale release];
                 }

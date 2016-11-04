@@ -270,7 +270,7 @@ static int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, ui
                     newTrack.name = trackName;
                 }
                 iso639_lang_t *isoLanguage = lang_for_code2(mkvTrack->Language);
-                newTrack.language = @(isoLanguage->eng_name);
+                newTrack.language = @(isoLanguage->iso639_2);
 
                 [self addTrack:newTrack];
                 [newTrack release];
@@ -337,8 +337,7 @@ static int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, ui
 
     mkv_GetTags(_matroskaFile, &tags, &count);
     if (count) {
-        unsigned int xi = 0;
-        for (xi = 0; xi < tags->nSimpleTags; xi++) {
+        for (unsigned int xi = 0; xi < tags->nSimpleTags; xi++) {
 
             if (!strcmp(tags->SimpleTags[xi].Name, "TITLE")) {
                 [self addMetadataItemWithString:[NSString stringWithUTF8String:tags->SimpleTags[xi].Value] identifier:MP42MetadataKeyName metadata:mkvMetadata];
@@ -367,6 +366,15 @@ static int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, ui
             if (!strcmp(tags->SimpleTags[xi].Name, "ENCODER")) {
                 [self addMetadataItemWithString:[NSString stringWithUTF8String:tags->SimpleTags[xi].Value] identifier:MP42MetadataKeyEncodingTool metadata:mkvMetadata];
             }
+        }
+    }
+
+    Attachment *attachments;
+    mkv_GetAttachments(_matroskaFile, &attachments, &count);
+
+    if (count) {
+        for (unsigned int xi = 0; xi < count; xi++) {
+            NSLog(@"%s", attachments[xi].Name);
         }
     }
 

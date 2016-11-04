@@ -262,6 +262,13 @@ FourCharCode getTrackMediaSubType(MP4FileHandle fileHandle, MP4TrackId Id)
     return kMP42MediaType_Unknown;
 }
 
+NSString * getTrackLanguage(MP4FileHandle fileHandle, MP4TrackId Id)
+{
+    char lang[4] = "";
+    MP4GetTrackLanguage(fileHandle, Id, lang);
+    return @(lang);
+}
+
 NSString * getHumanReadableTrackLanguage(MP4FileHandle fileHandle, MP4TrackId Id)
 {
     NSString *language;
@@ -279,7 +286,7 @@ NSString * getFilenameLanguage(CFStringRef filename)
 	CFRange findResult;
 	CFStringRef baseName = NULL;
 	CFStringRef langStr = NULL;
-	NSString *lang = @"English";
+	NSString *lang = @"eng";
 
 	// find and strip the extension
 	findResult = CFStringFind(filename, CFSTR("."), kCFCompareBackwards);
@@ -298,7 +305,7 @@ NSString * getFilenameLanguage(CFStringRef filename)
 
 		langStr = CFStringCreateWithSubstring(NULL, baseName, findResult);
 		CFStringGetCString(langStr, langCStr, 4, kCFStringEncodingASCII);
-        lang = [NSString stringWithFormat:@"%s", lang_for_code2(langCStr)->eng_name];
+        lang = [NSString stringWithFormat:@"%s", lang_for_code2(langCStr)->iso639_2];
 
 		CFRelease(langStr);
 
@@ -308,7 +315,7 @@ NSString * getFilenameLanguage(CFStringRef filename)
 
 		langStr = CFStringCreateWithSubstring(NULL, baseName, findResult);
 		CFStringGetCString(langStr, langCStr, 3, kCFStringEncodingASCII);
-        lang = [NSString stringWithFormat:@"%s", lang_for_code_s(langCStr)->eng_name];
+        lang = [NSString stringWithFormat:@"%s", lang_for_code_s(langCStr)->iso639_2];
 
 		CFRelease(langStr);
 	}
@@ -317,7 +324,7 @@ NSString * getFilenameLanguage(CFStringRef filename)
 
 		langStr = CFStringCreateWithSubstring(NULL, baseName, findResult);
 		CFStringGetCString(langStr, langCStr, 40, kCFStringEncodingASCII);
-        lang = [NSString stringWithFormat:@"%s", lang_for_english(langCStr)->eng_name];
+        lang = [NSString stringWithFormat:@"%s", lang_for_english(langCStr)->iso639_2];
         
         CFRelease(langStr);
     }

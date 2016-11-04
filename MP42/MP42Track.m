@@ -54,7 +54,7 @@
         _enabled = YES;
         _updatedProperty = [[NSMutableDictionary alloc] init];
         _mediaCharacteristicTags = [[NSSet alloc] init];
-        _language = @"Unknown";
+        _language = @"und";
     }
     return self;
 }
@@ -76,7 +76,7 @@
             if (trackName) {
                 _name = [trackName copy];
             }
-            _language = getHumanReadableTrackLanguage(fileHandle, _trackId);
+            _language = getTrackLanguage(fileHandle, _trackId);
 
             // Extended language tag
             if (MP4HaveTrackAtom(fileHandle, _trackId, "mdia.elng")) {
@@ -222,7 +222,7 @@
     }
 
     if (_updatedProperty[@"language"] || !_muxed) {
-        MP4SetTrackLanguage(fileHandle, _trackId, lang_for_english(_language.UTF8String)->iso639_2);
+        MP4SetTrackLanguage(fileHandle, _trackId, _language.UTF8String);
     }
 
     if ((_updatedProperty[@"extendedLanguageTag"] || !_muxed) && _extendedLanguageTag) {

@@ -91,7 +91,7 @@ protected:
 - (instancetype)initWithLanguage:(NSString *)language extendedLanguageTag:(NSString *)extendedLanguageTag;
 {
     if ((self = [super init])) {
-        NSString *lang = [NSString stringWithUTF8String:lang_for_english([language UTF8String])->iso639_2];
+        NSString *lang = language;
 
         if ([lang isEqualToString:@"zho"] || [extendedLanguageTag isEqualToString:@"zh-Hans"]) {
             lang = @"chi_sim";

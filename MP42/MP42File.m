@@ -870,7 +870,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
     jpegTrack = MP4AddJpegVideoTrack(self.fileHandle, MP4GetTrackTimeScale(self.fileHandle, chapterTrack.trackId),
                                          MP4_INVALID_DURATION, imageSize.width, imageSize.height);
 
-    MP4SetTrackLanguage(self.fileHandle, jpegTrack, lang_for_english([videoTrack.language UTF8String])->iso639_2);
+    MP4SetTrackLanguage(self.fileHandle, jpegTrack, videoTrack.language.UTF8String);
     MP4SetTrackIntegerProperty(self.fileHandle, jpegTrack, "tkhd.layer", 1);
     MP4SetTrackDisabled(self.fileHandle, jpegTrack);
 

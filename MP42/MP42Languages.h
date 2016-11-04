@@ -62,6 +62,9 @@ extern "C" {
 
 + (nullable NSString *)iso6391CodeFor:(NSString *)aLanguage;
 
++ (NSString *)ISO_639_2CodeForLang:(NSString *)language;
++ (NSString *)langForISO_639_2Code:(NSString *)code;
+
 @end
 
 NS_ASSUME_NONNULL_END

@@ -26,7 +26,7 @@
         self.mediaType = kMP42MediaType_Text;
         self.enabled = NO;
         self.muxed = NO;
-        self.language = @"English";
+        self.language = @"eng";
         _chapters = [[NSMutableArray alloc] init];
     }
 
@@ -82,7 +82,7 @@
         self.format = kMP42SubtitleCodecType_Text;
         self.mediaType = kMP42MediaType_Text;
         self.enabled = NO;
-        self.language = @"English";
+        self.language = @"eng";
         self.URL = URL;
         self.edited = YES;
         self.muxed = NO;

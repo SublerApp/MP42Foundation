@@ -670,4 +670,14 @@ iso639_lang_t * lang_for_english( const char * english )
 	return nil;
 }
 
++ (NSString *)ISO_639_2CodeForLang:(NSString *)language {
+    iso639_lang_t *lang = lang_for_english(language.UTF8String);
+    return @(lang->iso639_2);
+}
+
++ (NSString *)langForISO_639_2Code:(NSString *)code {
+    iso639_lang_t *lang = lang_for_code2(code.UTF8String);
+    return @(lang->eng_name);
+}
+
 @end
