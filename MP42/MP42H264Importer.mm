@@ -1397,11 +1397,13 @@ NSData* H264Info(const char *filePath, uint32_t *pic_width, uint32_t *pic_height
 
 - (NSUInteger)timescaleForTrack:(MP42Track *)track
 {
-    framerate_t * framerate;
+    framerate_t *framerate;
 
-    for (framerate = (framerate_t*) framerates; framerate->code; framerate++)
-        if([track sourceId] == framerate->code)
+    for (framerate = (framerate_t *)framerates; framerate->code; framerate++) {
+        if ([(MP42RawConversionSettings *)track.conversionSettings frameRate] == framerate->code) {
             break;
+        }
+    }
 
     timescale = framerate->timescale;
     mp4FrameDuration = framerate->duration;
@@ -1433,7 +1435,7 @@ NSData* H264Info(const char *filePath, uint32_t *pic_width, uint32_t *pic_height
         int64_t currentSize = 0;
 
         for (framerate = (framerate_t *)framerates; framerate->code; framerate++) {
-            if ([track.conversionSettings frameRate] == framerate->code) {
+            if ([(MP42RawConversionSettings *)track.conversionSettings frameRate] == framerate->code) {
                 break;
             }
         }
