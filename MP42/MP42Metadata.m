@@ -1416,7 +1416,9 @@ static const genreType_t genreType_strings[] = {
 
     // Subler 1.1.8 and previous sets
     if (version < 4) {
-        NSDictionary<NSString *, id> *tagsDict = [decoder decodeObjectOfClass:[NSMutableDictionary class] forKey:@"MP42TagsDict"];
+        NSDictionary<NSString *, id> *tagsDict = [decoder decodeObjectOfClasses:[NSSet setWithObjects:[NSMutableDictionary class],
+                                                                                 [NSMutableString class], nil]
+                                                                                               forKey:@"MP42TagsDict"];
 
         [tagsDict enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
             MP42MetadataItem *coverArtItem = [MP42MetadataItem metadataItemWithIdentifier:key value:obj
@@ -1435,7 +1437,8 @@ static const genreType_t genreType_strings[] = {
             }
         }
         else {
-            NSArray *artworks = [decoder decodeObjectOfClass:[NSArray class] forKey:@"MP42Artwork"];
+            NSArray *artworks = [decoder decodeObjectOfClasses:[NSSet setWithObjects:[NSArray class], [MP42Image class], nil]
+                                                        forKey:@"MP42Artwork"];
             for (MP42Image *artwork in artworks) {
                 MP42MetadataItem *coverArtItem = [MP42MetadataItem metadataItemWithIdentifier:MP42MetadataKeyCoverArt value:artwork
                                                                                      dataType:MP42MetadataItemDataTypeImage extendedLanguageTag:nil];
