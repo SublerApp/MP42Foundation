@@ -1094,7 +1094,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 }
 
 - (id)initWithCoder:(NSCoder *)decoder {
-    self = [super init];
+    self = [self init];
 
     NSData *bookmarkData = [decoder decodeObjectOfClass:[NSData class] forKey:@"bookmark"];
     if (bookmarkData) {

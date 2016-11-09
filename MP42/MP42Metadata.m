@@ -1488,6 +1488,12 @@ static const genreType_t genreType_strings[] = {
     _artworkEdited = [decoder decodeBoolForKey:@"MP42ArtworkEdited"];
     _edited = [decoder decodeBoolForKey:@"MP42Edited"];
 
+    for (MP42MetadataItem *item in _itemsArray) {
+        if (![item.identifier isEqualToString:MP42MetadataKeyCoverArt]) {
+            _itemsMap[item.identifier] = item;
+        }
+    }
+
     return self;
 }
 
