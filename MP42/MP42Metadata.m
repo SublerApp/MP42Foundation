@@ -1477,7 +1477,8 @@ static const genreType_t genreType_strings[] = {
         }
     }
     else {
-        _itemsArray = [decoder decodeObjectOfClass:[NSMutableDictionary class] forKey:@"MP42Items"];
+        _itemsArray = [decoder decodeObjectOfClasses:[NSSet setWithObjects:[NSMutableArray class], [MP42MetadataItem class], nil]
+                                              forKey:@"MP42Items"];
     }
 
     _presetName = [decoder decodeObjectOfClass:[NSString class] forKey:@"MP42SetName"];

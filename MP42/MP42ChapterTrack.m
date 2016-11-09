@@ -304,6 +304,11 @@
 
 #pragma mark - NSSecureCoding
 
++ (BOOL)supportsSecureCoding
+{
+    return YES;
+}
+
 - (void)encodeWithCoder:(NSCoder *)coder
 {
     [super encodeWithCoder:coder];
@@ -316,7 +321,8 @@
     self = [super initWithCoder:decoder];
 
     if (self) {
-        _chapters = [decoder decodeObjectOfClass:[NSMutableArray class] forKey:@"chapters"];
+        _chapters = [decoder decodeObjectOfClasses:[NSSet setWithObjects:[NSMutableArray class], [MP42TextSample class], nil]
+                                            forKey:@"chapters"];
     }
 
     return self;

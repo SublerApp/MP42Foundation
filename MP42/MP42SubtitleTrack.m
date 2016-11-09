@@ -441,6 +441,11 @@ static void insertTagsFromStyleRecord(style_record record, NSMutableString *samp
 
 #pragma mark - NSSecureCoding
 
++ (BOOL)supportsSecureCoding
+{
+    return YES;
+}
+
 - (void)encodeWithCoder:(NSCoder *)coder
 {
     [super encodeWithCoder:coder];

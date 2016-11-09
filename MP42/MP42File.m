@@ -1110,11 +1110,13 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
         _URL = [decoder decodeObjectOfClass:[NSURL class] forKey:@"fileUrl"];
     }
 
-    _tracksToBeDeleted = [decoder decodeObjectOfClass:[NSMutableArray class] forKey:@"tracksToBeDeleted"];
+    _tracksToBeDeleted = [decoder decodeObjectOfClasses:[NSSet setWithObjects:[NSMutableArray class], [MP42Track class], nil]
+                                                 forKey:@"tracksToBeDeleted"];
 
     _hasFileRepresentation = [decoder decodeBoolForKey:@"hasFileRepresentation"];
 
-    _tracks = [decoder decodeObjectOfClass:[NSMutableArray class] forKey:@"tracks"];
+    _tracks = [decoder decodeObjectOfClasses:[NSSet setWithObjects:[NSMutableArray class], [MP42Track class], nil]
+                                      forKey:@"tracks"];
     _metadata = [decoder decodeObjectOfClass:[MP42Metadata class] forKey:@"metadata"];
 
     return self;
