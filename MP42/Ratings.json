@@ -128,7 +128,7 @@
 {
 	"country" : "Nederland",
 	"ratings" : [
-	   { "media" : "movie & TV", "prefix" : "nl-movie", 	"itunes-code" : "AL/G", 	"itunes-value" : "000",  "description" : "AL/G" },
+	   { "media" : "movie & TV", "prefix" : "nl-movie", 	"itunes-code" : "AL/G", "itunes-value" : "000",  "description" : "AL/G" },
 	   { "media" : "movie & TV", "prefix" : "nl-movie", 	"itunes-code" : "6", 	"itunes-value" : "100",  "description" : "6" },
 	   { "media" : "movie & TV", "prefix" : "nl-movie", 	"itunes-code" : "9", 	"itunes-value" : "200",  "description" : "9" },
 	   { "media" : "movie & TV", "prefix" : "nl-movie", 	"itunes-code" : "12", 	"itunes-value" : "300",  "description" : "12" },
@@ -220,5 +220,30 @@
 	   { "media" : "movie & TV", 	"prefix" : "ru-movie", 	"itunes-code" : "18+", 		"itunes-value" : "400", "description" : "18+" },
 	   { "media" : "movie & TV", 	"prefix" : "ru-movie", 	"itunes-code" : "Unrated", 	"itunes-value" : "???", "description" : "Unrated" }
 	]
+},
+{
+	"country" : "Pilipinas",
+	"ratings" : [
+        { "media" : "movie & TV", 	"prefix" : "ph-movie", "itunes-code" : "G", 		"itunes-value" : "100", "description" : "G" },
+        { "media" : "movie & TV", 	"prefix" : "ph-movie", "itunes-code" : "PG", 		"itunes-value" : "300", "description" : "PG" },
+        { "media" : "movie & TV", 	"prefix" : "ph-movie", "itunes-code" : "R-13",	 	"itunes-value" : "325", "description" : "R-13" },
+        { "media" : "movie & TV", 	"prefix" : "ph-movie", "itunes-code" : "R-16",	 	"itunes-value" : "375", "description" : "R-16" },
+        { "media" : "movie & TV", 	"prefix" : "ph-movie", "itunes-code" : "R-18",      "itunes-value" : "400", "description" : "R-18" },
+        { "media" : "movie & TV", 	"prefix" : "ph-movie", "itunes-code" : "Unrated", 	"itunes-value" : "???", "description" : "Unrated" }
+    ]
+},
+{
+	"country" : "Hong Kong",
+	"ratings" : [
+        { "media" : "movie & TV", 	"prefix" : "hk-movie", "itunes-code" : "第i類",	 	"itunes-value" : "100", "description" : "第i類" },
+        { "media" : "movie & TV", 	"prefix" : "hk-movie", "itunes-code" : "第ii類",     "itunes-value" : "400", "description" : "第ii類" },
+        { "media" : "movie & TV", 	"prefix" : "hk-movie", "itunes-code" : "未作評級", 	"itunes-value" : "???", "description" : "未作評級" }
+    ]
+},
+{
+	"country" : "Unknown",
+	"ratings" : [
+        { "media" : "movie & TV", 	"prefix" : "mpaa", 	"itunes-code" : "Unrated", 	"itunes-value" : "???", "description" : "Unknown" }
+    ]
 }
 ]
