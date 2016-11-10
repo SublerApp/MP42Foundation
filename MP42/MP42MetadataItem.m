@@ -264,7 +264,8 @@ static NSDictionary<NSString *, NSNumber *> *_defaultTypes;
 
 @implementation MP42MetadataItem (MP42MetadataItemTypeCoercion)
 
-- (NSString *)stringFromStringArray:(NSArray<NSString *> *)array {
+- (NSString *)stringFromStringArray:(NSArray<NSString *> *)array
+{
     NSMutableString *result = [NSMutableString string];
 
     for (NSString *text in array) {
@@ -279,7 +280,8 @@ static NSDictionary<NSString *, NSNumber *> *_defaultTypes;
     return [result copy];
 }
 
-- (NSString *)stringFromIntegerArray:(NSArray<NSNumber *> *)array {
+- (NSString *)stringFromIntegerArray:(NSArray<NSNumber *> *)array
+{
     NSMutableString *result = [NSMutableString string];
 
     for (NSNumber *number in array) {
