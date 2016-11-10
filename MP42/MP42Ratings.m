@@ -116,14 +116,21 @@
 	return -1;
 }
 
-- (NSUInteger) ratingIndexForiTunesCountry:(NSString *)aCountry media:(NSString *)aMedia ratingString:(NSString *)aRatingString {
+- (NSUInteger)ratingIndexForiTunesCountry:(NSString *)aCountry media:(NSString *)aMedia ratingString:(NSString *)aRatingString {
 	NSString *target1 = [[NSString stringWithFormat:@"%@ %@: %@", aCountry, aMedia, aRatingString] lowercaseString];
 	NSString *target2 = [[NSString stringWithFormat:@"%@ %@: %@", aCountry, @"movie & TV", aRatingString] lowercaseString];
-	for (NSUInteger i = 0; i < ratings.count; i++) {
-		if ([[ratings[i] lowercaseString] isEqualToString:target1] || [[ratings[i] lowercaseString] isEqualToString:target2]) {
-			return i;
-		}
-	}
+
+    NSUInteger i = 0;
+    for (NSString *iTunesRating in ratings) {
+        NSString *lowerCaseRating = iTunesRating.lowercaseString;
+
+        if ([lowerCaseRating isEqualToString:target1] || [lowerCaseRating isEqualToString:target2]) {
+            return i;
+        }
+        else {
+            i += 1;
+        }
+    }
 
 	if (aRatingString != nil) {
 		NSLog(@"Unknown rating information: %@", target1);
@@ -142,8 +149,14 @@
 	return -1;
 }
 
-- (NSString *) ratingStringForiTunesCountry:(NSString *)aCountry media:(NSString *)aMedia ratingString:(NSString *)aRatingString {
-    return iTunesCodes[[self ratingIndexForiTunesCountry:aCountry media:aMedia ratingString:aRatingString]];
+- (NSString *)ratingStringForiTunesCountry:(NSString *)aCountry media:(NSString *)aMedia ratingString:(NSString *)aRatingString {
+    NSInteger index = [self ratingIndexForiTunesCountry:aCountry media:aMedia ratingString:aRatingString];
+    if (index > -1) {
+        return iTunesCodes[index];
+    }
+    else {
+        return nil;
+    }
 }
 
 @end
