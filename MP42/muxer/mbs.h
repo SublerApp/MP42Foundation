@@ -68,7 +68,7 @@ public:
 
 	void SetBitPosition(u_int32_t bitPos) {
 		if (bitPos > m_numBits) {
-			throw;
+			throw EIO;
 		}
 		m_bitPos = bitPos;
 	}
