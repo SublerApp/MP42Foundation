@@ -149,7 +149,7 @@
 	return -1;
 }
 
-- (NSString *)ratingStringForiTunesCountry:(NSString *)aCountry media:(NSString *)aMedia ratingString:(NSString *)aRatingString {
+- (nullable NSString *)ratingStringForiTunesCountry:(NSString *)aCountry media:(NSString *)aMedia ratingString:(NSString *)aRatingString {
     NSInteger index = [self ratingIndexForiTunesCountry:aCountry media:aMedia ratingString:aRatingString];
     if (index > -1) {
         return iTunesCodes[index];
