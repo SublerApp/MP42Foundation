@@ -18,8 +18,8 @@ static NSDictionary<NSString *, NSNumber *> *_defaultTypes;
 + (void)initialize
 {
     if (self == [MP42MetadataItem class]) {
-        _defaultTypes = @{ MP42MetadataKeyReleaseDate:         @(MP42MetadataItemDataTypeDate),
-                           MP42MetadataKeyPurchasedDate:       @(MP42MetadataItemDataTypeDate),
+        _defaultTypes = @{ MP42MetadataKeyReleaseDate:         @(MP42MetadataItemDataTypeString),
+                           MP42MetadataKeyPurchasedDate:       @(MP42MetadataItemDataTypeString),
                            MP42MetadataKeyCoverArt:            @(MP42MetadataItemDataTypeImage),
                            MP42MetadataKeyCast:                @(MP42MetadataItemDataTypeStringArray),
                            MP42MetadataKeyDirector:            @(MP42MetadataItemDataTypeStringArray),

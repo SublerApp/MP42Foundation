@@ -20,9 +20,9 @@ NSString *localizedMetadataKeyName(NSString  *key)
         localizedStrings = @{MP42MetadataKeyName: NSLocalizedStringFromTableInBundle(@"Name", @"Localizable", bundle, nil),
                              MP42MetadataKeyTrackSubTitle: NSLocalizedStringFromTableInBundle(@"Track Sub-Title", @"Localizable", bundle, nil),
 
-                             MP42MetadataKeyArtist: NSLocalizedStringFromTableInBundle(@"Album", @"Localizable", bundle, nil),
+                             MP42MetadataKeyArtist: NSLocalizedStringFromTableInBundle(@"Artist", @"Localizable", bundle, nil),
                              MP42MetadataKeyAlbumArtist: NSLocalizedStringFromTableInBundle(@"Album Artist", @"Localizable", bundle, nil),
-                             MP42MetadataKeyAlbum: NSLocalizedStringFromTableInBundle(@"Artist", @"Localizable", bundle, nil),
+                             MP42MetadataKeyAlbum: NSLocalizedStringFromTableInBundle(@"Album", @"Localizable", bundle, nil),
 
                              MP42MetadataKeyGrouping: NSLocalizedStringFromTableInBundle(@"Grouping", @"Localizable", bundle, nil),
 

@@ -1465,14 +1465,14 @@ static const genreType_t genreType_strings[] = {
             [self addMetadataItem:hdVideoItem];
         }
 
-        int gapless = [decoder decodeIntForKey:@"MP42Gapless"];
+        BOOL gapless = [decoder decodeIntForKey:@"MP42Gapless"];
         if (gapless) {
             MP42MetadataItem *gaplessItem = [MP42MetadataItem metadataItemWithIdentifier:MP42MetadataKeyGapless value:@(gapless)
                                                                                 dataType:MP42MetadataItemDataTypeBool extendedLanguageTag:nil];
             [self addMetadataItem:gaplessItem];
         }
 
-        int podcast = [decoder decodeIntForKey:@"MP42Podcast"];
+        BOOL podcast = [decoder decodeIntForKey:@"MP42Podcast"];
         if (podcast) {
             MP42MetadataItem *podcastItem = [MP42MetadataItem metadataItemWithIdentifier:MP42MetadataKeyPodcast value:@(podcast)
                                                                             dataType:MP42MetadataItemDataTypeBool extendedLanguageTag:nil];
