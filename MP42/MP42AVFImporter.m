@@ -77,10 +77,6 @@
     return result;
 }
 
-- (NSString *)langForTrack:(AVAssetTrack *)track {
-    return [NSString stringWithUTF8String:lang_for_qtcode(track.languageCode.integerValue)->iso639_2];
-}
-
 - (instancetype)initWithURL:(NSURL *)fileURL error:(NSError **)outError {
     if ((self = [super initWithURL:fileURL])) {
         _localAsset = [[AVAsset assetWithURL:self.fileURL] retain];
@@ -278,7 +274,7 @@
                 }
             }
 
-            newTrack.language = [self langForTrack:track];
+            newTrack.language = [MP42Languages ISO_639_2CodeForQTCode:track.languageCode];
 
             // Media characteristic tags, requires 10.10 or later
             if ([[AVMetadataItem class] respondsToSelector:@selector(metadataItemsFromArray:filteredByIdentifier:)]) {

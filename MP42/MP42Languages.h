@@ -10,45 +10,18 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-typedef struct iso639_lang_t
-{
-    char * eng_name;        /* Description in English */
-    char * native_name;     /* Description in native language */
-    char * iso639_1;        /* ISO-639-1 (2 characters) code */
-    char * iso639_2;        /* ISO-639-2/t (3 character) code */
-    char * iso639_2b;       /* ISO-639-2/b code (if different from above) */
-    short  qtLang;          /* QT Lang Code */
-    
-} iso639_lang_t;
+@interface MP42Languages : NSObject
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-    /* find language associated with ISO-639-1 language code */
-    iso639_lang_t * lang_for_code( int code );
-    iso639_lang_t * lang_for_code_s( const char *code );
-    
-    /* find language associated with ISO-639-2 language code */
-    iso639_lang_t * lang_for_code2( const char *code2 );
+@property (class, readonly) MP42Languages *defaultManager;
 
-    /* find language associated with qt language code */
-    iso639_lang_t * lang_for_qtcode( short code );
-    
-    /* ISO-639-1 code for language */
-    int lang_to_code(const iso639_lang_t *lang);
-    
-    iso639_lang_t * lang_for_english( const char * english );
-#ifdef __cplusplus
-}
-#endif
++ (nullable NSString *)ISO_639_1CodeForLang:(NSString *)language;
++ (NSString *)langForISO_639_1Code:(NSString *)language;
 
-@interface MP42Languages : NSObject {
-@private
-    NSArray<NSString *> *_languagesArray;
-    NSArray<NSString *> *_iso6391languagesArray;
-}
++ (NSString *)ISO_639_2CodeForLang:(NSString *)language;
++ (NSString *)langForISO_639_2Code:(NSString *)code;
 
-+ (MP42Languages *)defaultManager;
++ (NSString *)ISO_639_2CodeForISO_639_1:(NSString *)code;
++ (NSString *)ISO_639_2CodeForQTCode:(NSString *)code;
 
 /**
  *  Returns the complete languages list
@@ -56,14 +29,18 @@ extern "C" {
 - (NSArray<NSString *> *)languages;
 
 /**
- *  Returns the complete  ISO-639-1 language code list
+ *  Returns the complete languages list in the current locale
  */
-- (NSArray<NSString *> *)iso6391languages;
+- (NSArray<NSString *> *)localizedLanguages;
 
-+ (nullable NSString *)iso6391CodeFor:(NSString *)aLanguage;
+/**
+ *  Returns the complete ISO-639-1 language code list
+ */
+- (NSArray<NSString *> *)ISO_639_1Languages;
 
-+ (NSString *)ISO_639_2CodeForLang:(NSString *)language;
-+ (NSString *)langForISO_639_2Code:(NSString *)code;
+
+- (NSString *)ISO_639_2CodeForLocalizedLang:(NSString *)language;
+- (NSString *)localizedLangForISO_639_2Code:(NSString *)code;
 
 @end
 

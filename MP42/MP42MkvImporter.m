@@ -269,8 +269,7 @@ static int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, ui
                 if (trackName) {
                     newTrack.name = trackName;
                 }
-                iso639_lang_t *isoLanguage = lang_for_code2(mkvTrack->Language);
-                newTrack.language = @(isoLanguage->iso639_2);
+                newTrack.language = @(mkvTrack->Language);
 
                 [self addTrack:newTrack];
                 [newTrack release];

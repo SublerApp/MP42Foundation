@@ -269,16 +269,6 @@ NSString * getTrackLanguage(MP4FileHandle fileHandle, MP4TrackId Id)
     return @(lang);
 }
 
-NSString * getHumanReadableTrackLanguage(MP4FileHandle fileHandle, MP4TrackId Id)
-{
-    NSString *language;
-    char lang[4] = "";
-    MP4GetTrackLanguage(fileHandle, Id, lang);
-    language = [NSString stringWithFormat:@"%s", lang_for_code2(lang)->eng_name];
-
-    return language;
-}
-
 // if the subtitle filename is something like title.en.srt or movie.fre.srt
 // this function detects it and returns the subtitle language
 NSString * getFilenameLanguage(CFStringRef filename)
@@ -305,7 +295,7 @@ NSString * getFilenameLanguage(CFStringRef filename)
 
 		langStr = CFStringCreateWithSubstring(NULL, baseName, findResult);
 		CFStringGetCString(langStr, langCStr, 4, kCFStringEncodingASCII);
-        lang = [NSString stringWithFormat:@"%s", lang_for_code2(langCStr)->iso639_2];
+        lang = [MP42Languages ISO_639_2CodeForLang:[MP42Languages langForISO_639_2Code:@(langCStr)]];
 
 		CFRelease(langStr);
 
@@ -315,7 +305,7 @@ NSString * getFilenameLanguage(CFStringRef filename)
 
 		langStr = CFStringCreateWithSubstring(NULL, baseName, findResult);
 		CFStringGetCString(langStr, langCStr, 3, kCFStringEncodingASCII);
-        lang = [NSString stringWithFormat:@"%s", lang_for_code_s(langCStr)->iso639_2];
+        lang = [MP42Languages ISO_639_2CodeForISO_639_1:@(langCStr)];
 
 		CFRelease(langStr);
 	}
@@ -324,7 +314,7 @@ NSString * getFilenameLanguage(CFStringRef filename)
 
 		langStr = CFStringCreateWithSubstring(NULL, baseName, findResult);
 		CFStringGetCString(langStr, langCStr, 40, kCFStringEncodingASCII);
-        lang = [NSString stringWithFormat:@"%s", lang_for_english(langCStr)->iso639_2];
+        lang = [MP42Languages ISO_639_2CodeForLang:@(langCStr)];
         
         CFRelease(langStr);
     }

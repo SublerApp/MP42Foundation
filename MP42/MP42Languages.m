@@ -11,6 +11,38 @@
 #include <string.h>
 #include <ctype.h>
 
+typedef struct iso639_lang_t
+{
+    char * eng_name;        /* Description in English */
+    char * native_name;     /* Description in native language */
+    char * iso639_1;        /* ISO-639-1 (2 characters) code */
+    char * iso639_2;        /* ISO-639-2/t (3 character) code */
+    char * iso639_2b;       /* ISO-639-2/b code (if different from above) */
+    short  qtLang;          /* QT Lang Code */
+
+} iso639_lang_t;
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+    /* find language associated with ISO-639-1 language code */
+    iso639_lang_t * lang_for_code( int code );
+    iso639_lang_t * lang_for_code_s( const char *code );
+
+    /* find language associated with ISO-639-2 language code */
+    iso639_lang_t * lang_for_code2( const char *code2 );
+
+    /* find language associated with qt language code */
+    iso639_lang_t * lang_for_qtcode( short code );
+
+    /* ISO-639-1 code for language */
+    int lang_to_code(const iso639_lang_t *lang);
+
+    iso639_lang_t * lang_for_english( const char * english );
+#ifdef __cplusplus
+}
+#endif
+
 static const iso639_lang_t languages[] =
 { { "Unknown", "", "", "und", "", 32767 },
     { "Abkhazian", "Аҧсуа", "ab", "abk", "", -1 },
@@ -601,14 +633,76 @@ iso639_lang_t * lang_for_english( const char * english )
 }
 
 @implementation MP42Languages
+{
+    NSArray<NSString *> *_languagesArray;
+    NSArray<NSString *> *_iso6391languagesArray;
+
+    NSArray<NSString *> *_localizedLanguagesArray;
+    NSDictionary<NSString *, NSString *> *_localizedLanguagesToCodeDict;
+    NSDictionary<NSString *, NSString *> *_localizedCodeToLanguagesDict;
+}
 
 + (MP42Languages *)defaultManager
 {
     static dispatch_once_t pred;
     static MP42Languages *sharedLanguagesManager = nil;
 
-    dispatch_once(&pred, ^{ sharedLanguagesManager = [[self alloc] init]; });
+    dispatch_once(&pred, ^{
+        sharedLanguagesManager = [[self alloc] init];
+        [sharedLanguagesManager buildLocalizedLanguagesCache];
+    });
     return sharedLanguagesManager;
+}
+
+- (void)buildLocalizedLanguagesCache
+{
+    NSLocale *locale = NSLocale.currentLocale;
+    NSMutableArray *languagesArray = [NSMutableArray array];
+    NSMutableDictionary<NSString *, NSString *> *languagesDict = [NSMutableDictionary dictionary];
+    NSMutableDictionary<NSString *, NSString *> *codeDict = [NSMutableDictionary dictionary];
+
+    iso639_lang_t *_languages;
+    for (_languages = (iso639_lang_t *) languages; _languages->iso639_2; _languages++) {
+        NSString *localizedName = nil;
+        NSString *code = @(_languages->iso639_2);
+        if (strlen(_languages->iso639_1)) {
+            localizedName = [locale displayNameForKey:NSLocaleLanguageCode value:@(_languages->iso639_1)];
+        }
+        else {
+            localizedName = [locale displayNameForKey:NSLocaleLanguageCode value:code];
+        }
+
+        if (!localizedName) {
+            localizedName = @(_languages->eng_name);
+        }
+
+        [languagesArray addObject:localizedName];
+        languagesDict[localizedName] = code;
+        codeDict[code] = localizedName;
+
+    }
+
+    _languagesArray = [languagesArray copy];
+    _localizedLanguagesToCodeDict = [languagesDict copy];
+    _localizedCodeToLanguagesDict = [codeDict copy];
+}
+
+- (NSString *)ISO_639_2CodeForLocalizedLang:(NSString *)language
+{
+    NSString *code = _localizedLanguagesToCodeDict[language];
+    if (!code) {
+        code = @"und";
+    }
+    return code;
+}
+
+- (NSString *)localizedLangForISO_639_2Code:(NSString *)code
+{
+    NSString *language = _localizedCodeToLanguagesDict[code];
+    if (!language) {
+        language = _localizedCodeToLanguagesDict[@"und"];
+    }
+    return language;
 }
 
 - (NSArray<NSString *> *)commonLanguages {
@@ -639,7 +733,35 @@ iso639_lang_t * lang_for_english( const char * english )
     return [_languagesArray copy];
 }
 
-- (NSArray<NSString *> *)iso6391languages {
+- (NSArray<NSString *> *)localizedLanguages {
+    if (!_localizedLanguagesArray) {
+        NSLocale *locale = NSLocale.currentLocale;
+        NSMutableArray *languagesArray = [[NSMutableArray alloc] init];
+
+        iso639_lang_t *_languages;
+        for (_languages = (iso639_lang_t *) languages; _languages->iso639_2; _languages++) {
+            NSString *localizedName = nil;
+            if (strlen(_languages->iso639_1)) {
+                localizedName = [locale displayNameForKey:NSLocaleLanguageCode value:@(_languages->iso639_1)];
+            }
+            else {
+                localizedName = [locale displayNameForKey:NSLocaleLanguageCode value:@(_languages->iso639_2)];
+            }
+            if (localizedName) {
+                [languagesArray addObject:localizedName];
+            }
+            else {
+                [languagesArray addObject:@(_languages->eng_name)];
+            }
+        }
+
+        _languagesArray = [languagesArray copy];
+    }
+
+    return [_languagesArray copy];
+}
+
+- (NSArray<NSString *> *)ISO_639_1Languages {
     if (!_iso6391languagesArray) {
         NSMutableArray *languagesArray = [[NSMutableArray alloc] init];
 
@@ -660,14 +782,20 @@ iso639_lang_t * lang_for_english( const char * english )
     return [_iso6391languagesArray copy];
 }
 
-+ (NSString *)iso6391CodeFor:(NSString *)aLanguage {
++ (nullable NSString *)ISO_639_1CodeForLang:(NSString *)language {
     iso639_lang_t *_languages;
-    for ( _languages = (iso639_lang_t*) languages; _languages->iso639_2; _languages++ ) {
-		if ([[NSString stringWithUTF8String:_languages->eng_name] isEqualToString:aLanguage]) {
+    for (_languages = (iso639_lang_t *) languages; _languages->eng_name; _languages++) {
+		if ([[NSString stringWithUTF8String:_languages->eng_name] isEqualToString:language]) {
 			return [NSString stringWithUTF8String:_languages->iso639_1];
 		}
 	}
 	return nil;
+}
+
++ (NSString *)langForISO_639_1Code:(NSString *)language
+{
+    iso639_lang_t *lang = lang_for_code_s(language.UTF8String);
+    return @(lang->eng_name);
 }
 
 + (NSString *)ISO_639_2CodeForLang:(NSString *)language {
@@ -678,6 +806,18 @@ iso639_lang_t * lang_for_english( const char * english )
 + (NSString *)langForISO_639_2Code:(NSString *)code {
     iso639_lang_t *lang = lang_for_code2(code.UTF8String);
     return @(lang->eng_name);
+}
+
++ (NSString *)ISO_639_2CodeForISO_639_1:(NSString *)code;
+{
+    iso639_lang_t *lang = lang_for_code_s(code.UTF8String);
+    return @(lang->iso639_2);
+}
+
++ (NSString *)ISO_639_2CodeForQTCode:(NSString *)code;
+{
+    iso639_lang_t *lang = lang_for_qtcode(code.integerValue);
+    return @(lang->iso639_2);
 }
 
 @end
