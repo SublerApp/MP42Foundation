@@ -671,6 +671,10 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
         }
         else {
             success = NO;
+            if (outError) {
+                *outError = MP42Error(@"The file could not be saved.", @"You do not have sufficient permissions for this operation.", 101);
+                [_logger writeErrorToLog:*outError];
+            }
         }
     }
     else {
