@@ -79,7 +79,7 @@
 {
     if (!fileHandle || !self.trackId) {
         if ( outError != NULL) {
-            *outError = MP42Error(@"Error: couldn't mux subtitle track",
+            *outError = MP42Error(MP42LocalizedString(@"Error: couldn't mux subtitle track", @"error message"),
                                   nil,
                                   120);
             return NO;

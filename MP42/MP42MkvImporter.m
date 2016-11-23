@@ -170,7 +170,8 @@ static int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, ui
 
         if (!_matroskaFile) {
             if (outError) {
-                *outError = MP42Error(@"The movie could not be opened.", @"The file is not a matroska file.", 100);
+                *outError = MP42Error(MP42LocalizedString(@"The movie could not be opened.", @"mkv error message"),
+                                      MP42LocalizedString(@"The file is not a matroska file.", @"mkv error message"), 100);
             }
 
             [self release];

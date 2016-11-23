@@ -103,7 +103,8 @@
 
         if (!success) {
             if (outError) {
-                *outError = MP42Error(@"The file could not be opened.", @"The file is not a srt file, or it does not contain any subtitles.", 100);
+                *outError = MP42Error(MP42LocalizedString(@"The file could not be opened.", @"srt error message"),
+                                      MP42LocalizedString(@"The file is not a srt file, or it does not contain any subtitles.", @"srt error message"), 100);
             }
             
             [newTrack release];

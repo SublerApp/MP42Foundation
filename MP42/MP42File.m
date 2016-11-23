@@ -162,7 +162,8 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
         if (![self startReading]) {
 
             if (error) {
-                *error = MP42Error(@"The movie could not be opened.", @"The file is not a mp4 file.", 100);
+                *error = MP42Error(MP42LocalizedString(@"The movie could not be opened.", @"error message"),
+                                   MP42LocalizedString(@"The file is not a mp4 file.", @"error message"), 100);
                 [_logger writeErrorToLog:*error];
             }
 			return nil;
@@ -177,7 +178,8 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
                 [self stopReading];
 
                 if (error) {
-                    *error = MP42Error(@"Invalid File Type.", @"MOV File cannot be edited.", 100);
+                    *error = MP42Error(MP42LocalizedString(@"Invalid File Type.", @"error message"),
+                                       MP42LocalizedString(@"MOV File cannot be edited.", @"error message"), 100);
                     [_logger writeErrorToLog:*error];
                 }
 
@@ -190,7 +192,8 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
             [self stopReading];
 
             if (error) {
-                *error = MP42Error(@"Invalid File Type.", @"Fragmented MP4 cannot be edited.", 100);
+                *error = MP42Error(MP42LocalizedString(@"Invalid File Type.", @"error message"),
+                                   MP42LocalizedString(@"Fragmented MP4 cannot be edited.", @"error message"), 100);
                 [_logger writeErrorToLog:*error];
             }
 
@@ -622,7 +625,8 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 
     if (!url) {
         if (outError) {
-            *outError = MP42Error(@"Invalid path.", @"The destination path cannot be empty.", 100);
+            *outError = MP42Error(MP42LocalizedString(@"Invalid path.", @"error message"),
+                                  MP42LocalizedString(@"The destination path cannot be empty.", @"error message"), 100);
             [_logger writeErrorToLog:*outError];
         }
         return NO;
@@ -632,7 +636,8 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
         NSURL *sourceURL = track.URL.filePathURL;
         if ([sourceURL isEqualTo:url]) {
             if (outError) {
-                *outError = MP42Error(@"Invalid destination.", @"Can't overwrite the source movie.", 100);
+                *outError = MP42Error(MP42LocalizedString(@"Invalid destination.", @"error"),
+                                      MP42LocalizedString(@"Can't overwrite the source movie.", @"error message"), 100);
                 [_logger writeErrorToLog:*outError];
             }
             return NO;
@@ -672,7 +677,8 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
         else {
             success = NO;
             if (outError) {
-                *outError = MP42Error(@"The file could not be saved.", @"You do not have sufficient permissions for this operation.", 101);
+                *outError = MP42Error(MP42LocalizedString(@"The file could not be saved.", @"error message"),
+                                      MP42LocalizedString(@"You do not have sufficient permissions for this operation.", @"error message"), 101);
                 [_logger writeErrorToLog:*outError];
             }
         }
@@ -725,7 +731,8 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
         } else {
             success = NO;
             if (outError) {
-                *outError = MP42Error(@"The file could not be saved.", @"You do not have sufficient permissions for this operation.", 101);
+                *outError = MP42Error(MP42LocalizedString(@"The file could not be saved.", @"error message"),
+                                      MP42LocalizedString(@"You do not have sufficient permissions for this operation.", @"error message"), 101);
                 [_logger writeErrorToLog:*outError];
             }
         }
@@ -739,7 +746,9 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
     // Open the mp4 file
     if (![self startWriting]) {
         if (outError) {
-            *outError = MP42Error(@"The file could not be saved.", @"You may do not have sufficient permissions for this operation, or the mp4 file is corrupted.", 101);
+            *outError = MP42Error(MP42LocalizedString(@"The file could not be saved.", @"error message"),
+                                  MP42LocalizedString(@"You may do not have sufficient permissions for this operation, or the mp4 file is corrupted.", @"error message"),
+                                  101);
             [_logger writeErrorToLog:*outError];
         }
         return NO;
@@ -773,7 +782,8 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
                         track.importer = fileImporter;
                     } else {
                         if (outError) {
-                            NSError *error = MP42Error(@"Missing sources.", @"One or more sources files are missing.", 200);
+                            NSError *error = MP42Error(MP42LocalizedString(@"Missing sources.", @"error message"),
+                                                       MP42LocalizedString(@"One or more sources files are missing.", @"error message"), 200);
                             [_logger writeErrorToLog:error];
                             if (outError) { *outError = error; }
                         }
@@ -789,7 +799,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
                     } else {
                         // We don't know how to handle this type of track.
                         // Just drop it.
-                        NSError *error = MP42Error(@"Unsupported track",
+                        NSError *error = MP42Error(MP42LocalizedString(@"Unsupported track", @"error message"),
                                                    [NSString stringWithFormat:@"%@, %u, has not been muxed.", track.name, (unsigned int)track.format],
                                                    201);
 
@@ -833,8 +843,8 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
     // Close the mp4 file handle
     if (![self stopWriting]) {
         if (outError) {
-            *outError = MP42Error(@"File excedes 4 GB.",
-                                  @"The file is bigger than 4 GB, but it was created with 32bit data chunk offset.\nSelect 64bit data chunk offset in the save panel.",
+            *outError = MP42Error(MP42LocalizedString(@"File excedes 4 GB.", @"error message"),
+                                  MP42LocalizedString(@"The file is bigger than 4 GB, but it was created with 32bit data chunk offset.\nSelect 64bit data chunk offset in the save panel.", @"error message"),
                                   102);
             [_logger writeErrorToLog:*outError];
         }

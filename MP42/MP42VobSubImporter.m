@@ -252,7 +252,8 @@ static NSArray<SBVobSubTrack *> * LoadVobSubSubtitles(NSURL *theDirectory, NSStr
 
         if (!self.tracks.count) {
             if (outError) {
-                *outError = MP42Error(@"The file could not be opened.", @"The file is not a idx file, or it does not contain any subtitles.", 100);
+                *outError = MP42Error(MP42LocalizedString(@"The file could not be opened.", @"vobsub error message"),
+                                      MP42LocalizedString(@"The file is not a idx file, or it does not contain any subtitles.", @"vobsub error message"), 100);
             }
 
             [self release];

@@ -747,7 +747,8 @@ static bool GetFirstHeader(FILE* inFile)
 
         if (!GetFirstHeader(inFile)) {
             if (outError) {
-                *outError = MP42Error(@"The audio could not be opened.", @"Data in file doesn't appear to be valid audio.", 100);
+                *outError = MP42Error(MP42LocalizedString(@"The audio could not be opened.", @"error message"),
+                                      MP42LocalizedString(@"Data in file doesn't appear to be valid audio.", @"error message"), 100);
             }
             [newTrack release];
             return nil;
@@ -759,7 +760,8 @@ static bool GetFirstHeader(FILE* inFile)
         if (aacProfileLevel == 2) {
             if (profile > MP4_MPEG4_AAC_SSR_AUDIO_TYPE) {
                 if (outError) {
-                    *outError = MP42Error(@"The audio could not be opened.", @"Can't convert profile to mpeg2", 100);
+                    *outError = MP42Error(MP42LocalizedString(@"The audio could not be opened.", @"error message"),
+                                          MP42LocalizedString(@"Can't convert profile to mpeg2", @"error message"), 100);
                 }
                 [newTrack release];
                 return nil;
@@ -788,7 +790,8 @@ static bool GetFirstHeader(FILE* inFile)
                         break;
                     case 3:
                         if (outError) {
-                            *outError = MP42Error(@"The audio could not be opened.", @"Data in file doesn't appear to be valid audio.", 100);
+                            *outError = MP42Error(MP42LocalizedString(@"The audio could not be opened.", @"error message"),
+                                                  MP42LocalizedString(@"Data in file doesn't appear to be valid audio.", @"error message"), 100);
                         }
                         [newTrack release];
                         return nil;

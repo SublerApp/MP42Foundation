@@ -250,7 +250,7 @@
 
     if (!success) {
         if (outError != NULL)
-            *outError = MP42Error(@"Failed to mux chapters into mp4 file",
+            *outError = MP42Error(MP42LocalizedString(@"Failed to mux chapters into mp4 file", @"error message"),
                                   nil,
                                   120);
 
@@ -287,7 +287,9 @@
             NSArray *lineFields = csvData[i];
             if (lineFields.count != 2 || [lineFields[0] integerValue] != i + 1) {
                 if (NULL != outError)
-                    *outError = MP42Error(@"Invalid chapters CSV file.", @"The CSV file is not a valid chapters CSV file.", 150);
+                    *outError = MP42Error(MP42LocalizedString(@"Invalid chapters CSV file.", @"error message"),
+                                          MP42LocalizedString(@"The CSV file is not a valid chapters CSV file.", @"error message"),
+                                          150);
                 return NO;
             }
         }
@@ -298,7 +300,9 @@
         return YES;
     }
     if (NULL != outError)
-        *outError = MP42Error(@"Incorrect line count", @"The line count in the chapters CSV file does not match the number of chapters in the movie.", 151);
+        *outError = MP42Error(MP42LocalizedString(@"Incorrect line count", @"error message"),
+                              MP42LocalizedString(@"The line count in the chapters CSV file does not match the number of chapters in the movie.", @"error message"),
+                                                  151);
     return NO;
 }
 

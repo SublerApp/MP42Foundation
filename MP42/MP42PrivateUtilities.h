@@ -11,6 +11,10 @@
 #import "MP42Utilities.h"
 #include "mp4v2.h"
 
+#define MP42BundleIdentifier @"org.galad.MP42Foundation"
+
+#define MP42LocalizedString(key, comment) NSLocalizedStringFromTableInBundle(key, @"Localizable", (NSBundle *__nonnull)([NSBundle bundleWithIdentifier:MP42BundleIdentifier] ? [NSBundle bundleWithIdentifier:MP42BundleIdentifier] : [NSBundle mainBundle]), comment)
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -22,7 +26,7 @@ typedef enum {  TRACK_DISABLED = 0x0,
     TRACK_IN_POSTER = 0x8
 } track_header_flags;
 
-NSString* SRTStringFromTime( long long time, long timeScale , const char separator);
+NSString * SRTStringFromTime( long long time, long timeScale , const char separator);
 
 int MP4SetTrackEnabled(MP4FileHandle fileHandle, MP4TrackId trackId);
 int MP4SetTrackDisabled(MP4FileHandle fileHandle, MP4TrackId trackId);

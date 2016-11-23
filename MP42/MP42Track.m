@@ -196,7 +196,7 @@
 
     if (!fileHandle || !_trackId) {
         if ( outError != NULL) {
-            *outError = MP42Error(@"Failed to modify track",
+            *outError = MP42Error(MP42LocalizedString(@"Failed to modify track", @"error message"),
                                   nil,
                                   120);
             return NO;
