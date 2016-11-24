@@ -896,6 +896,10 @@ static NSString * TrackNameToString(TrackInfo *track)
                     }
                 }
 
+                if (duration == 0) {
+                    duration = 10000;
+                }
+
                 // offset calculation
                 int64_t offset = currentSample->startTime - demuxHelper->currentTime;
 
