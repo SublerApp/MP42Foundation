@@ -295,7 +295,7 @@ NSString * getFilenameLanguage(CFStringRef filename)
 
 		langStr = CFStringCreateWithSubstring(NULL, baseName, findResult);
 		CFStringGetCString(langStr, langCStr, 4, kCFStringEncodingASCII);
-        lang = [MP42Languages ISO_639_2CodeForLang:[MP42Languages langForISO_639_2Code:@(langCStr)]];
+        lang = [MP42Languages.defaultManager extendedTagForISO_639_2:@(langCStr)];
 
 		CFRelease(langStr);
 
@@ -305,7 +305,7 @@ NSString * getFilenameLanguage(CFStringRef filename)
 
 		langStr = CFStringCreateWithSubstring(NULL, baseName, findResult);
 		CFStringGetCString(langStr, langCStr, 3, kCFStringEncodingASCII);
-        lang = [MP42Languages ISO_639_2CodeForISO_639_1:@(langCStr)];
+        lang = [MP42Languages.defaultManager extendedTagForISO_639_1:@(langCStr)];
 
 		CFRelease(langStr);
 	}
@@ -314,7 +314,7 @@ NSString * getFilenameLanguage(CFStringRef filename)
 
 		langStr = CFStringCreateWithSubstring(NULL, baseName, findResult);
 		CFStringGetCString(langStr, langCStr, 40, kCFStringEncodingASCII);
-        lang = [MP42Languages ISO_639_2CodeForLang:@(langCStr)];
+        lang = [MP42Languages.defaultManager extendedTagForLang:@(langCStr)];
         
         CFRelease(langStr);
     }

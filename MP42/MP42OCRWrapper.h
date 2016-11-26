@@ -10,7 +10,7 @@
 
 @interface MP42OCRWrapper : NSObject
 
-- (instancetype)initWithLanguage:(NSString *)language extendedLanguageTag:(NSString *)extendedLanguageTag;
+- (instancetype)initWithLanguage:(NSString *)language;
 - (NSString *)performOCROnCGImage:(CGImageRef)image;
 
 @end

@@ -88,15 +88,20 @@ protected:
     return NO;
 }
 
-- (instancetype)initWithLanguage:(NSString *)language extendedLanguageTag:(NSString *)extendedLanguageTag;
+- (instancetype)initWithLanguage:(NSString *)language;
 {
     if ((self = [super init])) {
         NSString *lang = language;
 
-        if ([lang isEqualToString:@"zho"] || [extendedLanguageTag isEqualToString:@"zh-Hans"]) {
+        // ISO_639_2 language code required?
+        if ([language isEqualToString:@"zh-Hans"]) {
             lang = @"chi_sim";
-        } else if ([extendedLanguageTag isEqualToString:@"zh-Hant"]) {
+        }
+        else if ([language isEqualToString:@"zh-Hant"]) {
             lang = @"chi_tra";
+        }
+        else {
+            lang = [MP42Languages.defaultManager ISO_639_2CodeForExtendedTag:language];
         }
 
         NSURL *dataURL = [self appSupportUrl];

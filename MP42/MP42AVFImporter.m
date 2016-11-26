@@ -274,7 +274,12 @@
                 }
             }
 
-            newTrack.language = [MP42Languages ISO_639_2CodeForQTCode:track.languageCode];
+            if (track.extendedLanguageTag) {
+                newTrack.language = track.extendedLanguageTag;
+            }
+            else {
+                newTrack.language = [MP42Languages.defaultManager extendedTagForQTCode:track.languageCode];
+            }
 
             // Media characteristic tags, requires 10.10 or later
             if ([[AVMetadataItem class] respondsToSelector:@selector(metadataItemsFromArray:filteredByIdentifier:)]) {

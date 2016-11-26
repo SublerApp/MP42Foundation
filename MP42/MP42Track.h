@@ -37,7 +37,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property(nonatomic, readwrite, copy) NSString *name;
 @property(nonatomic, readwrite, copy) NSString *language;
-@property(nonatomic, readwrite, copy) NSString *extendedLanguageTag;
 
 @property(nonatomic, readwrite, copy) NSSet<NSString *> *mediaCharacteristicTags;
 

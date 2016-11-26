@@ -414,7 +414,7 @@
 
         srcMagicCookie = [[track.muxer_helper->importer magicCookieForTrack:track] retain];
 
-        _ocr = [[MP42OCRWrapper alloc] initWithLanguage:track.language extendedLanguageTag:track.extendedLanguageTag];
+        _ocr = [[MP42OCRWrapper alloc] initWithLanguage:track.language];
 
         if (format == kMP42SubtitleCodecType_VobSub) {
             // Launch the vobsub decoder thread.

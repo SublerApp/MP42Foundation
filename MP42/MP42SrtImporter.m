@@ -85,7 +85,7 @@
 															 value:language];
 
                     if (languageName) {
-                        newTrack.language = [MP42Languages ISO_639_2CodeForLang:languageName];
+                        newTrack.language = [MP42Languages.defaultManager extendedTagForLang:languageName];
                     }
                     [locale release];
                 }

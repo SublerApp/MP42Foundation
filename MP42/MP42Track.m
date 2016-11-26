@@ -20,7 +20,6 @@
 {
     NSString *_name;
     NSString *_language;
-    NSString *_extendedLanguageTag;
 
     BOOL        _enabled;
     uint64_t    _alternate_group;
@@ -76,14 +75,16 @@
             if (trackName) {
                 _name = [trackName copy];
             }
-            _language = getTrackLanguage(fileHandle, _trackId);
 
             // Extended language tag
-            if (MP4HaveTrackAtom(fileHandle, _trackId, "mdia.elng")) {
+            if (MP4HaveTrackAtom(fileHandle, _trackId, "mdia.elng.")) {
                 const char *elng;
-                if (MP4GetTrackStringProperty(fileHandle, _trackId, "mdia.elng", &elng)) {
-                    _extendedLanguageTag = [NSString stringWithCString:elng encoding:NSASCIIStringEncoding];
+                if (MP4GetTrackStringProperty(fileHandle, _trackId, "mdia.elng.extended_language", &elng)) {
+                    _language = [NSString stringWithCString:elng encoding:NSASCIIStringEncoding];
                 }
+            }
+            else {
+                _language = [MP42Languages.defaultManager extendedTagForISO_639_2:getTrackLanguage(fileHandle, _trackId)];
             }
 
             _timescale = MP4GetTrackTimeScale(fileHandle, _trackId);
@@ -165,7 +166,6 @@
         copy->_mediaType = _mediaType;
         copy->_name = [_name copy];
         copy->_language = [_language copy];
-        copy->_extendedLanguageTag = [_extendedLanguageTag copy];
         copy->_enabled = _enabled;
         copy->_alternate_group = _alternate_group;
         copy->_startOffset = _startOffset;
@@ -222,11 +222,9 @@
     }
 
     if (_updatedProperty[@"language"] || !_muxed) {
-        MP4SetTrackLanguage(fileHandle, _trackId, _language.UTF8String);
-    }
-
-    if ((_updatedProperty[@"extendedLanguageTag"] || !_muxed) && _extendedLanguageTag) {
-        MP4SetTrackStringProperty(fileHandle, _trackId, "mdia.elng", [_extendedLanguageTag cStringUsingEncoding:NSASCIIStringEncoding]);
+        NSString *ISO_639_2Code = [MP42Languages.defaultManager ISO_639_2CodeForExtendedTag:_language];
+        MP4SetTrackLanguage(fileHandle, _trackId, ISO_639_2Code.UTF8String);
+        MP4SetTrackExtendedLanguage(fileHandle, _trackId, [_language cStringUsingEncoding:NSASCIIStringEncoding]);
     }
 
     if (_updatedProperty[@"enabled"] || !_muxed) {
@@ -294,17 +292,6 @@
     self.edited = YES;
     _updatedProperty[@"language"] = @YES;
 
-}
-
-- (NSString *)extendedLanguageTag {
-    return [_extendedLanguageTag copy];
-}
-
-- (void)setExtendedLanguageTag:(NSString *)newExtendedLanguageTag
-{
-    _extendedLanguageTag = [newExtendedLanguageTag copy];
-    self.edited = YES;
-    _updatedProperty[@"extendedLanguageTag"] = @YES;
 }
 
 - (void)setMediaCharacteristicTags:(NSSet<NSString *> *)mediaCharacteristicTags
@@ -402,7 +389,6 @@
     [coder encodeInteger:_mediaType forKey:@"mediaType"];
     [coder encodeObject:_name forKey:@"name"];
     [coder encodeObject:_language forKey:@"language"];
-    [coder encodeObject:_extendedLanguageTag forKey:@"extendedLanguageTag"];
 
     [coder encodeBool:_enabled forKey:@"enabled"];
 
@@ -450,7 +436,6 @@
     _mediaType = [decoder decodeIntegerForKey:@"mediaType"];
     _name = [decoder decodeObjectOfClass:[NSString class] forKey:@"name"];
     _language = [decoder decodeObjectOfClass:[NSString class] forKey:@"language"];
-    _extendedLanguageTag = [decoder decodeObjectOfClass:[NSString class] forKey:@"extendedLanguageTag"];
 
     _enabled = [decoder decodeBoolForKey:@"enabled"];
 
