@@ -163,6 +163,60 @@
                         videoTrack.vertOffN = cleanApertureVerticalOffset;
                         videoTrack.vertOffD = 1;
                     }
+
+                    // Color
+                    CFStringRef colorPrimaries = CMFormatDescriptionGetExtension(formatDescription, kCMFormatDescriptionExtension_ColorPrimaries);
+
+                    if (CFEqual(colorPrimaries, kCMFormatDescriptionColorPrimaries_ITU_R_709_2)) {
+                        videoTrack.colorPrimaries = 1;
+                    }
+                    else if (CFEqual(colorPrimaries, kCMFormatDescriptionColorPrimaries_EBU_3213)) {
+                        videoTrack.colorPrimaries = 5;
+                    }
+                    else if (CFEqual(colorPrimaries, kCMFormatDescriptionColorPrimaries_SMPTE_C)) {
+                        videoTrack.colorPrimaries = 6;
+                    }
+                    else if (CFEqual(colorPrimaries, kCMFormatDescriptionColorPrimaries_ITU_R_2020)) {
+                        videoTrack.colorPrimaries = 9;
+                    }
+                    else if (CFEqual(colorPrimaries, kCMFormatDescriptionColorPrimaries_DCI_P3)) {
+                        videoTrack.colorPrimaries = 11;
+                    }
+                    else if (CFEqual(colorPrimaries, kCMFormatDescriptionColorPrimaries_P3_D65)) {
+                        videoTrack.colorPrimaries = 12;
+                    }
+                    else if (CFEqual(colorPrimaries, kCMFormatDescriptionColorPrimaries_P22)) {
+                        // ???
+                        videoTrack.colorPrimaries = 1;
+                    }
+
+                    CFStringRef transferFunctions = CMFormatDescriptionGetExtension(formatDescription, kCMFormatDescriptionExtension_TransferFunction);
+
+                    if (CFEqual(transferFunctions, kCMFormatDescriptionTransferFunction_ITU_R_709_2) ||
+                        CFEqual(transferFunctions, kCMFormatDescriptionTransferFunction_ITU_R_2020)) {
+                        videoTrack.transferCharacteristics = 1;
+                    }
+                    else if (CFEqual(transferFunctions, kCMFormatDescriptionTransferFunction_SMPTE_240M_1995)) {
+                        videoTrack.transferCharacteristics = 7;
+                    }
+                    else if (CFEqual(transferFunctions, kCMFormatDescriptionTransferFunction_SMPTE_ST_428_1)) {
+                        videoTrack.transferCharacteristics = 17;
+                    }
+
+                    CFStringRef YCbCrMatrix = CMFormatDescriptionGetExtension(formatDescription, kCMFormatDescriptionExtension_YCbCrMatrix);
+
+                    if (CFEqual(YCbCrMatrix, kCMFormatDescriptionYCbCrMatrix_ITU_R_709_2)) {
+                        videoTrack.matrixCoefficients = 1;
+                    }
+                    else if (CFEqual(YCbCrMatrix, kCMFormatDescriptionYCbCrMatrix_ITU_R_601_4)) {
+                        videoTrack.matrixCoefficients = 6;
+                    }
+                    else if (CFEqual(YCbCrMatrix, kCMFormatDescriptionYCbCrMatrix_SMPTE_240M_1995)) {
+                        videoTrack.matrixCoefficients = 7;
+                    }
+                    else if (CFEqual(YCbCrMatrix, kCMFormatDescriptionYCbCrMatrix_ITU_R_2020)) {
+                        videoTrack.matrixCoefficients = 9;
+                    }
                 }
                 newTrack = videoTrack;
 

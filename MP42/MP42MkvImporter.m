@@ -190,8 +190,8 @@ static int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, ui
                 float trackWidth = 0;
                 newTrack = [[MP42VideoTrack alloc] init];
 
-                [(MP42VideoTrack*)newTrack setWidth:mkvTrack->AV.Video.PixelWidth];
-                [(MP42VideoTrack*)newTrack setHeight:mkvTrack->AV.Video.PixelHeight];
+                [(MP42VideoTrack *)newTrack setWidth:mkvTrack->AV.Video.PixelWidth];
+                [(MP42VideoTrack *)newTrack setHeight:mkvTrack->AV.Video.PixelHeight];
 
                 AVRational dar, invPixelSize, sar;
                 dar			   = (AVRational){mkvTrack->AV.Video.DisplayWidth, mkvTrack->AV.Video.DisplayHeight};
@@ -200,10 +200,12 @@ static int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, ui
 
                 av_reduce(&sar.num, &sar.den, sar.num, sar.den, fixed1);
                 
-                if (sar.num && sar.den)
+                if (sar.num && sar.den) {
                     trackWidth = mkvTrack->AV.Video.PixelWidth * sar.num / sar.den;
-                else
+                }
+                else {
                     trackWidth = mkvTrack->AV.Video.PixelWidth;
+                }
 
                 [(MP42VideoTrack*)newTrack setTrackWidth:trackWidth];
                 [(MP42VideoTrack*)newTrack setTrackHeight:mkvTrack->AV.Video.PixelHeight];

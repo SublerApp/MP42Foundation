@@ -17,6 +17,10 @@
 @property(nonatomic, readwrite) float trackWidth;
 @property(nonatomic, readwrite) float trackHeight;
 
+@property(nonatomic, readwrite) uint16_t colorPrimaries;
+@property(nonatomic, readwrite) uint16_t transferCharacteristics;
+@property(nonatomic, readwrite) uint16_t matrixCoefficients;
+
 @property(nonatomic, readwrite) uint64_t hSpacing;
 @property(nonatomic, readwrite) uint64_t vSpacing;
 

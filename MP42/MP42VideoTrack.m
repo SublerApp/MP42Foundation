@@ -17,6 +17,11 @@
     uint64_t _width, _height;
     float _trackWidth, _trackHeight;
 
+    // Color
+    uint16_t _colorPrimaries;
+    uint16_t _transferCharacteristics;
+    uint16_t _matrixCoefficients;
+
     // Pixel Aspect Ratio
     uint64_t _hSpacing, _vSpacing;
 
@@ -66,6 +71,23 @@
         else {
             _hSpacing = 1;
             _vSpacing = 1;
+        }
+
+        if (MP4HaveTrackAtom(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.colr")) {
+            const char *type;
+            if (MP4GetTrackStringProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.colr.colorParameterType", &type)) {
+                if (!strcmp(type, "nclc") || !strcmp(type, "nclx")) {
+                    uint64_t colorPrimaries, transferCharacteristics, matrixCoefficients;
+
+                    MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.colr.primariesIndex", &colorPrimaries);
+                    MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.colr.transferFunctionIndex", &transferCharacteristics);
+                    MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.colr.matrixIndex", &matrixCoefficients);
+
+                    _colorPrimaries = colorPrimaries;
+                    _transferCharacteristics = transferCharacteristics;
+                    _matrixCoefficients = matrixCoefficients;
+                }
+            }
         }
 
         if (MP4HaveTrackAtom(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.clap")) {
@@ -136,6 +158,30 @@
                 }
             }
 
+            if (self.updatedProperty[@"colr"] &&
+                (self.format == kMP42VideoCodecType_H264 || self.format == kMP42VideoCodecType_MPEG4Video
+                 || self.format == kMP42VideoCodecType_HEVC || self.format == kMP42VideoCodecType_HEVC_2)) {
+
+                if (_colorPrimaries > 0 && _transferCharacteristics > 0 && _matrixCoefficients > 0) {
+                    const char *type;
+                    if (MP4HaveTrackAtom(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.colr")) {
+                        if (MP4GetTrackStringProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.colr.colorParameterType", &type)) {
+                            if (!strcmp(type, "nclc") || !strcmp(type, "nclx")) {
+                                MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.colr.primariesIndex", _colorPrimaries);
+                                MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.colr.transferFunctionIndex", _transferCharacteristics);
+                                MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.colr.matrixIndex", _matrixCoefficients);
+                            }
+                        }
+                    }
+                    else {
+                        MP4AddColr(fileHandle, self.trackId, _colorPrimaries, _transferCharacteristics, _matrixCoefficients);
+                    }
+                }
+                else {
+                    // Remove color tag
+                }
+            }
+
             if (_cleanApertureWidthN >= 1 && _cleanApertureHeightN >= 1) {
                     if (MP4HaveTrackAtom(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.clap")) {
                         MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.clap.cleanApertureWidthN", _cleanApertureWidthN);
@@ -195,6 +241,24 @@
     self.edited = YES;
 }
 
+- (void)setColorPrimaries:(uint16_t)colorPrimaries
+{
+    self.updatedProperty[@"colr"] = @YES;
+    _colorPrimaries = colorPrimaries;
+}
+
+- (void)setTransferCharacteristics:(uint16_t)transferCharacteristics
+{
+    self.updatedProperty[@"colr"] = @YES;
+    _transferCharacteristics = transferCharacteristics;
+}
+
+- (void)setMatrixCoefficients:(uint16_t)matrixCoefficients
+{
+    self.updatedProperty[@"colr"] = @YES;
+    _matrixCoefficients = matrixCoefficients;
+}
+
 - (void)setHSpacing:(uint64_t)newHSpacing
 {
     _hSpacing = newHSpacing;
@@ -247,6 +311,10 @@
         copy->_trackWidth = _trackWidth;
         copy->_trackHeight = _trackHeight;
 
+        copy->_colorPrimaries = _colorPrimaries;
+        copy->_transferCharacteristics = _transferCharacteristics;
+        copy->_matrixCoefficients = _matrixCoefficients;
+
         copy->_hSpacing = _hSpacing;
         copy->_vSpacing = _vSpacing;
 
@@ -290,6 +358,10 @@
     [coder encodeFloat:_trackWidth forKey:@"trackWidth"];
     [coder encodeFloat:_trackHeight forKey:@"trackHeight"];
 
+    [coder encodeInt32:_colorPrimaries forKey:@"colorPrimaries"];
+    [coder encodeInt32:_transferCharacteristics forKey:@"transferCharacteristics"];
+    [coder encodeInt32:_matrixCoefficients forKey:@"matrixCoefficients"];
+
     [coder encodeInt64:_hSpacing forKey:@"hSpacing"];
     [coder encodeInt64:_vSpacing forKey:@"vSpacing"];
 
@@ -312,6 +384,10 @@
 
     _trackWidth = [decoder decodeFloatForKey:@"trackWidth"];
     _trackHeight = [decoder decodeFloatForKey:@"trackHeight"];
+
+    _colorPrimaries = [decoder decodeInt32ForKey:@"colorPrimaries"];
+    _transferCharacteristics = [decoder decodeInt32ForKey:@"transferCharacteristics"];
+    _matrixCoefficients = [decoder decodeInt32ForKey:@"matrixCoefficients"];
 
     _hSpacing = [decoder decodeInt64ForKey:@"hSpacing"];
     _vSpacing = [decoder decodeInt64ForKey:@"vSpacing"];
