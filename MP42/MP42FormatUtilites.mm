@@ -1084,6 +1084,67 @@ int analyze_ESDS(MPEG4AudioConfig *c, const uint8_t *cookie, uint32_t cookieLen)
     return specific_config_bitindex;
 }
 
+#pragma mark - AVC
+
+typedef struct AVCConfig {
+    UInt8 configurationVersion;
+
+    UInt8 AVCProfileIndication;
+    UInt8 profile_compatibility;
+    UInt8 AVCLevelIndication;
+
+    UInt8 lengthSizeMinusOne;
+
+    UInt8 numOfSequenceParameterSets;
+    UInt8 numOfPictureParameterSets;
+
+    struct NAL_units *NAL_units;
+} AVCConfig;
+
+
+int analyze_AVC(const uint8_t *cookie, uint32_t cookieLen)
+{
+    int result = 0;
+
+    AVCConfig *info = (AVCConfig *)malloc (sizeof(AVCConfig));
+    bzero(info, sizeof(AVCConfig));
+
+    CMemoryBitstream b;
+    b.SetBytes((uint8_t *)cookie, cookieLen);
+
+    try {
+        info->configurationVersion = b.GetBits(8);
+        info->AVCProfileIndication = b.GetBits(8);
+        info->profile_compatibility = b.GetBits(8);
+        info->AVCLevelIndication = b.GetBits(8);
+
+        b.SkipBits(6);
+        info->lengthSizeMinusOne = b.GetBits(2);
+        b.SkipBits(3);
+
+        info->numOfSequenceParameterSets = b.GetBits(5);
+
+        for (int i = 0; i < info->numOfSequenceParameterSets; i++) {
+            UInt16 sequenceParameterSetLength = b.GetBits(16);
+            b.SkipBits(8 * sequenceParameterSetLength);
+        }
+
+        info->numOfPictureParameterSets = b.GetBits(8);
+
+        for (int i = 0; i < info->numOfPictureParameterSets; i++) {
+            UInt16 pictureParameterSetLength = b.GetBits(16);
+            b.SkipBits(8 * pictureParameterSetLength);
+        }
+    }
+    catch (int e) {
+        result = 1;
+    }
+
+
+    return result;
+}
+
+
 #pragma mark - HEVC
 
 struct NAL_units{

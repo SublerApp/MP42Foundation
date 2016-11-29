@@ -178,7 +178,7 @@
                     }
                 }
                 else {
-                    // Remove color tag
+                    MP4AddColr(fileHandle, self.trackId, 0, 0, 0);
                 }
             }
 

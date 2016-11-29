@@ -38,6 +38,8 @@ extern "C" {
 
     int analyze_ESDS(MPEG4AudioConfig *c, const uint8_t *cookie, uint32_t cookieLen);
 
+    int analyze_AVC(const uint8_t *cookie, uint32_t cookieLen);
+
     int analyze_HEVC(const uint8_t *frame, uint32_t cookieLen, bool *completeness);
 
 #ifdef __cplusplus
