@@ -708,14 +708,15 @@ iso639_lang_t * lang_for_english( const char * english )
     NSMutableDictionary<NSString *, NSString *> *codeToLocalizedLangDict = [NSMutableDictionary dictionary];
 
     for (NSString *code in languagesSet) {
-        NSString *localizedName = [locale displayNameForKey:NSLocaleIdentifier value:code];
+        NSString *fixedCode = [code stringByReplacingOccurrencesOfString:@"_" withString:@"-"];
+        NSString *localizedName = [locale displayNameForKey:NSLocaleIdentifier value:fixedCode];
 
         if (!localizedName) {
-            localizedName = code;
+            localizedName = fixedCode;
         }
 
-        localizedLangToCodeDict[localizedName] = code;
-        codeToLocalizedLangDict[code] = localizedName;
+        localizedLangToCodeDict[localizedName] = fixedCode;
+        codeToLocalizedLangDict[fixedCode] = localizedName;
 
         [localizedLanguages addObject:localizedName];
     }
@@ -867,6 +868,17 @@ iso639_lang_t * lang_for_english( const char * english )
         code = @"und";
     }
     return code;
+}
+
+- (NSString *)extendedTagForISO_639_2b:(NSString *)code2
+{
+    iso639_lang_t *lang = lang_for_code_s(code2.UTF8String);
+    if (lang) {
+        return [self extendedTagForISO_639_2:@(lang->iso639_2)];
+    }
+    else {
+        return @"und";
+    }
 }
 
 @end

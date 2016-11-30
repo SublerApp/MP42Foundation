@@ -23,6 +23,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSString *)extendedTagForQTCode:(NSString *)code;
 - (NSString *)extendedTagForISO_639_1:(NSString *)code;
 - (NSString *)extendedTagForISO_639_2:(NSString *)code;
+- (NSString *)extendedTagForISO_639_2b:(NSString *)code;
 
 - (NSString *)extendedTagForLocalizedLang:(NSString *)language;
 - (NSString *)localizedLangForExtendedTag:(NSString *)tag;

@@ -272,7 +272,7 @@ static int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, ui
                 if (trackName) {
                     newTrack.name = trackName;
                 }
-                newTrack.language = [MP42Languages.defaultManager extendedTagForISO_639_2:@(mkvTrack->Language)];
+                newTrack.language = [MP42Languages.defaultManager extendedTagForISO_639_2b:@(mkvTrack->Language)];
 
                 [self addTrack:newTrack];
                 [newTrack release];
