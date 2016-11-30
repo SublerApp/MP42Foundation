@@ -743,7 +743,7 @@ iso639_lang_t * lang_for_english( const char * english )
 {
     NSString *code = _localizedLanguagesToCodeDict[language];
     if (!code) {
-        code = @"und";
+        code = language;
     }
     return code;
 }
@@ -752,11 +752,10 @@ iso639_lang_t * lang_for_english( const char * english )
 {
     NSString *language = _localizedCodeToLanguagesDict[code];
     if (!language) {
-        language = _localizedCodeToLanguagesDict[@"und"];
+        language = code;
     }
     return language;
 }
-
 
 #pragma mark - Language lists
 
