@@ -872,7 +872,7 @@ iso639_lang_t * lang_for_english( const char * english )
 
 - (NSString *)extendedTagForISO_639_2b:(NSString *)code2
 {
-    iso639_lang_t *lang = lang_for_code_s(code2.UTF8String);
+    iso639_lang_t *lang = lang_for_code2(code2.UTF8String);
     if (lang) {
         return [self extendedTagForISO_639_2:@(lang->iso639_2)];
     }
