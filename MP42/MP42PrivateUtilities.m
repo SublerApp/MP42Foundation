@@ -276,7 +276,7 @@ NSString * getFilenameLanguage(CFStringRef filename)
 	CFRange findResult;
 	CFStringRef baseName = NULL;
 	CFStringRef langStr = NULL;
-	NSString *lang = @"eng";
+	NSString *lang = @"en";
 
 	// find and strip the extension
 	findResult = CFStringFind(filename, CFSTR("."), kCFCompareBackwards);
