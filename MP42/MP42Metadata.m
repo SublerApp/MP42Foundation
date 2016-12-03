@@ -1175,7 +1175,7 @@ static const genreType_t genreType_strings[] = {
     }
 
     if (self.itemsMap[MP42MetadataKeyPlaylistID]) {
-        const uint64_t i = self.itemsMap[MP42MetadataKeyArtistID].numberValue.integerValue;
+        const uint64_t i = self.itemsMap[MP42MetadataKeyPlaylistID].numberValue.integerValue;
         MP4TagsSetPlaylistID(tags, &i);
     }
     else {
