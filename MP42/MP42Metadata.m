@@ -12,6 +12,7 @@
 #import "MP42Image.h"
 
 #import "NSString+MP42Additions.h"
+#import "MP42Ratings.h"
 
 typedef struct genreType_t {
     uint8_t index;
@@ -1405,7 +1406,7 @@ static const genreType_t genreType_strings[] = {
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
-    [coder encodeInt:4 forKey:@"MP42TagEncodeVersion"];
+    [coder encodeInt:5 forKey:@"MP42TagEncodeVersion"];
 
     [coder encodeObject:_presetName forKey:@"MP42SetName"];
     [coder encodeObject:_itemsArray forKey:@"MP42Items"];
@@ -1427,9 +1428,11 @@ static const genreType_t genreType_strings[] = {
                                                                                                forKey:@"MP42TagsDict"];
 
         [tagsDict enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
-            MP42MetadataItem *coverArtItem = [MP42MetadataItem metadataItemWithIdentifier:key value:obj
-                                                                                 dataType:MP42MetadataItemDataTypeUnspecified extendedLanguageTag:nil];
-            [self addMetadataItem:coverArtItem];
+            MP42MetadataItem *item = [MP42MetadataItem metadataItemWithIdentifier:key
+                                                                            value:obj
+                                                                         dataType:MP42MetadataItemDataTypeUnspecified
+                                                              extendedLanguageTag:nil];
+            [self addMetadataItem:item];
         }];
 
         // Subler 0.19 and previous sets
@@ -1488,6 +1491,23 @@ static const genreType_t genreType_strings[] = {
     else {
         _itemsArray = [decoder decodeObjectOfClasses:[NSSet setWithObjects:[NSMutableArray class], [MP42MetadataItem class], nil]
                                               forKey:@"MP42Items"];
+    }
+    if (version < 5) {
+        // Try to fix broken ratings from old sets that used an integer
+        NSArray<MP42MetadataItem *> *ratings = [self metadataItemsFilteredByIdentifier:MP42MetadataKeyRating];
+        for (MP42MetadataItem *rating in ratings) {
+            if ([rating.value isKindOfClass:[NSNumber class]]) {
+                [self removeMetadataItem:rating];
+
+                NSUInteger index = ((NSNumber *)rating.value).unsignedIntegerValue;
+                NSArray<NSString *> *ratings = MP42Ratings.defaultManager.ratings;
+                if (index < ratings.count) {
+                    MP42MetadataItem *correctRating = [MP42MetadataItem metadataItemWithIdentifier:MP42MetadataKeyRating value:ratings[index]
+                                                                                          dataType:MP42MetadataItemDataTypeString extendedLanguageTag:nil];
+                    [self addMetadataItem:correctRating];
+                }
+            }
+        }
     }
 
     _presetName = [decoder decodeObjectOfClass:[NSString class] forKey:@"MP42SetName"];
