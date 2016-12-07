@@ -66,7 +66,7 @@ static NSDictionary<NSString *, NSNumber *> *_defaultTypes;
 
         if (dataType == MP42MetadataItemDataTypeUnspecified) {
             _dataType = [MP42MetadataItem defaultDataTypeForIdentifier:identifier];
-            [self convertToNativeValue];
+            [self convertToType:_dataType];
         }
         else {
             _dataType = dataType;
@@ -89,13 +89,13 @@ static NSDictionary<NSString *, NSNumber *> *_defaultTypes;
     return dataType == 0 ? MP42MetadataItemDataTypeString : dataType;
 }
 
-- (void)convertToNativeValue
+- (void)convertToType:(MP42MetadataItemDataType)dataType
 {
     if ([_value isKindOfClass:[NSString class]]) {
         [self convertStringToNativeValue];
     }
     else if ([_value isKindOfClass:[NSNumber class]]) {
-        [self convertStringToNativeValue];
+        [self convertNumberToNativeValue];
     }
     else if ([_value isKindOfClass:[NSData class]]) {
         [self convertDataToNativeValue];

@@ -1404,9 +1404,11 @@ static const genreType_t genreType_strings[] = {
     return YES;
 }
 
+#define MP42METADATA_CODER_VERSION 6
+
 - (void)encodeWithCoder:(NSCoder *)coder
 {
-    [coder encodeInt:5 forKey:@"MP42TagEncodeVersion"];
+    [coder encodeInt:MP42METADATA_CODER_VERSION forKey:@"MP42TagEncodeVersion"];
 
     [coder encodeObject:_presetName forKey:@"MP42SetName"];
     [coder encodeObject:_itemsArray forKey:@"MP42Items"];
@@ -1421,6 +1423,10 @@ static const genreType_t genreType_strings[] = {
 
     NSInteger version = [decoder decodeIntForKey:@"MP42TagEncodeVersion"];
 
+    if (version > MP42METADATA_CODER_VERSION)
+    {
+        return nil;
+    }
     // Subler 1.1.8 and previous sets
     if (version < 4) {
         NSDictionary<NSString *, id> *tagsDict = [decoder decodeObjectOfClasses:[NSSet setWithObjects:[NSMutableDictionary class],
