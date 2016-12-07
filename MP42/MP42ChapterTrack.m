@@ -180,7 +180,7 @@
     BOOL success = YES;
 
     if ((self.edited && _areChaptersEdited) || !self.muxed) {
-        MP4Chapter_t * fileChapters = 0;
+        MP4Chapter_t *fileChapters = 0;
         MP4Duration refTrackDuration;
         uint32_t chapterCount = 0;
         uint32_t i = 0;
@@ -221,9 +221,11 @@
                 refTrackDuration = moovDuration;
 
             for (i = 0; i < chapterCount; i++) {
-                MP42TextSample *chapter = [_chapters objectAtIndex:i];
-                if ([[chapter title] UTF8String])
-                    strcpy(fileChapters[i].title, [[chapter title] UTF8String]);
+                MP42TextSample *chapter = _chapters[i];
+                const char *title = chapter.title.UTF8String;
+                if (title) {
+                    strlcpy(fileChapters[i].title, title, MP4V2_CHAPTER_TITLE_MAX + 1);
+                }
 
                 if (i + 1 < chapterCount && sum < refTrackDuration) {
                     MP42TextSample * nextChapter = [_chapters objectAtIndex:i+1];
