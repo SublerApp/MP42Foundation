@@ -193,8 +193,9 @@
         updateTracksCount(fileHandle);
 
         MP4TrackId refTrack = findFirstVideoTrack(fileHandle);
-        if (!refTrack)
-            refTrack = 1;
+        if (!refTrack) {
+            refTrack = 1; 
+        }
 
         chapterCount = _chapters.count;
         
@@ -247,6 +248,9 @@
 
             free(fileChapters);
             success = self.trackId = findChapterTrackId(fileHandle);
+
+            // Reset language
+            self.language = self.language;
         }
     }
 
