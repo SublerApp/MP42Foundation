@@ -482,7 +482,7 @@
                     videoSize.width = getFixedVideoWidth(_fileHandle, videoTrack);
                     videoSize.height = MP4GetTrackVideoHeight(_fileHandle, videoTrack);
                 }
-                else {
+                if (videoSize.width == 0 || videoSize.height == 0) {
                     videoSize.width = 640;
                     videoSize.height = 480;
                 }
