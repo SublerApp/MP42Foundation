@@ -241,6 +241,16 @@
     ]
 },
 {
+	"country" : "Česká republika",
+	"ratings" : [
+        { "media" : "movie & TV", 	"prefix" : "cz-movies", "itunes-code" : "U",                 "itunes-value" : "100", "description" : "U" },
+        { "media" : "movie & TV", 	"prefix" : "cz-movies", "itunes-code" : "12+",               "itunes-value" : "200", "description" : "12+" },
+        { "media" : "movie & TV", 	"prefix" : "cz-movies", "itunes-code" : "15+",               "itunes-value" : "350", "description" : "15+" },
+        { "media" : "movie & TV", 	"prefix" : "cz-movies", "itunes-code" : "18+",               "itunes-value" : "400", "description" : "18+" },
+        { "media" : "movie & TV", 	"prefix" : "cz-movies", "itunes-code" : "neklasifikováno",   "itunes-value" : "???", "description" : "Neklasifikováno" }
+    ]
+},
+{
 	"country" : "Unknown",
 	"ratings" : [
         { "media" : "movie & TV", 	"prefix" : "mpaa", 	"itunes-code" : "Unrated", 	"itunes-value" : "???", "description" : "Unknown" }
