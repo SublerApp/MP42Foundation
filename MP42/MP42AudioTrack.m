@@ -92,6 +92,11 @@
             MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.alac.channels", &channels_count);
             _channels = channels_count;
         }
+        else if (MP4HaveTrackAtom(fileHandle, self.trackId, "mdia.minf.stbl.stsd.twos")) {
+            uint64_t channels_count = 0;
+            MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.twos.channels", &channels_count);
+            _channels = channels_count;
+        }
 
         if (MP4HaveTrackAtom(fileHandle, self.trackId, "tref.fall")) {
             uint64_t fallbackId = 0;
