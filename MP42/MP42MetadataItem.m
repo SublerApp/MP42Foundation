@@ -10,6 +10,7 @@
 #import "MP42Metadata.h"
 #import "MP42Image.h"
 #import "NSString+MP42Additions.h"
+#import "MP42MetadataUtilities.h"
 
 @implementation MP42MetadataItem
 
@@ -49,8 +50,6 @@ static NSDictionary<NSString *, NSNumber *> *_defaultTypes;
                            MP42MetadataKeyShowWorkAndMovement: @(MP42MetadataItemDataTypeBool)};
     }
 }
-
-#import <CoreMedia/CMMetadata.h>
 
 - (instancetype)initWithIdentifier:(NSString *)identifier
                              value:(id)value
@@ -147,6 +146,7 @@ static NSDictionary<NSString *, NSNumber *> *_defaultTypes;
             break;
         case MP42MetadataItemDataTypeDate:
             NSAssert(NO, @"Unhandled conversion");
+            _value = nil;
             break;
         case MP42MetadataItemDataTypeStringArray:
             _value = @[numberValue.stringValue];
@@ -156,6 +156,7 @@ static NSDictionary<NSString *, NSNumber *> *_defaultTypes;
             break;
         default:
             NSAssert(NO, @"Unhandled conversion");
+            _value = nil;
     }
 }
 
@@ -164,19 +165,29 @@ static NSDictionary<NSString *, NSNumber *> *_defaultTypes;
     NSData *dataValue = (NSData *)_value;
     switch (_dataType) {
         case MP42MetadataItemDataTypeString:
-            NSAssert(NO, @"Unhandled conversion");
+        {
+            if (dataValue.length >= 2) {
+                uint8_t *bytes = (uint8_t *)dataValue.bytes;
+                int genre = ((bytes[0]) <<  8) | ((bytes[1]));
+                _value = genreFromIndex(genre);
+            }
             break;
+        }
         case MP42MetadataItemDataTypeBool:
             NSAssert(NO, @"Unhandled conversion");
+            _value = nil;
             break;
         case MP42MetadataItemDataTypeInteger:
             NSAssert(NO, @"Unhandled conversion");
+            _value = nil;
             break;
         case MP42MetadataItemDataTypeDate:
             NSAssert(NO, @"Unhandled conversion");
+            _value = nil;
             break;
         case MP42MetadataItemDataTypeStringArray:
             NSAssert(NO, @"Unhandled conversion");
+            _value = nil;
             break;
         case MP42MetadataItemDataTypeIntegerArray:
         {
@@ -190,6 +201,7 @@ static NSDictionary<NSString *, NSNumber *> *_defaultTypes;
         }
         default:
             NSAssert(NO, @"Unhandled conversion");
+            _value = nil;
     }
 }
 
