@@ -245,18 +245,21 @@
 {
     self.updatedProperty[@"colr"] = @YES;
     _colorPrimaries = colorPrimaries;
+    self.edited = YES;
 }
 
 - (void)setTransferCharacteristics:(uint16_t)transferCharacteristics
 {
     self.updatedProperty[@"colr"] = @YES;
     _transferCharacteristics = transferCharacteristics;
+    self.edited = YES;
 }
 
 - (void)setMatrixCoefficients:(uint16_t)matrixCoefficients
 {
     self.updatedProperty[@"colr"] = @YES;
     _matrixCoefficients = matrixCoefficients;
+    self.edited = YES;
 }
 
 - (void)setHSpacing:(uint64_t)newHSpacing
