@@ -199,6 +199,12 @@ typedef struct AudioFileIO
         NSLog(@"err: kAudioConverterPropertyMaximumOutputPacketSize");
     }
 
+    // Get the prime info
+    tmpsiz = sizeof(_primeInfo);
+    AudioConverterGetProperty(_encoder,
+                              kAudioConverterPrimeInfo,
+                              &tmpsiz, &_primeInfo);
+
     // Set up our fifo
     _ringBuffer = (sfifo_t *) malloc(sizeof(sfifo_t));
     int ringbuffer_len = _inputFormat.mSampleRate * FIFO_DURATION * 4 * 23;
@@ -457,6 +463,12 @@ static inline void enqueue(MP42AudioEncoder *self, MP42SampleBuffer *outSample)
                         while ((outSample = flush(_encoder, _afio))) {
                             enqueue(self, outSample);
                         }
+
+                        // Update the prime info
+                        UInt32 tmpsiz = sizeof(_primeInfo);
+                        AudioConverterGetProperty(_encoder,
+                                                  kAudioConverterPrimeInfo,
+                                                  &tmpsiz, &_primeInfo);
                     }
 
                     enqueue(self, sampleBuffer);
