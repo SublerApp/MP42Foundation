@@ -32,6 +32,8 @@ typedef struct AudioFileIO
 
     UInt64 outputPos;
 
+    bool done;
+
     AudioStreamPacketDescription * _Nullable pktDescs;
 } AudioFileIO;
 
@@ -336,7 +338,13 @@ OSStatus EncoderDataProc(AudioConverterRef               inAudioConverter,
 
     if (!availableBytes) {
         *ioNumberDataPackets = 0;
-        return 1;
+        if (afio->done) {
+            ioData->mBuffers[0].mDataByteSize = 0;
+            return 0;
+        }
+        else {
+            return 1;
+        }
     }
 
     // Figure out how much to read
@@ -375,7 +383,8 @@ static MP42SampleBuffer *encode(AudioConverterRef encoder, AudioFileIO *afio)
 
     UInt32 availableBytes = sfifo_used(afio->ringBuffer);
     // Check if we need more data
-    if (availableBytes < afio->inSamples * afio->inSizePerPacket) {
+    if (!afio->done &&
+        availableBytes < afio->inSamples * afio->inSizePerPacket) {
         return nil;
     }
 
@@ -416,14 +425,6 @@ static MP42SampleBuffer *encode(AudioConverterRef encoder, AudioFileIO *afio)
 
 static MP42SampleBuffer *flush(AudioConverterRef encoder, AudioFileIO *afio)
 {
-    UInt32 availableBytes = sfifo_used(afio->ringBuffer);
-    UInt32 pad = afio->inSamples * afio->inSizePerPacket - availableBytes;
-
-    if (pad > 0 && availableBytes > 0) {
-        UInt8 *padBuffer = calloc(1, pad);
-        sfifo_write(afio->ringBuffer, padBuffer, pad);
-        free(padBuffer);
-    }
     MP42SampleBuffer *outSample = encode(encoder, afio);
     return outSample;
 }
@@ -452,6 +453,7 @@ static inline void enqueue(MP42AudioEncoder *self, MP42SampleBuffer *outSample)
 
                 if (sampleBuffer->flags & MP42SampleBufferFlagEndOfFile) {
                     if (_encoder) {
+                        _afio->done = true;
                         while ((outSample = flush(_encoder, _afio))) {
                             enqueue(self, outSample);
                         }

@@ -1134,12 +1134,12 @@
                             sample->flags |= sync ? MP42SampleBufferFlagIsSync : 0;
                             sample->flags |= doNotDisplay ? MP42SampleBufferFlagDoNotDisplay : 0;
                             sample->trackId = track.sourceId;
-                            
+
                             if (attachmentsSent == NO) {
                                 sample->attachments = (void *)attachments;
                                 attachmentsSent = YES;
                             }
-                            
+
                             [demuxHelper->editsConstructor addSample:sample];
                             [self enqueue:sample];
                             [sample release];
