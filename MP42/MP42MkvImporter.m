@@ -371,14 +371,14 @@ static int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, ui
         }
     }
 
-    Attachment *attachments;
+    /*Attachment *attachments;
     mkv_GetAttachments(_matroskaFile, &attachments, &count);
 
     if (count) {
         for (unsigned int xi = 0; xi < count; xi++) {
             NSLog(@"%s", attachments[xi].Name);
         }
-    }
+    }*/
 
     return (mkvMetadata.items.count) ? mkvMetadata : nil;
 }
