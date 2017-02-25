@@ -62,13 +62,48 @@
     return self;
 }
 
-- (void) dealloc {
+- (void)dealloc {
     [queue release], queue = nil;
     [ss release], ss = nil;
 
     [super dealloc];
 }
 @end
+
+static int readData(struct StdIoStream  *ioStream, uint64_t pos, uint8_t **data, uint32_t dataSize)
+{
+    if (fseeko(ioStream->fp, pos, SEEK_SET)) {
+#ifdef DEBUG
+        fprintf(stderr,"fseeko(): %s\n", strerror(errno));
+#endif
+        return 0;
+    }
+
+    size_t rd = fread(*data, 1, dataSize, ioStream->fp);
+
+    if (rd != dataSize) {
+        if (rd == 0) {
+            if (feof(ioStream->fp)) {
+#ifdef DEBUG
+                fprintf(stderr,"Unexpected EOF while reading frame\n");
+#endif
+            }
+            else {
+#ifdef DEBUG
+                fprintf(stderr,"Error reading frame: %s\n",strerror(errno));
+#endif
+            }
+        } else {
+#ifdef DEBUG
+            fprintf(stderr,"Short read while reading frame\n");
+#endif
+        }
+
+        return 0;
+    }
+
+    return 1;
+}
 
 static int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, uint64_t FilePos, uint8_t** frame, uint32_t *FrameSize)
 {
@@ -86,8 +121,9 @@ static int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, ui
         packet = malloc(iSize + trackInfo->CompMethodPrivateSize);
         memcpy(packet, trackInfo->CompMethodPrivate, trackInfo->CompMethodPrivateSize);
     }
-    else
+    else {
         packet = malloc(iSize);
+    }
 
     if (packet == NULL) {
         fprintf(stderr,"Out of memory\n");
@@ -316,7 +352,7 @@ static int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, ui
     return self;
 }
 
-- (void)addMetadataItemWithString:(NSString *)value identifier:(NSString *)identifier metadata:(MP42Metadata *)metadata
+- (void)addMetadataItem:(id)value identifier:(NSString *)identifier metadata:(MP42Metadata *)metadata
 {
     MP42MetadataItem *item = [MP42MetadataItem metadataItemWithIdentifier:identifier
                                                                     value:value
@@ -331,7 +367,7 @@ static int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, ui
 
     SegmentInfo *segInfo = mkv_GetFileInfo(_matroskaFile);
     if (segInfo->Title) {
-        [self addMetadataItemWithString:[NSString stringWithUTF8String:segInfo->Title] identifier:MP42MetadataKeyName metadata:mkvMetadata];
+        [self addMetadataItem:[NSString stringWithUTF8String:segInfo->Title] identifier:MP42MetadataKeyName metadata:mkvMetadata];
     }
     
     Tag *tags;
@@ -342,43 +378,65 @@ static int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, ui
         for (unsigned int xi = 0; xi < tags->nSimpleTags; xi++) {
 
             if (!strcmp(tags->SimpleTags[xi].Name, "TITLE")) {
-                [self addMetadataItemWithString:[NSString stringWithUTF8String:tags->SimpleTags[xi].Value] identifier:MP42MetadataKeyName metadata:mkvMetadata];
+                [self addMetadataItem:@(tags->SimpleTags[xi].Value) identifier:MP42MetadataKeyName metadata:mkvMetadata];
             }
             
             if (!strcmp(tags->SimpleTags[xi].Name, "DATE_RELEASED")) {
-                [self addMetadataItemWithString:[NSString stringWithUTF8String:tags->SimpleTags[xi].Value] identifier:MP42MetadataKeyReleaseDate metadata:mkvMetadata];
+                [self addMetadataItem:@(tags->SimpleTags[xi].Value) identifier:MP42MetadataKeyReleaseDate metadata:mkvMetadata];
             }
 
             if (!strcmp(tags->SimpleTags[xi].Name, "COMMENT")) {
-                [self addMetadataItemWithString:[NSString stringWithUTF8String:tags->SimpleTags[xi].Value] identifier:MP42MetadataKeyUserComment metadata:mkvMetadata];
+                [self addMetadataItem:@(tags->SimpleTags[xi].Value) identifier:MP42MetadataKeyUserComment metadata:mkvMetadata];
             }
 
             if (!strcmp(tags->SimpleTags[xi].Name, "DIRECTOR")) {
-                [self addMetadataItemWithString:[NSString stringWithUTF8String:tags->SimpleTags[xi].Value] identifier:MP42MetadataKeyDirector metadata:mkvMetadata];
+                [self addMetadataItem:@(tags->SimpleTags[xi].Value) identifier:MP42MetadataKeyDirector metadata:mkvMetadata];
             }
 
             if (!strcmp(tags->SimpleTags[xi].Name, "COPYRIGHT")) {
-                [self addMetadataItemWithString:[NSString stringWithUTF8String:tags->SimpleTags[xi].Value] identifier:MP42MetadataKeyCopyright metadata:mkvMetadata];
+                [self addMetadataItem:@(tags->SimpleTags[xi].Value) identifier:MP42MetadataKeyCopyright metadata:mkvMetadata];
             }
 
             if (!strcmp(tags->SimpleTags[xi].Name, "ARTIST")) {
-                [self addMetadataItemWithString:[NSString stringWithUTF8String:tags->SimpleTags[xi].Value] identifier:MP42MetadataKeyArtist metadata:mkvMetadata];
+                [self addMetadataItem:@(tags->SimpleTags[xi].Value) identifier:MP42MetadataKeyArtist metadata:mkvMetadata];
             }
 
             if (!strcmp(tags->SimpleTags[xi].Name, "ENCODER")) {
-                [self addMetadataItemWithString:[NSString stringWithUTF8String:tags->SimpleTags[xi].Value] identifier:MP42MetadataKeyEncodingTool metadata:mkvMetadata];
+                [self addMetadataItem:@(tags->SimpleTags[xi].Value) identifier:MP42MetadataKeyEncodingTool metadata:mkvMetadata];
             }
         }
     }
 
-    /*Attachment *attachments;
+    Attachment *attachments;
     mkv_GetAttachments(_matroskaFile, &attachments, &count);
 
     if (count) {
         for (unsigned int xi = 0; xi < count; xi++) {
-            NSLog(@"%s", attachments[xi].Name);
+            Attachment *attachment = &attachments[xi];
+
+            if (attachment->Name && attachment->MimeType && attachment->Length > 0) {
+                if (!strcmp(attachment->MimeType, "image/jpeg") || !strcmp(attachment->MimeType, "image/png")) {
+                    uint8_t *data = malloc(attachment->Length);
+
+                    if (readData(_ioStream, attachment->Position, &data, attachment->Length)) {
+                        MP42TagArtworkType type = MP42_ART_JPEG;
+
+                        if (!strcmp(attachment->MimeType, "image/png")) {
+                            type = MP42_ART_PNG;
+                        }
+
+                        MP42Image *image = [[MP42Image alloc] initWithBytes:data length:attachment->Length type:type];
+
+                        [self addMetadataItem:image identifier:MP42MetadataKeyCoverArt metadata:mkvMetadata];
+
+                        [image release];
+                    }
+
+                    free(data);
+                }
+            }
         }
-    }*/
+    }
 
     return (mkvMetadata.items.count) ? mkvMetadata : nil;
 }

@@ -23,7 +23,7 @@
     NSData  *_data;
     NSString *_uuid;
 
-    NSInteger _type;
+    MP42TagArtworkType _type;
 }
 
 @synthesize url = _url;
@@ -31,7 +31,7 @@
 @synthesize type = _type;
 @synthesize uuid = _uuid;
 
-- (instancetype)initWithURL:(NSURL *)url type:(NSInteger)type
+- (instancetype)initWithURL:(NSURL *)url type:(MP42TagArtworkType)type
 {
     if (self = [super init]) {
         _url = url;
@@ -49,7 +49,7 @@
     return self;
 }
 
-- (instancetype)initWithData:(NSData *)data type:(NSInteger)type
+- (instancetype)initWithData:(NSData *)data type:(MP42TagArtworkType)type
 {
     if (self = [super init]) {
         _data = [data copy];
@@ -59,7 +59,7 @@
     return self;
 }
 
-- (instancetype)initWithBytes:(const void*)bytes length:(NSUInteger)length type:(NSInteger)type
+- (instancetype)initWithBytes:(const void*)bytes length:(NSUInteger)length type:(MP42TagArtworkType)type
 {
     if (self = [super init]) {
         _data = [[NSData alloc] initWithBytes:bytes length:length];

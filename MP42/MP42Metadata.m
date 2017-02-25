@@ -700,7 +700,7 @@
     }
     if (tags->artwork) {
         for (uint32_t i = 0; i < tags->artworkCount; i++) {
-            MP42Image *artwork = [[MP42Image alloc] initWithBytes:tags->artwork[i].data length:tags->artwork[i].size type:tags->artwork[i].type];
+            MP42Image *artwork = [[MP42Image alloc] initWithBytes:tags->artwork[i].data length:tags->artwork[i].size type:(MP42TagArtworkType)tags->artwork[i].type];
             [self addMetadataItemWithImage:artwork identifier:MP42MetadataKeyCoverArt];
         }
     }
@@ -1058,7 +1058,7 @@
 
                 newArtwork.data = (void *)artwork.data.bytes;
                 newArtwork.size = artwork.data.length;
-                newArtwork.type = artwork.type;
+                newArtwork.type = (MP4TagArtworkType)artwork.type;
             }
             else {
 
