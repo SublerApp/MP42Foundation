@@ -298,6 +298,9 @@
                     continue;
                 }
 
+                NSMutableString *text = [NSMutableString string];
+                BOOL forced = NO;
+
                 for (unsigned i = 0; i < subtitle.num_rects; i++) {
                     AVSubtitleRect *rect = subtitle.rects[i];
                     if (rect->w == 0 || rect->h == 0) {
@@ -326,8 +329,6 @@
                         }
                     }
 
-                    BOOL forced = NO;
-
                     if (rect->flags & AV_SUBTITLE_FLAG_FORCED) {
                         forced = YES;
                     }
@@ -351,18 +352,14 @@
 
                     CGImageRef filteredCGImage = [self createfilteredCGImage:cgImage];
 
-                    NSString *text = nil;
-                    MP42SampleBuffer *subSample = nil;
-                    if ((text = [_ocr performOCROnCGImage:filteredCGImage])) {
-                        subSample = copySubtitleSample(sampleBuffer->trackId, text, sampleBuffer->duration, forced, NO, NO, CGSizeMake(0,0), 0);
+                    NSString *ocrText;
+                    if ((ocrText = [_ocr performOCROnCGImage:filteredCGImage])) {
+                        if (text.length) {
+                            [text appendString:@"\n"];
+                        }
+                        [text appendString:ocrText];
                     }
-                    else {
-                        subSample = copyEmptySubtitleSample(sampleBuffer->trackId, sampleBuffer->duration, forced);
-                    }
-                    
-                    [_outputSamplesBuffer enqueue:subSample];
-                    [subSample release];
-                    
+
                     CGImageRelease(cgImage);
                     CGDataProviderRelease(provider);
                     CFRelease(imgData);
@@ -370,7 +367,18 @@
                     
                     free(imageData);
                 }
-                
+
+                MP42SampleBuffer *subSample = nil;
+                if (text.length) {
+                    subSample = copySubtitleSample(sampleBuffer->trackId, text, sampleBuffer->duration, forced, NO, NO, CGSizeMake(0,0), 0);
+                }
+                else {
+                    subSample = copyEmptySubtitleSample(sampleBuffer->trackId, sampleBuffer->duration, forced);
+                }
+
+                [_outputSamplesBuffer enqueue:subSample];
+                [subSample release];
+
                 avsubtitle_free(&subtitle);
                 av_packet_unref(&pkt);
                 
