@@ -13,6 +13,7 @@
 
 #import "MP42AudioDecoder.h"
 #import "MP42AudioEncoder.h"
+#import "MP42AC3AudioEncoder.h"
 
 #import "MP42Track+Muxer.h"
 #import "MP42FileImporter+Private.h"
@@ -22,7 +23,7 @@
 @interface MP42AudioConverter ()
 
 @property (nonatomic, readonly) MP42AudioDecoder *decoder;
-@property (nonatomic, readonly) MP42AudioEncoder *encoder;
+@property (nonatomic, readonly) id<MP42AudioUnit> encoder;
 
 @end
 
@@ -53,10 +54,17 @@
         if (!_decoder) {
             return nil;
         }
-
-        _encoder = [[MP42AudioEncoder alloc] initWithInputUnit:_decoder
-                                                       bitRate:settings.bitRate
-                                                         error:error];
+        
+        if (settings.format == kMP42AudioCodecType_AC3 || settings.format == kMP42AudioCodecType_EnhancedAC3) {
+            _encoder = [[MP42AC3AudioEncoder alloc] initWithInputUnit:_decoder
+                                                              bitRate:settings.bitRate
+                                                                error:error];
+        }
+        else {
+            _encoder = [[MP42AudioEncoder alloc] initWithInputUnit:_decoder
+                                                           bitRate:settings.bitRate
+                                                             error:error];
+        }
         _encoder.outputUnit = self;
         _encoder.outputType = MP42AudioUnitOutputPull;
 

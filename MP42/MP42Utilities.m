@@ -8,6 +8,7 @@
 
 #import "MP42Utilities.h"
 #import "MP42SubUtilities.h"
+#import <AudioToolbox/AudioToolbox.h>
 
 NSString * StringFromTime(long long time, long timeScale)
 {
@@ -98,4 +99,38 @@ int isHdVideo(uint64_t width, uint64_t height)
         return 1;
 
     return 0;
+}
+
+NSString *nameForChannelLayoutTag(UInt32 channelLayoutTag)
+{
+    UInt32 channelLayoutSize = sizeof(AudioChannelLayout);
+    AudioChannelLayout *channelLayout = calloc(channelLayoutSize, 1);
+    channelLayout->mChannelLayoutTag = channelLayoutTag;
+    
+    UInt32 bitmapSize = sizeof(UInt32);
+    UInt32 channelBitmap;
+    OSStatus err = AudioFormatGetProperty(kAudioFormatProperty_BitmapForLayoutTag,
+                                          sizeof(AudioChannelLayoutTag), &channelLayout->mChannelLayoutTag,
+                                          &bitmapSize, &channelBitmap);
+    UInt32 channels = AudioChannelLayoutTag_GetNumberOfChannels(channelLayout->mChannelLayoutTag);
+    if (err && channels == 6) {
+        channelBitmap = 0x3F;
+    }
+    free(channelLayout);
+    BOOL lfe = (channelBitmap & kAudioChannelBit_LFEScreen);
+    int mainChannels = (lfe) ? channels - 1 : channels;
+    NSString *desc;
+    switch (mainChannels) {
+        case 1:
+            desc = @"Mono";
+            break;
+        case 2:
+        case 3:
+            desc = @"Stereo";
+            break;
+        default:
+            desc = @"Surround";
+            break;
+    }
+    return [NSString stringWithFormat:@"%@ %d.%d", desc, mainChannels, (lfe) ? 1 : 0];
 }

@@ -17,6 +17,10 @@
 extern AVCodec ff_##x##_decoder; \
 avcodec_register(&ff_##x##_decoder); }
 
+#define REGISTER_ENCODER(x) { \
+extern AVCodec ff_##x##_encoder; \
+avcodec_register(&ff_##x##_encoder); }
+
 static int ff_lockmgr_cb(void **mutex, enum AVLockOp op)
 {
     switch (op) {
@@ -83,6 +87,7 @@ void FFInitFFmpeg()
         REGISTER_DECODER(pcm_u16le);
         REGISTER_DECODER(pcm_u24be);
         REGISTER_DECODER(pcm_u24le);
+        REGISTER_ENCODER(ac3);
     });
 }
 
@@ -326,4 +331,28 @@ int convert_layout_to_av(AudioChannelLayout *layout, UInt32 layoutSize)
 done:
     free(layout_copy);
     return layout_mask;
+}
+
+int channel_layout_for_channels(AVCodec *codec, int channels)
+{
+    const uint64_t *p;
+    uint64_t best_ch_layout = 0;
+    int best_nb_channells   = 0;
+    
+    if (!codec->channel_layouts)
+        return AV_CH_LAYOUT_STEREO;
+    
+    p = codec->channel_layouts;
+    while (*p) {
+        int nb_channels = av_get_channel_layout_nb_channels(*p);
+        
+        if (nb_channels == channels) return *p;
+        
+        if (nb_channels > best_nb_channells) {
+            best_ch_layout    = *p;
+            best_nb_channells = nb_channels;
+        }
+        p++;
+    }
+    return best_ch_layout;
 }

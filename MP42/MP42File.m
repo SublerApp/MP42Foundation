@@ -1046,7 +1046,8 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 
     for (MP42AudioTrack *track in [self tracksWithMediaType:kMP42MediaType_Audio] ) {
         if ((track.targetFormat == kMP42AudioCodecType_AC3 ||
-            track.targetFormat == kMP42AudioCodecType_EnhancedAC3) &&
+             track.targetFormat == kMP42AudioCodecType_EnhancedAC3 ||
+             track.targetFormat == kMP42AudioCodecType_DTS) &&
             track.fallbackTrack == nil) {
             [needFallbackTracks addObject:track];
         }

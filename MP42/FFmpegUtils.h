@@ -22,4 +22,6 @@ OSType CodecIDToFourCC(enum AVCodecID codecID);
 int remap_layout(AudioChannelLayout *layout, uint64_t in_layout, int count);
 int convert_layout_to_av(AudioChannelLayout *layout, UInt32 layoutSize);
 
+int channel_layout_for_channels(AVCodec *codec, int channels);
+
 #endif /* FFmpegUtils_h */
