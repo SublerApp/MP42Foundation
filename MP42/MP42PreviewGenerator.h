@@ -14,7 +14,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MP42PreviewGenerator : NSObject
 
-+ (NSArray<NSImage *> *)generatePreviewImagesFromChapters:(NSArray<MP42TextSample *> *)chapters fileURL:(NSURL *)url;
++ (NSArray<NSImage *> *)generatePreviewImagesFromChapters:(NSArray<MP42TextSample *> *)chapters fileURL:(NSURL *)url atPosition:(CGFloat)position;
 
 @end
 
