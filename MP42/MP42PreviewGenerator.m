@@ -20,7 +20,7 @@
     return images;
 }
 
-+ (NSArray *)generatePreviewImagesAVFoundationFromChapters:(NSArray<MP42TextSample *> *)chapters andFile:(NSURL *)file {
++ (NSArray *)generatePreviewImagesAVFoundationFromChapters:(NSArray *)chapters andFile:(NSURL *)file {
     NSMutableArray *images = [[NSMutableArray alloc] initWithCapacity:[chapters count]];
 
     AVAsset *asset = [AVAsset assetWithURL:file];
@@ -32,13 +32,8 @@
         generator.requestedTimeToleranceBefore = kCMTimeZero;
         generator.requestedTimeToleranceAfter  = kCMTimeZero;
 
-        CGFloat thumbnailPosition = 0.5; // Middle of chapter
-        
-        for (NSInteger idx = 0; idx < chapters.count; idx++)
-        {
-            MP42TextSample *chapter = chapters[idx];
-            MP42Duration nextChapterTimestamp = (idx < chapters.count - 1) ? [chapters[idx+1] timestamp] : CMTimeGetSeconds(asset.duration) * 1000;
-            CMTime time = CMTimeMake([chapter timestamp] + ((nextChapterTimestamp - [chapter timestamp]) * thumbnailPosition), 1000);
+        for (MP42TextSample *chapter in chapters) {
+            CMTime time = CMTimeMake([chapter timestamp] + 1800, 1000);
             CGImageRef imgRef = [generator copyCGImageAtTime:time actualTime:NULL error:NULL];
             if (imgRef) {
                 NSSize size = NSMakeSize(CGImageGetWidth(imgRef), CGImageGetHeight(imgRef));
