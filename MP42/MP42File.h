@@ -24,6 +24,7 @@ NS_ASSUME_NONNULL_BEGIN
 extern NSString * const MP4264BitData;
 extern NSString * const MP4264BitTime;
 extern NSString * const MP42GenerateChaptersPreviewTrack;
+extern NSString * const MP42ChaptersPreviewPosition;
 extern NSString * const MP42CustomChaptersPreviewTrack;
 
 typedef void (^MP42FileProgressHandler)(double progress);
