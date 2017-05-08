@@ -20,6 +20,7 @@
 NSString * const MP4264BitData = @"MP4264BitData";
 NSString * const MP4264BitTime = @"MP4264BitTime";
 NSString * const MP42GenerateChaptersPreviewTrack = @"MP42ChaptersPreview";
+NSString * const MP42ChaptersPreviewPosition = @"MP42ChaptersPreviewPosition";
 NSString * const MP42CustomChaptersPreviewTrack = @"MP42CustomChaptersPreview";
 
 /**
@@ -853,7 +854,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 
     // Generate previews images for chapters
     if ([options[MP42GenerateChaptersPreviewTrack] boolValue] && self.itracks.count) {
-        [self createChaptersPreview];
+        [self createChaptersPreviewAtPosition:[options[MP42ChaptersPreviewPosition] floatValue]];
     } else if ([options[MP42CustomChaptersPreviewTrack] boolValue] && self.itracks.count) {
         [self customChaptersPreview];
     }
@@ -968,7 +969,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
     return YES;
 }
 
-- (BOOL)createChaptersPreview {
+- (BOOL)createChaptersPreviewAtPosition:(CGFloat)position {
     NSInteger decodable = 1;
     MP42ChapterTrack *chapterTrack = nil;
     MP42VideoTrack *refTrack = nil;
@@ -1001,7 +1002,9 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
     }
 
     if (chapterTrack && decodable && (!jpegTrack)) {
-        NSArray<NSImage *> *images = [MP42PreviewGenerator generatePreviewImagesFromChapters:chapterTrack.chapters fileURL:self.URL];
+        NSArray<NSImage *> *images = [MP42PreviewGenerator generatePreviewImagesFromChapters:chapterTrack.chapters
+                                                                                     fileURL:self.URL
+                                                                                  atPosition:position];
 
         // If we haven't got any images, return.
         if (!images || !images.count) {
@@ -1046,7 +1049,8 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 
     for (MP42AudioTrack *track in [self tracksWithMediaType:kMP42MediaType_Audio] ) {
         if ((track.targetFormat == kMP42AudioCodecType_AC3 ||
-            track.targetFormat == kMP42AudioCodecType_EnhancedAC3) &&
+             track.targetFormat == kMP42AudioCodecType_EnhancedAC3 ||
+             track.targetFormat == kMP42AudioCodecType_DTS) &&
             track.fallbackTrack == nil) {
             [needFallbackTracks addObject:track];
         }

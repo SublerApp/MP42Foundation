@@ -227,6 +227,8 @@
 		A9DFBDCC1960174500410060 /* MP42EditListsReconstructor.m in Sources */ = {isa = PBXBuildFile; fileRef = A9DFBDCA1960174500410060 /* MP42EditListsReconstructor.m */; };
 		A9E8FB851D4664E80071A5F1 /* libbz2.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = A9E8FB841D4664E80071A5F1 /* libbz2.tbd */; };
 		A9E8FB871D4664F70071A5F1 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = A9E8FB861D4664F70071A5F1 /* libz.tbd */; };
+		FFE849961EBCAFDF000AA078 /* MP42AC3AudioEncoder.h in Headers */ = {isa = PBXBuildFile; fileRef = FFE849941EBCAFDF000AA078 /* MP42AC3AudioEncoder.h */; };
+		FFE849971EBCAFDF000AA078 /* MP42AC3AudioEncoder.m in Sources */ = {isa = PBXBuildFile; fileRef = FFE849951EBCAFDF000AA078 /* MP42AC3AudioEncoder.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -438,6 +440,8 @@
 		A9DFBDCA1960174500410060 /* MP42EditListsReconstructor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MP42EditListsReconstructor.m; sourceTree = "<group>"; };
 		A9E8FB841D4664E80071A5F1 /* libbz2.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libbz2.tbd; path = usr/lib/libbz2.tbd; sourceTree = SDKROOT; };
 		A9E8FB861D4664F70071A5F1 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
+		FFE849941EBCAFDF000AA078 /* MP42AC3AudioEncoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MP42AC3AudioEncoder.h; sourceTree = "<group>"; };
+		FFE849951EBCAFDF000AA078 /* MP42AC3AudioEncoder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MP42AC3AudioEncoder.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -756,6 +760,8 @@
 				A908010D1D4B83A3002B6950 /* MP42AudioDecoder.m */,
 				A908010E1D4B83A3002B6950 /* MP42AudioEncoder.h */,
 				A908010F1D4B83A3002B6950 /* MP42AudioEncoder.m */,
+				FFE849941EBCAFDF000AA078 /* MP42AC3AudioEncoder.h */,
+				FFE849951EBCAFDF000AA078 /* MP42AC3AudioEncoder.m */,
 				A90801101D4B83A3002B6950 /* MP42AudioUnit.h */,
 				A9B9C21F1823923100416A4E /* MP42AudioConverter.h */,
 				A9B9C2201823923100416A4E /* MP42AudioConverter.m */,
@@ -794,6 +800,7 @@
 				A9B9C27D1823923200416A4E /* MP42FileImporter.h in Headers */,
 				A9B9C27B1823923200416A4E /* MP42File.h in Headers */,
 				A9059DCB1D870B9C000D1B9A /* MP42ConversionSettings.h in Headers */,
+				FFE849961EBCAFDF000AA078 /* MP42AC3AudioEncoder.h in Headers */,
 				A9DFBDCB1960174500410060 /* MP42EditListsReconstructor.h in Headers */,
 				A9B9C29B1823923200416A4E /* MP42Track.h in Headers */,
 				A9B9C29F1823923200416A4E /* MP42VideoTrack.h in Headers */,
@@ -1073,6 +1080,7 @@
 				A9B9C29C1823923200416A4E /* MP42Track.m in Sources */,
 				A9B9C2A01823923200416A4E /* MP42VideoTrack.m in Sources */,
 				A90801171D4B83A3002B6950 /* MP42AudioEncoder.m in Sources */,
+				FFE849971EBCAFDF000AA078 /* MP42AC3AudioEncoder.m in Sources */,
 				A9B9C2981823923200416A4E /* MP42SubtitleTrack.m in Sources */,
 				A9022A961D6F3FD9005F0920 /* MP42MetadataItem.m in Sources */,
 				A9B9C2D0182396A100416A4E /* MP42Ratings.m in Sources */,
