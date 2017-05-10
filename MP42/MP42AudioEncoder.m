@@ -48,7 +48,7 @@ typedef struct AudioFileIO
 @property (nonatomic, readonly) AudioConverterRef encoder;
 @property (nonatomic, readonly) NSUInteger bitrate;
 
-@property (nonatomic, readonly) NSThread *decoderThread;
+@property (nonatomic, readonly) NSThread *thread;
 @property (nonatomic, readonly) MP42Fifo<MP42SampleBuffer *> *inputSamplesBuffer;
 @property (nonatomic, readonly) MP42Fifo<MP42SampleBuffer *> *outputSamplesBuffer;
 
@@ -291,9 +291,9 @@ typedef struct AudioFileIO
 
 - (void)start
 {
-    _decoderThread = [[NSThread alloc] initWithTarget:self selector:@selector(threadMainRoutine) object:nil];
-    [_decoderThread setName:@"AudioToolbox Audio Encoder"];
-    [_decoderThread start];
+    _thread = [[NSThread alloc] initWithTarget:self selector:@selector(threadMainRoutine) object:nil];
+    [_thread setName:@"AudioToolbox Audio Encoder"];
+    [_thread start];
 }
 
 #pragma mark - Public methods

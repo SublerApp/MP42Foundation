@@ -324,8 +324,16 @@
 - (NSMutableArray<NSString *> *)stringArrayFromDictionaryArray:(NSArray<NSDictionary *> *)array key:(id)key {
     NSMutableArray *result = [NSMutableArray array];
 
-    for (NSDictionary *name in array) {
-        [result addObject:name[key]];
+    if ([array isKindOfClass:[NSArray class]]) {
+        for (NSDictionary *dict in array) {
+            if ([dict isKindOfClass:[NSDictionary class]]) {
+                [result addObject:dict[key]];
+            }
+        }
+    }
+    else if ([array isKindOfClass:[NSString class]]) {
+        NSString *name = (NSString *)array;
+        [result addObject:name];
     }
 
     return [result copy];

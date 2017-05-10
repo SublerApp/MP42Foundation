@@ -384,13 +384,25 @@
 - (NSString *)stringFromArray:(NSArray<NSDictionary *> *)array key:(id)key {
     NSMutableString *result = [NSMutableString string];
 
-    for (NSDictionary *name in array) {
+    if ([array isKindOfClass:[NSArray class]]) {
 
-        if (result.length) {
-            [result appendString:@", "];
+        for (id name in array) {
+
+            if (result.length) {
+                [result appendString:@", "];
+            }
+
+            if ([name isKindOfClass:[NSDictionary class]]) {
+                [result appendString:name[key]];
+            }
+            else if ([name isKindOfClass:[NSString class]]) {
+                [result appendString:name];
+            }
         }
-
-        [result appendString:name[key]];
+    }
+    else if ([array isKindOfClass:[NSString class]]) {
+        NSString *name = (NSString *)array;
+        [result appendString:name];
     }
 
     return [[result copy] autorelease];
