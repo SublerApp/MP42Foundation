@@ -23,12 +23,9 @@ typedef struct AudioFileIO
     float   *inBuffer;
     UInt32  inBufferSize;
 
-    UInt32  outputMaxSize;
-
     UInt32  inSizePerPacket;
     UInt32  inSamples;
     UInt32  channelsPerFrame;
-    UInt32  numPacketsPerRead;
 
     AVFrame *frame;
     float *samples;
@@ -144,17 +141,14 @@ typedef struct AudioFileIO
     
     _afio = malloc(sizeof(AudioFileIO));
     bzero(_afio, sizeof(AudioFileIO));
-    
+
     _afio->inBufferSize = 1024 * 64;
     _afio->inBuffer     = malloc(_afio->inBufferSize);
-    
-    _afio->outputMaxSize = _afio->inBufferSize;
-    
+
     _afio->inSizePerPacket = _inputFormat.mBytesPerPacket;
     _afio->inSamples = _outputFormat.mFramesPerPacket;
     _afio->channelsPerFrame = _inputFormat.mChannelsPerFrame;
-    _afio->numPacketsPerRead = _afio->inBufferSize / _afio->inSizePerPacket;
-    
+
     _afio->ringBuffer = _ringBuffer;
 
     _afio->frame = av_frame_alloc();
@@ -197,11 +191,31 @@ typedef struct AudioFileIO
         {
             av_frame_free(&_afio->frame);
         }
+        free(_afio->inBuffer);
+        free(_afio);
+        _afio = NULL;
+
     }
     if (_avctx)
     {
         avcodec_close(_avctx);
         av_free(_avctx);
+    }
+
+    if (_ringBuffer) {
+        sfifo_close(_ringBuffer);
+        free(_ringBuffer);
+        _ringBuffer = NULL;
+    }
+
+    if (_outputLayout) {
+        free(_outputLayout);
+        _outputLayout = NULL;
+    }
+
+    if (_inputLayout) {
+        free(_inputLayout);
+        _inputLayout = NULL;
     }
 }
 

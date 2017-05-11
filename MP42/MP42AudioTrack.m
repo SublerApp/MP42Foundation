@@ -192,23 +192,6 @@
     return (self.trackId > 0);
 }
 
-- (void)setConversionSettings:(MP42AudioConversionSettings *)conversionSettings
-{
-    [super setConversionSettings:conversionSettings];
-    
-    if (conversionSettings == nil) return;
-    
-    if ([self.name rangeOfString:@"surround" options:NSCaseInsensitiveSearch].location == NSNotFound) return;
-    
-    if ([conversionSettings.mixDown isEqualToString:SBNoneMixdown]) {
-        // FFmpeg encoding currently doesn't go beyond 5.1
-        self.name = (self.channels > 6) ? @"Surround 5.1" : nameForChannelLayoutTag(self.channelLayoutTag);
-    }
-    else {
-        self.name = (self.channels == 1 || [conversionSettings.mixDown isEqualToString:SBMonoMixdown]) ? @"Mono" : @"Stereo";
-    }
-}
-
 - (void)setVolume:(float)newVolume
 {
     _volume = newVolume;
