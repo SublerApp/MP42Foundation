@@ -723,37 +723,39 @@
         } else if ([assetTrack.mediaType isEqualToString:AVMediaTypeAudio]) {
 
             size_t cookieSizeOut;
-            const void *magicCookie = CMAudioFormatDescriptionGetMagicCookie(formatDescription, &cookieSizeOut);
+            const void *cookieBuffer = CMAudioFormatDescriptionGetMagicCookie(formatDescription, &cookieSizeOut);
 
             if (code == kAudioFormatMPEG4AAC || code == kAudioFormatMPEG4AAC_HE || code == kAudioFormatMPEG4AAC_HE_V2) {
 
                 // Extract DecoderSpecific info
                 UInt8 *buffer;
                 int size;
-                ReadESDSDescExt((void*)magicCookie, &buffer, &size, 0);
+                ReadESDSDescExt((void *)cookieBuffer, &buffer, &size, 0);
 
-                return [NSData dataWithBytes:buffer length:size];
+                NSData *magicCookie = [NSData dataWithBytes:buffer length:size];
+                free(buffer);
+                return magicCookie;
 
             }
+
             else if (code == kAudioFormatAppleLossless) {
 
                 if (cookieSizeOut > 48) {
                     // Remove unneeded parts of the cookie, as described in ALACMagicCookieDescription.txt
-                    magicCookie += 24;
+                    cookieBuffer += 24;
                     cookieSizeOut = cookieSizeOut - 24 - 8;
                 }
 
-                return [NSData dataWithBytes:magicCookie length:cookieSizeOut];
-
+                return [NSData dataWithBytes:cookieBuffer length:cookieSizeOut];
             }
 
             else if (code == kAudioFormatEnhancedAC3) {
                 // dec3 atom
                 // remove the atom header
-                magicCookie += 8;
+                cookieBuffer += 8;
                 cookieSizeOut = cookieSizeOut - 8;
 
-                return [NSData dataWithBytes:magicCookie length:cookieSizeOut];
+                return [NSData dataWithBytes:cookieBuffer length:cookieSizeOut];
             }
 
             else if (code == kAudioFormatAC3 ||
@@ -818,7 +820,7 @@
                 return [ac3Info autorelease];
 
             } else if (cookieSizeOut) {
-                return [NSData dataWithBytes:magicCookie length:cookieSizeOut];
+                return [NSData dataWithBytes:cookieBuffer length:cookieSizeOut];
             }
         }
 
