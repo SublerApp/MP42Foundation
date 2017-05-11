@@ -119,72 +119,6 @@
             // so update the track timescale here.
             timeScale = audioConverter.sampleRate;
             format = track.conversionSettings.format;
-            
-            if (track.format == kMP42AudioCodecType_DTS && format == kMP42AudioCodecType_AC3) {
-                AudioStreamBasicDescription asbd;
-                bzero(&asbd, sizeof(AudioStreamBasicDescription));
-                asbd.mSampleRate = [track.muxer_helper->importer timescaleForTrack:track];
-                asbd.mChannelsPerFrame = [(MP42AudioTrack *)track channels];
-                asbd.mFormatID = track.format;
-                
-                UInt32 channelLayoutSize = sizeof(AudioChannelLayout);
-                AudioChannelLayout *channelLayout = calloc(channelLayoutSize, 1);
-                channelLayout->mChannelLayoutTag = [(MP42AudioTrack *)track channelLayoutTag];
-                
-                UInt32 bitmapSize = sizeof(UInt32);
-                UInt32 channelBitmap;
-                OSStatus err = AudioFormatGetProperty(kAudioFormatProperty_BitmapForLayoutTag,
-                                                      sizeof(AudioChannelLayoutTag), &channelLayout->mChannelLayoutTag,
-                                                      &bitmapSize, &channelBitmap);
-                if (err && AudioChannelLayoutTag_GetNumberOfChannels(channelLayout->mChannelLayoutTag) == 6) {
-                    channelBitmap = 0x3F;
-                }
-                free(channelLayout);
-                
-                uint64_t fscod = 0;
-                uint64_t bsid = 8;
-                uint64_t bsmod = 0;
-                uint64_t acmod = 7;
-                uint64_t lfeon = (channelBitmap & kAudioChannelBit_LFEScreen) ? 1 : 0;
-                uint64_t bit_rate_code = 15;
-                
-                switch (asbd.mChannelsPerFrame - lfeon) {
-                    case 1:
-                        acmod = 1;
-                        break;
-                    case 2:
-                        acmod = 2;
-                        break;
-                    case 3:
-                        if (channelBitmap & kAudioChannelBit_CenterSurround) acmod = 3;
-                        else acmod = 4;
-                        break;
-                    case 4:
-                        if (channelBitmap & kAudioChannelBit_CenterSurround) acmod = 5;
-                        else acmod = 6;
-                        break;
-                    case 5:
-                        acmod = 7;
-                        break;
-                    default:
-                        break;
-                }
-                
-                if (asbd.mSampleRate == 48000) fscod = 0;
-                else if (asbd.mSampleRate == 44100) fscod = 1;
-                else if (asbd.mSampleRate == 32000) fscod = 2;
-                else fscod = 3;
-                
-                NSMutableData *ac3Info = [NSMutableData dataWithCapacity:sizeof(uint64_t) * 6];
-                [ac3Info appendBytes:&fscod length:sizeof(uint64_t)];
-                [ac3Info appendBytes:&bsid length:sizeof(uint64_t)];
-                [ac3Info appendBytes:&bsmod length:sizeof(uint64_t)];
-                [ac3Info appendBytes:&acmod length:sizeof(uint64_t)];
-                [ac3Info appendBytes:&lfeon length:sizeof(uint64_t)];
-                [ac3Info appendBytes:&bit_rate_code length:sizeof(uint64_t)];
-                
-                magicCookie = ac3Info;
-            }
         }
         if ([track isMemberOfClass:[MP42SubtitleTrack class]] && track.conversionSettings &&
                 (track.format == kMP42SubtitleCodecType_VobSub || track.format == kMP42SubtitleCodecType_PGS)) {
@@ -339,20 +273,28 @@
         // AC-3 audio track
         else if ([track isMemberOfClass:[MP42AudioTrack class]] && format == kMP42AudioCodecType_AC3) {
             if (magicCookie.length < sizeof(uint64_t) * 6) {
-                [unsupportedTracks addObject:track];
-                continue;
+
+                dstTrackId = MP4AddAC3AudioTrack(_fileHandle,
+                                                 timeScale,
+                                                 0,
+                                                 0,
+                                                 0,
+                                                 0,
+                                                 0,
+                                                 0);
             }
+            else {
+                const uint64_t *ac3Info = (const uint64_t *)magicCookie.bytes;
 
-            const uint64_t *ac3Info = (const uint64_t *)magicCookie.bytes;
-
-            dstTrackId = MP4AddAC3AudioTrack(_fileHandle,
-                                             timeScale,
-                                             ac3Info[0],
-                                             ac3Info[1],
-                                             ac3Info[2],
-                                             ac3Info[3],
-                                             ac3Info[4],
-                                             ac3Info[5]);
+                dstTrackId = MP4AddAC3AudioTrack(_fileHandle,
+                                                 timeScale,
+                                                 ac3Info[0],
+                                                 ac3Info[1],
+                                                 ac3Info[2],
+                                                 ac3Info[3],
+                                                 ac3Info[4],
+                                                 ac3Info[5]);
+            }
 
             [helper->importer setActiveTrack:track];
         }
@@ -650,9 +592,23 @@
     for (MP42Track *track in _workingTracks) {
         if (track.muxer_helper->converter && track.conversionSettings && [track isMemberOfClass:[MP42AudioTrack class]]) {
             NSData *magicCookie = [track.muxer_helper->converter magicCookie];
-            MP4SetTrackESConfiguration(_fileHandle, track.trackId,
-                                       magicCookie.bytes,
-                                       magicCookie.length);
+            if (track.conversionSettings.format == kAudioFormatMPEG4AAC)
+            {
+                MP4SetTrackESConfiguration(_fileHandle, track.trackId,
+                                           magicCookie.bytes,
+                                           magicCookie.length);
+            }
+            else if (track.conversionSettings.format == kAudioFormatAC3)
+            {
+                const uint64_t *ac3Info = (const uint64_t *)magicCookie.bytes;
+
+                MP4SetTrackIntegerProperty(_fileHandle, track.trackId, "mdia.minf.stbl.stsd.ac-3.dac3.fscod",           ac3Info[0]);
+                MP4SetTrackIntegerProperty(_fileHandle, track.trackId, "mdia.minf.stbl.stsd.ac-3.dac3.bsid",            ac3Info[1]);
+                MP4SetTrackIntegerProperty(_fileHandle, track.trackId, "mdia.minf.stbl.stsd.ac-3.dac3.bsmod",           ac3Info[2]);
+                MP4SetTrackIntegerProperty(_fileHandle, track.trackId, "mdia.minf.stbl.stsd.ac-3.dac3.acmod",           ac3Info[3]);
+                MP4SetTrackIntegerProperty(_fileHandle, track.trackId, "mdia.minf.stbl.stsd.ac-3.dac3.lfeon",           ac3Info[4]);
+                MP4SetTrackIntegerProperty(_fileHandle, track.trackId, "mdia.minf.stbl.stsd.ac-3.dac3.bit_rate_code",   ac3Info[5]);
+            }
         }
     }
 
