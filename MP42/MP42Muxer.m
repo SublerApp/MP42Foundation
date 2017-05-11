@@ -592,22 +592,28 @@
     for (MP42Track *track in _workingTracks) {
         if (track.muxer_helper->converter && track.conversionSettings && [track isMemberOfClass:[MP42AudioTrack class]]) {
             NSData *magicCookie = [track.muxer_helper->converter magicCookie];
-            if (track.conversionSettings.format == kAudioFormatMPEG4AAC)
-            {
-                MP4SetTrackESConfiguration(_fileHandle, track.trackId,
-                                           magicCookie.bytes,
-                                           magicCookie.length);
-            }
-            else if (track.conversionSettings.format == kAudioFormatAC3)
-            {
-                const uint64_t *ac3Info = (const uint64_t *)magicCookie.bytes;
 
-                MP4SetTrackIntegerProperty(_fileHandle, track.trackId, "mdia.minf.stbl.stsd.ac-3.dac3.fscod",           ac3Info[0]);
-                MP4SetTrackIntegerProperty(_fileHandle, track.trackId, "mdia.minf.stbl.stsd.ac-3.dac3.bsid",            ac3Info[1]);
-                MP4SetTrackIntegerProperty(_fileHandle, track.trackId, "mdia.minf.stbl.stsd.ac-3.dac3.bsmod",           ac3Info[2]);
-                MP4SetTrackIntegerProperty(_fileHandle, track.trackId, "mdia.minf.stbl.stsd.ac-3.dac3.acmod",           ac3Info[3]);
-                MP4SetTrackIntegerProperty(_fileHandle, track.trackId, "mdia.minf.stbl.stsd.ac-3.dac3.lfeon",           ac3Info[4]);
-                MP4SetTrackIntegerProperty(_fileHandle, track.trackId, "mdia.minf.stbl.stsd.ac-3.dac3.bit_rate_code",   ac3Info[5]);
+            if (magicCookie) {
+                if (track.conversionSettings.format == kAudioFormatMPEG4AAC)
+                {
+                    MP4SetTrackESConfiguration(_fileHandle, track.trackId,
+                                               magicCookie.bytes,
+                                               magicCookie.length);
+                }
+                else if (track.conversionSettings.format == kAudioFormatAC3)
+                {
+                    const uint64_t *ac3Info = (const uint64_t *)magicCookie.bytes;
+
+                    MP4SetTrackIntegerProperty(_fileHandle, track.trackId, "mdia.minf.stbl.stsd.ac-3.dac3.fscod",           ac3Info[0]);
+                    MP4SetTrackIntegerProperty(_fileHandle, track.trackId, "mdia.minf.stbl.stsd.ac-3.dac3.bsid",            ac3Info[1]);
+                    MP4SetTrackIntegerProperty(_fileHandle, track.trackId, "mdia.minf.stbl.stsd.ac-3.dac3.bsmod",           ac3Info[2]);
+                    MP4SetTrackIntegerProperty(_fileHandle, track.trackId, "mdia.minf.stbl.stsd.ac-3.dac3.acmod",           ac3Info[3]);
+                    MP4SetTrackIntegerProperty(_fileHandle, track.trackId, "mdia.minf.stbl.stsd.ac-3.dac3.lfeon",           ac3Info[4]);
+                    MP4SetTrackIntegerProperty(_fileHandle, track.trackId, "mdia.minf.stbl.stsd.ac-3.dac3.bit_rate_code",   ac3Info[5]);
+                }
+            }
+            else {
+                [_logger writeToLog:@"MagicCookie not found"];
             }
         }
     }
