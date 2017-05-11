@@ -760,6 +760,9 @@ concatenate:
 
     if (!info->num_blocks) {
         // Copy the frame
+        if (info->frame) {
+            free(info->frame);
+        }
         info->frame = (uint8_t *)malloc(size);
         if (info->frame == NULL) {
             return -2;
@@ -820,6 +823,7 @@ CFDataRef createCookie_EAC3(void *context)
     }
 
     free(info->frame);
+    info->frame = NULL;
 
     uint8_t *buffer = cookie.GetBuffer();
     size_t size = cookie.GetBitPosition() / 8;
@@ -827,6 +831,15 @@ CFDataRef createCookie_EAC3(void *context)
     free (buffer);
 
     return cookieData;
+}
+
+void free_EAC3_context(void *context)
+{
+    struct eac3_info *info = (struct eac3_info *) context;
+    free(info->frame);
+
+    info->frame = NULL;
+    free(context);
 }
 
 #pragma mark - MPEG 4 Audio

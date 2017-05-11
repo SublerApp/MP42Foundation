@@ -19,7 +19,7 @@ extern "C" {
 
     int analyze_EAC3(void **context ,uint8_t *frame, uint32_t size);
     CFDataRef createCookie_EAC3(void *context);
-
+    void free_EAC3_context(void *context);
 
     typedef struct MPEG4AudioConfig {
         int object_type;
