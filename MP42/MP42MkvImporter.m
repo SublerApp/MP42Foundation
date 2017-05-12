@@ -224,30 +224,60 @@ static int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, ui
             // Video
             if (mkvTrack->Type == TT_VIDEO)  {
                 float trackWidth = 0;
-                newTrack = [[MP42VideoTrack alloc] init];
-
-                [(MP42VideoTrack *)newTrack setWidth:mkvTrack->AV.Video.PixelWidth];
-                [(MP42VideoTrack *)newTrack setHeight:mkvTrack->AV.Video.PixelHeight];
-
                 AVRational dar, invPixelSize, sar;
-                dar			   = (AVRational){mkvTrack->AV.Video.DisplayWidth, mkvTrack->AV.Video.DisplayHeight};
-                invPixelSize   = (AVRational){mkvTrack->AV.Video.PixelHeight, mkvTrack->AV.Video.PixelWidth};
-                sar = av_mul_q(dar, invPixelSize);    
 
-                av_reduce(&sar.num, &sar.den, sar.num, sar.den, fixed1);
-                
-                if (sar.num && sar.den) {
-                    trackWidth = mkvTrack->AV.Video.PixelWidth * sar.num / sar.den;
+                MP42VideoTrack *videoTrack = [[MP42VideoTrack alloc] init];
+
+                videoTrack.width  = mkvTrack->AV.Video.PixelWidth;
+                videoTrack.height = mkvTrack->AV.Video.PixelHeight;
+
+                if (mkvTrack->AV.Video.CropB || mkvTrack->AV.Video.CropT ||
+                    mkvTrack->AV.Video.CropL || mkvTrack->AV.Video.CropR) {
+
+                    videoTrack.cleanApertureWidthN = mkvTrack->AV.Video.PixelWidth - mkvTrack->AV.Video.CropL - mkvTrack->AV.Video.CropR;
+                    videoTrack.cleanApertureWidthD = 1;
+                    videoTrack.cleanApertureHeightN = mkvTrack->AV.Video.PixelHeight - mkvTrack->AV.Video.CropB - mkvTrack->AV.Video.CropT;
+                    videoTrack.cleanApertureHeightD = 1;
+                    videoTrack.horizOffN = mkvTrack->AV.Video.CropL;
+                    videoTrack.horizOffD = 1;
+                    videoTrack.vertOffN = mkvTrack->AV.Video.CropT;
+                    videoTrack.vertOffD = 1;
+
+                    dar			   = (AVRational){mkvTrack->AV.Video.DisplayWidth, mkvTrack->AV.Video.DisplayHeight};
+                    invPixelSize   = (AVRational){videoTrack.cleanApertureHeightN, videoTrack.cleanApertureWidthN};
                 }
                 else {
-                    trackWidth = mkvTrack->AV.Video.PixelWidth;
+                    dar			   = (AVRational){mkvTrack->AV.Video.DisplayWidth, mkvTrack->AV.Video.DisplayHeight};
+                    invPixelSize   = (AVRational){mkvTrack->AV.Video.PixelHeight, mkvTrack->AV.Video.PixelWidth};
                 }
 
-                [(MP42VideoTrack*)newTrack setTrackWidth:trackWidth];
-                [(MP42VideoTrack*)newTrack setTrackHeight:mkvTrack->AV.Video.PixelHeight];
+                sar = av_mul_q(dar, invPixelSize);
 
-                [(MP42VideoTrack*)newTrack setHSpacing:sar.num];
-                [(MP42VideoTrack*)newTrack setVSpacing:sar.den];
+                av_reduce(&sar.num, &sar.den, sar.num, sar.den, fixed1);
+
+                if (sar.num && sar.den) {
+                    trackWidth = invPixelSize.den * sar.num / sar.den;
+                }
+                else {
+                    trackWidth = invPixelSize.den;
+                }
+
+                videoTrack.trackWidth = trackWidth;
+                videoTrack.trackHeight = invPixelSize.num;
+
+                videoTrack.hSpacing = sar.num;
+                videoTrack.vSpacing = sar.den;
+
+                if (mkvTrack->AV.Video.Colour.Primaries &&
+                    mkvTrack->AV.Video.Colour.TransferCharacteristics &&
+                    mkvTrack->AV.Video.Colour.MatrixCoefficients) {
+
+                    videoTrack.colorPrimaries = mkvTrack->AV.Video.Colour.Primaries;
+                    videoTrack.transferCharacteristics = mkvTrack->AV.Video.Colour.TransferCharacteristics;
+                    videoTrack.matrixCoefficients = mkvTrack->AV.Video.Colour.MatrixCoefficients;
+                }
+
+                newTrack = videoTrack;
             }
 
             // Audio

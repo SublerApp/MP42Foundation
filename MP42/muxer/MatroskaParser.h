@@ -124,6 +124,7 @@ struct TrackInfo {
   MKFLOAT	  TimecodeScale;
   void		  *CodecPrivate;
   unsigned	  CodecPrivateSize;
+  unsigned int CodecDelay;
   unsigned	  CompMethod;
   void		  *CompMethodPrivate;
   unsigned	  CompMethodPrivateSize;
@@ -147,6 +148,13 @@ struct TrackInfo {
       unsigned int    CropL, CropT, CropR, CropB;
       unsigned int    ColourSpace;
       MKFLOAT	      GammaValue;
+
+      struct {
+          unsigned int    MatrixCoefficients;
+          unsigned int    BitsPerChannel;
+          unsigned int    TransferCharacteristics;
+          unsigned int    Primaries;
+      } Colour;
 
       unsigned int  Interlaced:1;
     } Video;

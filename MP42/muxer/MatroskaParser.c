@@ -1149,6 +1149,24 @@ out:
   ENDFOR(mf);
 }
 
+static void parseColourInfo(MatroskaFile *mf,ulonglong toplen,struct TrackInfo *ti) {
+
+    FOREACH(mf,toplen)
+    case 0x55b1: // MatrixCoefficients
+        ti->AV.Video.Colour.MatrixCoefficients = (unsigned)readUInt(mf,len);
+        break;
+    case 0x55b2: // BitsPerChannel
+        ti->AV.Video.Colour.BitsPerChannel = (unsigned)readUInt(mf,len);
+        break;
+    case 0x55ba: // TransferCharacteristics
+        ti->AV.Video.Colour.TransferCharacteristics = (unsigned)readUInt(mf,len);
+        break;
+    case 0x55bb: // Primaries
+        ti->AV.Video.Colour.Primaries = (unsigned)readUInt(mf,len);
+        break;
+    ENDFOR(mf);
+}
+
 static void parseVideoInfo(MatroskaFile *mf,ulonglong toplen,struct TrackInfo *ti) {
   ulonglong v;
   char	    dW = 0, dH = 0;
@@ -1230,6 +1248,9 @@ static void parseVideoInfo(MatroskaFile *mf,ulonglong toplen,struct TrackInfo *t
       break;
     case 0x2fb523: // GammaValue
       ti->AV.Video.GammaValue = readFloat(mf,(unsigned)len);
+      break;
+    case 0x55b0: // Colour
+      parseColourInfo(mf,len,&ti);
       break;
   ENDFOR(mf);
 }
@@ -1389,6 +1410,9 @@ static void parseTrackEntry(MatroskaFile *mf,ulonglong toplen) {
       if (v>255)
 	errorjmp(mf,"Track number in TrackOverlay is too large: %d",(int)v);
       t.TrackOverlay = (unsigned char)v;
+      break;
+    case 0x56aa: // CodecDelay
+      t.CodecDelay = readUInt(mf,(unsigned)len);;
       break;
     case 0xe0: // VideoInfo
       parseVideoInfo(mf,len,&t);

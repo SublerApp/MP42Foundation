@@ -83,11 +83,17 @@
 - (UInt32)initialPaddingForTrack:(MP42AudioTrack *)track
 {
     UInt32 initialPadding = 0;
-    if (track.format == kMP42AudioCodecType_MPEG4AAC) {
+    if (track.format == kMP42AudioCodecType_MPEG4AAC ||
+        track.format == kMP42AudioCodecType_MPEG4AAC_HE ||
+        track.format == kMP42AudioCodecType_MPEG4AAC_HE_V2) {
         initialPadding = 2112;
     }
-    else if (track.format == kMP42AudioCodecType_AC3) {
+    else if (track.format == kMP42AudioCodecType_AC3 ||
+             track.format == kMP42AudioCodecType_EnhancedAC3) {
         initialPadding = 256;
+    }
+    else if (track.format == kMP42AudioCodecType_MPEGLayer3) {
+        initialPadding = 1105;
     }
 
     return initialPadding;
