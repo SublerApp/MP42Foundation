@@ -13,6 +13,8 @@
 #import "MP42FormatUtilites.h"
 #import "MP42MediaFormat.h"
 
+#define FFmpegMaximumSupportedChannels  6
+
 @implementation MP42AudioTrack {
 @private
     float _volume;
@@ -200,9 +202,8 @@
     
     if ([self.name rangeOfString:@"surround" options:NSCaseInsensitiveSearch].location == NSNotFound) return;
     
-    if ([conversionSettings.mixDown isEqualToString:SBNoneMixdown]) {
-        // FFmpeg encoding currently doesn't go beyond 5.1
-        self.name = (self.channels > 6) ? @"Surround 5.1" : nameForChannelLayoutTag(self.channelLayoutTag);
+    if ([conversionSettings.mixDown isEqualToString:SBNoneMixdown] && self.channels > 3) {
+        self.name = (self.channels > FFmpegMaximumSupportedChannels) ? [NSString stringWithFormat:@"Surround %d.1", FFmpegMaximumSupportedChannels - 1] : nameForChannelLayoutTag(self.channelLayoutTag);
     }
     else {
         self.name = (self.channels == 1 || [conversionSettings.mixDown isEqualToString:SBMonoMixdown]) ? @"Mono" : @"Stereo";
@@ -255,7 +256,10 @@
         if ([settings.mixDown isEqualToString:SBMonoMixdown] || self.channels == 1) {
             channels = 1;
         }
-        else if (![settings.mixDown isEqualToString:SBNoneMixdown]) {
+        else if ([settings.mixDown isEqualToString:SBNoneMixdown]) {
+            channels = MIN(channels, FFmpegMaximumSupportedChannels);
+        }
+        else {
             channels = 2;
         }
         return [NSString stringWithFormat:@"%@, %u ch", localizedDisplayName(self.mediaType, self.conversionSettings.format), channels];
