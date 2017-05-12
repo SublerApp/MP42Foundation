@@ -282,25 +282,29 @@ static int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, ui
 
             // Audio
             else if (mkvTrack->Type == TT_AUDIO) {
-                newTrack = [[MP42AudioTrack alloc] init];
-                [(MP42AudioTrack *)newTrack setChannels:mkvTrack->AV.Audio.Channels];
-                [(MP42AudioTrack *)newTrack setChannelLayoutTag:getDefaultChannelLayout(mkvTrack->AV.Audio.Channels)];
-                [newTrack setAlternate_group:1];
+                MP42AudioTrack *audioTrack = [[MP42AudioTrack alloc] init];
+                audioTrack.channels = mkvTrack->AV.Audio.Channels;
+                audioTrack.channelLayoutTag = getDefaultChannelLayout(mkvTrack->AV.Audio.Channels);
+                audioTrack.alternate_group = 1;
 
-                for (MP42Track *audioTrack in self.tracks) {
-                    if ([audioTrack isMemberOfClass:[MP42AudioTrack class]])
+                for (MP42Track *track in self.tracks) {
+                    if ([track isMemberOfClass:[MP42AudioTrack class]]) {
                         newTrack.enabled = NO;
+                    }
                 }
+
+                newTrack = audioTrack;
             }
 
             // Text
             else if (mkvTrack->Type == TT_SUB) {
                 newTrack = [[MP42SubtitleTrack alloc] init];
-                [newTrack setAlternate_group:2];
+                newTrack.alternate_group = 2;
 
                 for (MP42Track *subtitleTrack in self.tracks) {
-                    if ([subtitleTrack isMemberOfClass:[MP42SubtitleTrack class]])
+                    if ([subtitleTrack isMemberOfClass:[MP42SubtitleTrack class]]) {
                         newTrack.enabled = NO;
+                    }
                 }
             }
 
@@ -331,8 +335,9 @@ static int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, ui
 
                 newTrack.duration = scaledDuration;
 
-                if (scaledDuration > _fileDuration)
+                if (scaledDuration > _fileDuration) {
                     _fileDuration = scaledDuration;
+                }
 
                 NSString *trackName = TrackNameToString(mkvTrack);
                 if (trackName) {
