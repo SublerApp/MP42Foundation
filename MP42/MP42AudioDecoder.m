@@ -35,6 +35,8 @@ struct MP42DecodeContext {
     enum AVMatrixEncoding matrix_encoding;
     int                   out_layout;
 
+    int drop_samples;
+
     BOOL configured;
 };
 
@@ -67,6 +69,7 @@ typedef struct MP42DecodeContext MP42DecodeContext;
                   channelLayoutSize:(UInt32)channelLayoutSize
                         mixdownType:(NSString *)mixdownType
                                 drc:(float)drc
+                     initialPadding:(UInt32)initialPadding
                         magicCookie:(NSData *)magicCookie
                               error:(NSError **)error
 {
@@ -178,6 +181,11 @@ typedef struct MP42DecodeContext MP42DecodeContext;
             }
         }
 
+        int drop_samples = 0;
+        if (initialPadding > 0) {
+            drop_samples = initialPadding;
+        }
+
         // Creates the output audio stream basic description.
         // It will be used to configure the next audio unit in the chain.
         AudioStreamBasicDescription outputFormat;
@@ -205,6 +213,7 @@ typedef struct MP42DecodeContext MP42DecodeContext;
         _context->outputLayout = &_outputLayout;
         _context->outputLayoutSize = &_outputLayoutSize;
         _context->matrix_encoding = matrix_encoding;
+        _context->drop_samples = drop_samples;
         _context->configured = NO;
 
         // Init the FIFOs
@@ -433,6 +442,27 @@ static int resample(MP42DecodeContext *context, AVFrame *frame, uint8_t **output
                             output_data, output_data_size);
 
 
+    if (ret == 0 && context->drop_samples > 0)
+    {
+        // drop audio samples that are part of the encoder delay
+        int channels = context->outputFormat->mChannelsPerFrame;
+        int sample_size = channels * sizeof(float);
+        int samples = *output_data_size / sample_size;
+        if (samples <= context->drop_samples)
+        {
+            *output_data_size = 0;
+            free(*output_data);
+            context->drop_samples -= samples;
+        }
+        else
+        {
+            int size = context->drop_samples * sample_size;
+            memmove(*output_data, *output_data + size, *output_data_size - size);
+            *output_data_size -= size;
+            context->drop_samples = 0;
+        }
+    }
+
     return ret;
 }
 
@@ -463,8 +493,11 @@ static int receive_frame(MP42DecodeContext *context, MP42SampleBuffer **outSampl
         uint8_t *output_data = NULL;
         int output_data_size = 0;
         ret = resample(context, frame, &output_data, &output_data_size);
-        if (!ret) {
+        if (!ret && output_data_size) {
             *outSample = sampleBufferFromFrame(output_data, output_data_size);
+        }
+        else {
+            *outSample = nil;
         }
     }
     av_frame_free(&frame);

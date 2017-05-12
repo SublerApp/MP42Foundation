@@ -38,15 +38,19 @@
     if (self) {
         NSData *magicCookie = [track.muxer_helper->importer magicCookieForTrack:track];
         AudioStreamBasicDescription asbd = [self basicDescriptorForTrack:track];
+        UInt32 initialPadding = [self initialPaddingForTrack:track];
         UInt32 channelLayoutSize = sizeof(AudioChannelLayout);
         AudioChannelLayout *channelLayout = calloc(channelLayoutSize, 1);
         channelLayout->mChannelLayoutTag = track.channelLayoutTag;
+
+        
 
         _decoder = [[MP42AudioDecoder alloc] initWithAudioFormat:asbd
                                                    channelLayout:channelLayout
                                                channelLayoutSize:channelLayoutSize
                                                      mixdownType:settings.mixDown
                                                              drc:settings.drc
+                                                  initialPadding:initialPadding
                                                      magicCookie:magicCookie error:error];
 
         free(channelLayout);
@@ -74,6 +78,19 @@
     }
 
     return self;
+}
+
+- (UInt32)initialPaddingForTrack:(MP42AudioTrack *)track
+{
+    UInt32 initialPadding = 0;
+    if (track.format == kMP42AudioCodecType_MPEG4AAC) {
+        initialPadding = 2112;
+    }
+    else if (track.format == kMP42AudioCodecType_AC3) {
+        initialPadding = 256;
+    }
+
+    return initialPadding;
 }
 
 - (AudioStreamBasicDescription)basicDescriptorForTrack:(MP42AudioTrack *)track

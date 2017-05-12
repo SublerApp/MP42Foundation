@@ -22,6 +22,7 @@ NS_ASSUME_NONNULL_BEGIN
                   channelLayoutSize:(UInt32)channelLayoutSize
                         mixdownType:(NSString *)mixdownType
                                 drc:(float)drc
+                     initialPadding:(UInt32)initialPadding
                         magicCookie:(NSData *)magicCookie
                               error:(NSError **)error;
 
