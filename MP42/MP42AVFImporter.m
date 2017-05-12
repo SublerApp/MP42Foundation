@@ -341,8 +341,8 @@
             if (track.extendedLanguageTag) {
                 newTrack.language = track.extendedLanguageTag;
             }
-            else {
-                newTrack.language = [MP42Languages.defaultManager extendedTagForQTCode:track.languageCode];
+            else if (track.languageCode) {
+                newTrack.language = [MP42Languages.defaultManager extendedTagForISO_639_2:track.languageCode];
             }
 
             // Media characteristic tags, requires 10.10 or later
