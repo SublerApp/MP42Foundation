@@ -68,7 +68,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
     }
     char buffer[2048];
     vsnprintf(buffer, 2048, fmt, ap);
-    NSString *output = [NSString stringWithFormat:@"%s: %s\n", level, buffer];
+    NSString *output = [NSString stringWithFormat:@"%s: %s", level, buffer];
 
     [_logger writeToLog:output];
 }
