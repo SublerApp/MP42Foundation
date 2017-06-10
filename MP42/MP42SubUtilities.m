@@ -335,7 +335,7 @@ extern NSString *STLoadFileWithUnknownEncoding(NSURL *url)
 			if (!res) NSLog(@"Both of latin1/2 failed.\n");
 		} else {
             res = [[NSString alloc] initWithData:data encoding:NSASCIIStringEncoding];
-            if (!res) NSLog(@"ASCII failed."), NSLog(@"Failed to load file as guessed encoding %@.",enc_str);
+            if (!res) { NSLog(@"ASCII failed."); NSLog(@"Failed to load file as guessed encoding %@.",enc_str); }
         }
 	}
 

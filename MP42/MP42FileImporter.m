@@ -124,12 +124,12 @@ static NSArray<NSString *> *_supportedFileFormats;
     }
 
     [_metadata release];
-    [_tracksArray release], _tracksArray = nil;
-    [_inputTracks release], _inputTracks = nil;
-    [_outputsTracks release], _outputsTracks = nil;
+    [_tracksArray release]; _tracksArray = nil;
+    [_inputTracks release]; _inputTracks = nil;
+    [_outputsTracks release]; _outputsTracks = nil;
 
-    [_fileURL release], _fileURL = nil;
-    [_demuxerThread release], _demuxerThread = nil;
+    [_fileURL release]; _fileURL = nil;
+    [_demuxerThread release]; _demuxerThread = nil;
 
     if (_doneSem) {
         dispatch_release(_doneSem);

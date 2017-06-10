@@ -110,7 +110,10 @@
     if (joined) [self addMetadataItemWithString:joined identifier:MP42MetadataKeyProducer];
     
     joined = [self nodes:node forXPath:@"./directors/director_name" joinedBy:@","];
-    if (joined) [self addMetadataItemWithString:joined identifier:MP42MetadataKeyDirector], [self addMetadataItemWithString:joined identifier:MP42MetadataKeyArtist];
+    if (joined) {
+        [self addMetadataItemWithString:joined identifier:MP42MetadataKeyDirector];
+        [self addMetadataItemWithString:joined identifier:MP42MetadataKeyArtist];
+    }
     
     joined = [self nodes:node forXPath:@"./casts/cast" joinedBy:@","];
     if (joined) [self addMetadataItemWithString:joined identifier:MP42MetadataKeyCast];

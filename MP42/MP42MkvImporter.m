@@ -63,8 +63,8 @@
 }
 
 - (void)dealloc {
-    [queue release], queue = nil;
-    [ss release], ss = nil;
+    [queue release]; queue = nil;
+    [ss release]; ss = nil;
 
     [super dealloc];
 }
