@@ -65,7 +65,7 @@
 
 						NSOrthography *ortho = [tagger orthographyAtIndex:0 effectiveRange:NULL];
 
-						if (![ortho.dominantLanguage isEqualToString:@"und"]) {
+						if (ortho && ![ortho.dominantLanguage isEqualToString:@"und"]) {
 							[languagesSet addObject:ortho.dominantLanguage];
 						}
 					}
