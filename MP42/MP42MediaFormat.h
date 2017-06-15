@@ -150,7 +150,7 @@ enum : MP42AudioCodecType
     kMP42AudioCodecType_DTS                     = 'DTS ',
     kMP42AudioCodecType_TrueHD                  = 'trhd',
     kMP42AudioCodecType_MLP                     = 'mlp ',
-    kMP42AudioCodecType_Opus                    = 'Opus',
+    kMP42AudioCodecType_Opus                    = 'opus',
     kMP42AudioCodecType_TTA                     = 'TTA1',
 
     kMP42AudioCodecType_FairPlay                = 'drms',

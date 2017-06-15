@@ -50,7 +50,7 @@
 
 + (NSArray<NSString *> *)supportedFileFormats {
     return @[@"mov", @"qt", @"mp4", @"m4v", @"m4a", @"mp3", @"m2ts", @"ts", @"mts",
-             @"ac3", @"eac3", @"ec3", @"webvtt", @"vtt", @"caf", @"aif", @"aiff", @"aifc", @"wav"];
+             @"ac3", @"eac3", @"ec3", @"webvtt", @"vtt", @"caf", @"aif", @"aiff", @"aifc", @"wav", @"flac"];
 }
 
 - (FourCharCode)formatForTrack:(AVAssetTrack *)track {
@@ -62,6 +62,9 @@
         switch (code) {
             case 'ms \0':
                 result = kMP42AudioCodecType_AC3;
+                break;
+            case 'flac':
+                result = kMP42AudioCodecType_FLAC;
                 break;
             case 'SRT ':
                 result = kMP42SubtitleCodecType_Text;
@@ -206,8 +209,14 @@
                         else if (CFEqual(transferFunctions, kCMFormatDescriptionTransferFunction_SMPTE_240M_1995)) {
                             videoTrack.transferCharacteristics = 7;
                         }
+                        else if (CFEqual(transferFunctions, CFSTR("SMPTE_ST_2084_PQ"))) { // kCMFormatDescriptionTransferFunction_SMPTE_ST_2084_PQ
+                            videoTrack.transferCharacteristics = 16;
+                        }
                         else if (CFEqual(transferFunctions, kCMFormatDescriptionTransferFunction_SMPTE_ST_428_1)) {
                             videoTrack.transferCharacteristics = 17;
+                        }
+                        else if (CFEqual(transferFunctions, CFSTR("ITU_R_2100_HLG"))) { // kCMFormatDescriptionTransferFunction_ITU_R_2100_HLG
+                            videoTrack.transferCharacteristics = 18;
                         }
                     }
 
@@ -747,6 +756,33 @@
                 }
 
                 return [NSData dataWithBytes:cookieBuffer length:cookieSizeOut];
+            }
+
+            else if (code == 'opus') {
+                // dec3 atom
+                // remove the atom header
+                //cookieBuffer += 9;
+                //cookieSizeOut = cookieSizeOut - 9;
+
+                UInt32 *cookie = (UInt32 *)cookieBuffer;
+
+                for (size_t i = 0; i < cookieSizeOut / 8; i++) {
+                    cookie[i] = EndianS32_BtoN(cookie[i]);
+                }
+
+                return [NSData dataWithBytes:cookieBuffer length:cookieSizeOut];
+            }
+
+            else if (code == 'flac') {
+
+                UInt32 *cookie = (UInt32 *)cookieBuffer;
+
+                for (size_t i = 0; i < cookieSizeOut / 8; i++) {
+                    cookie[i] = EndianS32_BtoN(cookie[i]);
+                }
+
+                return [NSData dataWithBytes:cookieBuffer length:cookieSizeOut];
+                
             }
 
             else if (code == kAudioFormatEnhancedAC3) {

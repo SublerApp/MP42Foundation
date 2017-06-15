@@ -106,7 +106,7 @@ static const struct {
     { kAudioFormatEnhancedAC3, AV_CODEC_ID_EAC3 },
     { 'XiFL', AV_CODEC_ID_FLAC },
     { 'XiVs', AV_CODEC_ID_VORBIS },
-    { 'Opus', AV_CODEC_ID_OPUS },
+    { 'opus', AV_CODEC_ID_OPUS },
     { kAudioFormatAppleLossless, AV_CODEC_ID_ALAC },
     { 'DTS ', AV_CODEC_ID_DTS },
     { 'trhd', AV_CODEC_ID_TRUEHD },
