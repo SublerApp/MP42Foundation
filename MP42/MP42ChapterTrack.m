@@ -247,7 +247,8 @@
             MP4SetChapters(fileHandle, fileChapters, i, MP4ChapterTypeQt);
 
             free(fileChapters);
-            success = self.trackId = findChapterTrackId(fileHandle);
+            self.trackId = findChapterTrackId(fileHandle);
+            success = self.trackId > 0;
 
             // Reset language
             self.language = self.language;
