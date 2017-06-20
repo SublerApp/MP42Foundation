@@ -1166,6 +1166,9 @@ struct NAL_units{
     UInt16 numNalus;
 };
 
+#define NAL_UNIT_VPS 32
+#define NAL_UNIT_SPS 33
+#define NAL_UNIT_PPS 34
 
 typedef struct HEVCConfig {
     UInt8 configurationVersion;
@@ -1241,15 +1244,22 @@ int analyze_HEVC(const uint8_t *cookie, uint32_t cookieLen, bool *completeness)
         info->NAL_units = (struct NAL_units *)malloc(sizeof(struct NAL_units) * info->numOfArrays);
 
         for (UInt8 j = 0; j < info->numOfArrays; j++) {
+            bool unitIsComplete = true;
             info->NAL_units[j].array_completeness = b.GetBits(1);
             if (info->NAL_units[j].array_completeness == 0) {
-                complete = false;
+                unitIsComplete = false;
             }
 
             b.SkipBits(1); // reserved 0
 
             info->NAL_units[j].NAL_unit_type = b.GetBits(6);
             info->NAL_units[j].numNalus = b.GetBits(16);
+
+            if (info->NAL_units[j].NAL_unit_type == NAL_UNIT_VPS ||
+                info->NAL_units[j].NAL_unit_type == NAL_UNIT_SPS ||
+                info->NAL_units[j].NAL_unit_type == NAL_UNIT_PPS) {
+                complete = unitIsComplete;
+            }
 
             for (UInt8 i = 0; i < info->NAL_units[j].numNalus; i++) {
                 UInt16 nalUnitLength = b.GetBits(16);
