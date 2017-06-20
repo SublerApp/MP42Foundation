@@ -27,7 +27,7 @@
 @interface SBSubSerializer : NSObject
 {
 	// input lines, sorted by 1. beginning time 2. original insertion order
-	NSMutableArray *lines;
+	NSMutableArray<SBSubLine *> *lines;
 	BOOL finished;
 
     BOOL position_information, forced;

@@ -13,20 +13,16 @@ NS_ASSUME_NONNULL_BEGIN
 @class MP42Metadata;
 @class MP42Track;
 
-@interface MP42FileImporter : NSObject {
-@protected
-    double        _progress;
-    int32_t       _cancelled;
-}
+@interface MP42FileImporter : NSObject
 
 + (NSArray<NSString *> *)supportedFileFormats;
 + (BOOL)canInitWithFileType:(NSString *)fileType;
 
 - (instancetype)initWithURL:(NSURL *)fileURL error:(NSError **)error;
 
-@property(nonatomic, readonly) NSURL *fileURL;
-@property(nonatomic, readonly) MP42Metadata *metadata;
-@property(nonatomic, readonly) NSArray<MP42Track *> *tracks;
+@property (nonatomic, readonly) NSURL *fileURL;
+@property (nonatomic, readonly) MP42Metadata *metadata;
+@property (nonatomic, readonly) NSArray<MP42Track *> *tracks;
 
 @end
 

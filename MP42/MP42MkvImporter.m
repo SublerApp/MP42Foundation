@@ -800,8 +800,8 @@ static NSString * TrackNameToString(TrackInfo *track)
 
     mkv_SetTrackMask(_matroskaFile, TrackMask);
 
-    while (!mkv_ReadFrame(_matroskaFile, 0, &Track, &StartTime, &EndTime, &FilePos, &FrameSize, &FrameFlags) && !_cancelled) {
-        _progress = (StartTime / _fileDuration / 10000);
+    while (!mkv_ReadFrame(_matroskaFile, 0, &Track, &StartTime, &EndTime, &FilePos, &FrameSize, &FrameFlags) && !self.isCancelled) {
+        self.progress = (StartTime / _fileDuration / 10000);
         muxer_helper *helper = NULL;
 
         MP42Track *track = nil;
@@ -842,7 +842,8 @@ static NSString * TrackNameToString(TrackInfo *track)
 
 #ifdef VARIABLE_AUDIO_RATE
                 if (demuxHelper->previousSample) {
-                    uint64_t sampleDuration = (sample->decodeTimestamp * (double)mkv_TruncFloat(trackInfo->AV.Audio.SamplingFreq) / 1000000000.f) - demuxHelper->currentTime;
+                    double convertedDuration = sample->decodeTimestamp * (double)mkv_TruncFloat(trackInfo->AV.Audio.SamplingFreq) / 1000000000.f;
+                    uint64_t sampleDuration = convertedDuration - demuxHelper->currentTime;
 
                     // MKV timestamps are a bit random, try to round them
                     // to make the sample table in the mp4 smaller.
@@ -1116,7 +1117,7 @@ static NSString * TrackNameToString(TrackInfo *track)
 
             [ss setFinished:YES];
 
-            while (![ss isEmpty] && !_cancelled) {
+            while (![ss isEmpty] && !self.isCancelled) {
                 SBSubLine *sl = [ss getSerializedPacket];
 
                 if ([sl->line isEqualToString:@"\n"]) {

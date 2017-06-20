@@ -159,7 +159,7 @@ static int ParseByte(const char *string, UInt8 *byte, Boolean hex)
         }
 
         for (MP42TextSample *ccSample in sampleArray) {
-            if (_cancelled) {
+            if (self.isCancelled) {
                 break;
             }
 
@@ -242,7 +242,7 @@ static int ParseByte(const char *string, UInt8 *byte, Boolean hex)
             [sample release];
             
             i++;
-            _progress = ((CGFloat)i / sampleArray.count) * 100;
+            self.progress = ((CGFloat)i / sampleArray.count) * 100;
         }
         
         [sampleArray release];

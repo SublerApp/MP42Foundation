@@ -858,7 +858,7 @@ static bool GetFirstHeader(FILE* inFile)
 
         int64_t currentSize = 0;
 
-        while (LoadNextAacFrame(inFile, sampleBuffer, &sampleSize, true) && !_cancelled) {
+        while (LoadNextAacFrame(inFile, sampleBuffer, &sampleSize, true) && !self.isCancelled) {
             MP42SampleBuffer *sample = [[MP42SampleBuffer alloc] init];
 
             void * sampleDataBuffer = malloc(sampleSize);
@@ -878,7 +878,7 @@ static bool GetFirstHeader(FILE* inFile)
             sampleSize = sizeof(sampleBuffer);
             
             currentSize += sampleSize;
-            _progress = (currentSize / (CGFloat) size) * 100;
+            self.progress = (currentSize / (CGFloat) size) * 100;
         }
         
         [self setDone];

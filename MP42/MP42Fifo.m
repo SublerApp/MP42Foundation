@@ -15,13 +15,15 @@
     int32_t     _head;
     int32_t     _tail;
 
-    int32_t     _count;
     int32_t     _size;
+    _Atomic int32_t     _count;
 
-    int32_t     _cancelled;
+    _Atomic int32_t     _cancelled;
 
     dispatch_semaphore_t _full;
     dispatch_semaphore_t _empty;
+
+    dispatch_queue_t _queue;
 }
 
 - (instancetype)init {
@@ -36,7 +38,7 @@
         _array = (id *) malloc(sizeof(id) * _size);
         _full = dispatch_semaphore_create(_size - 1);
         _empty = dispatch_semaphore_create(0);
-
+        _queue = dispatch_queue_create("org.subler.FifoQueue", DISPATCH_QUEUE_SERIAL);
     }
     return self;
 }
@@ -48,26 +50,32 @@
 
     dispatch_semaphore_wait(_full, DISPATCH_TIME_FOREVER);
 
-    _array[_tail++] = item;
+    dispatch_sync(_queue, ^{
+        _array[_tail++] = item;
+    });
 
     if (_tail == _size) {
         _tail = 0;
     }
 
-    OSAtomicIncrement32Barrier(&_count);
+    _count++;
     dispatch_semaphore_signal(_empty);
 }
 
 - (nullable id)dequeue NS_RETURNS_RETAINED {
     if (!_count) return nil;
 
-    id item = _array[_head++];
+    __block id item = nil;
+
+    dispatch_sync(_queue, ^{
+        item = _array[_head++];
+    });
 
     if (_head == _size) {
         _head = 0;
     }
 
-    OSAtomicDecrement32Barrier(&_count);
+    _count--;
     dispatch_semaphore_signal(_full);
 
     return item;
@@ -104,7 +112,7 @@
 }
 
 - (void)cancel {
-    OSAtomicIncrement32(&_cancelled);
+    _cancelled = 1;
     [self drain];
 }
 
@@ -114,6 +122,7 @@
 	free(_array);
     dispatch_release(_full);
     dispatch_release(_empty);
+    dispatch_release(_queue);
 
     [super dealloc];
 }

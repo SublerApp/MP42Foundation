@@ -155,7 +155,7 @@
             trackSize.width = track.trackWidth;
             trackSize.height = track.trackHeight;
 
-            while (![_ss isEmpty] && !_cancelled) {
+            while (!_ss.isEmpty && !self.isCancelled) {
                 SBSubLine *sl = [_ss getSerializedPacket];
 
                 if ([sl->line isEqualToString:@"\n"]) {
@@ -171,7 +171,7 @@
             }
         }
         
-        _progress = 100.0;
+        self.progress = 100.0;
         
         [self setDone];
     }

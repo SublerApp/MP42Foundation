@@ -35,15 +35,30 @@
         generator.requestedTimeToleranceAfter  = kCMTimeZero;
 
         CGFloat offset;
+        MP42Duration assetDuration = CMTimeGetSeconds(asset.duration) * 1000;
 
         for (NSInteger idx = 0; idx < chapters.count; idx++)
         {
             MP42TextSample *chapter = chapters[idx];
-            MP42Duration nextChapterTimestamp = (idx < chapters.count - 1) ? [chapters[idx+1] timestamp] : CMTimeGetSeconds(asset.duration) * 1000;
-            if (position <= 0.0) offset = MINIMUM_OFFSET;
-            else if (position >= 1.0) offset = ((nextChapterTimestamp - [chapter timestamp]) * position) - MINIMUM_OFFSET;
-            else offset = (nextChapterTimestamp - [chapter timestamp]) * position;
-            CMTime time = CMTimeMake([chapter timestamp] + MAX(MINIMUM_OFFSET, offset), 1000);
+
+            if (chapter.timestamp > assetDuration) {
+                break;
+            }
+
+            MP42Duration nextChapterTimestamp = (idx < chapters.count - 1) ? chapters[idx+1].timestamp : assetDuration;
+
+            if (position <= 0.0) {
+                offset = MINIMUM_OFFSET;
+            }
+            else if (position >= 1.0) {
+                offset = ((nextChapterTimestamp - chapter.timestamp) * position) - MINIMUM_OFFSET;
+            }
+            else {
+                offset = (nextChapterTimestamp - chapter.timestamp) * position;
+            }
+
+            CMTime time = CMTimeMake(chapter.timestamp + MAX(MINIMUM_OFFSET, offset), 1000);
+
             CGImageRef imgRef = [generator copyCGImageAtTime:time actualTime:NULL error:NULL];
             if (imgRef) {
                 NSSize size = NSMakeSize(CGImageGetWidth(imgRef), CGImageGetHeight(imgRef));

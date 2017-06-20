@@ -776,7 +776,7 @@ static ulonglong  readUInt(MatroskaFile *mf,unsigned int len) {
 static inline longlong	readSInt(MatroskaFile *mf,unsigned int len) {
   longlong	v = readUInt(mf,(unsigned)len);
   int		s = 64 - (len<<3);
-  return (v << s) >> s;
+  return ((ulonglong)v << s) >> s;
 }
 
 static MKFLOAT readFloat(MatroskaFile *mf,unsigned int len) {

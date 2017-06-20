@@ -44,6 +44,9 @@ static NSArray<NSString *> *_supportedFileFormats;
     NSThread *_demuxerThread;
 
     dispatch_semaphore_t _doneSem;
+
+    _Atomic double _progress;
+    _Atomic BOOL _cancelled;
 }
 
 + (void)initialize {
@@ -253,7 +256,7 @@ static NSArray<NSString *> *_supportedFileFormats;
 
 - (void)cancelReading
 {
-    OSAtomicIncrement32(&_cancelled);
+    _cancelled = YES;
 
     // wait until the demuxer thread exits
     dispatch_semaphore_wait(_doneSem, DISPATCH_TIME_FOREVER);
@@ -296,9 +299,19 @@ static NSArray<NSString *> *_supportedFileFormats;
     dispatch_semaphore_signal(_doneSem);
 }
 
+- (void)setProgress:(double)progress
+{
+    _progress = progress;
+}
+
 - (double)progress
 {
     return _progress;
+}
+
+- (BOOL)isCancelled
+{
+    return _cancelled;
 }
 
 - (MP42Track *)inputTrackWithTrackID:(MP4TrackId)trackId

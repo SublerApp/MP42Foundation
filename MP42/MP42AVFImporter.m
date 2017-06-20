@@ -937,7 +937,7 @@
         demuxHelper = track.muxer_helper->demuxer_context;
         AVAssetReaderOutput *assetReaderOutput = demuxHelper->assetReaderOutput;
 
-        while (!_cancelled) {
+        while (!self.isCancelled) {
 
             CMSampleBufferRef sampleBuffer = [assetReaderOutput copyNextSampleBuffer];
 
@@ -1205,7 +1205,7 @@
                 }
                 CFRelease(sampleBuffer);
 
-                _progress = (((CGFloat) currentDataLength /  totalDataLength ) * 100);
+                self.progress = (((CGFloat) currentDataLength /  totalDataLength ) * 100);
 
             } else {
                 break;

@@ -299,7 +299,7 @@
         MP4Duration timescale = MP4GetTimeScale(_fileHandle);
 
         while (tracksDone != tracksNumber) {
-            if (_cancelled) {
+            if (self.isCancelled) {
                 break;
             }
 
@@ -307,7 +307,7 @@
                 muxer_helper *helper = track.muxer_helper;
                 demuxHelper = helper->demuxer_context;
 
-                if (_cancelled) {
+                if (self.isCancelled) {
                     break;
                 }
 
@@ -354,7 +354,7 @@
                 }
             }
 
-            _progress = ((CGFloat)currentTime * timescale / totalDuration) * 100;
+            self.progress = ((CGFloat)currentTime * timescale / totalDuration) * 100;
             currentTime += 3;
         }
 

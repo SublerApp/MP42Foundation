@@ -559,7 +559,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 
 - (BOOL)optimize {
     __block BOOL noErr = NO;
-    __block int32_t done = 0;
+    __block _Atomic int32_t done = 0;
 
     @autoreleasepool {
         NSError *error = nil;
@@ -572,7 +572,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 
             dispatch_async(dispatch_get_global_queue(0, 0), ^{
                 noErr = MP4Optimize(self.URL.fileSystemRepresentation, tempURL.fileSystemRepresentation);
-                OSAtomicIncrement32Barrier(&done);
+                done = 1;
                 dispatch_semaphore_signal(sem);
             });
 
@@ -649,7 +649,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
         __block BOOL noErr = YES;
 
         if (![self.URL isEqualTo:url]) {
-            __block int32_t done = 0;
+            __block _Atomic int32_t done = 0;
             dispatch_semaphore_t sem = dispatch_semaphore_create(0);
 
             NSFileManager *fileManager = [[NSFileManager alloc] init];
@@ -659,7 +659,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
                 noErr = [fileManager copyItemAtURL:self.URL toURL:url error:outError];
                 if (!noErr && *outError) {
                 }
-                OSAtomicIncrement32Barrier(&done);
+                done = 1;
                 dispatch_semaphore_signal(sem);
             });
 
@@ -917,7 +917,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
             NSRectFill(rect);
 
             if (chapterT.image.image)
-                [[chapterT image].image drawInRect:rect fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0];
+                [[chapterT image].image drawInRect:rect fromRect:NSZeroRect operation:NSCompositingOperationCopy fraction:1.0];
 
             [NSGraphicsContext restoreGraphicsState];
 

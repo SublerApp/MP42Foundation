@@ -314,9 +314,9 @@ static NSArray<SBVobSubTrack *> * LoadVobSubSubtitles(NSURL *theDirectory, NSStr
             SBVobSubSample *firstSample = nil;
 
             uint32_t lastTime = 0;
-            int i, sampleCount = [vobTrack->samples count];
+            int sampleCount = vobTrack->samples.count;
 
-            for (i = 0; i < sampleCount && !_cancelled; i++) {
+            for (int i = 0; i < sampleCount && !self.isCancelled; i++) {
                 SBVobSubSample *currentSample = [vobTrack->samples objectAtIndex:i];
                 int offset = currentSample->fileOffset;
                 int nextOffset;
@@ -392,7 +392,7 @@ static NSArray<SBVobSubTrack *> * LoadVobSubSubtitles(NSURL *theDirectory, NSStr
                 
                 lastTime = endTime;
                 
-                _progress = ((i / (CGFloat) sampleCount ) * 100 / tracksNumber) + (tracksDone / (CGFloat) tracksNumber * 100);
+                self.progress = ((i / (CGFloat) sampleCount ) * 100 / tracksNumber) + (tracksDone / (CGFloat) tracksNumber * 100);
             }
             tracksDone++;
         }

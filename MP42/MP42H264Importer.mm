@@ -1485,7 +1485,7 @@ NSData* H264Info(const char *filePath, uint32_t *pic_width, uint32_t *pic_height
         memset(&h264_dec, 0, sizeof(h264_dec));
         DpbInit(&h264_dpb);
 
-        while ( (LoadNal(&nal) != false) && !_cancelled) {
+        while ( (LoadNal(&nal) != false) && !self.isCancelled) {
             uint32_t header_size;
             header_size = nal.buffer[2] == 1 ? 3 : 4;
             bool boundary = h264_detect_boundary(nal.buffer,
@@ -1511,7 +1511,7 @@ NSData* H264Info(const char *filePath, uint32_t *pic_width, uint32_t *pic_height
                     [sample release];
 
                     currentSize += nal_buffer_size;
-                    _progress = (currentSize / (CGFloat) _size) * 100;
+                    self.progress = (currentSize / (CGFloat) _size) * 100;
 
                     sampleId++;
                     DpbAdd( &h264_dpb, poc, slice_is_idr );
@@ -1598,7 +1598,7 @@ NSData* H264Info(const char *filePath, uint32_t *pic_width, uint32_t *pic_height
             [sample release];
             
             currentSize += nal_buffer_size;
-            _progress = (currentSize / (CGFloat) _size) * 100;
+            self.progress = (currentSize / (CGFloat) _size) * 100;
             
             DpbAdd(&h264_dpb, h264_dec.pic_order_cnt, slice_is_idr);
         }

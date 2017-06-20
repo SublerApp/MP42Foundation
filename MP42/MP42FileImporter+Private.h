@@ -36,7 +36,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)enqueue:(MP42SampleBuffer *)sample;
 
-- (double)progress;
+@property (nonatomic, readwrite) double progress;
+@property (nonatomic, readonly, getter=isCancelled) BOOL cancelled;
+
 - (void)setDone;
 
 @end

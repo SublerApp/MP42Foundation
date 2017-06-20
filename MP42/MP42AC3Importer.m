@@ -369,7 +369,7 @@ static bool GetFirstHeader(FILE* inFile)
 
         int64_t currentSize = 0;
 
-        while (LoadNextAc3Frame(inFile, &pBuf, &pBufSize, false) && !_cancelled) {
+        while (LoadNextAc3Frame(inFile, &pBuf, &pBufSize, false) && !self.isCancelled) {
             MP42SampleBuffer *sample = [[MP42SampleBuffer alloc] init];
 
             void *sampleDataBuffer = malloc(pBufSize);
@@ -387,7 +387,7 @@ static bool GetFirstHeader(FILE* inFile)
             sampleId++;
 
             currentSize += pBufSize;
-            _progress = (currentSize / (CGFloat) size) * 100;
+            self.progress = (currentSize / (CGFloat) size) * 100;
         }
 
         free(pBuf);
