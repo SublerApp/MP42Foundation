@@ -374,15 +374,60 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
     return nil;
 }
 
+- (NSSet<NSString *> *)languaguesForMediaType:(MP42MediaType)mediaType {
+    NSMutableSet<NSString *> *languages = [NSMutableSet set];
+
+    for (MP42Track *track in self.itracks) {
+        if (track.mediaType == mediaType) {
+            [languages addObject:track.language];
+        }
+    }
+
+    return languages;
+}
+
 - (NSArray<MP42Track *> *)tracksWithMediaType:(MP42MediaType)mediaType {
     NSMutableArray<MP42Track *> *tracks = [NSMutableArray array];
 
     for (MP42Track *track in self.itracks) {
-        if (track.mediaType == mediaType)
+        if (track.mediaType == mediaType) {
             [tracks addObject:track];
+        }
     }
 
     return tracks;
+}
+
+- (NSArray<MP42Track *> *)tracksWithMediaType:(MP42MediaType)mediaType language:(NSString *)language {
+    NSMutableArray<MP42Track *> *tracks = [NSMutableArray array];
+
+    for (MP42Track *track in self.itracks) {
+        if (track.mediaType == mediaType &&
+            [track.language isEqualToString:language]) {
+                [tracks addObject:track];
+        }
+    }
+
+    return tracks;
+}
+
+- (NSArray<NSArray<MP42Track *> *> *)tracksSubgroupsWithMediaType:(MP42MediaType)mediaType {
+    NSSet<NSString *> *languages = [self languaguesForMediaType:mediaType];
+    NSMutableArray<NSArray<MP42Track *> *> *result = [NSMutableArray array];
+
+    for (NSString *language in languages) {
+        NSArray<MP42Track *> *tracks = [self tracksWithMediaType:mediaType language:language];
+        NSMutableArray<MP42Track *> *mutableTracks = [tracks mutableCopy];
+
+        for (MP42Track *track in tracks) {
+            NSArray<MP42Track *> *relatedTracks = [self relatedTracksForTrack:track];
+            [mutableTracks removeObjectsInArray:relatedTracks];
+        }
+
+        [result addObject:mutableTracks];
+    }
+
+    return result;
 }
 
 #pragma mark - Editing
@@ -514,9 +559,120 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
                                       withGroupID:i];
     }
 
+    for (NSUInteger i = 1; i < 3; i++) {
+        [self organizeMediaCharacteristicsForMediaType:typeToOrganize[i]];
+    }
+
     for (MP42Track *track in self.itracks) {
         if ([track isMemberOfClass:[MP42ChapterTrack class]])
             track.enabled = NO;
+    }
+}
+
+- (void)setTrack:(MP42Track *)track mediaCharacteristics:(NSSet<NSString *> *)tags {
+    track.mediaCharacteristicTags = tags;
+
+    for (MP42Track *relatedTrack in [self relatedTracksForTrack:track]) {
+        relatedTrack.mediaCharacteristicTags = tags;
+    }
+}
+
+- (NSArray<MP42Track *> *)relatedTracksForTrack:(MP42Track *)track {
+    NSMutableArray *tracks = [NSMutableArray array];
+    if ([track isKindOfClass:[MP42AudioTrack class]]) {
+        MP42AudioTrack *audioTrack = (MP42AudioTrack *)track;
+        if (audioTrack.fallbackTrack) {
+            [tracks addObject:audioTrack.fallbackTrack];
+        }
+    }
+
+    if ([track isKindOfClass:[MP42SubtitleTrack class]]) {
+        MP42SubtitleTrack *subTrack = (MP42SubtitleTrack *)track;
+        if (subTrack.forcedTrack) {
+            [tracks addObject:subTrack.forcedTrack];
+        }
+    }
+    return tracks;
+}
+
+- (void)organizeMediaCharacteristicsForMediaType:(MP42MediaType)mediaType {
+    NSArray<NSArray<MP42Track *> *> *subGroups = [self tracksSubgroupsWithMediaType:mediaType];
+
+    for (NSArray<MP42Track *> *subGroup in subGroups) {
+
+        for (MP42Track *track in subGroup) {
+            NSMutableSet<NSString *> *tags = [track.mediaCharacteristicTags mutableCopy];
+
+            if (tags.count) {
+                continue;
+            }
+
+            // Try to create some useful tags from the track name.
+            if ([track.name containsString:@"Director"] ||
+                [track.name containsString:@"Commentary"] ||
+                [track.name containsString:@"Lyric"] ||
+                [track.name containsString:@"Karaoke"] ||
+                [track.name containsString:@"Sign"]) {
+                [tags addObject:@"public.auxiliary-content"];
+            }
+
+            if (mediaType == kMP42MediaType_Subtitle) {
+                if ([track.name containsString:@"Lyric"] ||
+                    [track.name containsString:@"Karaoke"]) {
+                    [tags addObject:@"public.accessibility.describes-music-and-sound"];
+                }
+            }
+
+            [self setTrack:track mediaCharacteristics:tags];
+        }
+
+        // Now we got to find a main track
+        MP42Track *mainTrackCandidate = nil;
+
+        // First check if we have a track with no tag and a related track
+        for (MP42Track *track in subGroup) {
+            NSArray<MP42Track *> *relatedTracks = [self relatedTracksForTrack:track];
+            if (relatedTracks.count && track.mediaCharacteristicTags.count == 0) {
+                mainTrackCandidate = track;
+                break;
+            }
+        }
+
+        // If not use the first track with no tags
+        if (!mainTrackCandidate) {
+            for (MP42Track *track in subGroup) {
+                if (track.mediaCharacteristicTags.count == 0) {
+                    mainTrackCandidate = track;
+                    break;
+                }
+            }
+        }
+
+        // If not use the first track with a related track
+        for (MP42Track *track in subGroup) {
+            NSArray<MP42Track *> *relatedTracks = [self relatedTracksForTrack:track];
+            if (relatedTracks.count) {
+                mainTrackCandidate = track;
+                break;
+            }
+        }
+
+        // Else use the first available track
+        if (!mainTrackCandidate) {
+            mainTrackCandidate = subGroup.firstObject;
+        }
+
+        NSMutableSet<NSString *> *tags = [mainTrackCandidate.mediaCharacteristicTags mutableCopy];
+        [tags addObject:@"public.main-program-content"];
+        [tags removeObject:@"public.auxiliary-content"];
+        [self setTrack:mainTrackCandidate mediaCharacteristics:tags];
+
+        for (MP42Track *track in subGroup) {
+            if (track.mediaCharacteristicTags.count == 0) {
+                NSSet<NSString *> *tags = [NSSet setWithObject:@"public.auxiliary-content"];
+                [self setTrack:track mediaCharacteristics:tags];
+            }
+        }
     }
 }
 
