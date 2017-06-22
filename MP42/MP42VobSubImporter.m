@@ -282,7 +282,7 @@ static NSArray<SBVobSubTrack *> * LoadVobSubSubtitles(NSURL *theDirectory, NSStr
     for (NSString *line in vobTrack->privateData) {
         if ([line hasPrefix:@"palette: "]) {
             const char *palette = [line UTF8String];
-            UInt32 colorPalette[16];
+            UInt32 colorPalette[32];
 
             if (palette != NULL) {
                 sscanf(palette, "palette: %lx, %lx, %lx, %lx, %lx, %lx, %lx, %lx, %lx, %lx, %lx, %lx, %lx, %lx, %lx, %lx",
