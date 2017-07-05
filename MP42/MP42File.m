@@ -559,9 +559,9 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
                                       withGroupID:i];
     }
 
-    for (NSUInteger i = 1; i < 3; i++) {
+    /*for (NSUInteger i = 1; i < 3; i++) {
         [self organizeMediaCharacteristicsForMediaType:typeToOrganize[i]];
-    }
+    }*/
 
     for (MP42Track *track in self.itracks) {
         if ([track isMemberOfClass:[MP42ChapterTrack class]])
