@@ -60,13 +60,13 @@
 
 					if (line.length > 1) {
 
-						[tagger setString:line];
-						[tagger tagAtIndex:0 scheme:NSLinguisticTagSchemeLanguage tokenRange:NULL sentenceRange:NULL];
+                        tagger.string = line;
 
-						NSOrthography *ortho = [tagger orthographyAtIndex:0 effectiveRange:NULL];
+                        NSOrthography *ortho = [tagger orthographyAtIndex:0 effectiveRange:NULL];
+                        NSString *dominantLanguage = ortho.dominantLanguage;
 
-						if (ortho && ![ortho.dominantLanguage isEqualToString:@"und"]) {
-							[languagesSet addObject:ortho.dominantLanguage];
+						if (dominantLanguage && ![dominantLanguage isEqualToString:@"und"]) {
+							[languagesSet addObject:dominantLanguage];
 						}
 					}
 				}];
