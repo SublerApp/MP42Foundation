@@ -197,7 +197,7 @@
 
         // H.265 video track
         else if ([track isMemberOfClass:[MP42VideoTrack class]] &&
-                 (format == kMP42VideoCodecType_HEVC || format == kMP42VideoCodecType_HEVC_2)) {
+                 (format == kMP42VideoCodecType_HEVC || format == kMP42VideoCodecType_HEVC_PSinBitstream)) {
 
             // Check whether we can use hvc1 or hev1 fourcc.
             bool completeness = 0;

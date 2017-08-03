@@ -160,7 +160,7 @@
 
             if (self.updatedProperty[@"colr"] &&
                 (self.format == kMP42VideoCodecType_H264 || self.format == kMP42VideoCodecType_MPEG4Video
-                 || self.format == kMP42VideoCodecType_HEVC || self.format == kMP42VideoCodecType_HEVC_2)) {
+                 || self.format == kMP42VideoCodecType_HEVC || self.format == kMP42VideoCodecType_HEVC_PSinBitstream)) {
 
                 if (_colorPrimaries > 0 && _transferCharacteristics > 0 && _matrixCoefficients > 0) {
                     const char *type;

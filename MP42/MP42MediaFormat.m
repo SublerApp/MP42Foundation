@@ -119,8 +119,11 @@ NSString *localizedVideoDisplayName(FourCharCode mediaSubtype)
             break;
 
         case kMP42VideoCodecType_HEVC:
-        case kMP42VideoCodecType_HEVC_2:
             result = NSLocalizedString(@"HEVC", nil);
+            break;
+
+        case kMP42VideoCodecType_HEVC_PSinBitstream:
+            result = NSLocalizedString(@"HEVC (Parameter Sets in Bitstream)", nil);
             break;
 
         case kMP42VideoCodecType_MPEG4Video:

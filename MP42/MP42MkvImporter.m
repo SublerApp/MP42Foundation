@@ -534,7 +534,7 @@ static const struct {
     { "V_MPEG4/ISO/ASP",    kMP42VideoCodecType_MPEG4Video },
     { "V_MPEG4/ISO/AP",     kMP42VideoCodecType_MPEG4Video },
     { "V_MPEG4/ISO/AVC",    kMP42VideoCodecType_H264 },
-    { "V_MPEGH/ISO/HEVC",   kMP42VideoCodecType_HEVC_2 },
+    { "V_MPEGH/ISO/HEVC",   kMP42VideoCodecType_HEVC_PSinBitstream },
     { "V_THEORA",           kMP42VideoCodecType_Theora },
     { "V_VP8",              kMP42VideoCodecType_VP8 },
     { "V_VP9",              kMP42VideoCodecType_VP9 },

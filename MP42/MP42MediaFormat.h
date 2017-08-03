@@ -72,7 +72,7 @@ enum : MP42VideoCodecType
     kMP42VideoCodecType_H263                = 'h263',
     kMP42VideoCodecType_H264                = 'avc1',
     kMP42VideoCodecType_HEVC                = 'hvc1',
-    kMP42VideoCodecType_HEVC_2              = 'hev1',
+    kMP42VideoCodecType_HEVC_PSinBitstream  = 'hev1',
     kMP42VideoCodecType_MPEG4Video          = 'mp4v',
     kMP42VideoCodecType_MPEG2Video          = 'mp2v',
     kMP42VideoCodecType_MPEG1Video          = 'mp1v',
