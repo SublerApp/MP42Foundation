@@ -32,6 +32,8 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, class, readonly)NSArray<NSString *> *writableMetadata;
 
+- (void)addMetadataItems:(NSArray<MP42MetadataItem *> *)items;
+
 - (void)addMetadataItem:(MP42MetadataItem *)item;
 - (void)removeMetadataItem:(MP42MetadataItem *)item;
 

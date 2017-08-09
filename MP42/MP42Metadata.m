@@ -293,6 +293,13 @@
     self.edited = YES;
 }
 
+- (void)addMetadataItems:(NSArray<MP42MetadataItem *> *)items
+{
+    for (MP42MetadataItem *item in items) {
+        [self addMetadataItem:item];
+    }
+}
+
 - (void)removeMetadataItem:(MP42MetadataItem *)item
 {
     [self.itemsArray removeObject:item];
@@ -395,9 +402,7 @@
         }
     }
 
-    for (MP42MetadataItem *item in metadata.items) {
-        [self addMetadataItem:item];
-    }
+    [self addMetadataItems:metadata.items];
 
     self.edited = YES;
     self.artworkEdited = YES;
