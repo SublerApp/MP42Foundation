@@ -1264,10 +1264,7 @@
 - (void)encodeWithCoder:(NSCoder *)coder
 {
     [coder encodeInt:MP42METADATA_CODER_VERSION forKey:@"MP42TagEncodeVersion"];
-
-    [coder encodeObject:_presetName forKey:@"MP42SetName"];
     [coder encodeObject:_itemsArray forKey:@"MP42Items"];
-
     [coder encodeBool:_artworkEdited forKey:@"MP42ArtworkEdited"];
     [coder encodeBool:_edited forKey:@"MP42Edited"];
 }
@@ -1389,13 +1386,7 @@
 - (id)copyWithZone:(NSZone *)zone
 {
     MP42Metadata *newObject = [[MP42Metadata allocWithZone:zone] init];
-
-    if (_presetName) {
-        newObject.presetName = _presetName;
-    }
-
     [newObject mergeMetadata:self];
-
     return newObject;
 }
 
