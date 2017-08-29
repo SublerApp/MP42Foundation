@@ -313,6 +313,13 @@
     }
 }
 
+- (void)removeMetadataItems:(NSArray<MP42MetadataItem *> *)items
+{
+    for (MP42MetadataItem *item in items) {
+        [self removeMetadataItem:item];
+    }
+}
+
 - (NSArray<MP42MetadataItem *> *)items
 {
     return [self.itemsArray copy];
