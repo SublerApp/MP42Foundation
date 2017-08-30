@@ -34,45 +34,48 @@
 
     if (self) {
         MP4GetTrackFloatProperty(fileHandle, self.trackId, "tkhd.volume", &_volume);
+        const char *dataName = MP4GetTrackMediaDataName(fileHandle, self.trackId);
 
-        u_int8_t audioType = MP4GetTrackEsdsObjectTypeId(fileHandle, self.trackId);
+        if (dataName && !strcmp(dataName, "mp4a")) {
+            u_int8_t audioType = MP4GetTrackEsdsObjectTypeId(fileHandle, self.trackId);
 
-        if (audioType != MP4_INVALID_AUDIO_TYPE) {
-            if (MP4_IS_AAC_AUDIO_TYPE(audioType)) {
-                u_int8_t* pAacConfig = NULL;
-                u_int32_t aacConfigLength;
+            if (audioType != MP4_INVALID_AUDIO_TYPE) {
+                if (MP4_IS_AAC_AUDIO_TYPE(audioType)) {
+                    u_int8_t* pAacConfig = NULL;
+                    u_int32_t aacConfigLength;
 
-                if (MP4GetTrackESConfiguration(fileHandle, 
-                                               self.trackId,
-                                               &pAacConfig,
-                                               &aacConfigLength) == true)
-                    if (pAacConfig != NULL || aacConfigLength >= 2) {
-                        MPEG4AudioConfig c = {0};
-                        analyze_ESDS(&c, pAacConfig, aacConfigLength);
-                        _channels = c.channels;
-                        free(pAacConfig);
+                    if (MP4GetTrackESConfiguration(fileHandle,
+                                                   self.trackId,
+                                                   &pAacConfig,
+                                                   &aacConfigLength) == true)
+                        if (pAacConfig != NULL || aacConfigLength >= 2) {
+                            MPEG4AudioConfig c = {0};
+                            analyze_ESDS(&c, pAacConfig, aacConfigLength);
+                            _channels = c.channels;
+                            free(pAacConfig);
+                        }
+                }
+                else if ((audioType == MP4_PCM16_LITTLE_ENDIAN_AUDIO_TYPE) ||
+                         (audioType == MP4_PCM16_BIG_ENDIAN_AUDIO_TYPE)) {
+
+                    u_int32_t samplesPerFrame =
+                    MP4GetSampleSize(fileHandle, self.trackId, 1) / 2;
+
+                    MP4Duration frameDuration =
+                    MP4GetSampleDuration(fileHandle, self.trackId, 1);
+
+                    if (frameDuration != 0) {
+                        // assumes track time scale == sampling rate
+                        _channels = samplesPerFrame / frameDuration;
                     }
-            }
-            else if ((audioType == MP4_PCM16_LITTLE_ENDIAN_AUDIO_TYPE) ||
-                     (audioType == MP4_PCM16_BIG_ENDIAN_AUDIO_TYPE)) {
-
-                u_int32_t samplesPerFrame =
-                MP4GetSampleSize(fileHandle, self.trackId, 1) / 2;
-
-                MP4Duration frameDuration =
-                MP4GetSampleDuration(fileHandle, self.trackId, 1);
-
-                if (frameDuration != 0) {
-                    // assumes track time scale == sampling rate
-                    _channels = samplesPerFrame / frameDuration;
                 }
             }
-        }
 
-        if (audioType == 0xA9) {
-            uint64_t channels_count = 0;
-            MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.mp4a.channels", &channels_count);
-            _channels = channels_count;
+            if (audioType == 0xA9) {
+                uint64_t channels_count = 0;
+                MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.mp4a.channels", &channels_count);
+                _channels = channels_count;
+            }
         }
         else if (MP4HaveTrackAtom(fileHandle, self.trackId, "mdia.minf.stbl.stsd.ac-3.dac3")) {
             uint64_t acmod, lfeon;
