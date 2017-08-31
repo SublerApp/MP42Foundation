@@ -601,7 +601,9 @@ static NSString * TrackNameToString(TrackInfo *track)
     mkv_ReadFrame(_matroskaFile, 0, &Track, &StartTime, &EndTime, &FilePos, &FrameSize, &FrameFlags);
     mkv_Seek(_matroskaFile, 0, 0);
 
-    return StartTime / SCALE_FACTOR;
+    TrackInfo *trackInfo = mkv_GetTrackInfo(_matroskaFile, Id);
+
+    return (StartTime - trackInfo->CodecDelay) / SCALE_FACTOR;
 }
 
 - (NSUInteger)timescaleForTrack:(MP42Track *)track

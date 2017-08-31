@@ -75,8 +75,9 @@
 
 - (void)addTrack:(MP42Track *)track
 {
-    if (![track isMemberOfClass:[MP42ChapterTrack class]])
+    if (![track isMemberOfClass:[MP42ChapterTrack class]]) {
         [_workingTracks addObject:track];
+    }
 }
 
 - (BOOL)setup:(NSError **)outError
@@ -594,14 +595,12 @@
             NSData *magicCookie = [track.muxer_helper->converter magicCookie];
 
             if (magicCookie) {
-                if (track.conversionSettings.format == kAudioFormatMPEG4AAC)
-                {
+                if (track.conversionSettings.format == kAudioFormatMPEG4AAC) {
                     MP4SetTrackESConfiguration(_fileHandle, track.trackId,
                                                magicCookie.bytes,
                                                magicCookie.length);
                 }
-                else if (track.conversionSettings.format == kAudioFormatAC3)
-                {
+                else if (track.conversionSettings.format == kAudioFormatAC3) {
                     const uint64_t *ac3Info = (const uint64_t *)magicCookie.bytes;
 
                     MP4SetTrackIntegerProperty(_fileHandle, track.trackId, "mdia.minf.stbl.stsd.ac-3.dac3.fscod",           ac3Info[0]);

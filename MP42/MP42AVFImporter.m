@@ -26,7 +26,9 @@
 
 @interface AVFDemuxHelper : NSObject {
 @public
+#ifdef SB_AVF_DEBUG
     int64_t currentTime;
+#endif
     int64_t minDisplayOffset;
 
     AVAssetReaderOutput *assetReaderOutput;
@@ -1003,7 +1005,9 @@
                     [self enqueue:sample];
                     [sample release];
 
+#ifdef SB_AVF_DEBUG
                     demuxHelper->currentTime += duration.value;
+#endif
                     currentDataLength += sampleSize;
                 } else if (samplesNum > 1) {
                     // The CMSampleBufferRef contains more than one sample
@@ -1103,7 +1107,9 @@
                         [self enqueue:sample];
                         [sample release];
 
+#ifdef SB_AVF_DEBUG
                         demuxHelper->currentTime += duration.value;
+#endif
                         currentDataLength += sampleSize;
                     }
                     else {
@@ -1198,8 +1204,10 @@
                             [demuxHelper->editsConstructor addSample:sample];
                             [self enqueue:sample];
                             [sample release];
-                            
+
+#ifdef SB_AVF_DEBUG
                             demuxHelper->currentTime += sampleTimingInfo.duration.value;
+#endif
                             currentDataLength += sampleSize;
                         }
                     }
