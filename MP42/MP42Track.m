@@ -88,9 +88,7 @@
             }
 
             _timescale = MP4GetTrackTimeScale(fileHandle, _trackId);
-            _duration = MP4ConvertFromTrackDuration(fileHandle, _trackId,
-                                                   MP4GetTrackDuration(fileHandle, _trackId),
-                                                   MP4_MSECS_TIME_SCALE);
+            _duration = MP4ConvertFromMovieDuration(fileHandle, getTrackDuration(fileHandle, _trackId), MP4_MSECS_TIME_SCALE);
             _startOffset = getTrackStartOffset(fileHandle, _trackId);
 
             _bitrate = MP4GetTrackBitRate(fileHandle, _trackId);
