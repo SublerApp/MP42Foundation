@@ -912,7 +912,7 @@
         for (MP42Track *track in self.inputTracks) {
             AVAssetReaderOutput *assetReaderOutput = [AVAssetReaderTrackOutput assetReaderTrackOutputWithTrack:[_localAsset trackWithTrackID:track.sourceId]
                                                                                                 outputSettings:nil];
-            if (![assetReader canAddOutput: assetReaderOutput]) {
+            if (![assetReader canAddOutput:assetReaderOutput]) {
                 NSLog(@"Unable to add the output to assetReader!");
             }
 
@@ -1005,7 +1005,7 @@
 
                     demuxHelper->currentTime += duration.value;
                     currentDataLength += sampleSize;
-                } else {
+                } else if (samplesNum > 1) {
                     // The CMSampleBufferRef contains more than one sample
                     if (!CMSampleBufferDataIsReady(sampleBuffer)) {
                         CMSampleBufferMakeDataReady(sampleBuffer);
@@ -1050,7 +1050,6 @@
                         continue;
                     }
 
-                    BOOL attachmentsSent = NO;
                     CFDictionaryRef attachments = CMCopyDictionaryOfAttachments(NULL, sampleBuffer, kCMAttachmentMode_ShouldPropagate);
 
                     // Get CMBlockBufferRef to extract the actual data later
@@ -1185,9 +1184,15 @@
                             sample->flags |= doNotDisplay ? MP42SampleBufferFlagDoNotDisplay : 0;
                             sample->trackId = track.sourceId;
 
-                            if (attachmentsSent == NO) {
-                                sample->attachments = (void *)attachments;
-                                attachmentsSent = YES;
+                            if (i == 0 && CFDictionaryContainsKey(attachments, kCMSampleBufferAttachmentKey_TrimDurationAtStart)) {
+                                CFMutableDictionaryRef copy = CFDictionaryCreateMutableCopy(kCFAllocatorDefault, 2, attachments);
+                                CFDictionaryRemoveValue(copy, kCMSampleBufferAttachmentKey_TrimDurationAtEnd);
+                                sample->attachments = (void *)copy;
+                            }
+                            else if (i == (samplesNum - 1) && CFDictionaryContainsKey(attachments, kCMSampleBufferAttachmentKey_TrimDurationAtEnd)) {
+                                CFMutableDictionaryRef copy = CFDictionaryCreateMutableCopy(kCFAllocatorDefault, 2, attachments);
+                                CFDictionaryRemoveValue(copy, kCMSampleBufferAttachmentKey_TrimDurationAtStart);
+                                sample->attachments = (void *)copy;
                             }
 
                             [demuxHelper->editsConstructor addSample:sample];
