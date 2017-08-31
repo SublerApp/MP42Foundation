@@ -16,7 +16,6 @@
 
     uint64_t        _currentTime;
     CMTimeScale     _timescale;
-    CMTimeScale     _primingTimescale;
 
     int64_t     _delta;
 
@@ -25,9 +24,6 @@
     uint64_t    _editsSize;
 
     BOOL        _editOpen;
-
-    uint64_t     _priming;
-    BOOL         _primingUsed;
 }
 
 - (instancetype)init {
@@ -41,17 +37,6 @@
         _priorityQueue = [[MP42Heap alloc] initWithCapacity:32 comparator:^NSComparisonResult(MP42SampleBuffer * obj1, MP42SampleBuffer * obj2) {
             return obj2->presentationTimestamp - obj1->presentationTimestamp;
         }];
-
-
-        if (format == kMP42AudioCodecType_MPEG4AAC) {
-            _priming = 2112;
-            _primingTimescale = 48000;
-        }
-        else if (format == kMP42AudioCodecType_MPEG4AAC_HE)
-        {
-            _priming = 4224;
-            _primingTimescale = 48000;
-        }
     }
     return self;
 }
@@ -89,20 +74,6 @@
     if (_editOpen == YES) {
         CMTime editEnd = CMTimeMake(_currentTime, _timescale);
         [self endEditListAtTime:editEnd empty:NO];
-    }
-
-    if (_priming && _primingUsed == NO && _editsCount) {
-        if (_timescale <= 1000) {
-            CMTime convertedPriming = CMTimeConvertScale(CMTimeMake(_priming, _primingTimescale),
-                                                         _timescale, kCMTimeRoundingMethod_QuickTime);
-            _edits[0].start.value -= convertedPriming.value;
-            _edits[0].duration.value += convertedPriming.value;
-        }
-        else {
-            _edits[0].start.value -= _priming;
-            _edits[0].duration.value += _priming;
-        }
-        _primingUsed = YES;
     }
 }
 
