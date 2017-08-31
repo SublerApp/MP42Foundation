@@ -13,7 +13,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @class MP42Image;
 
-typedef NS_ENUM(NSUInteger, MP42MetadataItemDataType) {
+typedef NS_OPTIONS(NSUInteger, MP42MetadataItemDataType) {
     MP42MetadataItemDataTypeUnspecified     = 1 << 0,
     MP42MetadataItemDataTypeString          = 1 << 1,
     MP42MetadataItemDataTypeStringArray     = 1 << 2,
@@ -32,7 +32,7 @@ typedef NS_ENUM(NSUInteger, MP42MetadataItemDataType) {
                                   dataType:(MP42MetadataItemDataType)dataType
                        extendedLanguageTag:(nullable NSString *)extendedLanguageTag;
 
-/* Indicates the identifier of the metadata item. Publicly defined identifiers are declared in AVMetadataIdentifiers.h. */
+/* Indicates the identifier of the metadata item. Publicly defined identifiers are declared in MP42MetadataFormat.h. */
 @property (nonatomic, readonly, copy) NSString *identifier;
 
 /* provides the value of the metadata item */
