@@ -354,9 +354,11 @@
     return YES;
 }
 
+#define MP42TRACK_VERSION 4
+
 - (void)encodeWithCoder:(NSCoder *)coder
 {
-    [coder encodeInt:3 forKey:@"MP42TrackVersion"];
+    [coder encodeInt:MP42TRACK_VERSION forKey:@"MP42TrackVersion"];
 
     [coder encodeInt64:_trackId forKey:@"Id"];
     [coder encodeInt64:_sourceId forKey:@"sourceId"];
@@ -412,6 +414,10 @@
 
     NSInteger version = [decoder decodeInt32ForKey:@"MP42TrackVersion"];
 
+    if (version < MP42TRACK_VERSION) {
+        return nil;
+    }
+
     _trackId = (MP4TrackId)[decoder decodeInt64ForKey:@"Id"];
     _sourceId = (MP4TrackId)[decoder decodeInt64ForKey:@"sourceId"];
 
@@ -447,9 +453,7 @@
     _bitrate = [decoder decodeInt32ForKey:@"bitrate"];
     _duration = [decoder decodeInt64ForKey:@"duration"];
     
-    if (version == 2) {
-        _dataLength = [decoder decodeInt64ForKey:@"dataLength"];
-    }
+    _dataLength = [decoder decodeInt64ForKey:@"dataLength"];
 
     _updatedProperty = [decoder decodeObjectOfClass:[NSMutableDictionary class] forKey:@"updatedProperty"];
     _mediaCharacteristicTags = [decoder decodeObjectOfClass:[NSSet class] forKey:@"mediaCharacteristicTags"];
