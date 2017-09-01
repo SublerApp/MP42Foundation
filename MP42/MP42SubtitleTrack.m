@@ -19,8 +19,7 @@
     self = [super initWithSourceURL:URL trackID:trackID fileHandle:fileHandle];
 
     if (self) {
-
-        if (self.format != kMP42SubtitleCodecType_VobSub) {
+        if (self.format == kMP42SubtitleCodecType_3GText) {
             uint64_t width, height;
 
             MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.tx3g.defTextBoxRight", &width);
@@ -45,12 +44,12 @@
                     _allSamplesAreForced = YES;
                 }
             }
+        }
 
-            if (MP4HaveTrackAtom(fileHandle, self.trackId, "tref.forc")) {
-                uint64_t forcedId = 0;
-                MP4GetTrackIntegerProperty(fileHandle, self.trackId, "tref.forc.entries.trackId", &forcedId);
-                _forcedTrackId = (MP4TrackId) forcedId;
-            }
+        if (MP4HaveTrackAtom(fileHandle, self.trackId, "tref.forc")) {
+            uint64_t forcedId = 0;
+            MP4GetTrackIntegerProperty(fileHandle, self.trackId, "tref.forc.entries.trackId", &forcedId);
+            _forcedTrackId = (MP4TrackId) forcedId;
         }
     }
 
@@ -70,12 +69,11 @@
 - (BOOL)writeToFile:(MP4FileHandle)fileHandle error:(NSError **)outError
 {
     if (!fileHandle || !self.trackId) {
-        if ( outError != NULL) {
+        if (outError != NULL) {
             *outError = MP42Error(MP42LocalizedString(@"Error: couldn't mux subtitle track", @"error message"),
                                   nil,
                                   120);
             return NO;
-            
         }
     }
 
@@ -96,30 +94,27 @@
         }
     }
 
-    if (self.edited && !self.muxed) {
-        [super writeToFile:fileHandle error:outError];
-        return self.trackId;
-    }
-    else {
-        [super writeToFile:fileHandle error:outError];
-    }
-
-    if (self.format != kMP42SubtitleCodecType_VobSub) {
+    if (self.format == kMP42SubtitleCodecType_3GText) {
         MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.tx3g.defTextBoxBottom", self.trackHeight);
         MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.tx3g.defTextBoxRight", self.trackWidth);
 
         uint32_t displayFlags = 0;
-        if (_verticalPlacement)
+        if (_verticalPlacement) {
             displayFlags = 0x20000000;
-        if (_someSamplesAreForced)
+        }
+        if (_someSamplesAreForced) {
             displayFlags |= 0x40000000;
-        if (_allSamplesAreForced)
+        }
+        if (_allSamplesAreForced) {
             displayFlags |= 0x80000000;
+        }
 
         MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.tx3g.displayFlags", displayFlags);
     }
 
-    return YES;
+    [super writeToFile:fileHandle error:outError];
+
+    return self.trackId > 0;
 }
 
 - (void)setSomeSamplesAreForced:(BOOL)value

@@ -370,19 +370,6 @@
             MP4SetTrackDurationPerChunk(_fileHandle, dstTrackId, timeScale / 8);
             MP4SetTrackIntegerProperty(_fileHandle, dstTrackId, "tkhd.layer", -1);
 
-            int32_t displayFlags = 0;
-            if (vPlacement) {
-                displayFlags = 0x20000000;
-            }
-            if (subTrack.someSamplesAreForced) {
-                displayFlags |= 0x40000000;
-            }
-            if (subTrack.allSamplesAreForced) {
-                displayFlags |= 0xC0000000;
-            }
-
-            MP4SetTrackIntegerProperty(_fileHandle, dstTrackId, "mdia.minf.stbl.stsd.tx3g.displayFlags", displayFlags);
-
             MP4SetTrackIntegerProperty(_fileHandle, dstTrackId, "mdia.minf.stbl.stsd.tx3g.horizontalJustification", 1);
             MP4SetTrackIntegerProperty(_fileHandle, dstTrackId, "mdia.minf.stbl.stsd.tx3g.verticalJustification", -1);
 
@@ -390,9 +377,6 @@
             MP4SetTrackIntegerProperty(_fileHandle, dstTrackId, "mdia.minf.stbl.stsd.tx3g.bgColorGreen", 0);
             MP4SetTrackIntegerProperty(_fileHandle, dstTrackId, "mdia.minf.stbl.stsd.tx3g.bgColorBlue", 0);
             MP4SetTrackIntegerProperty(_fileHandle, dstTrackId, "mdia.minf.stbl.stsd.tx3g.bgColorAlpha", 0);
-
-            MP4SetTrackIntegerProperty(_fileHandle, dstTrackId, "mdia.minf.stbl.stsd.tx3g.defTextBoxBottom", subSize.height);
-            MP4SetTrackIntegerProperty(_fileHandle, dstTrackId, "mdia.minf.stbl.stsd.tx3g.defTextBoxRight", videoSize.width);
 
             MP4SetTrackIntegerProperty(_fileHandle, dstTrackId, "mdia.minf.stbl.stsd.tx3g.fontSize", videoSize.height * 0.05);
 
