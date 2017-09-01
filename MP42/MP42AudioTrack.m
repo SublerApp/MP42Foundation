@@ -54,6 +54,21 @@
                             _channels = c.channels;
                             free(pAacConfig);
                         }
+
+                    if (!MP4HaveTrackAtom(fileHandle, self.trackId, "mdia.minf.stbl.sgpd")) {
+                        BOOL addDelay = YES;
+                        uint32_t edits = MP4GetTrackNumberOfEdits(fileHandle, self.trackId);
+                        if (edits == 1) {
+                            MP4Timestamp startTime = MP4GetTrackEditMediaStart(fileHandle, self.trackId, 1);
+                            if (startTime != 0) {
+                                addDelay = NO;
+                            }
+                        }
+                        if (addDelay) {
+                            // Guess a audio encoder delay
+                            self.startOffset = -2112.f / self.timescale * 1000;
+                        }
+                    }
                 }
                 else if ((audioType == MP4_PCM16_LITTLE_ENDIAN_AUDIO_TYPE) ||
                          (audioType == MP4_PCM16_BIG_ENDIAN_AUDIO_TYPE)) {
