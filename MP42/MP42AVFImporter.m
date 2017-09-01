@@ -948,13 +948,13 @@
             if (sampleBuffer) {
 
                 CMItemCount samplesNum = CMSampleBufferGetNumSamples(sampleBuffer);
+                CMTime presentationOutputTimeStamp = CMSampleBufferGetOutputPresentationTimeStamp(sampleBuffer);
 
                 if (samplesNum == 1) {
                     // We have only a sample
                     CMTime duration = CMSampleBufferGetDuration(sampleBuffer);
                     CMTime decodeTimeStamp = CMSampleBufferGetDecodeTimeStamp(sampleBuffer);
                     CMTime presentationTimeStamp = CMSampleBufferGetPresentationTimeStamp(sampleBuffer);
-                    CMTime presentationOutputTimeStamp = CMSampleBufferGetOutputPresentationTimeStamp(sampleBuffer);
 
                     CMBlockBufferRef buffer = CMSampleBufferGetDataBuffer(sampleBuffer);
                     size_t sampleSize = CMBlockBufferGetDataLength(buffer);
@@ -976,7 +976,7 @@
                         }
                     }
 
-                    CMTime currentOutputTimeStamp = CMTimeConvertScale(presentationOutputTimeStamp, duration.timescale, kCMTimeRoundingMethod_QuickTime);
+                    CMTime currentOutputTimeStamp = CMTimeConvertScale(presentationOutputTimeStamp, duration.timescale, kCMTimeRoundingMethod_Default);
                     CFDictionaryRef attachments = CMCopyDictionaryOfAttachments(NULL, sampleBuffer, kCMAttachmentMode_ShouldPropagate);
 
 #ifdef SB_AVF_DEBUG
@@ -991,6 +991,7 @@
                     sample->size = sampleSize;
                     sample->duration = duration.value;
                     sample->offset = -decodeTimeStamp.value + presentationTimeStamp.value;
+                    sample->decodeTimestamp = decodeTimeStamp.value;
                     sample->presentationTimestamp = presentationTimeStamp.value;
                     sample->presentationOutputTimestamp = currentOutputTimeStamp.value;
                     sample->timescale = duration.timescale;
@@ -1073,7 +1074,7 @@
                         CMTime decodeTimeStamp = CMSampleBufferGetDecodeTimeStamp(sampleBuffer);
                         CMTime presentationTimeStamp = CMSampleBufferGetPresentationTimeStamp(sampleBuffer);
                         CMTime presentationOutputTimeStamp = CMSampleBufferGetOutputPresentationTimeStamp(sampleBuffer);
-                        CMTime currentOutputTimeStamp = CMTimeConvertScale(presentationOutputTimeStamp, duration.timescale, kCMTimeRoundingMethod_QuickTime);
+                        CMTime currentOutputTimeStamp = CMTimeConvertScale(presentationOutputTimeStamp, duration.timescale, kCMTimeRoundingMethod_Default);
 
                         // Read sample attachment, sync to mark the frame as sync
                         BOOL sync = 1;
@@ -1116,11 +1117,12 @@
                     }
                     else {
                         int pos = 0;
+                        CMTime currentOutputTimeStamp = CMTimeConvertScale(presentationOutputTimeStamp, timingArrayOut[0].duration.timescale, kCMTimeRoundingMethod_Default);
+
                         for (int i = 0; i < samplesNum; i++) {
                             CMSampleTimingInfo sampleTimingInfo;
                             __unused CMTime decodeTimeStamp;
                             CMTime presentationTimeStamp;
-                            CMTime presentationOutputTimeStamp = CMSampleBufferGetOutputPresentationTimeStamp(sampleBuffer);
 
                             size_t sampleSize;
 
@@ -1137,9 +1139,6 @@
                                 decodeTimeStamp = sampleTimingInfo.decodeTimeStamp;
                                 presentationTimeStamp = sampleTimingInfo.presentationTimeStamp;
                             }
-
-                            presentationOutputTimeStamp.value = presentationOutputTimeStamp.value + (sampleTimingInfo.duration.value * i /
-                                                                                                     ((double) sampleTimingInfo.duration.timescale / presentationOutputTimeStamp.timescale));
 
                             // If the size of sample size array is equal to 1, it means every sample has got the same size
                             if (sizeArrayEntries ==  1) {
@@ -1180,27 +1179,37 @@
 
                             // Enqueues the new sample
                             MP42SampleBuffer *sample = [[MP42SampleBuffer alloc] init];
-                            sample->data = sampleData;
-                            sample->size = sampleSize;
-                            sample->duration = sampleTimingInfo.duration.value;
-                            // FIXME
-                            //sample->offset = -decodeTimeStamp.value + presentationTimeStamp.value;
-                            sample->presentationTimestamp = presentationTimeStamp.value;
-                            sample->presentationOutputTimestamp = presentationTimeStamp.value;
-                            sample->timescale = sampleTimingInfo.duration.timescale;
-                            sample->flags |= sync ? MP42SampleBufferFlagIsSync : 0;
-                            sample->flags |= doNotDisplay ? MP42SampleBufferFlagDoNotDisplay : 0;
-                            sample->trackId = track.sourceId;
 
                             if (attachments && i == 0 && CFDictionaryContainsKey(attachments, kCMSampleBufferAttachmentKey_TrimDurationAtStart)) {
                                 CFMutableDictionaryRef copy = CFDictionaryCreateMutableCopy(kCFAllocatorDefault, 2, attachments);
                                 CFDictionaryRemoveValue(copy, kCMSampleBufferAttachmentKey_TrimDurationAtEnd);
                                 sample->attachments = (void *)copy;
+                                CFDictionaryRef trimStart = CFDictionaryGetValue(sample->attachments, kCMSampleBufferAttachmentKey_TrimDurationAtStart);
+                                CMTime trimStartTime = CMTimeMakeFromDictionary(trimStart);
+                                trimStartTime = CMTimeConvertScale(trimStartTime, sampleTimingInfo.duration.value, kCMTimeRoundingMethod_Default);
+                                currentOutputTimeStamp.value -= trimStartTime.value;
+
                             }
-                            else if (attachments && i == (samplesNum - 1) && CFDictionaryContainsKey(attachments, kCMSampleBufferAttachmentKey_TrimDurationAtEnd)) {
+
+                            sample->data = sampleData;
+                            sample->size = sampleSize;
+                            sample->duration = sampleTimingInfo.duration.value;
+                            sample->offset = -decodeTimeStamp.value + presentationTimeStamp.value;
+                            sample->presentationTimestamp = presentationTimeStamp.value;
+                            sample->presentationOutputTimestamp = currentOutputTimeStamp.value;
+                            sample->timescale = sampleTimingInfo.duration.timescale;
+                            sample->flags |= sync ? MP42SampleBufferFlagIsSync : 0;
+                            sample->flags |= doNotDisplay ? MP42SampleBufferFlagDoNotDisplay : 0;
+                            sample->trackId = track.sourceId;
+
+                            if (attachments && i == (samplesNum - 1) && CFDictionaryContainsKey(attachments, kCMSampleBufferAttachmentKey_TrimDurationAtEnd)) {
                                 CFMutableDictionaryRef copy = CFDictionaryCreateMutableCopy(kCFAllocatorDefault, 2, attachments);
                                 CFDictionaryRemoveValue(copy, kCMSampleBufferAttachmentKey_TrimDurationAtStart);
                                 sample->attachments = (void *)copy;
+                                CFDictionaryRef trimEnd = CFDictionaryGetValue(sample->attachments, kCMSampleBufferAttachmentKey_TrimDurationAtEnd);
+                                CMTime trimEndTime = CMTimeMakeFromDictionary(trimEnd);
+                                trimEndTime = CMTimeConvertScale(trimEndTime, sampleTimingInfo.duration.value, kCMTimeRoundingMethod_Default);
+                                currentOutputTimeStamp.value -= trimEndTime.value;
                             }
 
                             [demuxHelper->editsConstructor addSample:sample];
@@ -1210,6 +1219,7 @@
 #ifdef SB_AVF_DEBUG
                             demuxHelper->currentTime += sampleTimingInfo.duration.value;
 #endif
+                            currentOutputTimeStamp.value = currentOutputTimeStamp.value + sampleTimingInfo.duration.value;
                             currentDataLength += sampleSize;
                         }
                     }
@@ -1260,7 +1270,7 @@
         // Add back the new constructed edit lists.
         for (uint64_t i = 0; i < helper->editsConstructor.editsCount; i++) {
             CMTimeRange timeRange = helper->editsConstructor.edits[i];
-            CMTime duration = CMTimeConvertScale(timeRange.duration, timescale, kCMTimeRoundingMethod_QuickTime);
+            CMTime duration = CMTimeConvertScale(timeRange.duration, timescale, kCMTimeRoundingMethod_Default);
 
             trackDuration += duration.value;
 
