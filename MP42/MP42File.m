@@ -205,7 +205,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
         _tracks = [[NSMutableArray alloc] init];
         uint32_t tracksCount = MP4GetNumberOfTracks(_fileHandle, 0, 0);
         MP4TrackId chapterId = findChapterTrackId(_fileHandle);
-        MP4TrackId previewsId = 0; //findChapterPreviewTrackId(_fileHandle);
+        MP4TrackId previewsId = findChapterPreviewTrackId(_fileHandle);
 
         for (int i = 0; i< tracksCount; i++) {
             id track;
@@ -238,13 +238,6 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 
         // Restore the tracks references in the wrapped tracks
         [self reconnectReferences];
-
-        // Ugly hack to check for the previews track
-        for (MP42Track *track in _tracks) {
-            if (track.format == kMP42VideoCodecType_JPEG) {
-                previewsId = track.trackId;
-            }
-        }
 
         // Load the previews images
         [self loadPreviewsFromTrackID:previewsId];

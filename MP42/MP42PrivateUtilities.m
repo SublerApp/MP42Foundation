@@ -120,7 +120,7 @@ MP4TrackId findChapterPreviewTrackId(MP4FileHandle fileHandle)
         if (MP4HaveTrackAtom(fileHandle, trackId, "tref.chap")) {
             uint64_t entryCount = 0;
             MP4GetTrackIntegerProperty(fileHandle, trackId, "tref.chap.entryCount", &entryCount);
-            if (entryCount > 1 && MP4GetTrackIntegerProperty(fileHandle, trackId, "tref.chap.entries.trackId[1]", &trackRef))
+            if (entryCount > 1 && MP4GetTrackIntegerProperty(fileHandle, trackId, "tref.chap.entries[1].trackId", &trackRef))
                 if (trackRef > 0)
                     return (MP4TrackId) trackRef;
         }
