@@ -20,7 +20,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property(nonatomic, readwrite) BOOL allSamplesAreForced;
 
 @property(nonatomic, readonly)  MP42TrackId forcedTrackId;
-@property(nonatomic, readwrite, assign, nullable) MP42Track *forcedTrack;
+@property(nonatomic, readwrite, weak, nullable) MP42Track *forcedTrack;
 
 @end
 

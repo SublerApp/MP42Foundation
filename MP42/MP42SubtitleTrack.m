@@ -12,15 +12,7 @@
 #import "MP42MediaFormat.h"
 #import "MP42HtmlParser.h"
 
-@implementation MP42SubtitleTrack {
-@private
-    BOOL _verticalPlacement;
-    BOOL _someSamplesAreForced;
-    BOOL _allSamplesAreForced;
-
-    MP42TrackId  _forcedTrackId;
-    MP42Track  *_forcedTrack;
-}
+@implementation MP42SubtitleTrack
 
 - (instancetype)initWithSourceURL:(NSURL *)URL trackID:(NSInteger)trackID fileHandle:(MP4FileHandle)fileHandle
 {
@@ -89,8 +81,8 @@
 
     if (self.updatedProperty[@"forced"] || !self.muxed) {
 
-        if (_forcedTrack) {
-            _forcedTrackId = _forcedTrack.trackId;
+        if (self.forcedTrack) {
+            _forcedTrackId = self.forcedTrack.trackId;
         }
 
         if (MP4HaveTrackAtom(fileHandle, self.trackId, "tref.forc") && (_forcedTrackId == 0)) {
@@ -130,22 +122,12 @@
     return YES;
 }
 
-@synthesize verticalPlacement = _verticalPlacement;
-
-- (BOOL)someSamplesAreForced {
-    return _someSamplesAreForced;
-}
-
 - (void)setSomeSamplesAreForced:(BOOL)value
 {
     _someSamplesAreForced = value;
     self.edited = YES;
 
     self.updatedProperty[@"forcedSubtitles"] = @YES;
-}
-
-- (BOOL)allSamplesAreForced {
-    return _allSamplesAreForced;
 }
 
 - (void)setAllSamplesAreForced:(BOOL)value
@@ -155,8 +137,6 @@
 
     self.updatedProperty[@"forcedSubtitles"] = @YES;
 }
-
-@synthesize forcedTrackId = _forcedTrackId;
 
 typedef struct style_record {
     uint16_t startChar;
@@ -396,11 +376,6 @@ static void insertTagsFromStyleRecord(style_record record, NSMutableString *samp
     _forcedTrackId = 0;
     self.edited = YES;
     self.updatedProperty[@"forced"] = @YES;
-}
-
-- (MP42Track *)forcedTrack
-{
-    return _forcedTrack;
 }
 
 #pragma mark - NSCopying
