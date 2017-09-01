@@ -1192,12 +1192,12 @@
                             sample->flags |= doNotDisplay ? MP42SampleBufferFlagDoNotDisplay : 0;
                             sample->trackId = track.sourceId;
 
-                            if (i == 0 && CFDictionaryContainsKey(attachments, kCMSampleBufferAttachmentKey_TrimDurationAtStart)) {
+                            if (attachments && i == 0 && CFDictionaryContainsKey(attachments, kCMSampleBufferAttachmentKey_TrimDurationAtStart)) {
                                 CFMutableDictionaryRef copy = CFDictionaryCreateMutableCopy(kCFAllocatorDefault, 2, attachments);
                                 CFDictionaryRemoveValue(copy, kCMSampleBufferAttachmentKey_TrimDurationAtEnd);
                                 sample->attachments = (void *)copy;
                             }
-                            else if (i == (samplesNum - 1) && CFDictionaryContainsKey(attachments, kCMSampleBufferAttachmentKey_TrimDurationAtEnd)) {
+                            else if (attachments && i == (samplesNum - 1) && CFDictionaryContainsKey(attachments, kCMSampleBufferAttachmentKey_TrimDurationAtEnd)) {
                                 CFMutableDictionaryRef copy = CFDictionaryCreateMutableCopy(kCFAllocatorDefault, 2, attachments);
                                 CFDictionaryRemoveValue(copy, kCMSampleBufferAttachmentKey_TrimDurationAtStart);
                                 sample->attachments = (void *)copy;
