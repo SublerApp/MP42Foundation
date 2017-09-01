@@ -24,13 +24,7 @@
 
 - (BOOL)writeToFile:(MP42FileHandle)fileHandle error:(NSError **)outError
 {
-    if (self.isEdited && !self.muxed) {
-        self.muxed = YES;
-    }
-
-    [super writeToFile:fileHandle error:outError];
-
-    return (self.trackId > 0);
+    return [super writeToFile:fileHandle error:outError];
 }
 
 @end

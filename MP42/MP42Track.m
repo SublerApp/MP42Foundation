@@ -191,8 +191,6 @@
 
 - (BOOL)writeToFile:(MP4FileHandle)fileHandle error:(NSError **)outError
 {
-    BOOL success = YES;
-
     if (!fileHandle || !_trackId) {
         if ( outError != NULL) {
             *outError = MP42Error(MP42LocalizedString(@"Failed to modify track", @"error message"),
@@ -239,7 +237,7 @@
         }
     }
 
-    return success;
+    return YES;
 }
 
 - (void *)muxer_helper

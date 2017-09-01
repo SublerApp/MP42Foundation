@@ -49,7 +49,7 @@
         if (MP4HaveTrackAtom(fileHandle, self.trackId, "tref.forc")) {
             uint64_t forcedId = 0;
             MP4GetTrackIntegerProperty(fileHandle, self.trackId, "tref.forc.entries.trackId", &forcedId);
-            _forcedTrackId = (MP4TrackId) forcedId;
+            _forcedTrackId = forcedId;
         }
     }
 
@@ -112,9 +112,7 @@
         MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.tx3g.displayFlags", displayFlags);
     }
 
-    [super writeToFile:fileHandle error:outError];
-
-    return self.trackId > 0;
+    return [super writeToFile:fileHandle error:outError];
 }
 
 - (void)setSomeSamplesAreForced:(BOOL)value

@@ -163,12 +163,13 @@
 
 - (BOOL)writeToFile:(MP4FileHandle)fileHandle error:(NSError **)outError
 {
-    if (!fileHandle) {
-        return NO;
-    }
-
-    if (self.trackId) {
-        [super writeToFile:fileHandle error:outError];
+    if (!fileHandle || !self.trackId || [super writeToFile:fileHandle error:outError]) {
+        if (outError != NULL) {
+            *outError = MP42Error(MP42LocalizedString(@"Error: couldn't mux audio track", @"error message"),
+                                  nil,
+                                  120);
+            return NO;
+        }
     }
 
     if (self.updatedProperty[@"volume"] || !self.muxed) {
@@ -209,7 +210,7 @@
         }
     }
 
-    return (self.trackId > 0);
+    return YES;
 }
 
 - (void)setConversionSettings:(MP42AudioConversionSettings *)conversionSettings

@@ -10,6 +10,7 @@
 #import "MP42Track+Private.h"
 #import "MP42MediaFormat.h"
 #import "MP42Track+Private.h"
+#import "MP42PrivateUtilities.h"
 #import <mp4v2.h>
 
 @implementation MP42VideoTrack
@@ -126,49 +127,51 @@
 
 - (BOOL)writeToFile:(MP4FileHandle)fileHandle error:(NSError **)outError
 {
-    if (!fileHandle) {
-        return NO;
+    if (!fileHandle || !self.trackId || [super writeToFile:fileHandle error:outError]) {
+        if (outError != NULL) {
+            *outError = MP42Error(MP42LocalizedString(@"Error: couldn't mux video track", @"error message"),
+                                  nil,
+                                  120);
+            return NO;
+        }
     }
 
-    if (self.trackId) {
-        [super writeToFile:fileHandle error:outError];
+    if (_trackWidth > 0 && _trackHeight > 0) {
+        MP4SetTrackFloatProperty(fileHandle, self.trackId, "tkhd.width", _trackWidth);
+        MP4SetTrackFloatProperty(fileHandle, self.trackId, "tkhd.height", _trackHeight);
 
-        if (_trackWidth > 0 && _trackHeight > 0) {
-            MP4SetTrackFloatProperty(fileHandle, self.trackId, "tkhd.width", _trackWidth);
-            MP4SetTrackFloatProperty(fileHandle, self.trackId, "tkhd.height", _trackHeight);
+        uint8_t *val;
+        uint8_t nval[36];
+        uint32_t *ptr32 = (uint32_t*) nval;
+        uint32_t size;
 
-            uint8_t *val;
-            uint8_t nval[36];
-            uint32_t *ptr32 = (uint32_t*) nval;
-            uint32_t size;
+        MP4GetTrackBytesProperty(fileHandle ,self.trackId, "tkhd.matrix", &val, &size);
+        memcpy(nval, val, size);
+        ptr32[0] = CFSwapInt32HostToBig(_transform.a * 0x10000);
+        ptr32[1] = CFSwapInt32HostToBig(_transform.b * 0x10000);
+        ptr32[3] = CFSwapInt32HostToBig(_transform.c * 0x10000);
+        ptr32[4] = CFSwapInt32HostToBig(_transform.d * 0x10000);
+        ptr32[6] = CFSwapInt32HostToBig(_transform.tx * 0x10000);
+        ptr32[7] = CFSwapInt32HostToBig(_transform.ty * 0x10000);
+        MP4SetTrackBytesProperty(fileHandle, self.trackId, "tkhd.matrix", nval, size);
 
-            MP4GetTrackBytesProperty(fileHandle ,self.trackId, "tkhd.matrix", &val, &size);
-            memcpy(nval, val, size);
-            ptr32[0] = CFSwapInt32HostToBig(_transform.a * 0x10000);
-            ptr32[1] = CFSwapInt32HostToBig(_transform.b * 0x10000);
-            ptr32[3] = CFSwapInt32HostToBig(_transform.c * 0x10000);
-            ptr32[4] = CFSwapInt32HostToBig(_transform.d * 0x10000);
-            ptr32[6] = CFSwapInt32HostToBig(_transform.tx * 0x10000);
-            ptr32[7] = CFSwapInt32HostToBig(_transform.ty * 0x10000);
-            MP4SetTrackBytesProperty(fileHandle, self.trackId, "tkhd.matrix", nval, size);
+        free(val);
 
-            free(val);
-
-            if (self.updatedProperty[@"hSpacing"] || self.updatedProperty[@"vSpacing"]) {
-                if (_hSpacing >= 1 && _vSpacing >= 1) {
-                    if (MP4HaveTrackAtom(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.pasp")) {
-                        MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.pasp.hSpacing", _hSpacing);
-                        MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.pasp.vSpacing", _vSpacing);
-                    }
-                    else {
-                        MP4AddPixelAspectRatio(fileHandle, self.trackId, (uint32_t)_hSpacing, (uint32_t)_vSpacing);
-                    }
+        if (self.updatedProperty[@"hSpacing"] || self.updatedProperty[@"vSpacing"]) {
+            if (_hSpacing >= 1 && _vSpacing >= 1) {
+                if (MP4HaveTrackAtom(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.pasp")) {
+                    MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.pasp.hSpacing", _hSpacing);
+                    MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.pasp.vSpacing", _vSpacing);
+                }
+                else {
+                    MP4AddPixelAspectRatio(fileHandle, self.trackId, (uint32_t)_hSpacing, (uint32_t)_vSpacing);
                 }
             }
+        }
 
-            if (self.updatedProperty[@"colr"] &&
-                (self.format == kMP42VideoCodecType_H264 || self.format == kMP42VideoCodecType_MPEG4Video
-                 || self.format == kMP42VideoCodecType_HEVC || self.format == kMP42VideoCodecType_HEVC_PSinBitstream)) {
+        if (self.updatedProperty[@"colr"] &&
+            (self.format == kMP42VideoCodecType_H264 || self.format == kMP42VideoCodecType_MPEG4Video
+             || self.format == kMP42VideoCodecType_HEVC || self.format == kMP42VideoCodecType_HEVC_PSinBitstream)) {
 
                 if (_colorPrimaries > 0 && _transferCharacteristics > 0 && _matrixCoefficients > 0) {
                     const char *type;
@@ -190,39 +193,38 @@
                 }
             }
 
-            if (_cleanApertureWidthN >= 1 && _cleanApertureHeightN >= 1) {
-                    if (MP4HaveTrackAtom(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.clap")) {
-                        MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.clap.cleanApertureWidthN", _cleanApertureWidthN);
-                        MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.clap.cleanApertureWidthD", _cleanApertureWidthD);
-                        
-                        MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.clap.cleanApertureHeightN", _cleanApertureHeightN);
-                        MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.clap.cleanApertureHeightD", _cleanApertureHeightD);
-                        
-                        MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.clap.horizOffN", _horizOffN);
-                        MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.clap.horizOffD", _horizOffD);
-                        
-                        MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.clap.vertOffN", _vertOffN);
-                        MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.clap.vertOffD", _vertOffD);
-                    }
-                    else
-                        MP4AddCleanAperture(fileHandle, self.trackId, _cleanApertureWidthN, _cleanApertureWidthD, _cleanApertureHeightN, _cleanApertureHeightD,
-                                            _horizOffN, _horizOffD, _vertOffN, _vertOffD);
-            }
+        if (_cleanApertureWidthN >= 1 && _cleanApertureHeightN >= 1) {
+            if (MP4HaveTrackAtom(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.clap")) {
+                MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.clap.cleanApertureWidthN", _cleanApertureWidthN);
+                MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.clap.cleanApertureWidthD", _cleanApertureWidthD);
 
-            if (self.format == kMP42VideoCodecType_H264) {
-                if (self.updatedProperty[@"profile"]) {
-                    MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*[0].avcC.AVCProfileIndication", _newProfile);
-                    _origProfile = _newProfile;
-                }
-                if (self.updatedProperty[@"level"]) {
-                    MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*[0].avcC.AVCLevelIndication", _newLevel);
-                    _origLevel = _newLevel;
-                }
+                MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.clap.cleanApertureHeightN", _cleanApertureHeightN);
+                MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.clap.cleanApertureHeightD", _cleanApertureHeightD);
+
+                MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.clap.horizOffN", _horizOffN);
+                MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.clap.horizOffD", _horizOffD);
+
+                MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.clap.vertOffN", _vertOffN);
+                MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.clap.vertOffD", _vertOffD);
+            }
+            else
+                MP4AddCleanAperture(fileHandle, self.trackId, _cleanApertureWidthN, _cleanApertureWidthD, _cleanApertureHeightN, _cleanApertureHeightD,
+                                    _horizOffN, _horizOffD, _vertOffN, _vertOffD);
+        }
+
+        if (self.format == kMP42VideoCodecType_H264) {
+            if (self.updatedProperty[@"profile"]) {
+                MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*[0].avcC.AVCProfileIndication", _newProfile);
+                _origProfile = _newProfile;
+            }
+            if (self.updatedProperty[@"level"]) {
+                MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*[0].avcC.AVCLevelIndication", _newLevel);
+                _origLevel = _newLevel;
             }
         }
     }
 
-    return (self.trackId > 0);
+    return YES;
 }
 
 - (void)setTrackWidth:(float)trackWidth
