@@ -332,7 +332,8 @@
             NSSize subSize = NSMakeSize(0, 0);
             NSSize videoSize = NSMakeSize(0, 0);
 
-            NSInteger vPlacement = [(MP42SubtitleTrack*)track verticalPlacement];
+            MP42SubtitleTrack *subTrack = (MP42SubtitleTrack *)track;
+            NSInteger vPlacement = subTrack.verticalPlacement;
 
             for (id workingTrack in _workingTracks) {
                 if ([workingTrack isMemberOfClass:[MP42VideoTrack class]]) {
@@ -354,8 +355,8 @@
                 }
             }
             if (!vPlacement) {
-                if ([(MP42SubtitleTrack*)track trackHeight])
-                    subSize.height = [(MP42SubtitleTrack*)track trackHeight];
+                if (subTrack.trackHeight)
+                    subSize.height = subTrack.trackHeight;
                 else
                     subSize.height = 0.15 * videoSize.height;
             }
@@ -367,16 +368,18 @@
             dstTrackId = MP4AddSubtitleTrack(_fileHandle, timeScale, videoSize.width, subSize.height);
 
             MP4SetTrackDurationPerChunk(_fileHandle, dstTrackId, timeScale / 8);
-            MP4SetTrackIntegerProperty(_fileHandle, dstTrackId, "tkhd.alternate_group", 2);
             MP4SetTrackIntegerProperty(_fileHandle, dstTrackId, "tkhd.layer", -1);
 
             int32_t displayFlags = 0;
-            if (vPlacement)
+            if (vPlacement) {
                 displayFlags = 0x20000000;
-            if ([(MP42SubtitleTrack *)track someSamplesAreForced])
+            }
+            if (subTrack.someSamplesAreForced) {
                 displayFlags |= 0x40000000;
-            if ([(MP42SubtitleTrack *)track allSamplesAreForced])
+            }
+            if (subTrack.allSamplesAreForced) {
                 displayFlags |= 0xC0000000;
+            }
 
             MP4SetTrackIntegerProperty(_fileHandle, dstTrackId, "mdia.minf.stbl.stsd.tx3g.displayFlags", displayFlags);
 
@@ -400,21 +403,13 @@
 
             /* translate the track */
             if (!vPlacement) {
-                uint8_t* val;
-                uint8_t nval[36];
-                uint32_t *ptr32 = (uint32_t*) nval;
-                uint32_t size;
-
-                MP4GetTrackBytesProperty(_fileHandle, dstTrackId, "tkhd.matrix", &val, &size);
-                memcpy(nval, val, size);
-                ptr32[7] = CFSwapInt32HostToBig( (videoSize.height * 0.85) * 0x10000);
-
-                MP4SetTrackBytesProperty(_fileHandle, dstTrackId, "tkhd.matrix", nval, size);
-                free(val);
+                CGAffineTransform transform = subTrack.transform;
+                transform.ty = videoSize.height * 0.85;
+                subTrack.transform = transform;
             }
 
-            [(MP42SubtitleTrack*)track setTrackWidth:videoSize.width];
-            [(MP42SubtitleTrack*)track setTrackHeight:subSize.height];
+            subTrack.trackWidth = videoSize.width;
+            subTrack.trackHeight = subSize.height;
 
             [helper->importer setActiveTrack:track];
         }

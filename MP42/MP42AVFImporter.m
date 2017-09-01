@@ -126,6 +126,8 @@
 
                 videoTrack.width = naturalSize.width;
                 videoTrack.height = naturalSize.height;
+                
+                videoTrack.transform = track.preferredTransform;
 
                 if (formatDescription) {
 

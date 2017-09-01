@@ -105,26 +105,7 @@
     }
 
     if (self.edited && !self.muxed) {
-        float trackWidth, trackHeight;
-        MP4GetTrackFloatProperty(fileHandle, self.trackId, "tkhd.width", &trackWidth);
-        MP4GetTrackFloatProperty(fileHandle, self.trackId, "tkhd.height", &trackHeight);
-
-        self.trackWidth = trackWidth;
-        self.trackHeight = trackHeight;
-
-        uint8_t *val;
-        uint8_t nval[36];
-        uint32_t *ptr32 = (uint32_t*) nval;
-        uint32_t size;
-
-        MP4GetTrackBytesProperty(fileHandle ,self.trackId, "tkhd.matrix", &val, &size);
-        memcpy(nval, val, size);
-        self.offsetX = CFSwapInt32BigToHost(ptr32[6]) / 0x10000;
-        self.offsetY = CFSwapInt32BigToHost(ptr32[7]) / 0x10000;
-        free(val);
-
         [super writeToFile:fileHandle error:outError];
-
         return self.trackId;
     }
     else {

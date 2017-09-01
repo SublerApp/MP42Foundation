@@ -31,9 +31,6 @@
     uint64_t _horizOffN, _horizOffD;
     uint64_t _vertOffN, _vertOffD;
 
-    // Matrix
-    uint32_t _offsetX, _offsetY;
-
     // H.264 profile
     uint8_t _origProfile, _origLevel;
     uint8_t _newProfile, _newLevel;
@@ -53,6 +50,8 @@
         MP4GetTrackFloatProperty(fileHandle, self.trackId, "tkhd.width", &_trackWidth);
         MP4GetTrackFloatProperty(fileHandle, self.trackId, "tkhd.height", &_trackHeight);
 
+        _transform = CGAffineTransformIdentity;
+        
         uint8_t *val;
         uint8_t nval[36];
         uint32_t *ptr32 = (uint32_t*) nval;
@@ -60,8 +59,12 @@
 
         MP4GetTrackBytesProperty(fileHandle ,self.trackId, "tkhd.matrix", &val, &size);
         memcpy(nval, val, size);
-        _offsetX = CFSwapInt32BigToHost(ptr32[6]) / 0x10000;
-        _offsetY = CFSwapInt32BigToHost(ptr32[7]) / 0x10000;
+        _transform.a = CFSwapInt32BigToHost(ptr32[0]) / 0x10000;
+        _transform.b = CFSwapInt32BigToHost(ptr32[1]) / 0x10000;
+        _transform.c = CFSwapInt32BigToHost(ptr32[3]) / 0x10000;
+        _transform.d = CFSwapInt32BigToHost(ptr32[4]) / 0x10000;
+        _transform.tx = CFSwapInt32BigToHost(ptr32[6]) / 0x10000;
+        _transform.ty = CFSwapInt32BigToHost(ptr32[7]) / 0x10000;
         free(val);
 
         if (MP4HaveTrackAtom(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.pasp")) {
@@ -116,6 +119,7 @@
     self = [super init];
     if (self) {
         self.mediaType = kMP42MediaType_Video;
+        _transform = CGAffineTransformIdentity;
     }
     return self;
 }
@@ -140,8 +144,12 @@
 
             MP4GetTrackBytesProperty(fileHandle ,self.trackId, "tkhd.matrix", &val, &size);
             memcpy(nval, val, size);
-            ptr32[6] = CFSwapInt32HostToBig(_offsetX * 0x10000);
-            ptr32[7] = CFSwapInt32HostToBig(_offsetY * 0x10000);
+            ptr32[0] = CFSwapInt32HostToBig(_transform.a * 0x10000);
+            ptr32[1] = CFSwapInt32HostToBig(_transform.b * 0x10000);
+            ptr32[3] = CFSwapInt32HostToBig(_transform.c * 0x10000);
+            ptr32[4] = CFSwapInt32HostToBig(_transform.d * 0x10000);
+            ptr32[6] = CFSwapInt32HostToBig(_transform.tx * 0x10000);
+            ptr32[7] = CFSwapInt32HostToBig(_transform.ty * 0x10000);
             MP4SetTrackBytesProperty(fileHandle, self.trackId, "tkhd.matrix", nval, size);
 
             free(val);
@@ -229,15 +237,9 @@
     self.edited = YES;
 }
 
-- (void)setOffsetX:(uint32_t)offsetX
+- (void)setTransform:(CGAffineTransform)transform
 {
-    _offsetX = offsetX;
-    self.edited = YES;
-}
-
-- (void)setOffsetY:(uint32_t)offsetY
-{
-    _offsetY = offsetY;
+    _transform = transform;
     self.edited = YES;
 }
 
@@ -313,6 +315,8 @@
         copy->_height = _height;
         copy->_trackWidth = _trackWidth;
         copy->_trackHeight = _trackHeight;
+        
+        copy->_transform = _transform;
 
         copy->_colorPrimaries = _colorPrimaries;
         copy->_transferCharacteristics = _transferCharacteristics;
@@ -329,9 +333,6 @@
         copy->_horizOffD = _horizOffD;
         copy->_vertOffN = _vertOffN;
         copy->_vertOffD = _vertOffD;
-
-        copy->_offsetX = _offsetX;
-        copy->_offsetY = _offsetY;
 
         copy->_origLevel = _origLevel;
         copy->_origProfile = _origProfile;
@@ -368,8 +369,12 @@
     [coder encodeInt64:_hSpacing forKey:@"hSpacing"];
     [coder encodeInt64:_vSpacing forKey:@"vSpacing"];
 
-    [coder encodeInt32:_offsetX forKey:@"offsetX"];
-    [coder encodeInt32:_offsetY forKey:@"offsetY"];
+    [coder encodeDouble:_transform.a forKey:@"transformA"];
+    [coder encodeDouble:_transform.b forKey:@"transformB"];
+    [coder encodeDouble:_transform.c forKey:@"transformC"];
+    [coder encodeDouble:_transform.d forKey:@"transformD"];
+    [coder encodeDouble:_transform.tx forKey:@"offsetX"];
+    [coder encodeDouble:_transform.ty forKey:@"offsetY"];
 
     [coder encodeInt:_origProfile forKey:@"origProfile"];
     [coder encodeInt:_origLevel forKey:@"origLevel"];
@@ -395,8 +400,12 @@
     _hSpacing = [decoder decodeInt64ForKey:@"hSpacing"];
     _vSpacing = [decoder decodeInt64ForKey:@"vSpacing"];
 
-    _offsetX = [decoder decodeInt32ForKey:@"offsetX"];
-    _offsetY = [decoder decodeInt32ForKey:@"offsetY"];
+    _transform.a = [decoder decodeDoubleForKey:@"transformA"];
+    _transform.b = [decoder decodeDoubleForKey:@"transformB"];
+    _transform.c = [decoder decodeDoubleForKey:@"transformC"];
+    _transform.d = [decoder decodeDoubleForKey:@"transformD"];
+    _transform.tx = [decoder decodeDoubleForKey:@"offsetX"];
+    _transform.ty = [decoder decodeDoubleForKey:@"offsetY"];
 
     _origProfile = [decoder decodeIntForKey:@"origProfile"];
     _origLevel = [decoder decodeIntForKey:@"origLevel"];

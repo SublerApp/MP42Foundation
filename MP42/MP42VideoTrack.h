@@ -17,6 +17,8 @@
 @property(nonatomic, readwrite) float trackWidth;
 @property(nonatomic, readwrite) float trackHeight;
 
+@property(nonatomic, readwrite) CGAffineTransform transform;
+
 @property(nonatomic, readwrite) uint16_t colorPrimaries;
 @property(nonatomic, readwrite) uint16_t transferCharacteristics;
 @property(nonatomic, readwrite) uint16_t matrixCoefficients;
@@ -32,9 +34,6 @@
 @property(nonatomic, readwrite) uint64_t horizOffD;
 @property(nonatomic, readwrite) uint64_t vertOffN;
 @property(nonatomic, readwrite) uint64_t vertOffD;
-
-@property(nonatomic, readwrite) uint32_t offsetX;
-@property(nonatomic, readwrite) uint32_t offsetY;
 
 @property(nonatomic, readwrite) uint8_t origProfile;
 @property(nonatomic, readwrite) uint8_t origLevel;
