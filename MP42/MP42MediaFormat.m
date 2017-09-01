@@ -381,6 +381,22 @@ NSString *localizedTimeCodeDisplayName(FourCharCode mediaSubtype)
     return result;
 }
 
+NSString *localizedMetadataDisplayName(FourCharCode mediaSubtype)
+{
+    NSString *result = @(FourCC2Str(mediaSubtype));
+
+    switch (mediaSubtype) {
+        case kMP42MetadataFormatType_TimedMetadata:
+            result = NSLocalizedString(@"Timed Metadata", nil);
+            break;
+
+        default:
+            break;
+    }
+
+    return result;
+}
+
 NSString *localizedDisplayName(FourCharCode mediaType, FourCharCode mediaSubtype)
 {
     NSString *result = @(FourCC2Str(mediaSubtype));
@@ -414,6 +430,9 @@ NSString *localizedDisplayName(FourCharCode mediaType, FourCharCode mediaSubtype
             break;
         case kMP42MediaType_Hint:
             result = NSLocalizedString(@"Hint", nil);
+            break;
+        case kMP42MediaType_Metadata:
+            result = localizedMetadataDisplayName(mediaSubtype);
             break;
 
         default:

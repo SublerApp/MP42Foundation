@@ -191,6 +191,13 @@ enum : MP42TimeCodeFormatType
     kMP42TimeCodeFormatType_Counter64   = 'cn64'
 };
 
+// Metadata Format
+typedef FourCharCode MP42MetadataFormatType;
+enum : MP42MetadataFormatType
+{
+    kMP42MetadataFormatType_TimedMetadata = 'mebx',
+};
+
 // Audio downmixes
 extern NSString * const SBNoneMixdown;
 extern NSString * const SBMonoMixdown;
