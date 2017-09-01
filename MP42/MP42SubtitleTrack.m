@@ -68,7 +68,7 @@
 
 - (BOOL)writeToFile:(MP4FileHandle)fileHandle error:(NSError **)outError
 {
-    if (!fileHandle || !self.trackId) {
+    if (!fileHandle || !self.trackId || ![super writeToFile:fileHandle error:outError]) {
         if (outError != NULL) {
             *outError = MP42Error(MP42LocalizedString(@"Error: couldn't mux subtitle track", @"error message"),
                                   nil,
@@ -112,7 +112,7 @@
         MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.tx3g.displayFlags", displayFlags);
     }
 
-    return [super writeToFile:fileHandle error:outError];
+    return YES;
 }
 
 - (void)setSomeSamplesAreForced:(BOOL)value

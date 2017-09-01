@@ -127,7 +127,7 @@
 
 - (BOOL)writeToFile:(MP4FileHandle)fileHandle error:(NSError **)outError
 {
-    if (!fileHandle || !self.trackId || [super writeToFile:fileHandle error:outError]) {
+    if (!fileHandle || !self.trackId || ![super writeToFile:fileHandle error:outError]) {
         if (outError != NULL) {
             *outError = MP42Error(MP42LocalizedString(@"Error: couldn't mux video track", @"error message"),
                                   nil,
