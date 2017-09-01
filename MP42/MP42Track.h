@@ -40,8 +40,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property(nonatomic, readwrite, copy) NSSet<NSString *> *mediaCharacteristicTags;
 
-@property(nonatomic, readwrite) uint64_t alternate_group;
-@property(nonatomic, readwrite) int64_t  startOffset;
+@property(nonatomic, readwrite) uint64_t alternateGroup;
+@property(nonatomic, readwrite) NSTimeInterval startOffset;
 
 @property(nonatomic, readwrite, copy) MP42ConversionSettings *conversionSettings;
 

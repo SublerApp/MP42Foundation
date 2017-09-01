@@ -285,7 +285,7 @@ static int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, ui
                 MP42AudioTrack *audioTrack = [[MP42AudioTrack alloc] init];
                 audioTrack.channels = mkvTrack->AV.Audio.Channels;
                 audioTrack.channelLayoutTag = getDefaultChannelLayout(mkvTrack->AV.Audio.Channels);
-                audioTrack.alternate_group = 1;
+                audioTrack.alternateGroup = 1;
 
                 for (MP42Track *track in self.tracks) {
                     if ([track isMemberOfClass:[MP42AudioTrack class]]) {
@@ -299,7 +299,7 @@ static int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, ui
             // Text
             else if (mkvTrack->Type == TT_SUB) {
                 newTrack = [[MP42SubtitleTrack alloc] init];
-                newTrack.alternate_group = 2;
+                newTrack.alternateGroup = 2;
 
                 for (MP42Track *subtitleTrack in self.tracks) {
                     if ([subtitleTrack isMemberOfClass:[MP42SubtitleTrack class]]) {
@@ -588,7 +588,7 @@ static NSString * TrackNameToString(TrackInfo *track)
     return nil;
 }
 
-- (uint64_t)matroskaTrackStartTime:(TrackInfo *)track Id:(MP4TrackId)Id
+- (double)matroskaTrackStartTime:(TrackInfo *)track Id:(MP4TrackId)Id
 {
     uint64_t StartTime, EndTime, FilePos;
     uint32_t Track, FrameSize, FrameFlags;
@@ -602,8 +602,13 @@ static NSString * TrackNameToString(TrackInfo *track)
     mkv_Seek(_matroskaFile, 0, 0);
 
     TrackInfo *trackInfo = mkv_GetTrackInfo(_matroskaFile, Id);
+    int64_t codecDelay = trackInfo->CodecDelay;
+    if (codecDelay == 0 && trackInfo->Type == TT_AUDIO && !strcmp(trackInfo->CodecID, "A_AAC")) {
+        NSUInteger sampleRate = mkv_TruncFloat(trackInfo->AV.Audio.SamplingFreq);
+        codecDelay = 2112 * SCALE_FACTOR * 1000 / sampleRate;
+    }
 
-    return (StartTime - trackInfo->CodecDelay) / SCALE_FACTOR;
+    return (((double)StartTime) - codecDelay) / SCALE_FACTOR;
 }
 
 - (NSUInteger)timescaleForTrack:(MP42Track *)track
@@ -630,7 +635,7 @@ static NSString * TrackNameToString(TrackInfo *track)
 
 - (NSSize)sizeForTrack:(MP42Track *)track
 {
-      return NSMakeSize([(MP42VideoTrack*)track width], [(MP42VideoTrack*) track height]);
+      return NSMakeSize([(MP42VideoTrack *)track width], [(MP42VideoTrack *) track height]);
 }
 
 - (NSData *)magicCookieForTrack:(MP42Track *)track

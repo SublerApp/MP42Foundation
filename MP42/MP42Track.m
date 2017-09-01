@@ -22,8 +22,9 @@
     NSString *_language;
 
     BOOL        _enabled;
-    uint64_t    _alternate_group;
-    int64_t     _startOffset;
+    uint64_t    _alternateGroup;
+
+    NSTimeInterval     _startOffset;
 }
 
 @property(nonatomic, readwrite) MP42TrackId trackId;
@@ -104,7 +105,7 @@
                 _enabled = NO;
             }
 
-            MP4GetTrackIntegerProperty(fileHandle, _trackId, "tkhd.alternate_group", &_alternate_group);
+            MP4GetTrackIntegerProperty(fileHandle, _trackId, "tkhd.alternate_group", &_alternateGroup);
 
             // Media characteristic tags
             NSMutableSet *mediaCharacteristicTags = [[NSMutableSet alloc] init];
@@ -165,7 +166,7 @@
         copy->_name = [_name copy];
         copy->_language = [_language copy];
         copy->_enabled = _enabled;
-        copy->_alternate_group = _alternate_group;
+        copy->_alternateGroup = _alternateGroup;
         copy->_startOffset = _startOffset;
 
         copy->_dataLength = _dataLength;
@@ -212,7 +213,7 @@
     }
 
     if (_updatedProperty[@"alternate_group"] || !_muxed) {
-        MP4SetTrackIntegerProperty(fileHandle, _trackId, "tkhd.alternate_group", _alternate_group);
+        MP4SetTrackIntegerProperty(fileHandle, _trackId, "tkhd.alternate_group", _alternateGroup);
     }
 
     if (_updatedProperty[@"start_offset"]) {
@@ -312,22 +313,22 @@
     return _enabled;
 }
 
-- (uint64_t)alternate_group {
-    return _alternate_group;
+- (uint64_t)alternateGroup {
+    return _alternateGroup;
 }
 
-- (void)setAlternate_group:(uint64_t)newGroup
+- (void)setAlternateGroup:(uint64_t)newGroup
 {
-    _alternate_group = newGroup;
+    _alternateGroup = newGroup;
     self.edited = YES;
     _updatedProperty[@"alternate_group"] = @YES;
 }
 
-- (int64_t)startOffset {
+- (NSTimeInterval)startOffset {
     return _startOffset;
 }
 
-- (void)setStartOffset:(int64_t)newOffset
+- (void)setStartOffset:(NSTimeInterval)newOffset
 {
     _startOffset = newOffset;
     self.edited = YES;
@@ -390,8 +391,8 @@
 
     [coder encodeBool:_enabled forKey:@"enabled"];
 
-    [coder encodeInt64:_alternate_group forKey:@"alternate_group"];
-    [coder encodeInt64:_startOffset forKey:@"startOffset"];
+    [coder encodeInt64:_alternateGroup forKey:@"alternate_group"];
+    [coder encodeDouble:_startOffset forKey:@"startOffset"];
 
     [coder encodeBool:_edited forKey:@"isEdited"];
     [coder encodeBool:_muxed forKey:@"muxed"];
@@ -437,8 +438,8 @@
 
     _enabled = [decoder decodeBoolForKey:@"enabled"];
 
-    _alternate_group = [decoder decodeInt64ForKey:@"alternate_group"];
-    _startOffset = [decoder decodeInt64ForKey:@"startOffset"];
+    _alternateGroup = [decoder decodeInt64ForKey:@"alternate_group"];
+    _startOffset = [decoder decodeDoubleForKey:@"startOffset"];
 
     _edited = [decoder decodeBoolForKey:@"isEdited"];
     _muxed = [decoder decodeBoolForKey:@"muxed"];

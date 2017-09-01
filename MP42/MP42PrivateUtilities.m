@@ -10,11 +10,13 @@
 #import "MP42PrivateUtilities.h"
 #import <string.h>
 #import <CoreAudio/CoreAudio.h>
+#import <CoreMedia/CMTime.h>
 #include <zlib.h>
 #include <bzlib.h>
 
 #import "MP42Languages.h"
 #import "MP42MediaFormat.h"
+
 #include "intreadwrite.h"
 #include "avcodec.h"
 
@@ -495,9 +497,9 @@ uint8_t *CreateEsdsFromSetupData(uint8_t *codecPrivate, size_t vosLen, size_t *e
 
 #pragma mark -
 
-int64_t getTrackStartOffset(MP4FileHandle fileHandle, MP4TrackId Id)
+NSTimeInterval getTrackStartOffset(MP4FileHandle fileHandle, MP4TrackId Id)
 {
-    int64_t offset = 0;
+    NSTimeInterval offset = 0;
     uint32_t i = 1, trackEditCount = MP4GetTrackNumberOfEdits(fileHandle, Id);
 
     while (i <= trackEditCount) {
@@ -509,11 +511,11 @@ int64_t getTrackStartOffset(MP4FileHandle fileHandle, MP4TrackId Id)
         MP4GetTrackIntegerProperty(fileHandle, Id, "edts.elst.version", &editListVersion);
 
         if (editListVersion == 0 && editMediaTime == ((uint32_t)-1))
-                offset += MP4ConvertFromMovieDuration(fileHandle, editDuration, MP4_MILLISECONDS_TIME_SCALE);
+                offset += MP4ConvertFromMovieDuration(fileHandle, editDuration, MP4_NANOSECONDS_TIME_SCALE);
         else if (editListVersion == 1 && editMediaTime == ((uint64_t)-1))
-                offset += MP4ConvertFromMovieDuration(fileHandle, editDuration, MP4_MILLISECONDS_TIME_SCALE);
+                offset += MP4ConvertFromMovieDuration(fileHandle, editDuration, MP4_NANOSECONDS_TIME_SCALE);
         else if (i == 1)
-            offset -= MP4ConvertFromTrackDuration(fileHandle, Id, editMediaTime, MP4_MILLISECONDS_TIME_SCALE);
+            offset -= MP4ConvertFromTrackDuration(fileHandle, Id, editMediaTime, MP4_NANOSECONDS_TIME_SCALE);
 
         //NSLog(@"Track %d, Media Time = %lld, Segment Duration: %qu Media Rate:%d", Id, editMediaTime, editDuration, editMediaRate);
         i++;
@@ -521,7 +523,7 @@ int64_t getTrackStartOffset(MP4FileHandle fileHandle, MP4TrackId Id)
 
     //NSLog(@"Track %d offset: %d ms", Id, offset);
 
-    return offset;
+    return offset / 1000000;
 }
 
 MP4Duration getTrackDuration(MP4FileHandle fileHandle, MP4TrackId trackId)
@@ -544,41 +546,42 @@ MP4Duration getTrackDuration(MP4FileHandle fileHandle, MP4TrackId trackId)
     return duration;
 }
 
-void setTrackStartOffset(MP4FileHandle fileHandle, MP4TrackId Id, int64_t offset)
+void setTrackStartOffset(MP4FileHandle fileHandle, MP4TrackId Id, NSTimeInterval offset)
 {
     uint32_t trackEditsCount = MP4GetTrackNumberOfEdits(fileHandle, Id);
-    if (offset > 0)
-        offset = MP4ConvertToTrackDuration(fileHandle, Id, offset, MP4_MILLISECONDS_TIME_SCALE);
-    else 
-        offset = -(MP4ConvertToTrackDuration(fileHandle, Id, -offset, MP4_MILLISECONDS_TIME_SCALE));
 
-    // If there is no existing edit list, just add some new ones at the start and do the usual stuff.
-    if (offset && !trackEditsCount) {
+    CMTime time = CMTimeMake(offset * 1000000, MP4_NANOSECONDS_TIME_SCALE);
+    CMTime trackTime = CMTimeConvertScale(time, MP4GetTrackTimeScale(fileHandle, Id), kCMTimeRoundingMethod_Default);
+
+    int64_t offset_i = trackTime.value;
+
+    // If there isn't an existing edit list, just add some new ones at the start and do the usual stuff.
+    if (offset_i && !trackEditsCount) {
         MP4Duration editDuration = MP4ConvertFromTrackDuration(fileHandle,
                                                    Id,
                                                    MP4GetTrackDuration(fileHandle, Id),
                                                    MP4GetTimeScale(fileHandle));
-        if (offset > 0) {
+        if (offset_i > 0) {
             MP4Duration delayDuration = MP4ConvertFromTrackDuration(fileHandle,
                                                                     Id,
-                                                                    offset,
+                                                                    offset_i,
                                                                     MP4GetTimeScale(fileHandle));
 
             MP4AddTrackEdit(fileHandle, Id, MP4_INVALID_EDIT_ID, -1, delayDuration, 0);
             MP4AddTrackEdit(fileHandle, Id, MP4_INVALID_EDIT_ID, 0, editDuration, 0);
         }
-        else if (offset < 0) {
+        else if (offset_i < 0) {
             MP4Duration delayDuration = MP4ConvertFromTrackDuration(fileHandle,
                                                                     Id,
-                                                                    -offset,
+                                                                    -offset_i,
                                                                     MP4GetTimeScale(fileHandle));
 
-            MP4AddTrackEdit(fileHandle, Id, MP4_INVALID_EDIT_ID, -offset, editDuration - delayDuration, 0);
+            MP4AddTrackEdit(fileHandle, Id, MP4_INVALID_EDIT_ID, -offset_i, editDuration - delayDuration, 0);
         }
     }
     // If the mp4 contains already some edits list, try to reuse them
     else if (trackEditsCount) {
-        if (offset >= 0) {
+        if (offset_i >= 0) {
             // Remove all the empty edit lists
             while (MP4GetTrackNumberOfEdits(fileHandle, Id)) {
                 uint64_t editListVersion = 0;
@@ -608,13 +611,13 @@ void setTrackStartOffset(MP4FileHandle fileHandle, MP4TrackId Id, int64_t offset
 
             MP4Duration delayDuration = MP4ConvertFromTrackDuration(fileHandle,
                                                                     Id,
-                                                                    offset,
+                                                                    offset_i,
                                                                     MP4GetTimeScale(fileHandle));
             
-            if (offset != 0)
+            if (offset_i != 0)
                 MP4AddTrackEdit(fileHandle, Id, 1, -1, delayDuration, 0);
         }
-        else if (offset < 0) {
+        else if (offset_i < 0) {
             // First remove all the empty edit lists
             while (MP4GetTrackNumberOfEdits(fileHandle, Id)) {
                 uint64_t editListVersion = 0;
@@ -640,17 +643,17 @@ void setTrackStartOffset(MP4FileHandle fileHandle, MP4TrackId Id, int64_t offset
                                                                 MP4GetTimeScale(fileHandle));
                 MP4Duration newOffsetDuration = MP4ConvertFromTrackDuration(fileHandle,
                                                                         Id,
-                                                                        -offset,
+                                                                        -offset_i,
                                                                         MP4GetTimeScale(fileHandle));
 
                 MP4SetTrackEditDuration(fileHandle, Id, 1, oldEditDuration + oldEditMediaStart - newOffsetDuration);
-                MP4SetTrackEditMediaStart(fileHandle, Id, 1, -offset);
+                MP4SetTrackEditMediaStart(fileHandle, Id, 1, -offset_i);
             }
             // Else create a new one.
             else {
                 MP4Duration delayDuration = MP4ConvertFromTrackDuration(fileHandle,
                                                                         Id,
-                                                                        -offset,
+                                                                        -offset_i,
                                                                         MP4GetTimeScale(fileHandle));
 
                 MP4AddTrackEdit(fileHandle, Id, 1, -1, delayDuration, 0);

@@ -56,8 +56,8 @@ ComponentResult ReadESDSDescExt(void* descExt, UInt8 **buffer, int *size, int ve
 
 MP4Duration getTrackDuration(MP4FileHandle fileHandle, MP4TrackId trackId);
 
-int64_t getTrackStartOffset(MP4FileHandle fileHandle, MP4TrackId Id);
-void setTrackStartOffset(MP4FileHandle fileHandle, MP4TrackId Id, int64_t offset);
+double getTrackStartOffset(MP4FileHandle fileHandle, MP4TrackId Id);
+void setTrackStartOffset(MP4FileHandle fileHandle, MP4TrackId Id, double offset);
 int copyTrackEditLists (MP4FileHandle fileHandle, MP4TrackId srcTrackId, MP4TrackId dstTrackId);
 
 NSError * MP42Error(NSString *description, NSString* recoverySuggestion, NSInteger code);

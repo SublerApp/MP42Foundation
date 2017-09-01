@@ -38,7 +38,7 @@
 
         newTrack.format = kMP42SubtitleCodecType_3GText;
         newTrack.URL = self.fileURL;
-        newTrack.alternate_group = 2;
+        newTrack.alternateGroup = 2;
         newTrack.language = getFilenameLanguage((CFStringRef)self.fileURL.path);
 
         // Check if a 10.10 only class is available, NSLinguisticTagger crashes on 10.9

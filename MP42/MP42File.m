@@ -532,7 +532,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
     }
 
     for (MP42Track *track in tracks) {
-        track.alternate_group = groupID;
+        track.alternateGroup = groupID;
 
         if (track.enabled && !enabled) {
             enabled = YES;
