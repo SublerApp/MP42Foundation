@@ -500,9 +500,8 @@ uint8_t *CreateEsdsFromSetupData(uint8_t *codecPrivate, size_t vosLen, size_t *e
 NSTimeInterval getTrackStartOffset(MP4FileHandle fileHandle, MP4TrackId Id)
 {
     NSTimeInterval offset = 0;
-    uint32_t i = 1, trackEditCount = MP4GetTrackNumberOfEdits(fileHandle, Id);
 
-    while (i <= trackEditCount) {
+    for (uint32_t i = 1, trackEditCount = MP4GetTrackNumberOfEdits(fileHandle, Id); i <= trackEditCount; i++) {
         MP4Duration editDuration = MP4GetTrackEditDuration(fileHandle, Id, i);
         MP4Timestamp editMediaTime = MP4GetTrackEditMediaStart(fileHandle, Id, i);
         //int8_t editMediaRate = MP4GetTrackEditDwell(fileHandle, Id, i);
@@ -510,39 +509,36 @@ NSTimeInterval getTrackStartOffset(MP4FileHandle fileHandle, MP4TrackId Id)
         uint64_t editListVersion = 0;
         MP4GetTrackIntegerProperty(fileHandle, Id, "edts.elst.version", &editListVersion);
 
-        if (editListVersion == 0 && editMediaTime == ((uint32_t)-1))
+        if (editListVersion == 0 && editMediaTime == ((uint32_t)-1)) {
                 offset += MP4ConvertFromMovieDuration(fileHandle, editDuration, MP4_NANOSECONDS_TIME_SCALE);
-        else if (editListVersion == 1 && editMediaTime == ((uint64_t)-1))
+        }
+        else if (editListVersion == 1 && editMediaTime == ((uint64_t)-1)) {
                 offset += MP4ConvertFromMovieDuration(fileHandle, editDuration, MP4_NANOSECONDS_TIME_SCALE);
-        else if (i == 1)
+        }
+        else if (i == 1) {
             offset -= MP4ConvertFromTrackDuration(fileHandle, Id, editMediaTime, MP4_NANOSECONDS_TIME_SCALE);
-
-        //NSLog(@"Track %d, Media Time = %lld, Segment Duration: %qu Media Rate:%d", Id, editMediaTime, editDuration, editMediaRate);
-        i++;
+            // We got the first non empty edit list, so we have everything for the start offset
+            break;
+        }
     }
-
-    //NSLog(@"Track %d offset: %d ms", Id, offset);
 
     return offset / 1000000;
 }
 
 MP4Duration getTrackDuration(MP4FileHandle fileHandle, MP4TrackId trackId)
 {
-    uint32_t trackEditsCount = MP4GetTrackNumberOfEdits(fileHandle, trackId);
     MP4Duration duration = 0;
-    uint32_t i = 1;
-    
-    while (i <= trackEditsCount) {
+
+    for (uint32_t i = 1, trackEditCount = MP4GetTrackNumberOfEdits(fileHandle, trackId); i <= trackEditCount; i++) {
         duration += MP4GetTrackEditDuration(fileHandle, trackId, i);
-        i++;
     }
-    
+
     if (duration == 0) {
         duration = MP4ConvertFromTrackDuration(fileHandle, trackId,
                                                MP4GetTrackDuration(fileHandle, trackId),
                                                MP4GetTimeScale(fileHandle));
     }
-    
+
     return duration;
 }
 
