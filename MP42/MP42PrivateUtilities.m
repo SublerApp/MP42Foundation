@@ -56,8 +56,8 @@ int MP4SetTrackDisabled(MP4FileHandle fileHandle, MP4TrackId trackId)
 int updateTracksCount(MP4FileHandle fileHandle)
 {
     MP4TrackId maxTrackId = 0;
-    unsigned int i;
-    for (i = 0; i< MP4GetNumberOfTracks( fileHandle, 0, 0); i++ )
+
+    for (uint32_t i = 0; i< MP4GetNumberOfTracks(fileHandle, 0, 0); i++ )
         if (MP4FindTrackId(fileHandle, i, 0, 0) > maxTrackId)
             maxTrackId = MP4FindTrackId(fileHandle, i, 0, 0);
 
@@ -68,12 +68,13 @@ void updateMoovDuration(MP4FileHandle fileHandle)
 {
     MP4TrackId trackId = 0;
     MP4Duration maxTrackDuration = 0, trackDuration = 0;
-    unsigned int i;
-    for (i = 0; i< MP4GetNumberOfTracks( fileHandle, 0, 0); i++ ) {
+
+    for (uint32_t i = 0; i < MP4GetNumberOfTracks(fileHandle, 0, 0); i++ ) {
         trackId = MP4FindTrackId(fileHandle, i, 0, 0);
         MP4GetTrackIntegerProperty(fileHandle, trackId, "tkhd.duration", &trackDuration);
-        if (maxTrackDuration < trackDuration)
+        if (maxTrackDuration < trackDuration) {
             maxTrackDuration = trackDuration;
+        }
     }
     MP4SetIntegerProperty(fileHandle, "moov.mvhd.duration", maxTrackDuration);
 }
@@ -97,13 +98,14 @@ MP4TrackId findChapterTrackId(MP4FileHandle fileHandle)
 {
     MP4TrackId trackId = 0;
     uint64_t trackRef;
-    unsigned int i;
-    for (i = 0; i< MP4GetNumberOfTracks( fileHandle, 0, 0); i++ ) {
+
+    for (uint32_t i = 0; i< MP4GetNumberOfTracks( fileHandle, 0, 0); i++ ) {
         trackId = MP4FindTrackId(fileHandle, i, 0, 0);
         if (MP4HaveTrackAtom(fileHandle, trackId, "tref.chap")) {
             MP4GetTrackIntegerProperty(fileHandle, trackId, "tref.chap.entries.trackId", &trackRef);
-            if (trackRef > 0)
-                return (MP4TrackId) trackRef;
+            if (trackRef > 0) {
+                return trackRef;
+            }
         }
     }
 
@@ -114,15 +116,16 @@ MP4TrackId findChapterPreviewTrackId(MP4FileHandle fileHandle)
 {
     MP4TrackId trackId = 0;
     uint64_t trackRef = 0;
-    unsigned int i;
-    for (i = 0; i< MP4GetNumberOfTracks( fileHandle, 0, 0); i++ ) {
+
+    for (uint32_t i = 0; i< MP4GetNumberOfTracks( fileHandle, 0, 0); i++ ) {
         trackId = MP4FindTrackId(fileHandle, i, 0, 0);
         if (MP4HaveTrackAtom(fileHandle, trackId, "tref.chap")) {
             uint64_t entryCount = 0;
             MP4GetTrackIntegerProperty(fileHandle, trackId, "tref.chap.entryCount", &entryCount);
             if (entryCount > 1 && MP4GetTrackIntegerProperty(fileHandle, trackId, "tref.chap.entries[1].trackId", &trackRef))
-                if (trackRef > 0)
-                    return (MP4TrackId) trackRef;
+                if (trackRef > 0) {
+                    return trackRef;
+                }
         }
     }
 
@@ -132,28 +135,28 @@ MP4TrackId findChapterPreviewTrackId(MP4FileHandle fileHandle)
 void removeAllChapterTrackReferences(MP4FileHandle fileHandle)
 {
     MP4TrackId trackId = 0;
-    unsigned int i;
-    for (i = 0; i< MP4GetNumberOfTracks( fileHandle, 0, 0); i++ ) {
+
+    for (uint32_t i = 0; i< MP4GetNumberOfTracks( fileHandle, 0, 0); i++ ) {
         trackId = MP4FindTrackId(fileHandle, i, 0, 0);
         if (MP4HaveTrackAtom(fileHandle, trackId, "tref.chap")) {
             MP4RemoveAllTrackReferences(fileHandle, "tref.chap", trackId);
         }
     }
-    return;
 }
 
 MP4TrackId findFirstVideoTrack(MP4FileHandle fileHandle)
 {
     MP4TrackId videoTrack = 0;
-    int i, trackNumber = MP4GetNumberOfTracks( fileHandle, 0, 0);
-    if (!trackNumber)
+    uint32_t trackNumber = MP4GetNumberOfTracks(fileHandle, 0, 0);
+    if (!trackNumber) {
         return 0;
-    for (i = 0; i < trackNumber; i++) {
+    }
+    for (uint32_t i = 0; i < trackNumber; i++) {
         videoTrack = MP4FindTrackId(fileHandle, i, 0, 0);
         const char *trackType = MP4GetTrackType(fileHandle, videoTrack);
-        if (trackType)
-            if (!strcmp(trackType, MP4_VIDEO_TRACK_TYPE))
-                return videoTrack;
+        if (trackType && !strcmp(trackType, MP4_VIDEO_TRACK_TYPE)) {
+            return videoTrack;
+        }
     }
     return 0;
 }
@@ -166,10 +169,9 @@ uint16_t getFixedVideoWidth(MP4FileHandle fileHandle, MP4TrackId Id)
         uint64_t hSpacing, vSpacing;
         MP4GetTrackIntegerProperty(fileHandle, Id, "mdia.minf.stbl.stsd.*.pasp.hSpacing", &hSpacing);
         MP4GetTrackIntegerProperty(fileHandle, Id, "mdia.minf.stbl.stsd.*.pasp.vSpacing", &vSpacing);
-        if( hSpacing > 0 && vSpacing > 0)
-            return  (uint16_t) (videoWidth / (float) vSpacing * (float) hSpacing);
-        else
-            return videoWidth;
+        if (hSpacing > 0 && vSpacing > 0) {
+            videoWidth =  (uint16_t) (videoWidth / (float) vSpacing * (float) hSpacing);
+        }
     }
 
     return videoWidth;
