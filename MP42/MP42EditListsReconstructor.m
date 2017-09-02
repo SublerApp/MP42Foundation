@@ -10,37 +10,32 @@
 #import "MP42MediaFormat.h"
 #import "MP42Heap.h"
 
-@implementation MP42EditListsReconstructor {
+@implementation MP42EditListsReconstructor
+{
 @private
     MP42Heap<MP42SampleBuffer *> *_priorityQueue;
 
     uint64_t    _currentMediaTime;
     CMTimeScale _timescale;
 
-    int64_t     _delta;
-
-    uint64_t  _previousPresentationOutputTimeStamp;
-    uint64_t  _emptyEditPresentationOutputTimestamp;
-
     CMTimeRange *_edits;
     uint64_t    _editsCount;
     uint64_t    _editsSize;
 
     BOOL        _editOpen;
+    BOOL        _emptyEditOpen;
 }
 
-- (instancetype)init {
-    self = [self initWithMediaFormat:0];
-    return self;
-}
-
-- (instancetype)initWithMediaFormat:(FourCharCode)format {
+- (instancetype)init
+{
     self = [super init];
+
     if (self) {
         _priorityQueue = [[MP42Heap alloc] initWithCapacity:32 comparator:^NSComparisonResult(MP42SampleBuffer * obj1, MP42SampleBuffer * obj2) {
             return obj2->presentationTimestamp - obj1->presentationTimestamp;
         }];
     }
+
     return self;
 }
 
@@ -49,12 +44,19 @@
     free(_edits);
 }
 
-- (void)addSample:(MP42SampleBuffer *)sample {
-
+- (void)addSample:(MP42SampleBuffer *)sample
+{
     if (sample->attachments) {
+
         // Flush the current queue, because pts time is going to be reset
         CFBooleanRef resetDecoderBeforeDecoding = CFDictionaryGetValue(sample->attachments, kCMSampleBufferAttachmentKey_ResetDecoderBeforeDecoding);
         if (resetDecoderBeforeDecoding && CFBooleanGetValue(resetDecoderBeforeDecoding) == 1) {
+            [self flush];
+        }
+
+        // Flush the current queue, because an empty edit is coming
+        CFBooleanRef emptyMedia = CFDictionaryGetValue(sample->attachments, kCMSampleBufferAttachmentKey_EmptyMedia);
+        if (emptyMedia && CFBooleanGetValue(emptyMedia) == 1) {
             [self flush];
         }
     }
@@ -67,6 +69,7 @@
     }
 }
 
+
 - (void)flush
 {
     while (!_priorityQueue.isEmpty) {
@@ -74,17 +77,14 @@
         [self analyzeSample:extractedSample];
     }
 
-    if (_editOpen == YES) {
+    if (_editOpen == YES && _emptyEditOpen == NO) {
         CMTime editEnd = CMTimeMake(_currentMediaTime, _timescale);
         [self endEditListAtTime:editEnd empty:NO];
     }
-
-#ifdef AVF_DEBUG
-    NSLog(@"Flush Done");
-#endif
 }
 
-- (void)done {
+- (void)done
+{
     [self flush];
 }
 
@@ -102,35 +102,22 @@
         }
     }
 
-    CFDictionaryRef trimStart = NULL, trimEnd = NULL;
+    CFDictionaryRef trimStart = NULL, trimEnd = NULL, emptyMedia = NULL;
     if (sample->attachments) {
         trimStart = CFDictionaryGetValue(sample->attachments, kCMSampleBufferAttachmentKey_TrimDurationAtStart);
         trimEnd = CFDictionaryGetValue(sample->attachments, kCMSampleBufferAttachmentKey_TrimDurationAtEnd);
+        emptyMedia = CFDictionaryGetValue(sample->attachments, kCMSampleBufferAttachmentKey_EmptyMedia);
     }
 
     // Check if we need to add an empty edit list.
-    if (sample->presentationOutputTimestamp > sample->presentationTimestamp + _delta) {
-        _delta = sample->presentationOutputTimestamp - sample->presentationTimestamp;
-
+    if (emptyMedia) {
         if (_editOpen == YES) {
             [self endEditListAtTime:CMTimeMake(_currentMediaTime, _timescale) empty:NO];
         }
 
-        if ([self isLastEditEmpty]) {
-            // If there is already an empty edit list as the last list, append the duration to it
-            uint64_t editDuration = sample->presentationOutputTimestamp - _emptyEditPresentationOutputTimestamp;
-            [self expandLastEmptyEdit: CMTimeMake(editDuration, _timescale)];
-        }
-        else {
-            // Add an empty edit list
-            uint64_t editDuration = sample->presentationOutputTimestamp - _previousPresentationOutputTimeStamp;
-
-            CMTime editStart = CMTimeMake(_currentMediaTime, _timescale);
-            [self startEditListAtTime:editStart];
-            CMTime editEnd = CMTimeMake(_currentMediaTime + editDuration, _timescale);
-            [self endEditListAtTime:editEnd empty:YES];
-            _emptyEditPresentationOutputTimestamp = sample->presentationOutputTimestamp + sample->duration;
-        }
+        CMTime editStart = CMTimeMake(sample->presentationOutputTimestamp, _timescale);
+        [self startEditListAtTime:editStart];
+        _emptyEditOpen = YES;
     }
 
     BOOL shouldStartNewEdit = trimStart || ((sample->flags & MP42SampleBufferFlagDoNotDisplay) == NO && _editOpen == NO);
@@ -139,6 +126,11 @@
 
     if (shouldStartNewEdit) {
         // Close the current edit list
+        if (_emptyEditOpen == YES) {
+            _emptyEditOpen = NO;
+            CMTime editEnd = CMTimeMake(sample->presentationOutputTimestamp, _timescale);
+            [self endEditListAtTime:editEnd empty:YES];
+        }
         if (_editOpen == YES) {
             [self endEditListAtTime:CMTimeMake(_currentMediaTime, _timescale) empty:NO];
         }
@@ -172,23 +164,6 @@
 
         [self endEditListAtTime:editEnd empty:NO];
     }
-
-    _previousPresentationOutputTimeStamp = sample->presentationOutputTimestamp + trimmedDuration;
-}
-
-/*
- * Check if the last edit is an empty edit
- */
-- (BOOL)isLastEditEmpty {
-    if (_editsCount == 0) { return NO; }
-    return _edits[_editsCount - 1].start.value == -1;
-}
-
-- (void)expandLastEmptyEdit:(CMTime)time {
-    _edits[_editsCount - 1].duration.value += time.value;
-#ifdef AVF_DEBUG
-    NSLog(@"Expanded empty edit");
-#endif
 }
 
 /**
@@ -203,10 +178,6 @@
     }
     _edits[_editsCount] = CMTimeRangeMake(time, kCMTimeInvalid);
     _editOpen = YES;
-
-#ifdef AVF_DEBUG
-    NSLog(@"Started an edit");
-#endif
 }
 
 /**
@@ -220,14 +191,8 @@
 
     if (type) {
         _edits[_editsCount].start.value = -1;
-#ifdef AVF_DEBUG
-        NSLog(@"Closed empty edit");
-#endif
     }
     else {
-#ifdef AVF_DEBUG
-        NSLog(@"Closed edit");
-#endif
     }
 
     if (_edits[_editsCount].duration.value > 0) {

@@ -198,6 +198,10 @@ static int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, ui
     return @[@"mkv", @"mka", @"mks"];
 }
 
+- (BOOL)supportsPreciseTimestamps {
+    return YES;
+}
+
 - (instancetype)initWithURL:(NSURL *)fileURL error:(NSError **)outError
 {
     if ((self = [super initWithURL:fileURL])) {

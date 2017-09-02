@@ -208,6 +208,11 @@ static NSArray<NSString *> *_supportedFileFormats;
                                  userInfo:nil];
 }
 
+- (BOOL)supportsPreciseTimestamps
+{
+    return NO;
+}
+
 - (BOOL)cleanUp:(MP4FileHandle)fileHandle
 {
     return YES;

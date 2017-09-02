@@ -50,6 +50,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (nullable NSData *)magicCookieForTrack:(MP42Track *)track;
 - (AudioStreamBasicDescription)audioDescriptionForTrack:(MP42Track *)track;
 - (BOOL)cleanUp:(MP42FileHandle)fileHandle;
+- (BOOL)supportsPreciseTimestamps;
 
 @end
 

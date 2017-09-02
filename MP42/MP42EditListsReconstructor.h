@@ -18,8 +18,6 @@
  */
 @interface MP42EditListsReconstructor : NSObject
 
-- (instancetype)initWithMediaFormat:(FourCharCode)format;
-
 - (void)addSample:(MP42SampleBuffer *)sample;
 - (void)done;
 
