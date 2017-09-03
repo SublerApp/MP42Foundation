@@ -267,7 +267,9 @@
                                            magicCookie.bytes,
                                            magicCookie.length);
             }
-            
+
+            MP4SetTrackWantsRoll(_fileHandle, dstTrackId, [helper->importer audioTrackUsesExplicitEncoderDelay:track]);
+
             [helper->importer setActiveTrack:track];
         }
 

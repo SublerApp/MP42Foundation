@@ -208,6 +208,11 @@ static NSArray<NSString *> *_supportedFileFormats;
                                  userInfo:nil];
 }
 
+- (BOOL)audioTrackUsesExplicitEncoderDelay:(MP42Track *)track;
+{
+    return NO;
+}
+
 - (BOOL)supportsPreciseTimestamps
 {
     return NO;

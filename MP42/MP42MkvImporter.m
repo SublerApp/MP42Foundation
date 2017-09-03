@@ -784,6 +784,11 @@ static NSString * TrackNameToString(TrackInfo *track)
     return result;
 }
 
+- (BOOL)audioTrackUsesExplicitEncoderDelay:(MP42Track *)track;
+{
+    return YES;
+}
+
 // Methods to extract all the samples from the active tracks at the same time
 - (void)demux
 {
@@ -1203,6 +1208,18 @@ static NSString * TrackNameToString(TrackInfo *track)
                             trackId,
                             MP4_INVALID_EDIT_ID,
                             - demuxHelper->minDisplayOffset + demuxHelper->startTime / 10000.0f,
+                            editDuration,
+                            0);
+        }
+        else {
+            MP4Duration editDuration = MP4ConvertFromTrackDuration(fileHandle, trackId,
+                                                                   MP4GetTrackDuration(fileHandle, trackId),
+                                                                   MP4GetTimeScale(fileHandle));
+
+            MP4AddTrackEdit(fileHandle,
+                            trackId,
+                            MP4_INVALID_EDIT_ID,
+                            0,
                             editDuration,
                             0);
         }

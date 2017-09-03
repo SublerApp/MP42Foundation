@@ -899,6 +899,11 @@
     return result;
 }
 
+- (BOOL)audioTrackUsesExplicitEncoderDelay:(MP42Track *)track;
+{
+    return YES;
+}
+
 - (void)demux {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 
@@ -967,7 +972,7 @@
                         if ([dict valueForKey:(NSString *)kCMSampleAttachmentKey_NotSync]) {
                             sync = 0;
                         }
-                        if ([dict valueForKey:(NSString*)kCMSampleAttachmentKey_DoNotDisplay]) {
+                        if ([dict valueForKey:(NSString *)kCMSampleAttachmentKey_DoNotDisplay]) {
                             doNotDisplay = YES;
                         }
                     }
@@ -1142,26 +1147,22 @@
                     free(sizeArrayOut);
                 }
                 else {
-                    if (attachments && CFDictionaryContainsKey(attachments, kCMSampleBufferAttachmentKey_EmptyMedia)) {
-                        CMTime currentDuration = CMTimeConvertScale(duration, timescale, kCMTimeRoundingMethod_Default);
-                        CMTime currentDecodeTimestamp = CMTimeConvertScale(decodeTimeStamp, timescale, kCMTimeRoundingMethod_Default);
-                        CMTime currentTimeStamp = CMTimeConvertScale(presentationTimeStamp, timescale, kCMTimeRoundingMethod_Default);
-                        CMTime currentOutputTimeStamp = CMTimeConvertScale(presentationOutputTimeStamp, timescale, kCMTimeRoundingMethod_Default);
+                    CMTime currentDuration = CMTimeConvertScale(duration, timescale, kCMTimeRoundingMethod_Default);
+                    CMTime currentTimeStamp = CMTimeConvertScale(presentationTimeStamp, timescale, kCMTimeRoundingMethod_Default);
+                    CMTime currentOutputTimeStamp = CMTimeConvertScale(presentationOutputTimeStamp, timescale, kCMTimeRoundingMethod_Default);
+
+                    MP42SampleBuffer *sample = [[MP42SampleBuffer alloc] init];
+                    sample->duration = currentDuration.value;
+                    sample->presentationTimestamp = currentTimeStamp.value;
+                    sample->presentationOutputTimestamp = currentOutputTimeStamp.value;
+                    sample->timescale = timescale;
+                    sample->flags |= sync ? MP42SampleBufferFlagIsSync : 0;
+                    sample->flags |= doNotDisplay ? MP42SampleBufferFlagDoNotDisplay : 0;
+                    sample->trackId = track.sourceId;
                         
-                        MP42SampleBuffer *sample = [[MP42SampleBuffer alloc] init];
-                        sample->duration = currentDuration.value;
-                        sample->offset = -currentDecodeTimestamp.value + presentationTimeStamp.value;
-                        sample->presentationTimestamp = currentTimeStamp.value;
-                        sample->presentationOutputTimestamp = currentOutputTimeStamp.value;
-                        sample->timescale = timescale;
-                        sample->flags |= sync ? MP42SampleBufferFlagIsSync : 0;
-                        sample->flags |= doNotDisplay ? MP42SampleBufferFlagDoNotDisplay : 0;
-                        sample->trackId = track.sourceId;
+                    sample->attachments = (void *)attachments;
                         
-                        sample->attachments = (void *)attachments;
-                        
-                        [demuxHelper->editsConstructor addSample:sample];
-                    }
+                    [demuxHelper->editsConstructor addSample:sample];
                 }
                 CFRelease(sampleBuffer);
 

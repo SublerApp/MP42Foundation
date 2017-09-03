@@ -58,17 +58,22 @@
         CFBooleanRef emptyMedia = CFDictionaryGetValue(sample->attachments, kCMSampleBufferAttachmentKey_EmptyMedia);
         if (emptyMedia && CFBooleanGetValue(emptyMedia) == 1) {
             [self flush];
+
+            CMTime editStart = CMTimeMake(sample->presentationOutputTimestamp, _timescale);
+            [self startEditListAtTime:editStart];
+            _emptyEditOpen = YES;
         }
     }
 
-    [_priorityQueue insert:sample];
+    if (sample->size) {
+        [_priorityQueue insert:sample];
+    }
 
     if ([_priorityQueue isFull]) {
         MP42SampleBuffer *extractedSample = [_priorityQueue extract];
         [self analyzeSample:extractedSample];
     }
 }
-
 
 - (void)flush
 {
@@ -80,6 +85,8 @@
     if (_editOpen == YES && _emptyEditOpen == NO) {
         CMTime editEnd = CMTimeMake(_currentMediaTime, _timescale);
         [self endEditListAtTime:editEnd empty:NO];
+
+        _currentMediaTime = 0;
     }
 }
 
@@ -90,47 +97,38 @@
 
 - (void)analyzeSample:(MP42SampleBuffer *)sample {
 
-#ifdef AVF_DEBUG
-    NSLog(@"T: %llu, D: %lld, P: %lld, PO: %lld O: %lld", _currentMediaTime, sample->decodeTimestamp, sample->presentationTimestamp, sample->presentationOutputTimestamp, sample->offset);
-#endif
-
     if (_timescale == 0) {
         _timescale = sample->timescale;
-        // Re-align things if the first sample pts is not 0
-        if (sample->presentationTimestamp != 0) {
-            _currentMediaTime += sample->presentationTimestamp;
-        }
     }
 
-    CFDictionaryRef trimStart = NULL, trimEnd = NULL, emptyMedia = NULL;
+    if (_currentMediaTime == 0) {
+        // Re-align things if the first sample pts is not 0
+        _currentMediaTime = sample->presentationTimestamp;
+    }
+
+#ifdef AVF_DEBUG
+    NSLog(@"T: %llu, D: %lld, P: %lld, PO: %lld O: %lld", _currentMediaTime, sample->decodeTimestamp, sample->presentationTimestamp, sample->presentationOutputTimestamp, sample->offset);
+    NSLog(@"%d", sample->flags);
+#endif
+
+    CFDictionaryRef trimStart = NULL, trimEnd = NULL;
     if (sample->attachments) {
         trimStart = CFDictionaryGetValue(sample->attachments, kCMSampleBufferAttachmentKey_TrimDurationAtStart);
         trimEnd = CFDictionaryGetValue(sample->attachments, kCMSampleBufferAttachmentKey_TrimDurationAtEnd);
-        emptyMedia = CFDictionaryGetValue(sample->attachments, kCMSampleBufferAttachmentKey_EmptyMedia);
     }
 
-    // Check if we need to add an empty edit list.
-    if (emptyMedia) {
-        if (_editOpen == YES) {
-            [self endEditListAtTime:CMTimeMake(_currentMediaTime, _timescale) empty:NO];
-        }
+    BOOL shouldCloseEmptyEdit = (trimStart || ((sample->flags & MP42SampleBufferFlagDoNotDisplay) == 0)) && _emptyEditOpen == YES && _editOpen == YES;
 
-        CMTime editStart = CMTimeMake(sample->presentationOutputTimestamp, _timescale);
-        [self startEditListAtTime:editStart];
-        _emptyEditOpen = YES;
+    if (shouldCloseEmptyEdit) {
+        CMTime editEnd = CMTimeMake(sample->presentationOutputTimestamp, _timescale);
+        [self endEditListAtTime:editEnd empty:YES];
+        _emptyEditOpen = NO;
     }
 
-    BOOL shouldStartNewEdit = trimStart || ((sample->flags & MP42SampleBufferFlagDoNotDisplay) == NO && _editOpen == NO);
-
-    uint64_t trimmedDuration = sample->duration;
+    BOOL shouldStartNewEdit = trimStart || ((sample->flags & MP42SampleBufferFlagDoNotDisplay) == 0 && _editOpen == NO && _emptyEditOpen == NO);
 
     if (shouldStartNewEdit) {
         // Close the current edit list
-        if (_emptyEditOpen == YES) {
-            _emptyEditOpen = NO;
-            CMTime editEnd = CMTimeMake(sample->presentationOutputTimestamp, _timescale);
-            [self endEditListAtTime:editEnd empty:YES];
-        }
         if (_editOpen == YES) {
             [self endEditListAtTime:CMTimeMake(_currentMediaTime, _timescale) empty:NO];
         }
@@ -142,7 +140,6 @@
             CMTime trimStartTime = CMTimeMakeFromDictionary(trimStart);
             trimStartTime = CMTimeConvertScale(trimStartTime, _timescale, kCMTimeRoundingMethod_Default);
             editStart.value += trimStartTime.value;
-            trimmedDuration -= trimStartTime.value;
         }
 
         [self startEditListAtTime:editStart];
@@ -150,16 +147,19 @@
 
     _currentMediaTime += sample->duration;
 
-    BOOL shouldEndEdit = trimEnd || ((sample->flags & MP42SampleBufferFlagDoNotDisplay) == YES && _editOpen == YES);
+    BOOL shouldEndEdit = (trimEnd || ((sample->flags & MP42SampleBufferFlagDoNotDisplay) != 0)) && _editOpen == YES && _emptyEditOpen == NO;
 
     if (shouldEndEdit) {
         CMTime editEnd = CMTimeMake(_currentMediaTime, _timescale);
+
+        if ((sample->flags & MP42SampleBufferFlagDoNotDisplay) != 0) {
+            editEnd.value -= sample->duration;
+        }
 
         if (trimEnd) {
             CMTime trimEndTime = CMTimeMakeFromDictionary(trimEnd);
             trimEndTime = CMTimeConvertScale(trimEndTime, _timescale, kCMTimeRoundingMethod_Default);
             editEnd.value -= trimEndTime.value;
-            trimmedDuration -= trimEndTime.value;
         }
 
         [self endEditListAtTime:editEnd empty:NO];

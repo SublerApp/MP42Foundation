@@ -273,6 +273,11 @@
     return nil;
 }
 
+- (BOOL)audioTrackUsesExplicitEncoderDelay:(MP42Track *)track;
+{
+    return MP4HaveTrackAtom(_fileHandle, track.sourceId, "mdia.minf.stbl.sgpd");
+}
+
 - (void)demux
 {
     @autoreleasepool {
