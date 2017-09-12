@@ -26,8 +26,6 @@
 
 @interface AVFDemuxHelper : NSObject {
 @public
-    int64_t minDisplayOffset;
-
     AVAssetReaderOutput *assetReaderOutput;
     MP42EditListsReconstructor *editsConstructor;
 }
@@ -1006,10 +1004,6 @@
                     sample->trackId = track.sourceId;
                     sample->attachments = (void *)attachments;
 
-                    if (sample->offset < demuxHelper->minDisplayOffset) {
-                        demuxHelper->minDisplayOffset = sample->offset;
-                    }
-
                     [demuxHelper->editsConstructor addSample:sample];
                     [self enqueue:sample];
                     [sample release];
@@ -1191,23 +1185,26 @@
         MP42Track *inputTrack = [self inputTrackWithTrackID:track.sourceId];
 
         AVFDemuxHelper *helper = inputTrack.muxer_helper->demuxer_context;
+        MP42EditListsReconstructor *editsConstructor = helper->editsConstructor;
 
         // Make sure the sample offsets are all positive.
-        if (helper->minDisplayOffset != 0) {
+        if (editsConstructor.minOffset < 0) {
             MP4SampleId samplesCount = MP4GetTrackNumberOfSamples(fileHandle, trackId);
             for (unsigned int i = 0; i < samplesCount; i++) {
                 MP4SetSampleRenderingOffset(fileHandle,
                                             trackId,
                                             1 + i,
-                                            MP4GetSampleRenderingOffset(fileHandle, trackId, 1 + i) - helper->minDisplayOffset);
+                                            MP4GetSampleRenderingOffset(fileHandle, trackId, 1 + i) - editsConstructor.minOffset);
             }
         }
 
         // Add back the new constructed edit lists.
         for (uint64_t i = 0; i < helper->editsConstructor.editsCount; i++) {
-            CMTimeRange timeRange = helper->editsConstructor.edits[i];
+            CMTimeRange timeRange = editsConstructor.edits[i];
             CMTime duration = CMTimeConvertScale(timeRange.duration, timescale, kCMTimeRoundingMethod_Default);
-            MP4Timestamp startTime = timeRange.start.value == -1 ? -1 : timeRange.start.value - helper->minDisplayOffset;
+            int64_t offset = editsConstructor.minOffset < 0 ? editsConstructor.minOffset : 0;
+            int64_t offset2 = editsConstructor.minOffset > 0 && timeRange.start.value == 0 ? editsConstructor.minOffset : 0;
+            MP4Timestamp startTime = timeRange.start.value == -1 ? -1 : timeRange.start.value - offset + offset2;
 
             MP4AddTrackEdit(fileHandle, trackId, MP4_INVALID_EDIT_ID,
                             startTime,

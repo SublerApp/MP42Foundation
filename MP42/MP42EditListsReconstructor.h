@@ -24,4 +24,6 @@
 @property (readonly, nonatomic) CMTimeRange *edits;
 @property (readonly, nonatomic) uint64_t editsCount;
 
+@property (readonly, nonatomic) int64_t minOffset;
+
 @end

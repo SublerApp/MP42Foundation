@@ -34,6 +34,8 @@
         _priorityQueue = [[MP42Heap alloc] initWithCapacity:32 comparator:^NSComparisonResult(MP42SampleBuffer * obj1, MP42SampleBuffer * obj2) {
             return obj2->presentationTimestamp - obj1->presentationTimestamp;
         }];
+        
+        _minOffset = INT64_MAX;
     }
 
     return self;
@@ -104,6 +106,10 @@
     if (_currentMediaTime == 0) {
         // Re-align things if the first sample pts is not 0
         _currentMediaTime = sample->presentationTimestamp;
+    }
+    
+    if (sample->offset < _minOffset) {
+        _minOffset = sample->offset;
     }
 
 #ifdef AVF_DEBUG
