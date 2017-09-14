@@ -1185,10 +1185,10 @@ ComponentResult ReadPacketControls(UInt8 *packet, UInt32 palette[16], PacketCont
 				controlDataOut->pixelColor[0] += (controlSeq[i + 2] & 0x0f) << 24;
 				
 				// double the nibble
-				controlDataOut->pixelColor[3] += (controlSeq[i + 1] & 0xf0) << 24;
-				controlDataOut->pixelColor[2] += (controlSeq[i + 1] & 0x0f) << 28;
-				controlDataOut->pixelColor[1] += (controlSeq[i + 2] & 0xf0) << 24;
-				controlDataOut->pixelColor[0] += (controlSeq[i + 2] & 0x0f) << 28;
+				controlDataOut->pixelColor[3] += (controlSeq[i + 1] & 0xf0) * 1u << 24;
+				controlDataOut->pixelColor[2] += (controlSeq[i + 1] & 0x0f) * 1u << 28;
+				controlDataOut->pixelColor[1] += (controlSeq[i + 2] & 0xf0) * 1u << 24;
+				controlDataOut->pixelColor[0] += (controlSeq[i + 2] & 0x0f) * 1u << 28;
 				
 				i += 3;
 				controlSeqSeen |= 0xf0;

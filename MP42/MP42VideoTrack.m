@@ -125,7 +125,7 @@
     return self;
 }
 
-- (BOOL)writeToFile:(MP4FileHandle)fileHandle error:(NSError **)outError
+- (BOOL)writeToFile:(MP4FileHandle)fileHandle error:(NSError **)outError __attribute__((no_sanitize("float-cast-overflow")))
 {
     if (!fileHandle || !self.trackId || ![super writeToFile:fileHandle error:outError]) {
         if (outError != NULL) {
@@ -142,7 +142,7 @@
 
         uint8_t *val;
         uint8_t nval[36];
-        uint32_t *ptr32 = (uint32_t*) nval;
+        uint32_t *ptr32 = (uint32_t *) nval;
         uint32_t size;
 
         MP4GetTrackBytesProperty(fileHandle ,self.trackId, "tkhd.matrix", &val, &size);
