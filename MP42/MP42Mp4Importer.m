@@ -20,6 +20,8 @@
 
 @interface MP4DemuxHelper : NSObject {
 @public
+    MP4TrackId sourceID;
+
     MP4SampleId     currentSampleId;
     uint64_t        totalSampleNumber;
     MP4Timestamp    currentTime;
@@ -294,6 +296,7 @@
         for (MP42Track *track in inputTracks) {
             track.muxer_helper->demuxer_context = [[MP4DemuxHelper alloc] init];
             demuxHelper = track.muxer_helper->demuxer_context;
+            demuxHelper->sourceID = track.sourceId;
             demuxHelper->totalSampleNumber = MP4GetTrackNumberOfSamples(_fileHandle, track.sourceId);
             demuxHelper->timeScale = MP4GetTrackTimeScale(_fileHandle, track.sourceId);
             demuxHelper->done = 0;
@@ -317,7 +320,6 @@
                 }
 
                 while (demuxHelper->currentTime < demuxHelper->timeScale * currentTime && !demuxHelper->done) {
-                    MP4TrackId srcTrackId = [track sourceId];
                     uint8_t *pBytes = NULL;
                     uint32_t numBytes = 0;
                     MP4Duration duration;
@@ -333,7 +335,7 @@
                     }
 
                     if (!MP4ReadSample(_fileHandle,
-                                       srcTrackId,
+                                       demuxHelper->sourceID,
                                        demuxHelper->currentSampleId,
                                        &pBytes, &numBytes,
                                        &pStartTime, &duration, &renderingOffset,
@@ -350,7 +352,7 @@
                     sample->offset = renderingOffset;
                     sample->decodeTimestamp = pStartTime;
                     sample->flags |= isSyncSample ? MP42SampleBufferFlagIsSync : 0;
-                    sample->trackId = track.sourceId;
+                    sample->trackId = demuxHelper->sourceID;
                     
                     [self enqueue:sample];
                     [sample release];

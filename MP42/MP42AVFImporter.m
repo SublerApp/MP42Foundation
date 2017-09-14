@@ -26,6 +26,12 @@
 
 @interface AVFDemuxHelper : NSObject {
 @public
+    MP42TrackId sourceID;
+    CMTimeScale timescale;
+    CMTimeValue currentTime;
+
+    uint32_t done;
+
     AVAssetReaderOutput *assetReaderOutput;
     MP42EditListsReconstructor *editsConstructor;
 }
@@ -920,14 +926,19 @@
         for (MP42Track *track in self.inputTracks) {
             AVAssetReaderOutput *assetReaderOutput = [AVAssetReaderTrackOutput assetReaderTrackOutputWithTrack:[_localAsset trackWithTrackID:track.sourceId]
                                                                                                 outputSettings:nil];
-            if (![assetReader canAddOutput:assetReaderOutput]) {
+            assetReaderOutput.alwaysCopiesSampleData = NO;
+
+            if ([assetReader canAddOutput:assetReaderOutput]) {
+                [assetReader addOutput:assetReaderOutput];
+            }
+            else {
                 NSLog(@"Unable to add the output to assetReader!");
             }
 
-            [assetReader addOutput:assetReaderOutput];
-
             track.muxer_helper->demuxer_context = [[AVFDemuxHelper alloc] init];
             demuxHelper = track.muxer_helper->demuxer_context;
+            demuxHelper->sourceID = track.sourceId;
+            demuxHelper->timescale = [self timescaleForTrack:track];
             demuxHelper->assetReaderOutput = assetReaderOutput;
             demuxHelper->editsConstructor = [[MP42EditListsReconstructor alloc] init];
 
@@ -939,235 +950,253 @@
 
     if (!success) {
 		localError = [assetReader error];
+
+        [assetReader release];
+        [self setDone];
+        [pool release];
+
+        return;
     }
 
-    for (MP42Track *track in self.inputTracks) {
-        demuxHelper = track.muxer_helper->demuxer_context;
-        AVAssetReaderOutput *assetReaderOutput = demuxHelper->assetReaderOutput;
+    CMTimeValue currentTime = 1;
+    NSInteger tracksNumber = self.inputTracks.count;
+    NSInteger tracksDone = 0;
 
-        while (!self.isCancelled) {
+    while (tracksDone != tracksNumber) {
+        if (self.isCancelled) {
+            break;
+        }
 
-            CMSampleBufferRef sampleBuffer = [assetReaderOutput copyNextSampleBuffer];
-            CMTimeScale timescale = [self timescaleForTrack:track];
+        for (MP42Track *track in self.inputTracks) {
+            demuxHelper = track.muxer_helper->demuxer_context;
+            AVAssetReaderOutput *assetReaderOutput = demuxHelper->assetReaderOutput;
 
-            if (sampleBuffer) {
+            while (demuxHelper->currentTime < demuxHelper->timescale * currentTime && !demuxHelper->done) {
+                CMSampleBufferRef sampleBuffer = [assetReaderOutput copyNextSampleBuffer];
 
-                CMItemCount samplesNum = CMSampleBufferGetNumSamples(sampleBuffer);
+                if (sampleBuffer) {
 
-                CMTime duration = CMSampleBufferGetDuration(sampleBuffer);
-                CMTime decodeTimeStamp = CMSampleBufferGetDecodeTimeStamp(sampleBuffer);
-                CMTime presentationTimeStamp = CMSampleBufferGetPresentationTimeStamp(sampleBuffer);
-                CMTime presentationOutputTimeStamp = CMSampleBufferGetOutputPresentationTimeStamp(sampleBuffer);
+                    CMItemCount samplesNum = CMSampleBufferGetNumSamples(sampleBuffer);
 
-                CMTime currentOutputTimeStamp = CMTimeConvertScale(presentationOutputTimeStamp, timescale, kCMTimeRoundingMethod_Default);
+                    CMTime duration = CMSampleBufferGetDuration(sampleBuffer);
+                    CMTime decodeTimeStamp = CMSampleBufferGetDecodeTimeStamp(sampleBuffer);
+                    CMTime presentationTimeStamp = CMSampleBufferGetPresentationTimeStamp(sampleBuffer);
+                    CMTime presentationOutputTimeStamp = CMSampleBufferGetOutputPresentationTimeStamp(sampleBuffer);
 
-                // Read sample attachment, to mark the frame as sync
-                BOOL sync = 1;
-                BOOL doNotDisplay = NO;
-                CFArrayRef attachmentsArray = CMSampleBufferGetSampleAttachmentsArray(sampleBuffer, NO);
-                if (attachmentsArray) {
-                    for (NSDictionary *dict in (NSArray *)attachmentsArray) {
-                        if ([dict valueForKey:(NSString *)kCMSampleAttachmentKey_NotSync]) {
-                            sync = 0;
-                        }
-                        if ([dict valueForKey:(NSString *)kCMSampleAttachmentKey_DoNotDisplay]) {
-                            doNotDisplay = YES;
+                    CMTime currentOutputTimeStamp = CMTimeConvertScale(presentationOutputTimeStamp, demuxHelper->timescale, kCMTimeRoundingMethod_Default);
+
+                    // Read sample attachment, to mark the frame as sync
+                    BOOL sync = 1;
+                    BOOL doNotDisplay = NO;
+                    CFArrayRef attachmentsArray = CMSampleBufferGetSampleAttachmentsArray(sampleBuffer, NO);
+                    if (attachmentsArray) {
+                        for (NSDictionary *dict in (NSArray *)attachmentsArray) {
+                            if ([dict valueForKey:(NSString *)kCMSampleAttachmentKey_NotSync]) {
+                                sync = 0;
+                            }
+                            if ([dict valueForKey:(NSString *)kCMSampleAttachmentKey_DoNotDisplay]) {
+                                doNotDisplay = YES;
+                            }
                         }
                     }
-                }
 
-                CFDictionaryRef attachments = CMCopyDictionaryOfAttachments(NULL, sampleBuffer, kCMAttachmentMode_ShouldPropagate);
+                    CFDictionaryRef attachments = CMCopyDictionaryOfAttachments(NULL, sampleBuffer, kCMAttachmentMode_ShouldPropagate);
 
-                // Get CMBlockBufferRef to extract the actual data later
-                CMBlockBufferRef buffer = CMSampleBufferGetDataBuffer(sampleBuffer);
-                size_t bufferSize = CMBlockBufferGetDataLength(buffer);
+                    // Get CMBlockBufferRef to extract the actual data later
+                    CMBlockBufferRef buffer = CMSampleBufferGetDataBuffer(sampleBuffer);
+                    size_t bufferSize = CMBlockBufferGetDataLength(buffer);
 
-                // We have only a sample
-                // or the format is PCM, if so send only a single buffer to improve performance
-                if (samplesNum == 1 || (samplesNum > 1 && track.format == kMP42AudioCodecType_LinearPCM)) {
+                    // We have only a sample
+                    // or the format is PCM, if so send only a single buffer to improve performance
+                    if (samplesNum == 1 || (samplesNum > 1 && track.format == kMP42AudioCodecType_LinearPCM)) {
 
-                    void *sampleData = malloc(bufferSize);
-                    CMBlockBufferCopyDataBytes(buffer, 0, bufferSize, sampleData);
-
-                    // Enqueues the new sample
-                    MP42SampleBuffer *sample = [[MP42SampleBuffer alloc] init];
-                    sample->data = sampleData;
-                    sample->size = bufferSize;
-                    sample->duration = duration.value;
-                    sample->offset = -decodeTimeStamp.value + presentationTimeStamp.value;
-                    sample->decodeTimestamp = decodeTimeStamp.value;
-                    sample->presentationTimestamp = presentationTimeStamp.value;
-                    sample->presentationOutputTimestamp = currentOutputTimeStamp.value;
-                    sample->timescale = timescale;
-                    sample->flags |= sync ? MP42SampleBufferFlagIsSync : 0;
-                    sample->flags |= doNotDisplay ? MP42SampleBufferFlagDoNotDisplay : 0;
-                    sample->trackId = track.sourceId;
-                    sample->attachments = (void *)attachments;
-
-                    [demuxHelper->editsConstructor addSample:sample];
-                    [self enqueue:sample];
-                    [sample release];
-
-                    currentDataLength += bufferSize;
-                }
-                // The CMSampleBufferRef contains more than one sample
-                else if (samplesNum > 1) {
-                    if (!CMSampleBufferDataIsReady(sampleBuffer)) {
-                        CMSampleBufferMakeDataReady(sampleBuffer);
-                    }
-
-                    // A CMSampleBufferRef can contains an multiple samples, check how many needs to be divided to separated MP42SampleBuffers
-                    // First get the array with the timings for each sample
-                    CMItemCount timingArrayEntries = 0;
-                    CMItemCount timingArrayEntriesNeededOut = 0;
-                    err = CMSampleBufferGetSampleTimingInfoArray(sampleBuffer, timingArrayEntries, NULL, &timingArrayEntriesNeededOut);
-                    if (err) {
-                        CFRelease(sampleBuffer);
-                        continue;
-                    }
-
-                    CMSampleTimingInfo *timingArrayOut = malloc(sizeof(CMSampleTimingInfo) * timingArrayEntriesNeededOut);
-                    timingArrayEntries = timingArrayEntriesNeededOut;
-                    err = CMSampleBufferGetSampleTimingInfoArray(sampleBuffer, timingArrayEntries, timingArrayOut, &timingArrayEntriesNeededOut);
-                    if (err) {
-                        free(timingArrayOut);
-                        CFRelease(sampleBuffer);
-                        continue;
-                    }
-
-                    // Then the array with the size of each sample
-                    CMItemCount sizeArrayEntries = 0;
-                    CMItemCount sizeArrayEntriesNeededOut = 0;
-                    err = CMSampleBufferGetSampleSizeArray(sampleBuffer, sizeArrayEntries, NULL, &sizeArrayEntriesNeededOut);
-                    if (err) {
-                        free(timingArrayOut);
-                        CFRelease(sampleBuffer);
-                        continue;
-                    }
-
-                    size_t *sizeArrayOut = malloc(sizeof(size_t) * sizeArrayEntriesNeededOut);
-                    sizeArrayEntries = sizeArrayEntriesNeededOut;
-                    err = CMSampleBufferGetSampleSizeArray(sampleBuffer, sizeArrayEntries, sizeArrayOut, &sizeArrayEntriesNeededOut);
-                    if (err) {
-                        free(timingArrayOut);
-                        free(sizeArrayOut);
-                        CFRelease(sampleBuffer);
-                        continue;
-                    }
-
-                    for (uint64_t i = 0, pos = 0; i < samplesNum; i++) {
-                        CMSampleTimingInfo sampleTimingInfo;
-                        CMTime decodeTimeStamp;
-                        CMTime presentationTimeStamp;
-
-                        size_t sampleSize;
-
-                        // If the size of sample timing array is equal to 1, it means every sample has got the same timing
-                        if (timingArrayEntries == 1) {
-                            sampleTimingInfo = timingArrayOut[0];
-                            decodeTimeStamp = sampleTimingInfo.decodeTimeStamp;
-                            decodeTimeStamp.value = decodeTimeStamp.value + ( sampleTimingInfo.duration.value * i);
-
-                            presentationTimeStamp = sampleTimingInfo.presentationTimeStamp;
-                            presentationTimeStamp.value = presentationTimeStamp.value + ( sampleTimingInfo.duration.value * i);
-                        } else {
-                            sampleTimingInfo = timingArrayOut[i];
-                            decodeTimeStamp = sampleTimingInfo.decodeTimeStamp;
-                            presentationTimeStamp = sampleTimingInfo.presentationTimeStamp;
-                        }
-
-                        // If the size of sample size array is equal to 1, it means every sample has got the same size
-                        if (sizeArrayEntries ==  1) {
-                            sampleSize = sizeArrayOut[0];
-                        } else {
-                            sampleSize = sizeArrayOut[i];
-                        }
-
-                        if (!sampleSize) {
-                            continue;
-                        }
-
-                        void *sampleData = malloc(sampleSize);
-
-                        if (pos < bufferSize) {
-                            CMBlockBufferCopyDataBytes(buffer, pos, sampleSize, sampleData);
-                            pos += sampleSize;
-                        }
+                        void *sampleData = malloc(bufferSize);
+                        CMBlockBufferCopyDataBytes(buffer, 0, bufferSize, sampleData);
 
                         // Enqueues the new sample
                         MP42SampleBuffer *sample = [[MP42SampleBuffer alloc] init];
-
-                        if (attachments && i == 0 && CFDictionaryContainsKey(attachments, kCMSampleBufferAttachmentKey_TrimDurationAtStart)) {
-                            CFMutableDictionaryRef copy = CFDictionaryCreateMutableCopy(kCFAllocatorDefault, 2, attachments);
-                            CFDictionaryRemoveValue(copy, kCMSampleBufferAttachmentKey_TrimDurationAtEnd);
-                            sample->attachments = (void *)copy;
-                            CFDictionaryRef trimStart = CFDictionaryGetValue(sample->attachments, kCMSampleBufferAttachmentKey_TrimDurationAtStart);
-                            CMTime trimStartTime = CMTimeMakeFromDictionary(trimStart);
-                            trimStartTime = CMTimeConvertScale(trimStartTime, sampleTimingInfo.duration.value, kCMTimeRoundingMethod_Default);
-                            currentOutputTimeStamp.value -= trimStartTime.value;
-
-                        }
-
                         sample->data = sampleData;
-                        sample->size = sampleSize;
-                        sample->duration = sampleTimingInfo.duration.value;
+                        sample->size = bufferSize;
+                        sample->duration = duration.value;
                         sample->offset = -decodeTimeStamp.value + presentationTimeStamp.value;
+                        sample->decodeTimestamp = decodeTimeStamp.value;
                         sample->presentationTimestamp = presentationTimeStamp.value;
                         sample->presentationOutputTimestamp = currentOutputTimeStamp.value;
-                        sample->timescale = timescale;
+                        sample->timescale = demuxHelper->timescale;
                         sample->flags |= sync ? MP42SampleBufferFlagIsSync : 0;
                         sample->flags |= doNotDisplay ? MP42SampleBufferFlagDoNotDisplay : 0;
-                        sample->trackId = track.sourceId;
-
-                        if (attachments && i == (samplesNum - 1) && CFDictionaryContainsKey(attachments, kCMSampleBufferAttachmentKey_TrimDurationAtEnd)) {
-                            CFMutableDictionaryRef copy = CFDictionaryCreateMutableCopy(kCFAllocatorDefault, 2, attachments);
-                            CFDictionaryRemoveValue(copy, kCMSampleBufferAttachmentKey_TrimDurationAtStart);
-                            sample->attachments = (void *)copy;
-                            CFDictionaryRef trimEnd = CFDictionaryGetValue(sample->attachments, kCMSampleBufferAttachmentKey_TrimDurationAtEnd);
-                            CMTime trimEndTime = CMTimeMakeFromDictionary(trimEnd);
-                            trimEndTime = CMTimeConvertScale(trimEndTime, sampleTimingInfo.duration.value, kCMTimeRoundingMethod_Default);
-                            currentOutputTimeStamp.value -= trimEndTime.value;
-                        }
+                        sample->trackId = demuxHelper->sourceID;
+                        sample->attachments = (void *)attachments;
 
                         [demuxHelper->editsConstructor addSample:sample];
                         [self enqueue:sample];
                         [sample release];
 
-                        currentOutputTimeStamp.value = currentOutputTimeStamp.value + sampleTimingInfo.duration.value;
-                        currentDataLength += sampleSize;
+                        currentDataLength += bufferSize;
+                        demuxHelper->currentTime = currentOutputTimeStamp.value;
                     }
+                    // The CMSampleBufferRef contains more than one sample
+                    else if (samplesNum > 1) {
+                        if (!CMSampleBufferDataIsReady(sampleBuffer)) {
+                            CMSampleBufferMakeDataReady(sampleBuffer);
+                        }
 
-                    free(timingArrayOut);
-                    free(sizeArrayOut);
+                        // A CMSampleBufferRef can contains an multiple samples, check how many needs to be divided to separated MP42SampleBuffers
+                        // First get the array with the timings for each sample
+                        CMItemCount timingArrayEntries = 0;
+                        CMItemCount timingArrayEntriesNeededOut = 0;
+                        err = CMSampleBufferGetSampleTimingInfoArray(sampleBuffer, timingArrayEntries, NULL, &timingArrayEntriesNeededOut);
+                        if (err) {
+                            CFRelease(sampleBuffer);
+                            continue;
+                        }
+
+                        CMSampleTimingInfo *timingArrayOut = malloc(sizeof(CMSampleTimingInfo) * timingArrayEntriesNeededOut);
+                        timingArrayEntries = timingArrayEntriesNeededOut;
+                        err = CMSampleBufferGetSampleTimingInfoArray(sampleBuffer, timingArrayEntries, timingArrayOut, &timingArrayEntriesNeededOut);
+                        if (err) {
+                            free(timingArrayOut);
+                            CFRelease(sampleBuffer);
+                            continue;
+                        }
+
+                        // Then the array with the size of each sample
+                        CMItemCount sizeArrayEntries = 0;
+                        CMItemCount sizeArrayEntriesNeededOut = 0;
+                        err = CMSampleBufferGetSampleSizeArray(sampleBuffer, sizeArrayEntries, NULL, &sizeArrayEntriesNeededOut);
+                        if (err) {
+                            free(timingArrayOut);
+                            CFRelease(sampleBuffer);
+                            continue;
+                        }
+
+                        size_t *sizeArrayOut = malloc(sizeof(size_t) * sizeArrayEntriesNeededOut);
+                        sizeArrayEntries = sizeArrayEntriesNeededOut;
+                        err = CMSampleBufferGetSampleSizeArray(sampleBuffer, sizeArrayEntries, sizeArrayOut, &sizeArrayEntriesNeededOut);
+                        if (err) {
+                            free(timingArrayOut);
+                            free(sizeArrayOut);
+                            CFRelease(sampleBuffer);
+                            continue;
+                        }
+
+                        for (uint64_t i = 0, pos = 0; i < samplesNum; i++) {
+                            CMSampleTimingInfo sampleTimingInfo;
+                            CMTime decodeTimeStamp;
+                            CMTime presentationTimeStamp;
+
+                            size_t sampleSize;
+
+                            // If the size of sample timing array is equal to 1, it means every sample has got the same timing
+                            if (timingArrayEntries == 1) {
+                                sampleTimingInfo = timingArrayOut[0];
+                                decodeTimeStamp = sampleTimingInfo.decodeTimeStamp;
+                                decodeTimeStamp.value = decodeTimeStamp.value + ( sampleTimingInfo.duration.value * i);
+
+                                presentationTimeStamp = sampleTimingInfo.presentationTimeStamp;
+                                presentationTimeStamp.value = presentationTimeStamp.value + ( sampleTimingInfo.duration.value * i);
+                            } else {
+                                sampleTimingInfo = timingArrayOut[i];
+                                decodeTimeStamp = sampleTimingInfo.decodeTimeStamp;
+                                presentationTimeStamp = sampleTimingInfo.presentationTimeStamp;
+                            }
+
+                            // If the size of sample size array is equal to 1, it means every sample has got the same size
+                            if (sizeArrayEntries ==  1) {
+                                sampleSize = sizeArrayOut[0];
+                            } else {
+                                sampleSize = sizeArrayOut[i];
+                            }
+
+                            if (!sampleSize) {
+                                continue;
+                            }
+
+                            void *sampleData = malloc(sampleSize);
+
+                            if (pos < bufferSize) {
+                                CMBlockBufferCopyDataBytes(buffer, pos, sampleSize, sampleData);
+                                pos += sampleSize;
+                            }
+
+                            // Enqueues the new sample
+                            MP42SampleBuffer *sample = [[MP42SampleBuffer alloc] init];
+
+                            if (attachments && i == 0 && CFDictionaryContainsKey(attachments, kCMSampleBufferAttachmentKey_TrimDurationAtStart)) {
+                                CFMutableDictionaryRef copy = CFDictionaryCreateMutableCopy(kCFAllocatorDefault, 2, attachments);
+                                CFDictionaryRemoveValue(copy, kCMSampleBufferAttachmentKey_TrimDurationAtEnd);
+                                sample->attachments = (void *)copy;
+                                CFDictionaryRef trimStart = CFDictionaryGetValue(sample->attachments, kCMSampleBufferAttachmentKey_TrimDurationAtStart);
+                                CMTime trimStartTime = CMTimeMakeFromDictionary(trimStart);
+                                trimStartTime = CMTimeConvertScale(trimStartTime, sampleTimingInfo.duration.value, kCMTimeRoundingMethod_Default);
+                                currentOutputTimeStamp.value -= trimStartTime.value;
+
+                            }
+
+                            sample->data = sampleData;
+                            sample->size = sampleSize;
+                            sample->duration = sampleTimingInfo.duration.value;
+                            //sample->offset = -decodeTimeStamp.value + presentationTimeStamp.value;
+                            sample->presentationTimestamp = presentationTimeStamp.value;
+                            sample->presentationOutputTimestamp = currentOutputTimeStamp.value;
+                            sample->timescale = demuxHelper->timescale;
+                            sample->flags |= sync ? MP42SampleBufferFlagIsSync : 0;
+                            sample->flags |= doNotDisplay ? MP42SampleBufferFlagDoNotDisplay : 0;
+                            sample->trackId = demuxHelper->sourceID;
+
+                            if (attachments && i == (samplesNum - 1) && CFDictionaryContainsKey(attachments, kCMSampleBufferAttachmentKey_TrimDurationAtEnd)) {
+                                CFMutableDictionaryRef copy = CFDictionaryCreateMutableCopy(kCFAllocatorDefault, 2, attachments);
+                                CFDictionaryRemoveValue(copy, kCMSampleBufferAttachmentKey_TrimDurationAtStart);
+                                sample->attachments = (void *)copy;
+                                CFDictionaryRef trimEnd = CFDictionaryGetValue(sample->attachments, kCMSampleBufferAttachmentKey_TrimDurationAtEnd);
+                                CMTime trimEndTime = CMTimeMakeFromDictionary(trimEnd);
+                                trimEndTime = CMTimeConvertScale(trimEndTime, sampleTimingInfo.duration.value, kCMTimeRoundingMethod_Default);
+                                currentOutputTimeStamp.value -= trimEndTime.value;
+                            }
+
+                            [demuxHelper->editsConstructor addSample:sample];
+                            [self enqueue:sample];
+                            [sample release];
+
+                            currentOutputTimeStamp.value = currentOutputTimeStamp.value + sampleTimingInfo.duration.value;
+                            currentDataLength += sampleSize;
+                        }
+
+                        demuxHelper->currentTime = currentOutputTimeStamp.value;
+
+                        free(timingArrayOut);
+                        free(sizeArrayOut);
+                    }
+                    else {
+                        CMTime currentDuration = CMTimeConvertScale(duration, demuxHelper->timescale, kCMTimeRoundingMethod_Default);
+                        CMTime currentTimeStamp = CMTimeConvertScale(presentationTimeStamp, demuxHelper->timescale, kCMTimeRoundingMethod_Default);
+                        CMTime currentOutputTimeStamp = CMTimeConvertScale(presentationOutputTimeStamp, demuxHelper->timescale, kCMTimeRoundingMethod_Default);
+
+                        MP42SampleBuffer *sample = [[MP42SampleBuffer alloc] init];
+                        sample->duration = currentDuration.value;
+                        sample->presentationTimestamp = currentTimeStamp.value;
+                        sample->presentationOutputTimestamp = currentOutputTimeStamp.value;
+                        sample->timescale = demuxHelper->timescale;
+                        sample->flags |= sync ? MP42SampleBufferFlagIsSync : 0;
+                        sample->flags |= doNotDisplay ? MP42SampleBufferFlagDoNotDisplay : 0;
+                        sample->trackId = demuxHelper->sourceID;
+                        sample->attachments = (void *)attachments;
+
+                        [demuxHelper->editsConstructor addSample:sample];
+                        demuxHelper->currentTime = currentOutputTimeStamp.value;
+                    }
+                    CFRelease(sampleBuffer);
+
+                } else {
+                    demuxHelper->done = YES;
+                    [demuxHelper->editsConstructor done];
+                    tracksDone += 1;
                 }
-                else {
-                    CMTime currentDuration = CMTimeConvertScale(duration, timescale, kCMTimeRoundingMethod_Default);
-                    CMTime currentTimeStamp = CMTimeConvertScale(presentationTimeStamp, timescale, kCMTimeRoundingMethod_Default);
-                    CMTime currentOutputTimeStamp = CMTimeConvertScale(presentationOutputTimeStamp, timescale, kCMTimeRoundingMethod_Default);
-
-                    MP42SampleBuffer *sample = [[MP42SampleBuffer alloc] init];
-                    sample->duration = currentDuration.value;
-                    sample->presentationTimestamp = currentTimeStamp.value;
-                    sample->presentationOutputTimestamp = currentOutputTimeStamp.value;
-                    sample->timescale = timescale;
-                    sample->flags |= sync ? MP42SampleBufferFlagIsSync : 0;
-                    sample->flags |= doNotDisplay ? MP42SampleBufferFlagDoNotDisplay : 0;
-                    sample->trackId = track.sourceId;
-                        
-                    sample->attachments = (void *)attachments;
-                        
-                    [demuxHelper->editsConstructor addSample:sample];
-                }
-                CFRelease(sampleBuffer);
-
-                self.progress = (((CGFloat) currentDataLength /  totalDataLength ) * 100);
-
-            } else {
-                break;
             }
         }
 
-        [demuxHelper->editsConstructor done];
+        self.progress = (((CGFloat) currentDataLength /  totalDataLength ) * 100);
+        currentTime += 2;
     }
 
     [assetReader release];

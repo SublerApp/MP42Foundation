@@ -531,7 +531,6 @@
                     if (sampleBuffer->flags & MP42SampleBufferFlagEndOfFile) {
                         track.muxer_helper->done = 1;
                     }
-
                     else if (!MP4WriteSample(_fileHandle, trackId,
                                              sampleBuffer->data, sampleBuffer->size,
                                              sampleBuffer->duration, sampleBuffer->offset,
