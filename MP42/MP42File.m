@@ -1065,8 +1065,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
             [[NSColor blackColor] set];
             NSRectFill(rect);
 
-            if (chapterT.image.image)
-                [[chapterT image].image drawInRect:rect fromRect:NSZeroRect operation:NSCompositingOperationCopy fraction:1.0];
+            [chapterT.image.image drawInRect:rect fromRect:NSZeroRect operation:NSCompositingOperationCopy fraction:1.0];
 
             [NSGraphicsContext restoreGraphicsState];
 
@@ -1075,8 +1074,8 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 
         MP4WriteSample(self.fileHandle,
                        jpegTrack,
-                       [imageData bytes],
-                       [imageData length],
+                       imageData.bytes,
+                       imageData.length,
                        duration,
                        0,
                        true);
