@@ -200,6 +200,9 @@
         else if ([track isMemberOfClass:[MP42VideoTrack class]] &&
                  (format == kMP42VideoCodecType_HEVC || format == kMP42VideoCodecType_HEVC_PSinBitstream)) {
 
+            uint8_t *hvcCAtom = (uint8_t *)magicCookie.bytes;
+            force_HEVC_completeness(hvcCAtom, magicCookie.length);
+
             // Check whether we can use hvc1 or hev1 fourcc.
             bool completeness = 0;
             if (magicCookie.length && !analyze_HEVC(magicCookie.bytes, magicCookie.length, &completeness)) {

@@ -1199,7 +1199,7 @@ typedef struct HEVCConfig {
     struct NAL_units *NAL_units;
 } HEVCConfig;
 
-int analyze_HEVC(const uint8_t *cookie, uint32_t cookieLen, bool *completeness)
+int parse_HEVC(const uint8_t *cookie, uint32_t cookieLen, bool *completeness, bool forceCompleteness)
 {
     int result = 0;
     bool complete = true;
@@ -1211,7 +1211,11 @@ int analyze_HEVC(const uint8_t *cookie, uint32_t cookieLen, bool *completeness)
     b.SetBytes((uint8_t *)cookie, cookieLen);
 
     try {
-        info->configurationVersion = b.GetBits(8);
+        if (forceCompleteness) {
+            b.PutBits(1, 8);
+        } else {
+            info->configurationVersion = b.GetBits(8);
+        }
         info->general_profile_space = b.GetBits(2);
         info->general_tier_flag = b.GetBits(1);
         info->general_profile_idc = b.GetBits(5);
@@ -1245,7 +1249,10 @@ int analyze_HEVC(const uint8_t *cookie, uint32_t cookieLen, bool *completeness)
 
         for (UInt8 j = 0; j < info->numOfArrays; j++) {
             bool unitIsComplete = true;
+            u_int32_t completenessPos = b.GetBitPosition();
+
             info->NAL_units[j].array_completeness = b.GetBits(1);
+
             if (info->NAL_units[j].array_completeness == 0) {
                 unitIsComplete = false;
             }
@@ -1258,7 +1265,14 @@ int analyze_HEVC(const uint8_t *cookie, uint32_t cookieLen, bool *completeness)
             if (info->NAL_units[j].NAL_unit_type == NAL_UNIT_VPS ||
                 info->NAL_units[j].NAL_unit_type == NAL_UNIT_SPS ||
                 info->NAL_units[j].NAL_unit_type == NAL_UNIT_PPS) {
-                complete = unitIsComplete;
+                if (forceCompleteness && info->NAL_units[j].numNalus > 0) {
+                    u_int32_t currentPos = b.GetBitPosition();
+                    b.SetBitPosition(completenessPos);
+                    b.PutBits(1, 1);
+                    b.SetBitPosition(currentPos);
+                } else {
+                    complete = unitIsComplete;
+                }
             }
 
             for (UInt8 i = 0; i < info->NAL_units[j].numNalus; i++) {
@@ -1277,4 +1291,13 @@ int analyze_HEVC(const uint8_t *cookie, uint32_t cookieLen, bool *completeness)
     *completeness = complete;
 
     return 0;
+}
+
+int analyze_HEVC(const uint8_t *cookie, uint32_t cookieLen, bool *completeness) {
+    return parse_HEVC(cookie, cookieLen, completeness, false);
+}
+
+void force_HEVC_completeness(const uint8_t *cookie, uint32_t cookieLen) {
+    bool completeness = 0;
+    parse_HEVC(cookie, cookieLen, &completeness, true);
 }
