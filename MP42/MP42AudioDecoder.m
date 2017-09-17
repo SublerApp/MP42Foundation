@@ -276,8 +276,8 @@ static AVPacket * packetFromSampleBuffer(MP42SampleBuffer *sample)
     AVPacket *pkt = av_packet_alloc();
     pkt->data = sample->data;
     pkt->size = sample->size;
-    pkt->pts = sample->decodeTimestamp;
-    pkt->dts = AV_NOPTS_VALUE;
+    pkt->dts = sample->decodeTimestamp;
+    pkt->duration = sample->duration;
 
     return pkt;
 }
@@ -354,10 +354,9 @@ static void configureDescriptors(MP42DecodeContext *context, AVFrame *frame)
     context->inputFormat->mSampleRate = sample_rate;
 
     if (sample_rate > 48000) {
-        sample_rate = 48000;
+        context->outputFormat->mSampleRate = sample_rate;
     }
 
-    context->outputFormat->mSampleRate = sample_rate;
     context->outputFormat->mBytesPerPacket = 4 * context->outputFormat->mChannelsPerFrame;
     context->outputFormat->mBytesPerFrame = context->outputFormat->mBytesPerPacket * context->outputFormat->mFramesPerPacket;
 
