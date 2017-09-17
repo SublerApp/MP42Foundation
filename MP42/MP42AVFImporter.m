@@ -1184,6 +1184,7 @@
 
                         [demuxHelper->editsConstructor addSample:sample];
                         demuxHelper->currentTime = currentOutputTimeStamp.value;
+                        [sample release];
                     }
                     CFRelease(sampleBuffer);
 
