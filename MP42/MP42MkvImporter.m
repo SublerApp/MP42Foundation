@@ -562,6 +562,7 @@ static const struct {
     { "A_PCM/INT/BIG",      kMP42AudioCodecType_LinearPCM },
     { "A_PCM/INT/LIT",      kMP42AudioCodecType_LinearPCM },
     { "A_PCM/FLOAT/IEEE",   kMP42AudioCodecType_LinearPCM },
+    { "A_ALAC",             kMP42AudioCodecType_AppleLossless },
 
 
     { "S_TEXT/UTF8",        kMP42SubtitleCodecType_Text },
