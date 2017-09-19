@@ -391,6 +391,18 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
     return tracks;
 }
 
+- (NSArray<MP42Track *> *)tracksWithMediaTypes:(NSArray *)mediaType {
+    NSMutableArray<MP42Track *> *tracks = [NSMutableArray array];
+
+    for (MP42Track *track in self.itracks) {
+        if ([mediaType containsObject:@(track.mediaType)]) {
+            [tracks addObject:track];
+        }
+    }
+
+    return tracks;
+}
+
 - (NSArray<MP42Track *> *)tracksWithMediaType:(MP42MediaType)mediaType language:(NSString *)language {
     NSMutableArray<MP42Track *> *tracks = [NSMutableArray array];
 
@@ -516,8 +528,8 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
     [self.itracks insertObject:track atIndex:newIndex];
 }
 
-- (void)organizeAlternateGroupsForMediaType:(MP42MediaType)mediaType withGroupID:(NSUInteger)groupID {
-    NSArray<MP42Track *> *tracks = [self tracksWithMediaType:mediaType];
+- (void)organizeAlternateGroupsForMediaTypes:(NSArray *)mediaTypes withGroupID:(NSUInteger)groupID {
+    NSArray<MP42Track *> *tracks = [self tracksWithMediaTypes:mediaTypes];
     BOOL enabled = NO;
 
     if (!tracks.count) {
@@ -543,13 +555,15 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 - (void)organizeAlternateGroups {
     NSAssert(self.status != MP42StatusWriting, @"Unsupported operation: trying to organize alternate groups while the file is open for writing");
 
-    MP42MediaType typeToOrganize[] = {kMP42MediaType_Video,
-                                      kMP42MediaType_Audio,
-                                      kMP42MediaType_Subtitle};
+    NSArray *typesToOrganize = @[@[@(kMP42MediaType_Video)],
+                                @[@(kMP42MediaType_Audio)],
+                                @[@(kMP42MediaType_Subtitle), @(kMP42MediaType_ClosedCaption)]];
 
-    for (NSUInteger i = 0; i < 3; i++) {
-        [self organizeAlternateGroupsForMediaType:typeToOrganize[i]
-                                      withGroupID:i];
+    NSInteger index = 0;
+    for (NSArray *types in typesToOrganize) {
+        [self organizeAlternateGroupsForMediaTypes:types
+                                      withGroupID:index];
+        index += 1;
     }
 
     /*for (NSUInteger i = 1; i < 3; i++) {
