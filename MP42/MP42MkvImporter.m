@@ -608,10 +608,10 @@ static NSString * TrackNameToString(TrackInfo *track)
 
     TrackInfo *trackInfo = mkv_GetTrackInfo(_matroskaFile, Id);
     int64_t codecDelay = trackInfo->CodecDelay;
-    if (codecDelay == 0 && trackInfo->Type == TT_AUDIO && !strcmp(trackInfo->CodecID, "A_AAC")) {
+    /*if (codecDelay == 0 && trackInfo->Type == TT_AUDIO && !strcmp(trackInfo->CodecID, "A_AAC")) {
         NSUInteger sampleRate = mkv_TruncFloat(trackInfo->AV.Audio.SamplingFreq);
         codecDelay = 2112 * SCALE_FACTOR * 1000 / sampleRate;
-    }
+    }*/
 
     return (((double)StartTime) - codecDelay) / SCALE_FACTOR;
 }
@@ -787,7 +787,8 @@ static NSString * TrackNameToString(TrackInfo *track)
 
 - (BOOL)audioTrackUsesExplicitEncoderDelay:(MP42Track *)track;
 {
-    return YES;
+    TrackInfo *trackInfo = mkv_GetTrackInfo(_matroskaFile, track.sourceId);
+    return trackInfo->CodecDelay != 0;
 }
 
 // Methods to extract all the samples from the active tracks at the same time
