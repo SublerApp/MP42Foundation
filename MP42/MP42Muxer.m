@@ -201,7 +201,10 @@
                  (format == kMP42VideoCodecType_HEVC || format == kMP42VideoCodecType_HEVC_PSinBitstream)) {
 
             uint8_t *hvcCAtom = (uint8_t *)magicCookie.bytes;
-            force_HEVC_completeness(hvcCAtom, magicCookie.length);
+            
+            if ([NSUserDefaults.standardUserDefaults boolForKey:@"SBForceHvc1"]) {
+                force_HEVC_completeness(hvcCAtom, magicCookie.length);
+            }
 
             // Check whether we can use hvc1 or hev1 fourcc.
             bool completeness = 0;
