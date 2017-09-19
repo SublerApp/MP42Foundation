@@ -354,9 +354,10 @@ static void configureDescriptors(MP42DecodeContext *context, AVFrame *frame)
     context->inputFormat->mSampleRate = sample_rate;
 
     if (sample_rate > 48000) {
-        context->outputFormat->mSampleRate = sample_rate;
+        sample_rate = 48000;
     }
 
+    context->outputFormat->mSampleRate = sample_rate;
     context->outputFormat->mBytesPerPacket = 4 * context->outputFormat->mChannelsPerFrame;
     context->outputFormat->mBytesPerFrame = context->outputFormat->mBytesPerPacket * context->outputFormat->mFramesPerPacket;
 
