@@ -743,6 +743,10 @@
             size_t cookieSizeOut;
             const void *cookieBuffer = CMAudioFormatDescriptionGetMagicCookie(formatDescription, &cookieSizeOut);
 
+            if (cookieBuffer == NULL || cookieSizeOut == 0) {
+                return nil;
+            }
+
             if (code == kAudioFormatMPEG4AAC || code == kAudioFormatMPEG4AAC_HE || code == kAudioFormatMPEG4AAC_HE_V2) {
 
                 // Extract DecoderSpecific info
