@@ -566,13 +566,19 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
         index += 1;
     }
 
-    /*for (NSUInteger i = 1; i < 3; i++) {
-        [self organizeMediaCharacteristicsForMediaType:typeToOrganize[i]];
-    }*/
-
     for (MP42Track *track in self.itracks) {
         if ([track isMemberOfClass:[MP42ChapterTrack class]])
             track.enabled = NO;
+    }
+}
+
+- (void)inferMediaCharacteristics {
+    MP42MediaType typesToOrganize[] = { kMP42MediaType_Video,
+                                        kMP42MediaType_Audio,
+                                        kMP42MediaType_Subtitle };
+
+    for (NSUInteger i = 1; i < 3; i++) {
+        [self organizeMediaCharacteristicsForMediaType:typesToOrganize[i]];
     }
 }
 
@@ -636,7 +642,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
         // Now we got to find a main track
         MP42Track *mainTrackCandidate = nil;
 
-        // First check if we have a track with no tag and a related track
+        // First check if we have a track with no tag or main tag and a related track
         for (MP42Track *track in subGroup) {
             NSArray<MP42Track *> *relatedTracks = [self relatedTracksForTrack:track];
             if (relatedTracks.count && track.mediaCharacteristicTags.count == 0) {
@@ -648,7 +654,8 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
         // If not use the first track with no tags
         if (!mainTrackCandidate) {
             for (MP42Track *track in subGroup) {
-                if (track.mediaCharacteristicTags.count == 0) {
+                if (track.mediaCharacteristicTags.count == 0 ||
+                    [track.mediaCharacteristicTags containsObject:@"public.main-program-content"]) {
                     mainTrackCandidate = track;
                     break;
                 }

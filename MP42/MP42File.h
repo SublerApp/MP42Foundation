@@ -148,6 +148,8 @@ typedef void (^MP42FileProgressHandler)(double progress);
  */
 - (void)organizeAlternateGroups;
 
+- (void)inferMediaCharacteristics;
+
 /**
  *  Set automatically a fallback track for AC3 if Stereo track in the same language is present
  */
