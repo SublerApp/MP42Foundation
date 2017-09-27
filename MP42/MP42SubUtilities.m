@@ -105,7 +105,7 @@ canOutput:
         if (l->begin_time <= begin_time) {
             // Try to be a bit smart and avoid duplicated lines
             // from ssa.
-            if (!ssa || ![str containsString:l->line]) {
+            if (!ssa || [str rangeOfString:l->line].location == NSNotFound) {
                 [str appendString:l->line];
             }
         }

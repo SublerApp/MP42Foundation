@@ -621,17 +621,17 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
             }
 
             // Try to create some useful tags from the track name.
-            if ([track.name containsString:@"Director"] ||
-                [track.name containsString:@"Commentary"] ||
-                [track.name containsString:@"Lyric"] ||
-                [track.name containsString:@"Karaoke"] ||
-                [track.name containsString:@"Sign"]) {
+            if ([track.name rangeOfString:@"Director"].location != NSNotFound ||
+                [track.name rangeOfString:@"Commentary"].location != NSNotFound ||
+                [track.name rangeOfString:@"Lyric"].location != NSNotFound ||
+                [track.name rangeOfString:@"Karaoke"].location != NSNotFound ||
+                [track.name rangeOfString:@"Sign"].location != NSNotFound) {
                 [tags addObject:@"public.auxiliary-content"];
             }
 
             if (mediaType == kMP42MediaType_Subtitle) {
-                if ([track.name containsString:@"Lyric"] ||
-                    [track.name containsString:@"Karaoke"]) {
+                if ([track.name rangeOfString:@"Lyric"].location != NSNotFound ||
+                    [track.name rangeOfString:@"Karaoke"].location != NSNotFound) {
                     [tags addObject:@"public.accessibility.describes-music-and-sound"];
                 }
             }
