@@ -94,7 +94,7 @@
         }
     }
 
-    if (self.format == kMP42SubtitleCodecType_3GText) {
+    if (MP4HaveTrackAtom(fileHandle, self.trackId, "mdia.minf.stbl.stsd.tx3g")) {
         MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.tx3g.defTextBoxBottom", self.trackHeight);
         MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.tx3g.defTextBoxRight", self.trackWidth);
 
