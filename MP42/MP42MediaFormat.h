@@ -145,7 +145,7 @@ enum : MP42AudioCodecType
     kMP42AudioCodecType_MicrosoftGSM            = 0x6D730031,
     kMP42AudioCodecType_AES3                    = 'aes3',
     kMP42AudioCodecType_EnhancedAC3             = 'ec-3',
-    kMP42AudioCodecType_FLAC                    = 'XiFL',
+    kMP42AudioCodecType_FLAC                    = 'flac',
     kMP42AudioCodecType_Vorbis                  = 'XiVs',
     kMP42AudioCodecType_DTS                     = 'DTS ',
     kMP42AudioCodecType_TrueHD                  = 'trhd',

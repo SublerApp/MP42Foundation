@@ -70,7 +70,7 @@
             case 'ms \0':
                 result = kMP42AudioCodecType_AC3;
                 break;
-            case 'flac':
+            case 'XiFL':
                 result = kMP42AudioCodecType_FLAC;
                 break;
             case 'SRT ':
@@ -103,8 +103,8 @@
                 chapters = [[MP42ChapterTrack alloc] init];
                 NSArray *chapterList = [_localAsset chapterMetadataGroupsWithTitleLocale:locale containingItemsWithCommonKeys:nil];
                 for (AVTimedMetadataGroup *chapterData in chapterList) {
-                    for (AVMetadataItem *item in [chapterData items]) {
-                        CMTime time = [item time];
+                    for (AVMetadataItem *item in chapterData.items) {
+                        CMTime time = item.time;
                         [chapters addChapter:[item stringValue] duration:time.value * time.timescale / 1000];
                     }
                 }
@@ -771,31 +771,14 @@
                 return [NSData dataWithBytes:cookieBuffer length:cookieSizeOut];
             }
 
-            else if (code == 'opus') {
-                // dec3 atom
-                // remove the atom header
-                //cookieBuffer += 9;
-                //cookieSizeOut = cookieSizeOut - 9;
-
-                UInt32 *cookie = (UInt32 *)cookieBuffer;
-
-                for (size_t i = 0; i < cookieSizeOut / 8; i++) {
-                    cookie[i] = EndianS32_BtoN(cookie[i]);
-                }
-
+            else if (code == kAudioFormatOpus) {
+                // TODO
                 return [NSData dataWithBytes:cookieBuffer length:cookieSizeOut];
             }
 
-            else if (code == 'flac') {
-
-                UInt32 *cookie = (UInt32 *)cookieBuffer;
-
-                for (size_t i = 0; i < cookieSizeOut / 8; i++) {
-                    cookie[i] = EndianS32_BtoN(cookie[i]);
-                }
-
+            else if (code == kAudioFormatFLAC) {
+                // TODO
                 return [NSData dataWithBytes:cookieBuffer length:cookieSizeOut];
-                
             }
 
             else if (code == kAudioFormatEnhancedAC3) {
@@ -879,9 +862,7 @@
 
                 CFDictionaryRef extentions = CMFormatDescriptionGetExtensions(formatDescription);
                 CFDictionaryRef atoms = CFDictionaryGetValue(extentions, kCMFormatDescriptionExtension_SampleDescriptionExtensionAtoms);
-                CFDataRef magicCookie = NULL;
-
-                magicCookie = CFDictionaryGetValue(atoms, @"vttC");
+                CFDataRef magicCookie = CFDictionaryGetValue(atoms, @"vttC");
 
                 return (NSData *)magicCookie;
             }
