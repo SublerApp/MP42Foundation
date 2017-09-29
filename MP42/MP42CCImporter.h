@@ -1,5 +1,5 @@
 //
-//  MP42CCFileImporter.h
+//  MP42CCImporter.h
 //  Subler
 //
 //  Created by Damiano Galassi on 05/12/10.

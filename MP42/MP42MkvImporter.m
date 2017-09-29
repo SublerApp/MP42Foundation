@@ -1,5 +1,5 @@
 //
-//  MP42MkvFileImporter.m
+//  MP42MkvImporter.m
 //  Subler
 //
 //  Created by Damiano Galassi on 31/01/10.
@@ -214,7 +214,7 @@ static int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, ui
         }
 
         NSInteger trackCount = mkv_GetNumTracks(_matroskaFile);
-        NSArray<NSNumber *> *trackSizes = [self guessedTrackDataLength];
+        NSArray<NSNumber *> *trackSizes = [self approximatedTrackDataLength];
 
         for (NSInteger i = 0; i < trackCount; i++) {
             TrackInfo *mkvTrack = mkv_GetTrackInfo(_matroskaFile, i);
@@ -471,7 +471,7 @@ static int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, ui
     return (mkvMetadata.items.count) ? mkvMetadata : nil;
 }
 
-- (NSArray<NSNumber *> *)guessedTrackDataLength
+- (NSArray<NSNumber *> *)approximatedTrackDataLength
 {
     SegmentInfo *segInfo = mkv_GetFileInfo(_matroskaFile);
     NSInteger trackCount = mkv_GetNumTracks(_matroskaFile);

@@ -1,5 +1,5 @@
 //
-//  SBVobSubImpoter.h
+//  MP42VobSubImporter.h
 //  Subler
 //
 //  Created by Damiano Galassi on 20/12/12.

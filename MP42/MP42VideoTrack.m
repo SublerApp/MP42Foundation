@@ -1,5 +1,5 @@
 //
-//  MP42SubtitleTrack.m
+//  MP42VideoTrack.m
 //  Subler
 //
 //  Created by Damiano Galassi on 31/01/09.
@@ -9,33 +9,10 @@
 #import "MP42VideoTrack.h"
 #import "MP42Track+Private.h"
 #import "MP42MediaFormat.h"
-#import "MP42Track+Private.h"
 #import "MP42PrivateUtilities.h"
 #import <mp4v2.h>
 
 @implementation MP42VideoTrack
-{
-    uint64_t _width, _height;
-    float _trackWidth, _trackHeight;
-
-    // Color
-    uint16_t _colorPrimaries;
-    uint16_t _transferCharacteristics;
-    uint16_t _matrixCoefficients;
-
-    // Pixel Aspect Ratio
-    uint64_t _hSpacing, _vSpacing;
-
-    // Clean Aperture
-    uint64_t _cleanApertureWidthN, _cleanApertureWidthD;
-    uint64_t _cleanApertureHeightN, _cleanApertureHeightD;
-    uint64_t _horizOffN, _horizOffD;
-    uint64_t _vertOffN, _vertOffD;
-
-    // H.264 profile
-    uint8_t _origProfile, _origLevel;
-    uint8_t _newProfile, _newLevel;
-}
 
 - (instancetype)initWithSourceURL:(NSURL *)URL trackID:(NSInteger)trackID fileHandle:(MP42FileHandle)fileHandle
 {

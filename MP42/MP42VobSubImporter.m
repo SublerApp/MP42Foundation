@@ -1,5 +1,5 @@
 //
-//  SBVobSubImpoter.m
+//  MP42VobSubImporter.m
 //  Subler
 //
 //  Created by Damiano Galassi on 20/12/12.
@@ -257,7 +257,7 @@ static NSArray<SBVobSubTrack *> * LoadVobSubSubtitles(NSURL *theDirectory, NSStr
 
 - (NSSize)sizeForTrack:(MP42Track *)track
 {
-    return NSMakeSize([(MP42SubtitleTrack*)track trackWidth], [(MP42SubtitleTrack*) track trackHeight]);
+    return NSMakeSize([(MP42SubtitleTrack *)track trackWidth], [(MP42SubtitleTrack *)track trackHeight]);
 }
 
 - (NSData *)magicCookieForTrack:(MP42Track *)track

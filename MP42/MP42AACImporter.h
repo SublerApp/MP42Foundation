@@ -1,5 +1,5 @@
 //
-//  MP42AACFileImporter.h
+//  MP42AACImporter.h
 //  Subler
 //
 //  Created by Damiano Galassi on 07/12/10.

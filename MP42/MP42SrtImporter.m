@@ -1,5 +1,5 @@
 //
-//  MP42MkvFileImporter.m
+//  MP42SrtImporter.m
 //  Subler
 //
 //  Created by Damiano Galassi on 31/01/10.
@@ -136,7 +136,7 @@
 
 - (NSSize)sizeForTrack:(MP42Track *)track
 {
-      return NSMakeSize([(MP42SubtitleTrack*)track trackWidth], [(MP42SubtitleTrack*) track trackHeight]);
+    return NSMakeSize([(MP42SubtitleTrack *)track trackWidth], [(MP42SubtitleTrack *) track trackHeight]);
 }
 
 - (void)demux

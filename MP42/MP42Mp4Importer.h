@@ -1,5 +1,5 @@
 //
-//  MP42Mp4FileImporter.h
+//  MP42Mp4Importer.h
 //  Subler
 //
 //  Created by Damiano Galassi on 31/01/10.

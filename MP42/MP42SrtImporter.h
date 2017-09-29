@@ -1,5 +1,5 @@
 //
-//  MP42MkvFileImporter.h
+//  MP42SrtImporter.h
 //  Subler
 //
 //  Created by Damiano Galassi on 31/01/10.

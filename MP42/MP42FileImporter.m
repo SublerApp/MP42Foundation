@@ -24,6 +24,8 @@
 #import "MP42Track+Muxer.h"
 #import "MP42Track+Private.h"
 
+#import "mp4v2.h"
+
 #import <CoreAudio/CoreAudio.h>
 
 /// The available subclasses

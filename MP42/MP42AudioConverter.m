@@ -1,5 +1,5 @@
 //
-//  SBAudioConverter.m
+//  MP42AudioConverter.m
 //  Subler
 //
 //  Created by Damiano Galassi on 16/09/10.
@@ -9,7 +9,6 @@
 #import "MP42AudioConverter.h"
 #import "MP42AudioTrack.h"
 #import "MP42MediaFormat.h"
-#import "MP42Fifo.h"
 
 #import "MP42AudioDecoder.h"
 #import "MP42AudioEncoder.h"
@@ -44,8 +43,6 @@
         AudioChannelLayout *channelLayout = calloc(channelLayoutSize, 1);
         channelLayout->mChannelLayoutTag = track.channelLayoutTag;
 
-        
-
         _decoder = [[MP42AudioDecoder alloc] initWithAudioFormat:asbd
                                                    channelLayout:channelLayout
                                                channelLayoutSize:channelLayoutSize
@@ -59,7 +56,7 @@
         if (!_decoder) {
             return nil;
         }
-        
+
         if (settings.format == kMP42AudioCodecType_AC3 || settings.format == kMP42AudioCodecType_EnhancedAC3) {
             _encoder = [[MP42AC3AudioEncoder alloc] initWithInputUnit:_decoder
                                                               bitRate:settings.bitRate

@@ -1,5 +1,5 @@
 //
-//  MP42MkvFileImporter.m
+//  MP42AVFImporter.m
 //  Subler
 //
 //  Created by Damiano Galassi on 31/01/10.
@@ -467,7 +467,7 @@
         }
     }
 
-    // Copy the artowrks
+    // Copy the artworks
     NSArray<AVMetadataItem *> *items = [AVMetadataItem metadataItemsFromArray:_localAsset.commonMetadata
                                                                       withKey:AVMetadataCommonKeyArtwork
                                                                      keySpace:AVMetadataKeySpaceCommon];
@@ -895,33 +895,35 @@
         AVAssetReader *assetReader = [[AVAssetReader alloc] initWithAsset:_localAsset error:NULL];
         AVFDemuxHelper * helpers[tracksNumber];
 
-        if (assetReader != nil) {
+        if (assetReader == nil) {
+            [self setDone];
+            return;
+        }
 
-            for (NSUInteger index = 0; index < tracksNumber; index += 1) {
-                MP42Track *track = self.inputTracks[index];
-                AVAssetReaderOutput *assetReaderOutput = [AVAssetReaderTrackOutput assetReaderTrackOutputWithTrack:[_localAsset trackWithTrackID:track.sourceId]
-                                                                                                    outputSettings:nil];
-                assetReaderOutput.alwaysCopiesSampleData = NO;
+        for (NSUInteger index = 0; index < tracksNumber; index += 1) {
+            MP42Track *track = self.inputTracks[index];
+            AVAssetReaderOutput *assetReaderOutput = [AVAssetReaderTrackOutput assetReaderTrackOutputWithTrack:[_localAsset trackWithTrackID:track.sourceId]
+                                                                                                outputSettings:nil];
+            assetReaderOutput.alwaysCopiesSampleData = NO;
 
-                if ([assetReader canAddOutput:assetReaderOutput]) {
-                    [assetReader addOutput:assetReaderOutput];
-                }
-                else {
-                    NSLog(@"Unable to add the output to assetReader!");
-                }
-
-                AVFDemuxHelper *demuxHelper = [[AVFDemuxHelper alloc] init];
-                demuxHelper->sourceID = track.sourceId;
-                demuxHelper->timescale = [self timescaleForTrack:track];
-                demuxHelper->format = track.format;
-                demuxHelper->assetReaderOutput = assetReaderOutput;
-                demuxHelper->editsConstructor = [[MP42EditListsReconstructor alloc] init];
-
-                track.demuxerHelper = demuxHelper;
-                helpers[index] = demuxHelper;
-
-                totalDataLength += track.dataLength;
+            if ([assetReader canAddOutput:assetReaderOutput]) {
+                [assetReader addOutput:assetReaderOutput];
             }
+            else {
+                NSLog(@"Unable to add the output to assetReader!");
+            }
+
+            AVFDemuxHelper *demuxHelper = [[AVFDemuxHelper alloc] init];
+            demuxHelper->sourceID = track.sourceId;
+            demuxHelper->timescale = [self timescaleForTrack:track];
+            demuxHelper->format = track.format;
+            demuxHelper->assetReaderOutput = assetReaderOutput;
+            demuxHelper->editsConstructor = [[MP42EditListsReconstructor alloc] init];
+
+            track.demuxerHelper = demuxHelper;
+            helpers[index] = demuxHelper;
+
+            totalDataLength += track.dataLength;
         }
 
         if (![assetReader startReading]) {

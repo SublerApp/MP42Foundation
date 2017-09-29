@@ -1,5 +1,5 @@
 //
-//  MP42H264FileImporter.m
+//  MP42H264Importer.m
 //  Subler
 //
 //  Created by Damiano Galassi on 07/12/10.
@@ -15,6 +15,30 @@
 #import "MP42Track+Private.h"
 
 #include <sys/stat.h>
+
+#import "mp4v2.h"
+
+typedef struct framerate_t {
+    uint32_t code;
+    uint32_t timescale;
+    uint32_t duration;
+} framerate_t;
+
+typedef struct
+{
+    struct
+    {
+        int size_min;
+        int next;
+        int cnt;
+        int idx[17];
+        int poc[17];
+    } dpb;
+
+    int cnt;
+    int cnt_max;
+    int *frame;
+} h264_dpb_t;
 
 //#define DEBUG_H264
 
@@ -1346,7 +1370,17 @@ NSData* H264Info(const char *filePath, uint32_t *pic_width, uint32_t *pic_height
     return avcCData;
 }
 
-@implementation MP42H264Importer
+@implementation MP42H264Importer {
+    FILE *inFile;
+    int64_t _size;
+
+    NSData *avcC;
+    uint32_t timescale;
+    uint32_t mp4FrameDuration;
+    MP4SampleId samplesWritten;
+    h264_dpb_t h264_dpb;
+}
+
 
 + (NSArray<NSString *> *)supportedFileFormats {
     return @[@"264", @"h264"];

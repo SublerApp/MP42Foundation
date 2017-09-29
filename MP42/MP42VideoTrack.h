@@ -19,13 +19,16 @@
 
 @property(nonatomic, readwrite) CGAffineTransform transform;
 
+// Color
 @property(nonatomic, readwrite) uint16_t colorPrimaries;
 @property(nonatomic, readwrite) uint16_t transferCharacteristics;
 @property(nonatomic, readwrite) uint16_t matrixCoefficients;
 
+// Pixel Aspect Ratio
 @property(nonatomic, readwrite) uint64_t hSpacing;
 @property(nonatomic, readwrite) uint64_t vSpacing;
 
+// Clean Aperture
 @property(nonatomic, readwrite) uint64_t cleanApertureWidthN;
 @property(nonatomic, readwrite) uint64_t cleanApertureWidthD;
 @property(nonatomic, readwrite) uint64_t cleanApertureHeightN;
@@ -35,6 +38,7 @@
 @property(nonatomic, readwrite) uint64_t vertOffN;
 @property(nonatomic, readwrite) uint64_t vertOffD;
 
+// H.264 profile
 @property(nonatomic, readwrite) uint8_t origProfile;
 @property(nonatomic, readwrite) uint8_t origLevel;
 @property(nonatomic, readwrite) uint8_t newProfile;

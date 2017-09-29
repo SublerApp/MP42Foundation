@@ -1,5 +1,5 @@
 //
-//  MP42AacFileImporter.m
+//  MP42AACImporter.m
 //  Subler
 //
 //  Created by Damiano Galassi on 07/12/10.
@@ -830,10 +830,10 @@ static bool GetFirstHeader(FILE* inFile)
 
 - (NSSize)sizeForTrack:(MP42Track *)track
 {
-      return NSMakeSize([(MP42SubtitleTrack*)track trackWidth], [(MP42SubtitleTrack*) track trackHeight]);
+    return NSMakeSize(0, 0);
 }
 
-- (NSData*)magicCookieForTrack:(MP42Track *)track
+- (NSData *)magicCookieForTrack:(MP42Track *)track
 {
     return aacInfo;
 }

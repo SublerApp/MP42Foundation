@@ -1,5 +1,5 @@
 //
-//  MP42MkvFileImporter.m
+//  MP42Mp4Importer.m
 //  Subler
 //
 //  Created by Damiano Galassi on 31/01/10.

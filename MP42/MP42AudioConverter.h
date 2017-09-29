@@ -1,5 +1,5 @@
 //
-//  SBAudioConverter.h
+//  MP42AudioConverter.h
 //  Subler
 //
 //  Created by Damiano Galassi on 16/09/10.

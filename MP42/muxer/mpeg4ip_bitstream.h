@@ -21,7 +21,6 @@
 
 #ifndef __BITSTREAM_H__
 #define __BITSTREAM_H__ 1
-//#include "mpeg4ip.h"
 
 #ifndef MIN
 #define MIN(a, b)  (((a) < (b)) ? (a) : (b))

@@ -15,18 +15,7 @@
 
 #define FFmpegMaximumSupportedChannels  6
 
-@implementation MP42AudioTrack {
-@private
-    float _volume;
-    UInt32 _channels;
-    UInt32 _channelLayoutTag;
-
-    MP42TrackId  _fallbackTrackId;
-    MP42TrackId  _followsTrackId;
-
-    MP42Track  *_fallbackTrack;
-    MP42Track  *_followsTrack;
-}
+@implementation MP42AudioTrack
 
 - (instancetype)initWithSourceURL:(NSURL *)URL trackID:(NSInteger)trackID fileHandle:(MP4FileHandle)fileHandle
 {
@@ -221,11 +210,6 @@
     self.updatedProperty[@"volume"] = @YES;
 }
 
-- (float)volume
-{
-    return _volume;
-}
-
 - (void)setFallbackTrack:(MP42Track *)newFallbackTrack
 {
     _fallbackTrack = newFallbackTrack;
@@ -234,22 +218,12 @@
     self.updatedProperty[@"fallback"] = @YES;
 }
 
-- (MP42Track *)fallbackTrack
-{
-    return _fallbackTrack;
-}
-
 - (void)setFollowsTrack:(MP42Track *)newFollowsTrack
 {
     _followsTrack = newFollowsTrack;
     _followsTrackId = 0;
     self.edited = YES;
     self.updatedProperty[@"follows"] = @YES;
-}
-
-- (MP42Track *)followsTrack
-{
-    return _followsTrack;
 }
 
 - (NSString *)formatSummary

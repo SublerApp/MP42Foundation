@@ -1,5 +1,5 @@
 //
-//  MP42CCFileImporter.m
+//  MP42CCImporter.m
 //  Subler
 //
 //  Created by Damiano Galassi on 05/12/10.
@@ -43,7 +43,7 @@
 
 - (NSSize)sizeForTrack:(MP42Track *)track
 {
-      return NSMakeSize([(MP42SubtitleTrack *)track trackWidth], [(MP42SubtitleTrack *)track trackHeight]);
+      return NSMakeSize([(MP42ClosedCaptionTrack *)track trackWidth], [(MP42ClosedCaptionTrack *)track trackHeight]);
 }
 
 - (nullable NSData *)magicCookieForTrack:(MP42Track *)track
