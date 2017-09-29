@@ -34,6 +34,16 @@
     self.muxer_helper->importer = importer;
 }
 
+- (id <MP42ConverterProtocol>)converter
+{
+    return self.muxer_helper->converter;
+}
+
+- (void)setConverter:(id <MP42ConverterProtocol>)converter
+{
+    self.muxer_helper->converter = converter;
+}
+
 - (void *)copy_muxer_helper
 {
     muxer_helper *copy = calloc(1, sizeof(muxer_helper));

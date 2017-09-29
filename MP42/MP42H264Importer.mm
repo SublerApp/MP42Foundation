@@ -1267,7 +1267,6 @@ NSData* H264Info(const char *filePath, uint32_t *pic_width, uint32_t *pic_height
     
     inFile = fopen(filePath, "r");
     if (inFile == NULL) {
-        [avcCData release];
         return 0;
     }
     
@@ -1278,7 +1277,6 @@ NSData* H264Info(const char *filePath, uint32_t *pic_width, uint32_t *pic_height
         if (LoadNal(&nal) == false) {
             // fprintf(stderr, "%s: Could not find sequence header\n", ProgName);
             fclose(inFile);
-            [avcCData release];
             return nil;
         }
         uint32_t header_size = nal.buffer[2] == 1 ? 3 : 4;
@@ -1313,8 +1311,6 @@ NSData* H264Info(const char *filePath, uint32_t *pic_width, uint32_t *pic_height
             [avcCData appendBytes:&iy length:sizeof(uint8_t)];
             [avcCData appendData:seqData];
 
-            [seqData release];
-
             // skip the nal type byte
             if (h264_read_seq_info(nal.buffer, nal.buffer_on, &h264_dec) == -1)
             {
@@ -1343,9 +1339,6 @@ NSData* H264Info(const char *filePath, uint32_t *pic_width, uint32_t *pic_height
             
             [avcCData appendBytes:&iy length:sizeof(uint8_t)];
             [avcCData appendData:pictData];
-            
-            [pictData release];
-
         }
     }
 
@@ -1389,7 +1382,6 @@ NSData* H264Info(const char *filePath, uint32_t *pic_width, uint32_t *pic_height
         [newTrack setDataLength:[[[[NSFileManager defaultManager] attributesOfItemAtPath:self.fileURL.path error:nil] valueForKey:NSFileSize] unsignedLongLongValue]];
 
         [self addTrack:newTrack];
-        [newTrack release];
     }
 
     return self;
@@ -1508,7 +1500,6 @@ NSData* H264Info(const char *filePath, uint32_t *pic_width, uint32_t *pic_height
                     sample->trackId = trackId;
 
                     [self enqueue:sample];
-                    [sample release];
 
                     currentSize += nal_buffer_size;
                     self.progress = (currentSize / (CGFloat) _size) * 100;
@@ -1595,8 +1586,7 @@ NSData* H264Info(const char *filePath, uint32_t *pic_width, uint32_t *pic_height
             sample->trackId = trackId;
             
             [self enqueue:sample];
-            [sample release];
-            
+
             currentSize += nal_buffer_size;
             self.progress = (currentSize / (CGFloat) _size) * 100;
             
@@ -1644,10 +1634,7 @@ NSData* H264Info(const char *filePath, uint32_t *pic_width, uint32_t *pic_height
 
 - (void) dealloc
 {
-    [avcC release];
     fclose(inFile);
-
-    [super dealloc];
 }
 
 @end

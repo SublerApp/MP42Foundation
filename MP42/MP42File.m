@@ -936,7 +936,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 
     for (MP42Track *track in self.itracks) {
         if (!track.muxed) {
-            // Reopen the file importer is they are not already open
+            // Reopen the file importers if they are not already open
             // this happens when the object was unarchived from a file.
             if (![track isMemberOfClass:[MP42ChapterTrack class]]) {
                 if (!track.importer && track.URL) {

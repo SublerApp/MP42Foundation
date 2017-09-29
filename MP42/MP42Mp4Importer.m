@@ -271,27 +271,26 @@ typedef struct MP4DemuxHelper {
 - (void)demux
 {
     @autoreleasepool {
-        NSArray<MP42Track *> *inputTracks = self.inputTracks;
-
-        NSInteger tracksNumber = inputTracks.count;
-        NSInteger tracksDone = 0;
 
         if (!_fileHandle) {
             return;
         }
 
+        NSArray<MP42Track *> *inputTracks = self.inputTracks;
+        NSInteger tracksNumber = inputTracks.count;
+        NSInteger tracksDone = 0;
+
         MP4DemuxHelper * helpers[tracksNumber];
 
-        NSUInteger index = 0;
-        for (MP42Track *track in inputTracks) {
-            MP4DemuxHelper *demuxHelper = malloc(sizeof(MP4DemuxHelper));
+        for (NSUInteger index = 0; index < tracksNumber; index += 1) {
+            MP42Track *track = inputTracks[index];
+            MP4DemuxHelper *demuxHelper = calloc(1, sizeof(MP4DemuxHelper));
             demuxHelper->sourceID = track.sourceId;
             demuxHelper->totalSampleNumber = MP4GetTrackNumberOfSamples(_fileHandle, track.sourceId);
             demuxHelper->timeScale = MP4GetTrackTimeScale(_fileHandle, track.sourceId);
             demuxHelper->done = 0;
 
             helpers[index] = demuxHelper;
-            index += 1;
         }
 
         MP4Timestamp currentTime = 1;

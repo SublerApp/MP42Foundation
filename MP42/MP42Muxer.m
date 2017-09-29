@@ -19,7 +19,6 @@
 #import "mp4v2.h"
 #import "MP42FormatUtilites.h"
 #import "MP42PrivateUtilities.h"
-#import "MP42Track+Muxer.h"
 #import "MP42Track+Private.h"
 
 @implementation MP42Muxer
@@ -30,14 +29,14 @@
     id <MP42MuxerDelegate>  _delegate;
     id <MP42Logging>        _logger;
 
-    NSMutableArray<MP42Track *> *_workingTracks;
+    NSMutableArray<MP42Track *> *_activeTracks;
     int32_t         _cancelled;
 }
 
 - (instancetype)init
 {
     if ((self = [super init])) {
-        _workingTracks = [[NSMutableArray alloc] init];
+        _activeTracks = [[NSMutableArray alloc] init];
     }
     return self;
 }
@@ -48,17 +47,10 @@
         NSParameterAssert(fileHandle);
         _fileHandle = fileHandle;
         _delegate = del;
-        _logger = [logger retain];
+        _logger = logger;
     }
 
     return self;
-}
-
-- (void)dealloc
-{
-    [_logger release];
-    [_workingTracks release];
-    [super dealloc];
 }
 
 - (BOOL)canAddTrack:(MP42Track *)track
@@ -76,7 +68,7 @@
 - (void)addTrack:(MP42Track *)track
 {
     if (![track isMemberOfClass:[MP42ChapterTrack class]]) {
-        [_workingTracks addObject:track];
+        [_activeTracks addObject:track];
     }
 }
 
@@ -84,17 +76,17 @@
 {
     NSMutableArray<MP42Track *> *unsupportedTracks = [[NSMutableArray alloc] init];;
 
-    for (MP42Track *track in _workingTracks) {
+    for (MP42Track *track in _activeTracks) {
 
+        MP42FileImporter *importer = track.importer;
         FourCharCode format = track.format;
         MP4TrackId dstTrackId = 0;
         NSData *magicCookie = nil;
         NSInteger timeScale = 0;
-        muxer_helper *helper = track.muxer_helper;
 
-        if (helper) {
-            magicCookie = [helper->importer magicCookieForTrack:track];
-            timeScale = [helper->importer timescaleForTrack:track];
+        if (importer) {
+            magicCookie = [importer magicCookieForTrack:track];
+            timeScale = [importer timescaleForTrack:track];
         }
         else {
             [unsupportedTracks addObject:track];
@@ -115,7 +107,7 @@
                 continue;
             }
 
-            helper->converter = audioConverter;
+            track.converter = audioConverter;
             // The audio converter might downsample the audio,
             // so update the track timescale here.
             timeScale = audioConverter.sampleRate;
@@ -134,7 +126,7 @@
                 continue;
             }
 
-            helper->converter = subConverter;
+            track.converter = subConverter;
             format = track.conversionSettings.format;
         } else if ([track isMemberOfClass:[MP42SubtitleTrack class]] && track.conversionSettings) {
             format = track.conversionSettings.format;
@@ -148,7 +140,7 @@
                 continue;
             }
 
-            NSSize size = [helper->importer sizeForTrack:track];
+            NSSize size = [importer sizeForTrack:track];
 
             uint8_t *avcCAtom = (uint8_t *)magicCookie.bytes;
             dstTrackId = MP4AddH264VideoTrack(_fileHandle, timeScale,
@@ -193,7 +185,7 @@
 
             MP4SetVideoProfileLevel(_fileHandle, 0x15);
 
-            [helper->importer setActiveTrack:track];
+            [importer setActiveTrack:track];
         }
 
         // H.265 video track
@@ -209,7 +201,7 @@
             // Check whether we can use hvc1 or hev1 fourcc.
             bool completeness = 0;
             if (magicCookie.length && !analyze_HEVC(magicCookie.bytes, magicCookie.length, &completeness)) {
-                NSSize size = [helper->importer sizeForTrack:track];
+                NSSize size = [importer sizeForTrack:track];
 
                 dstTrackId = MP4AddH265VideoTrack(_fileHandle, timeScale, MP4_INVALID_DURATION, size.width, size.height, completeness);
 
@@ -220,7 +212,7 @@
                     else {
                         MP4SetTrackBytesProperty(_fileHandle, dstTrackId, "mdia.minf.stbl.stsd.hev1.hvcC.content", magicCookie.bytes, magicCookie.length);
                     }
-                    [helper->importer setActiveTrack:track];
+                    [importer setActiveTrack:track];
                 }
                 else {
                     [unsupportedTracks addObject:track];
@@ -248,7 +240,7 @@
                                            magicCookie.length);
             }
 
-            [helper->importer setActiveTrack:track];
+            [importer setActiveTrack:track];
         }
 
         // Photo-JPEG video track
@@ -257,7 +249,7 @@
             dstTrackId = MP4AddJpegVideoTrack(_fileHandle, timeScale,
                                   MP4_INVALID_DURATION, [(MP42VideoTrack*)track width], [(MP42VideoTrack*)track height]);
 
-            [helper->importer setActiveTrack:track];
+            [importer setActiveTrack:track];
         }
 
         // AAC audio track
@@ -274,9 +266,9 @@
                                            magicCookie.length);
             }
 
-            MP4SetTrackWantsRoll(_fileHandle, dstTrackId, [helper->importer audioTrackUsesExplicitEncoderDelay:track]);
+            MP4SetTrackWantsRoll(_fileHandle, dstTrackId, [importer audioTrackUsesExplicitEncoderDelay:track]);
 
-            [helper->importer setActiveTrack:track];
+            [importer setActiveTrack:track];
         }
 
         // AC-3 audio track
@@ -305,14 +297,14 @@
                                                  ac3Info[5]);
             }
 
-            [helper->importer setActiveTrack:track];
+            [importer setActiveTrack:track];
         }
 
         // EAC-3 audio tack
         else if ([track isMemberOfClass:[MP42AudioTrack class]] && format == kMP42AudioCodecType_EnhancedAC3) {
             dstTrackId = MP4AddEAC3AudioTrack(_fileHandle, timeScale, magicCookie.bytes, magicCookie.length);
 
-            [helper->importer setActiveTrack:track];
+            [importer setActiveTrack:track];
         }
 
         // ALAC audio track
@@ -323,7 +315,7 @@
                 MP4SetTrackBytesProperty(_fileHandle, dstTrackId, "mdia.minf.stbl.stsd.alac.alac.AppleLosslessMagicCookie", magicCookie.bytes, magicCookie.length);
             }
 
-            [helper->importer setActiveTrack:track];
+            [importer setActiveTrack:track];
         }
 
         // DTS audio track
@@ -332,7 +324,7 @@
                                           timeScale,
                                           512, 0xA9);
 
-            [helper->importer setActiveTrack:track];
+            [importer setActiveTrack:track];
         }
 
         // 3GPP text track
@@ -343,7 +335,7 @@
             MP42SubtitleTrack *subTrack = (MP42SubtitleTrack *)track;
             NSInteger vPlacement = subTrack.verticalPlacement;
 
-            for (id workingTrack in _workingTracks) {
+            for (id workingTrack in _activeTracks) {
                 if ([workingTrack isMemberOfClass:[MP42VideoTrack class]]) {
                     videoSize.width  = [workingTrack trackWidth];
                     videoSize.height = [workingTrack trackHeight];
@@ -403,7 +395,7 @@
             subTrack.trackWidth = videoSize.width;
             subTrack.trackHeight = subSize.height;
 
-            [helper->importer setActiveTrack:track];
+            [importer setActiveTrack:track];
         }
 
         // VobSub bitmap track
@@ -430,14 +422,14 @@
             MP4SetTrackESConfiguration(_fileHandle, dstTrackId,
                                              (uint8_t *)palette, 16 * 4 );
 
-            [helper->importer setActiveTrack:track];
+            [importer setActiveTrack:track];
         }
 
         // WebVTT
         else if ([track isMemberOfClass:[MP42SubtitleTrack class]] && format ==kMP42SubtitleCodecType_WebVTT) {
-            NSSize videoSize = [helper->importer sizeForTrack:track];
+            NSSize videoSize = [importer sizeForTrack:track];
 
-            for (id workingTrack in _workingTracks)
+            for (id workingTrack in _activeTracks)
                 if ([workingTrack isMemberOfClass:[MP42VideoTrack class]]) {
                     videoSize.width  = [workingTrack trackWidth];
                     videoSize.height = [workingTrack trackHeight];
@@ -458,14 +450,14 @@
 
             dstTrackId = MP4AddWebVTTTrack(_fileHandle, timeScale, videoSize.width, videoSize.height, magicCookie.bytes, magicCookie.length);
 
-            [helper->importer setActiveTrack:track];
+            [importer setActiveTrack:track];
         }
 
         // Closed Caption text track
         else if ([track isMemberOfClass:[MP42ClosedCaptionTrack class]]) {
-            NSSize videoSize = [helper->importer sizeForTrack:track];
+            NSSize videoSize = [importer sizeForTrack:track];
 
-            for (id workingTrack in _workingTracks)
+            for (id workingTrack in _activeTracks)
                 if ([workingTrack isMemberOfClass:[MP42VideoTrack class]]) {
                     videoSize.width  = [workingTrack trackWidth];
                     videoSize.height = [workingTrack trackHeight];
@@ -486,7 +478,7 @@
 
             dstTrackId = MP4AddCCTrack(_fileHandle, timeScale, videoSize.width, videoSize.height);
 
-            [helper->importer setActiveTrack:track];
+            [importer setActiveTrack:track];
         } else {
             [unsupportedTracks addObject:track];
             continue;
@@ -498,15 +490,14 @@
         }
     }
 
-    [_workingTracks removeObjectsInArray:unsupportedTracks];
-    [unsupportedTracks release];
+    [_activeTracks removeObjectsInArray:unsupportedTracks];
 
     return YES;
 }
 
 - (void)work
 {
-    if (!_workingTracks.count) {
+    if (!_activeTracks.count) {
         return;
     }
 
@@ -519,7 +510,8 @@
     }
 
     NSUInteger tracksImportersCount = trackImportersArray.count;
-    NSUInteger tracksCount = _workingTracks.count;
+    NSUInteger tracksCount = _activeTracks.count;
+    NSMutableArray<MP42Track *> *tracks = [_activeTracks copy];
 
     for (;;) {
         @autoreleasepool {
@@ -527,15 +519,18 @@
             usleep(1000);
 
             // Iterate the tracks array and mux the samples
-            for (MP42Track *track in _workingTracks) {
+            for (MP42Track *track in tracks) {
                 MP42SampleBuffer *sampleBuffer = nil;
                 MP42TrackId trackId = track.trackId;
 
                 for (int i = 0; i < 100 && (sampleBuffer = [track copyNextSample]) != nil; i++) {
 
-                    // Check if the track helper is done.
                     if (sampleBuffer->flags & MP42SampleBufferFlagEndOfFile) {
-                        track.muxer_helper->done = 1;
+                        // Tracks done, remove it from the loop
+                        NSMutableArray<MP42Track *> *copy = [tracks mutableCopy];
+                        [copy removeObject:track];
+                        tracks = copy;
+                        done += 1;
                     }
                     else if (!MP4WriteSample(_fileHandle, trackId,
                                              sampleBuffer->data, sampleBuffer->size,
@@ -543,10 +538,7 @@
                                              sampleBuffer->flags & MP42SampleBufferFlagIsSync)) {
                         _cancelled = YES;
                     }
-
-                    [sampleBuffer release];
                 }
-                done += (track.muxer_helper->done ? 1 : 0);
             }
 
             if (_cancelled) {
@@ -576,9 +568,9 @@
     }
 
     // Write the converted audio track magic cookie
-    for (MP42Track *track in _workingTracks) {
-        if (track.muxer_helper->converter && track.conversionSettings && [track isMemberOfClass:[MP42AudioTrack class]]) {
-            NSData *magicCookie = [track.muxer_helper->converter magicCookie];
+    for (MP42Track *track in _activeTracks) {
+        if (track.converter && track.conversionSettings && [track isMemberOfClass:[MP42AudioTrack class]]) {
+            NSData *magicCookie = track.converter.magicCookie;
 
             if (magicCookie) {
                 if (track.conversionSettings.format == kAudioFormatMPEG4AAC) {
@@ -622,12 +614,12 @@
 {
     NSMutableArray<MP42FileImporter *> *trackImportersArray = [NSMutableArray array];
 
-    for (MP42Track *track in _workingTracks) {
-        if (![trackImportersArray containsObject:track.muxer_helper->importer]) {
-            [trackImportersArray addObject:track.muxer_helper->importer];
+    for (MP42Track *track in _activeTracks) {
+        if (![trackImportersArray containsObject:track.importer]) {
+            [trackImportersArray addObject:track.importer];
         }
     }
-    return [[trackImportersArray copy] autorelease];
+    return [trackImportersArray copy];
 }
 
 @end
