@@ -15,11 +15,9 @@
 
 #import "mp4v2.h"
 #import "MP42PrivateUtilities.h"
-#import "MP42Track+Muxer.h"
 #import "MP42Track+Private.h"
 
-@interface MP4DemuxHelper : NSObject {
-@public
+typedef struct MP4DemuxHelper {
     MP4TrackId sourceID;
 
     MP4SampleId     currentSampleId;
@@ -28,11 +26,7 @@
     uint64_t        timeScale;
 
     uint32_t        done;
-}
-@end
-
-@implementation MP4DemuxHelper
-@end
+} MP4DemuxHelper;
 
 @implementation MP42Mp4Importer {
 @private
@@ -49,14 +43,11 @@
         MP42File *sourceFile = [[MP42File alloc] initWithURL:self.fileURL error:outError];
 
         if (!sourceFile) {
-            [self release];
             return nil;
         }
 
         [self addTracks:sourceFile.tracks];
         self.metadata = sourceFile.metadata;
-
-        [sourceFile release];
     }
 
     return self;
@@ -110,8 +101,7 @@
             [ac3Info appendBytes:&lfeon length:sizeof(uint64_t)];
             [ac3Info appendBytes:&bit_rate_code length:sizeof(uint64_t)];
 
-            return [ac3Info autorelease];
-
+            return ac3Info;
         }
         else if (!strcmp(media_data_name, "ec-3")) {
             if (MP4HaveTrackAtom(_fileHandle, srcTrackId, "mdia.minf.stbl.stsd.ec-3.dec3")) {
@@ -161,7 +151,7 @@
         if (!strcmp(media_data_name, "avc1")) {
 
             // Extract and rewrite some kind of avcC extradata from the mp4 file.
-            NSMutableData *avcCData = [[[NSMutableData alloc] init] autorelease];
+            NSMutableData *avcCData = [[NSMutableData alloc] init];
 
             uint8_t configurationVersion = 1;
             uint8_t AVCProfileIndication;
@@ -227,10 +217,8 @@
             free(pictheadersize);
             
             magicCookie = [avcCData copy];
-            [seqData release];
-            [pictData release];
 
-            return [magicCookie autorelease];
+            return magicCookie;
         }
         else if (!strcmp(media_data_name, "hev1")) {
             uint8_t    *ppValue;
@@ -287,19 +275,23 @@
 
         NSInteger tracksNumber = inputTracks.count;
         NSInteger tracksDone = 0;
-        MP4DemuxHelper *demuxHelper;
 
         if (!_fileHandle) {
             return;
         }
 
+        MP4DemuxHelper * helpers[tracksNumber];
+
+        NSUInteger index = 0;
         for (MP42Track *track in inputTracks) {
-            track.muxer_helper->demuxer_context = [[MP4DemuxHelper alloc] init];
-            demuxHelper = track.muxer_helper->demuxer_context;
+            MP4DemuxHelper *demuxHelper = malloc(sizeof(MP4DemuxHelper));
             demuxHelper->sourceID = track.sourceId;
             demuxHelper->totalSampleNumber = MP4GetTrackNumberOfSamples(_fileHandle, track.sourceId);
             demuxHelper->timeScale = MP4GetTrackTimeScale(_fileHandle, track.sourceId);
             demuxHelper->done = 0;
+
+            helpers[index] = demuxHelper;
+            index += 1;
         }
 
         MP4Timestamp currentTime = 1;
@@ -311,9 +303,8 @@
                 break;
             }
 
-            for (MP42Track *track in inputTracks) {
-                muxer_helper *helper = track.muxer_helper;
-                demuxHelper = helper->demuxer_context;
+            for (NSUInteger index = 0; index < tracksNumber; index += 1) {
+                MP4DemuxHelper *demuxHelper = helpers[index];
 
                 if (self.isCancelled) {
                     break;
@@ -355,8 +346,7 @@
                     sample->trackId = demuxHelper->sourceID;
                     
                     [self enqueue:sample];
-                    [sample release];
-                    
+
                     demuxHelper->currentTime = pStartTime;
                 }
             }
@@ -366,6 +356,10 @@
         }
 
         [self setDone];
+
+        for (NSUInteger index = 0; index < tracksNumber; index += 1) {
+            free(helpers[index]);
+        }
     }
 }
 
@@ -417,8 +411,6 @@
     if (_fileHandle) {
         MP4Close(_fileHandle, 0);
     }
-
-    [super dealloc];
 }
 
 @end

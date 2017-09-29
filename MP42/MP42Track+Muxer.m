@@ -13,6 +13,17 @@
 
 @dynamic muxer_helper;
 
+- (id)demuxerHelper {
+    muxer_helper *helper = (muxer_helper *)_helper;
+    return helper->demuxer_context;
+}
+
+- (void)setDemuxerHelper:(id)demuxerHelper {
+    [demuxerHelper retain];
+    muxer_helper *helper = (muxer_helper *)_helper;
+    helper->demuxer_context = demuxerHelper;
+}
+
 - (MP42FileImporter *)importer
 {
     return self.muxer_helper->importer;

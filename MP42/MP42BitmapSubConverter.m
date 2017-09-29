@@ -11,11 +11,13 @@
 
 #import "MP42FileImporter.h"
 #import "MP42FileImporter+Private.h"
+#import "MP42Track.h"
+#import "MP42Track+Private.h"
 
+#import "MP42Fifo.h"
 #import "MP42Sample.h"
 
 #import "MP42PrivateUtilities.h"
-#import "MP42Track+Muxer.h"
 #import "MP42SubtitleTrack.h"
 
 #import "MP42OCRWrapper.h"
@@ -56,8 +58,8 @@
 
 - (CIContext *)imgContext {
     if (!_imgContext) {
-        _imgContext = [[CIContext contextWithCGContext:[[NSGraphicsContext currentContext] graphicsPort]
-                                               options:nil] retain];
+        _imgContext = [CIContext contextWithCGContext:[[NSGraphicsContext currentContext] graphicsPort]
+                                               options:nil];
     }
     return _imgContext;
 }
@@ -106,7 +108,6 @@
 
                 if (sampleBuffer->flags & MP42SampleBufferFlagEndOfFile) {
                     [_outputSamplesBuffer enqueue:sampleBuffer];
-                    [sampleBuffer release];
                     break;
                 }
 
@@ -118,9 +119,6 @@
                     MP42SampleBuffer *subSample = copyEmptySubtitleSample(sampleBuffer->trackId, sampleBuffer->duration, NO);
 
                     [_outputSamplesBuffer enqueue:subSample];
-                    [subSample release];
-
-                    [sampleBuffer release];
 
                     continue;
                 }
@@ -156,9 +154,6 @@
                     MP42SampleBuffer *subSample = copyEmptySubtitleSample(sampleBuffer->trackId, sampleBuffer->duration, NO);
 
                     [_outputSamplesBuffer enqueue:subSample];
-                    [subSample release];
-
-                    [sampleBuffer release];
 
                     continue;
                 }
@@ -243,8 +238,7 @@
                     }
                     
                     [_outputSamplesBuffer enqueue:subSample];
-                    [subSample release];
-                    
+
                     CGImageRelease(cgImage);
                     CGImageRelease(filteredCGImage);
                     CGDataProviderRelease(provider);
@@ -255,8 +249,6 @@
                 
                 avsubtitle_free(&subtitle);
                 av_packet_unref(&pkt);
-                
-                [sampleBuffer release];
             }
         }
         dispatch_semaphore_signal(_done);
@@ -273,8 +265,6 @@
 
                 if (sampleBuffer->flags & MP42SampleBufferFlagEndOfFile) {
                     [_outputSamplesBuffer enqueue:sampleBuffer];
-                    [sampleBuffer release];
-
                     break;
                 }
 
@@ -291,9 +281,6 @@
                     MP42SampleBuffer *subSample = copyEmptySubtitleSample(sampleBuffer->trackId, sampleBuffer->duration, NO);
 
                     [_outputSamplesBuffer enqueue:subSample];
-                    [subSample release];
-
-                    [sampleBuffer release];
 
                     continue;
                 }
@@ -306,7 +293,6 @@
                     if (rect->w == 0 || rect->h == 0) {
                         MP42SampleBuffer *subSample = copyEmptySubtitleSample(sampleBuffer->trackId, sampleBuffer->duration, NO);
                         [_outputSamplesBuffer enqueue:subSample];
-                        [subSample release];
 
                         continue;
                     }
@@ -377,12 +363,9 @@
                 }
 
                 [_outputSamplesBuffer enqueue:subSample];
-                [subSample release];
 
                 avsubtitle_free(&subtitle);
                 av_packet_unref(&pkt);
-                
-                [sampleBuffer release];
             }
         }
         dispatch_semaphore_signal(_done);
@@ -408,11 +391,9 @@
             if (avcodec_open2(avContext, avCodec, NULL)) {
                 NSLog(@"Error opening subtitle decoder");
                 av_freep(&avContext);
-                [self release];
                 return nil;
             }
         } else {
-            [self release];
             return nil;
         }
 
@@ -420,7 +401,7 @@
         _inputSamplesBuffer  = [[MP42Fifo alloc] initWithCapacity:20];
         _done = dispatch_semaphore_create(0);
 
-        srcMagicCookie = [[track.muxer_helper->importer magicCookieForTrack:track] retain];
+        srcMagicCookie = [track.importer magicCookieForTrack:track];
 
         _ocr = [[MP42OCRWrapper alloc] initWithLanguage:track.language];
 
@@ -468,18 +449,6 @@
     if (codecData) {
         av_freep(&codecData);
     }
-
-    [srcMagicCookie release];
-    [_outputSamplesBuffer release];
-    [_inputSamplesBuffer release];
-
-    [decoderThread release];
-    [_ocr release];
-    [_imgContext release];
-
-    dispatch_release(_done);
-
-    [super dealloc];
 }
 
 @end

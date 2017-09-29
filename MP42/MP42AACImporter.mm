@@ -750,7 +750,6 @@ static bool GetFirstHeader(FILE* inFile)
                 *outError = MP42Error(MP42LocalizedString(@"The audio could not be opened.", @"error message"),
                                       MP42LocalizedString(@"Data in file doesn't appear to be valid audio.", @"error message"), 100);
             }
-            [newTrack release];
             return nil;
         }
 
@@ -763,7 +762,6 @@ static bool GetFirstHeader(FILE* inFile)
                     *outError = MP42Error(MP42LocalizedString(@"The audio could not be opened.", @"error message"),
                                           MP42LocalizedString(@"Can't convert profile to mpeg2", @"error message"), 100);
                 }
-                [newTrack release];
                 return nil;
             }
             mpegVersion = 1;
@@ -793,7 +791,6 @@ static bool GetFirstHeader(FILE* inFile)
                             *outError = MP42Error(MP42LocalizedString(@"The audio could not be opened.", @"error message"),
                                                   MP42LocalizedString(@"Data in file doesn't appear to be valid audio.", @"error message"), 100);
                         }
-                        [newTrack release];
                         return nil;
                     default:
                         break;
@@ -821,7 +818,6 @@ static bool GetFirstHeader(FILE* inFile)
         free(pConfig);
 
         [self addTrack:newTrack];
-        [newTrack release];
     }
 
     return self;
@@ -872,7 +868,6 @@ static bool GetFirstHeader(FILE* inFile)
             sample->trackId = trackId;
 
             [self enqueue:sample];
-            [sample release];
 
             sampleId++;
             sampleSize = sizeof(sampleBuffer);
@@ -892,10 +887,7 @@ static bool GetFirstHeader(FILE* inFile)
 
 - (void) dealloc
 {
-    [aacInfo release];
     fclose(inFile);
-
-    [super dealloc];
 }
 
 @end

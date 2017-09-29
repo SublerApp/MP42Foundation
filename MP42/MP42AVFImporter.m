@@ -16,7 +16,6 @@
 #import "mp4v2.h"
 #import "MP42PrivateUtilities.h"
 #import "MP42FormatUtilites.h"
-#import "MP42Track+Muxer.h"
 #import "MP42Track+Private.h"
 
 #import "MP42EditListsReconstructor.h"
@@ -29,6 +28,7 @@
     MP42TrackId sourceID;
     CMTimeScale timescale;
     CMTimeValue currentTime;
+    MP42CodecType format;
 
     uint32_t done;
 
@@ -39,12 +39,6 @@
 @end
 
 @implementation AVFDemuxHelper
-
-- (void)dealloc {
-    [editsConstructor release];
-    [super dealloc];
-}
-
 @end
 
 @implementation MP42AVFImporter {
@@ -62,7 +56,7 @@
 
 - (FourCharCode)formatForTrack:(AVAssetTrack *)track {
     FourCharCode result = 0;
-    CMFormatDescriptionRef formatDescription = (CMFormatDescriptionRef)track.formatDescriptions.firstObject;
+    CMFormatDescriptionRef formatDescription = (__bridge CMFormatDescriptionRef)track.formatDescriptions.firstObject;
 
     if (formatDescription) {
         FourCharCode code = CMFormatDescriptionGetMediaSubType(formatDescription);
@@ -89,7 +83,7 @@
 
 - (instancetype)initWithURL:(NSURL *)fileURL error:(NSError **)outError {
     if ((self = [super initWithURL:fileURL])) {
-        _localAsset = [[AVAsset assetWithURL:self.fileURL] retain];
+        _localAsset = [AVAsset assetWithURL:self.fileURL];
 
         NSArray<AVAssetTrack *> *tracks = [_localAsset tracks];
         CMTime globaDuration = _localAsset.duration;
@@ -118,7 +112,7 @@
 
             // Retrieves the formatDescription
             NSArray *formatDescriptions = track.formatDescriptions;
-            CMFormatDescriptionRef formatDescription = (CMFormatDescriptionRef)formatDescriptions.firstObject;
+            CMFormatDescriptionRef formatDescription = (__bridge CMFormatDescriptionRef)formatDescriptions.firstObject;
 
             if ([track.mediaType isEqualToString:AVMediaTypeVideo]) {
 
@@ -380,7 +374,6 @@
             }
 
             [self addTrack:newTrack];
-            [newTrack release];
         }
 
         [self convertMetadata];
@@ -423,7 +416,7 @@
         [result appendString:name];
     }
 
-    return [[result copy] autorelease];
+    return [result copy];
 }
 
 - (MP42MetadataItem *)metadataItemWithValue:(id)value identifier:(NSString *)identifier
@@ -465,7 +458,7 @@
                                      MP42MetadataKeyEncodingTool,   AVMetadataCommonKeySoftware,
                                      nil];
 
-    self.metadata = [[[MP42Metadata alloc] init] autorelease];
+    self.metadata = [[MP42Metadata alloc] init];
 
     for (NSString *commonKey in commonItemsDict.allKeys) {
         NSArray<AVMetadataItem *> *items = [AVMetadataItem metadataItemsFromArray:_localAsset.commonMetadata
@@ -488,8 +481,6 @@
             NSImage *imageData = [[NSImage alloc] initWithData:artworkData];
             MP42Image *image = [[MP42Image alloc] initWithImage:imageData];
             [self.metadata addMetadataItem:[self metadataItemWithValue:image identifier:MP42MetadataKeyCoverArt]];
-            [image release];
-            [imageData release];
         }
     }
 
@@ -692,7 +683,7 @@
     // Prefer the asbd sample rate, naturalTimeScale might not be
     // the right one if we are reading for .ts
     if ([assetTrack.mediaType isEqualToString:AVMediaTypeAudio] && assetTrack.naturalTimeScale == 90000) {
-        CMFormatDescriptionRef formatDescription = (CMFormatDescriptionRef)assetTrack.formatDescriptions.firstObject;
+        CMFormatDescriptionRef formatDescription = (__bridge CMFormatDescriptionRef)assetTrack.formatDescriptions.firstObject;
 
         if (formatDescription) {
             const AudioStreamBasicDescription *asbd = CMAudioFormatDescriptionGetStreamBasicDescription(formatDescription);
@@ -714,7 +705,7 @@
 - (NSData *)magicCookieForTrack:(MP42Track *)track {
 
     AVAssetTrack *assetTrack = [_localAsset trackWithTrackID:track.sourceId];
-    CMFormatDescriptionRef formatDescription = (CMFormatDescriptionRef)assetTrack.formatDescriptions.firstObject;
+    CMFormatDescriptionRef formatDescription = (__bridge CMFormatDescriptionRef)assetTrack.formatDescriptions.firstObject;
 
     if (formatDescription) {
 
@@ -736,7 +727,7 @@
                 magicCookie = CFDictionaryGetValue(atoms, @"esds");
             }
 
-            return (NSData *)magicCookie;
+            return (__bridge NSData *)magicCookie;
 
         } else if ([assetTrack.mediaType isEqualToString:AVMediaTypeAudio]) {
 
@@ -849,7 +840,7 @@
                 [ac3Info appendBytes:&lfeon length:sizeof(uint64_t)];
                 [ac3Info appendBytes:&bit_rate_code length:sizeof(uint64_t)];
 
-                return [ac3Info autorelease];
+                return ac3Info;
 
             } else if (cookieSizeOut) {
                 return [NSData dataWithBytes:cookieBuffer length:cookieSizeOut];
@@ -864,7 +855,7 @@
                 CFDictionaryRef atoms = CFDictionaryGetValue(extentions, kCMFormatDescriptionExtension_SampleDescriptionExtensionAtoms);
                 CFDataRef magicCookie = CFDictionaryGetValue(atoms, @"vttC");
 
-                return (NSData *)magicCookie;
+                return (__bridge NSData *)magicCookie;
             }
         }
 
@@ -878,7 +869,7 @@
     bzero(&result, sizeof(AudioStreamBasicDescription));
 
     AVAssetTrack *assetTrack = [_localAsset trackWithTrackID:track.sourceId];
-    CMFormatDescriptionRef formatDescription = (CMFormatDescriptionRef)assetTrack.formatDescriptions.firstObject;
+    CMFormatDescriptionRef formatDescription = (__bridge CMFormatDescriptionRef)assetTrack.formatDescriptions.firstObject;
 
     if (formatDescription) {
         const AudioStreamBasicDescription *asbd = CMAudioFormatDescriptionGetStreamBasicDescription(formatDescription);
@@ -894,20 +885,25 @@
 }
 
 - (void)demux {
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-
+    @autoreleasepool {
+    NSError *localError;
 	BOOL success = YES;
     OSStatus err = noErr;
+
+    CMTimeValue currentTime = 1;
 
     uint64_t currentDataLength = 0;
     uint64_t totalDataLength = 0;
 
-    AVFDemuxHelper *demuxHelper = nil;
-    NSError *localError;
+    NSInteger tracksDone = 0;
+    NSInteger tracksNumber = self.inputTracks.count;
+
     AVAssetReader *assetReader = [[AVAssetReader alloc] initWithAsset:_localAsset error:&localError];
+    AVFDemuxHelper * helpers[tracksNumber];
 
 	success = (assetReader != nil);
 	if (success) {
+        NSUInteger index = 0;
         for (MP42Track *track in self.inputTracks) {
             AVAssetReaderOutput *assetReaderOutput = [AVAssetReaderTrackOutput assetReaderTrackOutputWithTrack:[_localAsset trackWithTrackID:track.sourceId]
                                                                                                 outputSettings:nil];
@@ -920,12 +916,16 @@
                 NSLog(@"Unable to add the output to assetReader!");
             }
 
-            track.muxer_helper->demuxer_context = [[AVFDemuxHelper alloc] init];
-            demuxHelper = track.muxer_helper->demuxer_context;
+            AVFDemuxHelper *demuxHelper = [[AVFDemuxHelper alloc] init];
             demuxHelper->sourceID = track.sourceId;
             demuxHelper->timescale = [self timescaleForTrack:track];
+            demuxHelper->format = track.format;
             demuxHelper->assetReaderOutput = assetReaderOutput;
             demuxHelper->editsConstructor = [[MP42EditListsReconstructor alloc] init];
+
+            track.demuxerHelper = demuxHelper;
+            helpers[index] = demuxHelper;
+            index += 1;
 
             totalDataLength += track.dataLength;
         }
@@ -935,25 +935,17 @@
 
     if (!success) {
 		localError = [assetReader error];
-
-        [assetReader release];
         [self setDone];
-        [pool release];
-
         return;
     }
-
-    CMTimeValue currentTime = 1;
-    NSInteger tracksNumber = self.inputTracks.count;
-    NSInteger tracksDone = 0;
 
     while (tracksDone != tracksNumber) {
         if (self.isCancelled) {
             break;
         }
 
-        for (MP42Track *track in self.inputTracks) {
-            demuxHelper = track.muxer_helper->demuxer_context;
+        for (NSUInteger index = 0; index < tracksNumber; index += 1) {
+            AVFDemuxHelper *demuxHelper = helpers[index];
             AVAssetReaderOutput *assetReaderOutput = demuxHelper->assetReaderOutput;
 
             while (demuxHelper->currentTime < demuxHelper->timescale * currentTime && !demuxHelper->done) {
@@ -975,7 +967,7 @@
                     BOOL doNotDisplay = NO;
                     CFArrayRef attachmentsArray = CMSampleBufferGetSampleAttachmentsArray(sampleBuffer, NO);
                     if (attachmentsArray) {
-                        for (NSDictionary *dict in (NSArray *)attachmentsArray) {
+                        for (NSDictionary *dict in (__bridge NSArray *)attachmentsArray) {
                             if (dict[(NSString *)kCMSampleAttachmentKey_NotSync]) {
                                 sync = 0;
                             }
@@ -993,7 +985,7 @@
 
                     // We have only a sample
                     // or the format is PCM, if so send only a single buffer to improve performance
-                    if (samplesNum == 1 || (samplesNum > 1 && track.format == kMP42AudioCodecType_LinearPCM)) {
+                    if (samplesNum == 1 || (samplesNum > 1 && demuxHelper->format == kMP42AudioCodecType_LinearPCM)) {
 
                         void *sampleData = malloc(bufferSize);
                         CMBlockBufferCopyDataBytes(buffer, 0, bufferSize, sampleData);
@@ -1015,7 +1007,6 @@
 
                         [demuxHelper->editsConstructor addSample:sample];
                         [self enqueue:sample];
-                        [sample release];
 
                         currentDataLength += bufferSize;
                         demuxHelper->currentTime = currentOutputTimeStamp.value;
@@ -1141,7 +1132,6 @@
 
                             [demuxHelper->editsConstructor addSample:sample];
                             [self enqueue:sample];
-                            [sample release];
 
                             currentOutputTimeStamp.value = currentOutputTimeStamp.value + sampleTimingInfo.duration.value;
                             currentDataLength += sampleSize;
@@ -1172,7 +1162,6 @@
 
                         [demuxHelper->editsConstructor addSample:sample];
                         demuxHelper->currentTime = currentOutputTimeStamp.value;
-                        [sample release];
                     }
                     CFRelease(sampleBuffer);
 
@@ -1188,9 +1177,8 @@
         currentTime += 1;
     }
 
-    [assetReader release];
     [self setDone];
-    [pool release];
+}
 }
 
 - (BOOL)cleanUp:(MP4FileHandle)fileHandle {
@@ -1202,7 +1190,7 @@
 
         MP42Track *inputTrack = [self inputTrackWithTrackID:track.sourceId];
 
-        AVFDemuxHelper *helper = inputTrack.muxer_helper->demuxer_context;
+        AVFDemuxHelper *helper = inputTrack.demuxerHelper;
         MP42EditListsReconstructor *editsConstructor = helper->editsConstructor;
 
         // Make sure the sample offsets are all positive.
@@ -1242,11 +1230,6 @@
 - (NSString *)description
 {
     return @"AVFoundation demuxer";
-}
-
-- (void) dealloc {
-    [_localAsset release];
-    [super dealloc];
 }
 
 @end

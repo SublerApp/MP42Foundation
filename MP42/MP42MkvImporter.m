@@ -8,6 +8,7 @@
 
 #import "MP42MkvImporter.h"
 #import "MP42FileImporter+Private.h"
+#import "MP42Sample.h"
 
 #import "MP42File.h"
 #import "MP42SubUtilities.h"
@@ -19,7 +20,6 @@
 
 #import "MP42PrivateUtilities.h"
 #import "MP42FormatUtilites.h"
-#import "MP42Track+Muxer.h"
 #import "MP42Track+Private.h"
 
 #define SCALE_FACTOR 1000000.f
@@ -62,12 +62,6 @@
     return self;
 }
 
-- (void)dealloc {
-    [queue release]; queue = nil;
-    [ss release]; ss = nil;
-
-    [super dealloc];
-}
 @end
 
 static int readData(struct StdIoStream  *ioStream, uint64_t pos, uint8_t **data, uint32_t dataSize)
@@ -213,8 +207,6 @@ static int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, ui
                 *outError = MP42Error(MP42LocalizedString(@"The movie could not be opened.", @"mkv error message"),
                                       MP42LocalizedString(@"The file is not a matroska file.", @"mkv error message"), 100);
             }
-
-            [self release];
             return nil;
         }
 
@@ -350,7 +342,6 @@ static int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, ui
                 newTrack.language = [MP42Languages.defaultManager extendedTagForISO_639_2b:@(mkvTrack->Language)];
 
                 [self addTrack:newTrack];
-                [newTrack release];
             }
         }
 
@@ -382,7 +373,6 @@ static int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, ui
                 }
             }
             [self addTrack:newTrack];
-            [newTrack release];
         }
 
         self.metadata = [self readMatroskaMetadata];
@@ -402,7 +392,7 @@ static int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, ui
 
 - (MP42Metadata *)readMatroskaMetadata
 {
-    MP42Metadata *mkvMetadata = [[[MP42Metadata alloc] init] autorelease];
+    MP42Metadata *mkvMetadata = [[MP42Metadata alloc] init];
 
     SegmentInfo *segInfo = mkv_GetFileInfo(_matroskaFile);
     if (segInfo->Title) {
@@ -467,8 +457,6 @@ static int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, ui
                         MP42Image *image = [[MP42Image alloc] initWithBytes:data length:attachment->Length type:type];
 
                         [self addMetadataItem:image identifier:MP42MetadataKeyCoverArt metadata:mkvMetadata];
-
-                        [image release];
                     }
 
                     free(data);
@@ -655,7 +643,7 @@ static NSString * TrackNameToString(TrackInfo *track)
         aac[1] = 0x90;
 
         [magicCookie appendBytes:aac length:2];
-        return [magicCookie autorelease];
+        return magicCookie;
     }
     else if (!strcmp(trackInfo->CodecID, "A_AC3") || !strcmp(trackInfo->CodecID, "A_EAC3")) {
         mkv_SetTrackMask(_matroskaFile, ~(1l << track.sourceId));
@@ -727,14 +715,14 @@ static NSString * TrackNameToString(TrackInfo *track)
             }
 
             if (context) {
-                magicCookie = (NSData *)createCookie_EAC3(context);
+                magicCookie = (__bridge NSData *)createCookie_EAC3(context);
                 free(context);
             }
         }
 
         mkv_Seek(_matroskaFile, 0, 0);
 
-        return [magicCookie autorelease];
+        return magicCookie;
     }
     else if (!strcmp(trackInfo->CodecID, "S_VOBSUB")) {
         char *string = (char *) trackInfo->CodecPrivate;
@@ -794,8 +782,7 @@ static NSString * TrackNameToString(TrackInfo *track)
 // Methods to extract all the samples from the active tracks at the same time
 - (void)demux
 {
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-
+    @autoreleasepool {
     uint64_t        StartTime, EndTime, FilePos;
     uint32_t        Track, FrameSize, FrameFlags;
     uint8_t         *frame = NULL;
@@ -813,21 +800,19 @@ static NSString * TrackNameToString(TrackInfo *track)
 
     for (MP42Track *track in inputTracks) {
         TrackMask &= ~(1l << track.sourceId);
-        track.muxer_helper->demuxer_context = [[MatroskaDemuxHelper alloc] init];
+        track.demuxerHelper = [[MatroskaDemuxHelper alloc] init];
     }
 
     mkv_SetTrackMask(_matroskaFile, TrackMask);
 
     while (!mkv_ReadFrame(_matroskaFile, 0, &Track, &StartTime, &EndTime, &FilePos, &FrameSize, &FrameFlags) && !self.isCancelled) {
         self.progress = (StartTime / _fileDuration / 10000);
-        muxer_helper *helper = NULL;
 
         MP42Track *track = nil;
 
         for (MP42Track *fTrack in inputTracks){
             if (fTrack.sourceId == Track) {
-                helper = fTrack.muxer_helper;
-                demuxHelper = helper->demuxer_context;
+                demuxHelper = fTrack.demuxerHelper;
                 track = fTrack;
             }
         }
@@ -889,7 +874,6 @@ static NSString * TrackNameToString(TrackInfo *track)
                     demuxHelper->currentTime = sample->decodeTimestamp * (double)mkv_TruncFloat(trackInfo->AV.Audio.SamplingFreq) / 1000000000.f;
                 }
 
-                [demuxHelper->previousSample release];
                 demuxHelper->previousSample = sample;
 #else
                 [self enqueue:sample];
@@ -908,14 +892,14 @@ static NSString * TrackNameToString(TrackInfo *track)
                         }
                     }
 
-                    NSString *string = [[[NSString alloc] initWithBytes:frame length:FrameSize encoding:NSUTF8StringEncoding] autorelease];
+                    NSString *string = [[NSString alloc] initWithBytes:frame length:FrameSize encoding:NSUTF8StringEncoding];
                     if (!strcmp(trackInfo->CodecID, "S_TEXT/ASS") || !strcmp(trackInfo->CodecID, "S_TEXT/SSA")) {
                         string = StripSSALine(string);
                     }
                     
                     if ([string length]) {
                         SBSubLine *sl = [[SBSubLine alloc] initWithLine:string start:StartTime / SCALE_FACTOR end:EndTime / SCALE_FACTOR];
-                        [demuxHelper->ss addLine:[sl autorelease]];
+                        [demuxHelper->ss addLine:sl];
                     }
                     demuxHelper->samplesWritten++;
                     free(frame);
@@ -951,7 +935,6 @@ static NSString * TrackNameToString(TrackInfo *track)
                         }
 
                         [self enqueue:demuxHelper->previousSample];
-                        [demuxHelper->previousSample release];
 
                         demuxHelper->previousSample = nextSample;
                         demuxHelper->samplesWritten++;
@@ -966,14 +949,12 @@ static NSString * TrackNameToString(TrackInfo *track)
                             sample->trackId = track.sourceId;
                             
                             [self enqueue:sample];
-                            [sample release];
                         }
                         
                         nextSample->duration = (EndTime - StartTime) / SCALE_FACTOR;
                         
                         [self enqueue:nextSample];
-                        [nextSample release];
-                        
+
                         demuxHelper->currentTime = EndTime;
                     }
                 }
@@ -990,7 +971,6 @@ static NSString * TrackNameToString(TrackInfo *track)
             frameSample->frameSize = FrameSize;
             frameSample->frameFlags = FrameFlags;
             [demuxHelper->queue addObject:frameSample];
-            [frameSample release];
 
             if ([demuxHelper->queue count] < bufferSize) {
                 continue;
@@ -1044,7 +1024,6 @@ static NSString * TrackNameToString(TrackInfo *track)
                     }
 
                     [self enqueue:sample];
-                    [sample release];
                 }
                 else {
                     continue;
@@ -1054,8 +1033,7 @@ static NSString * TrackNameToString(TrackInfo *track)
     }
 
     for (MP42Track *track in inputTracks) {
-        muxer_helper *helper = track.muxer_helper;
-        demuxHelper = helper->demuxer_context;
+        demuxHelper = track.demuxerHelper;
 
         if (demuxHelper->queue) {
             TrackInfo *trackInfo = mkv_GetTrackInfo(_matroskaFile, [track sourceId]);
@@ -1071,7 +1049,6 @@ static NSString * TrackNameToString(TrackInfo *track)
                     frameSample = [[MatroskaSample alloc] init];
                     frameSample->startTime = lastSample->endTime;
                     [demuxHelper->queue addObject:frameSample];
-                    [frameSample release];
                 }
                 currentSample = [demuxHelper->queue objectAtIndex:demuxHelper->buffer];
 
@@ -1115,7 +1092,6 @@ static NSString * TrackNameToString(TrackInfo *track)
                     }
 
                     [self enqueue:sample];
-                    [sample release];
 
                     demuxHelper->bufferFlush++;
                     if (demuxHelper->bufferFlush >= bufferSize - 1) {
@@ -1153,7 +1129,6 @@ static NSString * TrackNameToString(TrackInfo *track)
                 sample->decodeTimestamp = demuxHelper->currentTime;
 
                 [self enqueue:sample];
-                [sample release];
 
                 demuxHelper->samplesWritten++;
             }
@@ -1165,13 +1140,12 @@ static NSString * TrackNameToString(TrackInfo *track)
             }
 
             [self enqueue:demuxHelper->previousSample];
-            [demuxHelper->previousSample release];
             demuxHelper->previousSample = nil;
         }
     }
 
     [self setDone];
-    [pool release];
+    }
 }
 
 - (BOOL)cleanUp:(MP4FileHandle)fileHandle
@@ -1179,7 +1153,7 @@ static NSString * TrackNameToString(TrackInfo *track)
     for (MP42Track *track in self.outputsTracks) {
         MP42Track *inputTrack = [self inputTrackWithTrackID:track.sourceId];
 
-        MatroskaDemuxHelper *demuxHelper = inputTrack.muxer_helper->demuxer_context;
+        MatroskaDemuxHelper *demuxHelper = inputTrack.demuxerHelper;
         MP4TrackId trackId = track.trackId;
 
         if (demuxHelper->minDisplayOffset != 0) {
@@ -1238,7 +1212,6 @@ static NSString * TrackNameToString(TrackInfo *track)
 - (void)dealloc
 {
     closeMatroskaFile(_matroskaFile, _ioStream);
-    [super dealloc];
 }
 
 @end

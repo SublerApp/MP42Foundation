@@ -15,7 +15,6 @@
 
 #import "mp4v2.h"
 #import "MP42PrivateUtilities.h"
-#import "MP42Track+Muxer.h"
 #import "MP42Track+Private.h"
 
 @implementation MP42SrtImporter {
@@ -39,7 +38,7 @@
         newTrack.format = kMP42SubtitleCodecType_3GText;
         newTrack.URL = self.fileURL;
         newTrack.alternateGroup = 2;
-        newTrack.language = getFilenameLanguage((CFStringRef)self.fileURL.path);
+        newTrack.language = getFilenameLanguage((__bridge CFStringRef)self.fileURL.path);
 
         // Check if a 10.10 only class is available, NSLinguisticTagger crashes on 10.9
         // if the string contains some characters.
@@ -87,7 +86,6 @@
                     if (languageName) {
                         newTrack.language = [MP42Languages.defaultManager extendedTagForLang:languageName];
                     }
-                    [locale release];
                 }
 			}
 		}
@@ -107,9 +105,6 @@
                                       MP42LocalizedString(@"The file is not a srt file, or it does not contain any subtitles.", @"srt error message"), 100);
             }
             
-            [newTrack release];
-            [self release];
-
             return nil;
         }
 
@@ -124,7 +119,6 @@
         }
 
         [self addTrack:newTrack];
-        [newTrack release];
     }
 
     return self;
@@ -167,7 +161,6 @@
                 }
 
                 [self enqueue:sample];
-                [sample release];
             }
         }
         
@@ -180,13 +173,6 @@
 - (NSString *)description
 {
     return @"SRT demuxer";
-}
-
-- (void) dealloc
-{
-    [_ss release];
-
-    [super dealloc];
 }
 
 @end

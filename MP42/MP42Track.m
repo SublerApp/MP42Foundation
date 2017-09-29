@@ -19,12 +19,6 @@
 @interface MP42Track ()
 {
     NSString *_name;
-    NSString *_language;
-
-    BOOL        _enabled;
-    uint64_t    _alternateGroup;
-
-    NSTimeInterval     _startOffset;
 }
 
 @property(nonatomic, readwrite) MP42TrackId trackId;
@@ -280,10 +274,6 @@
 
 }
 
-- (NSString *)language {
-    return _language;
-}
-
 - (void)setLanguage:(NSString *)newLang
 {
     _language = [newLang copy];
@@ -308,23 +298,11 @@
     }
 }
 
-- (BOOL)isEnabled {
-    return _enabled;
-}
-
-- (uint64_t)alternateGroup {
-    return _alternateGroup;
-}
-
 - (void)setAlternateGroup:(uint64_t)newGroup
 {
     _alternateGroup = newGroup;
     self.edited = YES;
     _updatedProperty[@"alternate_group"] = @YES;
-}
-
-- (NSTimeInterval)startOffset {
-    return _startOffset;
 }
 
 - (void)setStartOffset:(NSTimeInterval)newOffset

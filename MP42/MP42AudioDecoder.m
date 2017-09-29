@@ -345,6 +345,7 @@ static void configureDescriptors(MP42DecodeContext *context, AVFrame *frame)
     // Get real channels number and layout
     int nb_channels = av_get_channel_layout_nb_channels(frame->channel_layout);
     int sample_rate = frame->sample_rate;
+    int container_sample_rate = context->inputFormat->mSampleRate;
 
     // Reset the channels per frame and sample rate
     if (context->inputFormat->mChannelsPerFrame == context->outputFormat->mChannelsPerFrame) {
@@ -357,7 +358,9 @@ static void configureDescriptors(MP42DecodeContext *context, AVFrame *frame)
         sample_rate = 48000;
     }
 
-    context->outputFormat->mSampleRate = sample_rate;
+    if (sample_rate < container_sample_rate) {
+        context->outputFormat->mSampleRate = sample_rate;
+    }
     context->outputFormat->mBytesPerPacket = 4 * context->outputFormat->mChannelsPerFrame;
     context->outputFormat->mBytesPerFrame = context->outputFormat->mBytesPerPacket * context->outputFormat->mFramesPerPacket;
 

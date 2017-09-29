@@ -31,7 +31,6 @@
         newTrack.URL = self.fileURL;
 
         [self addTrack:newTrack];
-        [newTrack release];
     }
 
     return self;
@@ -155,7 +154,6 @@ static int ParseByte(const char *string, UInt8 *byte, Boolean hex)
             sample.title = [lineArray lastObject];
 
             [sampleArray addObject:sample];
-            [sample release];
         }
 
         for (MP42TextSample *ccSample in sampleArray) {
@@ -203,7 +201,6 @@ static int ParseByte(const char *string, UInt8 *byte, Boolean hex)
                 sample->trackId = trackId;
 
                 [self enqueue:sample];
-                [sample release];
 
                 frameDrop += ccSample.timestamp;
                 minutesDrop += frameDrop;
@@ -239,13 +236,11 @@ static int ParseByte(const char *string, UInt8 *byte, Boolean hex)
             sample->trackId = trackId;
             
             [self enqueue:sample];
-            [sample release];
-            
+
             i++;
             self.progress = ((CGFloat)i / sampleArray.count) * 100;
         }
         
-        [sampleArray release];
         [self setDone];
     }
 }

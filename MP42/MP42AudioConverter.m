@@ -15,7 +15,8 @@
 #import "MP42AudioEncoder.h"
 #import "MP42AC3AudioEncoder.h"
 
-#import "MP42Track+Muxer.h"
+#import "MP42Track+Private.h"
+#import "MP42FileImporter.h"
 #import "MP42FileImporter+Private.h"
 
 #import <CoreAudio/CoreAudio.h>
@@ -36,7 +37,7 @@
     self = [super init];
 
     if (self) {
-        NSData *magicCookie = [track.muxer_helper->importer magicCookieForTrack:track];
+        NSData *magicCookie = [track.importer magicCookieForTrack:track];
         AudioStreamBasicDescription asbd = [self basicDescriptorForTrack:track];
         UInt32 initialPadding = [self initialPaddingForTrack:track];
         UInt32 channelLayoutSize = sizeof(AudioChannelLayout);
@@ -103,11 +104,11 @@
 {
     AudioStreamBasicDescription asbd;
     bzero(&asbd, sizeof(AudioStreamBasicDescription));
-    asbd.mSampleRate = [track.muxer_helper->importer timescaleForTrack:track];;
+    asbd.mSampleRate = [track.importer timescaleForTrack:track];;
     asbd.mChannelsPerFrame = track.channels;
 
     if (track.format == kMP42AudioCodecType_LinearPCM) {
-        AudioStreamBasicDescription temp = [track.muxer_helper->importer audioDescriptionForTrack:track];
+        AudioStreamBasicDescription temp = [track.importer audioDescriptionForTrack:track];
         if (temp.mFormatID) {
             asbd = temp;
         }
@@ -142,13 +143,6 @@
         return 48000;
     }
     return sampleRate;
-}
-
-- (void)dealloc {
-    [_decoder release];
-    [_encoder release];
-
-    [super dealloc];
 }
 
 @end

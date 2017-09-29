@@ -34,6 +34,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property(nonatomic, readonly) NSMutableDictionary<NSString *, NSNumber *> *updatedProperty;
 
 @property (nonatomic, readwrite) MP42FileImporter *importer;
+@property (nonatomic, readwrite) id demuxerHelper;
 
 - (void *)copy_muxer_helper;
 - (void *)create_muxer_helper;

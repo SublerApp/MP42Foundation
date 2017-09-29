@@ -332,7 +332,6 @@ static bool GetFirstHeader(FILE* inFile)
         [newTrack setDataLength:[[[[NSFileManager defaultManager] attributesOfItemAtPath:self.fileURL.path error:nil] valueForKey:NSFileSize] unsignedLongLongValue]];
         
         [self addTrack:newTrack];
-        [newTrack release];
     }
 
     return self;
@@ -382,7 +381,6 @@ static bool GetFirstHeader(FILE* inFile)
             sample->trackId = trackId;
 
             [self enqueue:sample];
-            [sample release];
 
             sampleId++;
 
@@ -403,10 +401,7 @@ static bool GetFirstHeader(FILE* inFile)
 
 - (void) dealloc
 {
-    [ac3Info release];
     fclose(inFile);
-
-    [super dealloc];
 }
 
 @end

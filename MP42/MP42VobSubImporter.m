@@ -15,8 +15,8 @@
 
 #import "mp4v2.h"
 #import "MP42PrivateUtilities.h"
-#import "MP42Track+Muxer.h"
 #import "MP42Track+Private.h"
+#import "MP42Sample.h"
 
 @interface SBVobSubSample : NSObject
 {
@@ -68,20 +68,12 @@
 	if(!self)
 		return self;
 
-	privateData = [idxPrivateData retain];
-	language = [lang retain];
+	privateData = [idxPrivateData copy];
+	language = [lang copy];
 	index = trackIndex;
 	samples = [[NSMutableArray alloc] init];
 
 	return self;
-}
-
-- (void)dealloc
-{
-	[privateData release];
-	[language release];
-	[samples release];
-	[super dealloc];
 }
 
 - (void)addSample:(SBVobSubSample *)sample
@@ -94,7 +86,6 @@
 {
 	SBVobSubSample *sample = [[SBVobSubSample alloc] initWithTime:time offset:offset];
 	[self addSample:sample];
-	[sample release];
 }
 
 @end
@@ -136,7 +127,7 @@ static NSArray<SBVobSubTrack *> * LoadVobSubSubtitles(NSURL *theDirectory, NSStr
 
         NSURL *subFileURL = [[nsURL URLByDeletingPathExtension] URLByAppendingPathExtension:@"sub"];
 
-        if([idxContent length]) {
+        if ([idxContent length]) {
             NSError *nsErr;
             NSDictionary *attr = [[NSFileManager defaultManager] attributesOfItemAtPath:subFileURL.path error:&nsErr];
             if (!attr) goto bail;
@@ -190,7 +181,6 @@ static NSArray<SBVobSubTrack *> * LoadVobSubSubtitles(NSURL *theDirectory, NSStr
 
                             currentTrack = [[SBVobSubTrack alloc] initWithPrivateData:privateLines language:language andIndex:index];
                             [tracks addObject:currentTrack];
-                            [currentTrack release];
                         }
                         break;
                     case VOB_SUB_STATE_READING_DELAY:
@@ -211,10 +201,9 @@ static NSArray<SBVobSubTrack *> * LoadVobSubSubtitles(NSURL *theDirectory, NSStr
                 }
             }
 
-            return [tracks retain];
+            return [tracks copy];
         }
     bail:
-        ;
         NSLog(@"Exception occurred while importing VobSub");
         return nil;
     }
@@ -247,7 +236,6 @@ static NSArray<SBVobSubTrack *> * LoadVobSubSubtitles(NSURL *theDirectory, NSStr
             newTrack.duration = track->duration;
 
             [self addTrack:newTrack];
-            [newTrack release];
         }
 
         if (!self.tracks.count) {
@@ -255,8 +243,6 @@ static NSArray<SBVobSubTrack *> * LoadVobSubSubtitles(NSURL *theDirectory, NSStr
                 *outError = MP42Error(MP42LocalizedString(@"The file could not be opened.", @"vobsub error message"),
                                       MP42LocalizedString(@"The file is not a idx file, or it does not contain any subtitles.", @"vobsub error message"), 100);
             }
-
-            [self release];
             return nil;
         }
     }
@@ -373,7 +359,6 @@ static NSArray<SBVobSubTrack *> * LoadVobSubSubtitles(NSURL *theDirectory, NSStr
                     sample->trackId = track.sourceId;
 
                     [self enqueue:sample];
-                    [sample release];
                 }
 
                 MP42SampleBuffer *sample = [[MP42SampleBuffer alloc] init];
@@ -388,8 +373,7 @@ static NSArray<SBVobSubTrack *> * LoadVobSubSubtitles(NSURL *theDirectory, NSStr
                 sample->trackId = track.sourceId;
                 
                 [self enqueue:sample];
-                [sample release];
-                
+
                 lastTime = endTime;
                 
                 self.progress = ((i / (CGFloat) sampleCount ) * 100 / tracksNumber) + (tracksDone / (CGFloat) tracksNumber * 100);
@@ -404,13 +388,6 @@ static NSArray<SBVobSubTrack *> * LoadVobSubSubtitles(NSURL *theDirectory, NSStr
 - (NSString *)description
 {
     return @"VobSub demuxer";
-}
-
-- (void)dealloc
-{
-    [_VobSubTracks release];
-
-    [super dealloc];
 }
 
 @end
