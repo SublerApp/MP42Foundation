@@ -976,10 +976,10 @@
                     CFArrayRef attachmentsArray = CMSampleBufferGetSampleAttachmentsArray(sampleBuffer, NO);
                     if (attachmentsArray) {
                         for (NSDictionary *dict in (NSArray *)attachmentsArray) {
-                            if ([dict valueForKey:(NSString *)kCMSampleAttachmentKey_NotSync]) {
+                            if (dict[(NSString *)kCMSampleAttachmentKey_NotSync]) {
                                 sync = 0;
                             }
-                            if ([dict valueForKey:(NSString *)kCMSampleAttachmentKey_DoNotDisplay]) {
+                            if (dict[(NSString *)kCMSampleAttachmentKey_DoNotDisplay]) {
                                 doNotDisplay = YES;
                             }
                         }
@@ -1149,6 +1149,9 @@
 
                         demuxHelper->currentTime = currentOutputTimeStamp.value;
 
+                        if (attachments) {
+                            CFRelease(attachments);
+                        }
                         free(timingArrayOut);
                         free(sizeArrayOut);
                     }
@@ -1182,7 +1185,7 @@
         }
 
         self.progress = (((CGFloat) currentDataLength /  totalDataLength ) * 100);
-        currentTime += 2;
+        currentTime += 1;
     }
 
     [assetReader release];

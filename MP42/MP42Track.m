@@ -128,6 +128,7 @@
                         if (tag) {
                             [mediaCharacteristicTags addObject:tag];
                         }
+                        free(ppValue);
                     }
 
                     count++;
