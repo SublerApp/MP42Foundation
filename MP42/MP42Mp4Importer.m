@@ -362,41 +362,39 @@ typedef struct MP4DemuxHelper {
     }
 }
 
-- (BOOL)cleanUp:(MP4FileHandle)dstFileHandle
+- (BOOL)cleanUp:(MP42Track *)track fileHandle:(MP4FileHandle)dstFileHandle
 {
-    for (MP42Track *track in self.outputsTracks) {
-        MP4TrackId srcTrackId = track.sourceId;
-        MP4TrackId dstTrackId = track.trackId;
-
-        MP4Duration trackDuration = 0;
-        uint32_t i = 1, trackEditCount = MP4GetTrackNumberOfEdits(_fileHandle, srcTrackId);
-        while (i <= trackEditCount) {
-            MP4Timestamp editMediaStart = MP4GetTrackEditMediaStart(_fileHandle, srcTrackId, i);
-            MP4Duration editDuration = MP4ConvertFromMovieDuration(_fileHandle,
-                                                                   MP4GetTrackEditDuration(_fileHandle, srcTrackId, i),
-                                                                   MP4GetTimeScale(dstFileHandle));
-            trackDuration += editDuration;
-            int8_t editDwell = MP4GetTrackEditDwell(_fileHandle, srcTrackId, i);
-            
-            MP4AddTrackEdit(dstFileHandle, dstTrackId, i, editMediaStart, editDuration, editDwell);
-            i++;
-        }
-        if (trackEditCount) {
-            MP4SetTrackIntegerProperty(dstFileHandle, dstTrackId, "tkhd.duration", trackDuration);
-        }
-        else if (MP4GetSampleRenderingOffset(dstFileHandle, dstTrackId, 1)) {
-            uint32_t firstFrameOffset = MP4GetSampleRenderingOffset(dstFileHandle, dstTrackId, 1);
-
-            MP4Duration editDuration = MP4ConvertFromTrackDuration(_fileHandle,
-                                                                   srcTrackId,
-                                                                   MP4GetTrackDuration(_fileHandle, srcTrackId),
-                                                                   MP4GetTimeScale(dstFileHandle));
-
-            MP4AddTrackEdit(dstFileHandle, dstTrackId, MP4_INVALID_EDIT_ID, firstFrameOffset,
-                            editDuration, 0);
-        }
+    MP4TrackId srcTrackId = track.sourceId;
+    MP4TrackId dstTrackId = track.trackId;
+    
+    MP4Duration trackDuration = 0;
+    uint32_t i = 1, trackEditCount = MP4GetTrackNumberOfEdits(_fileHandle, srcTrackId);
+    while (i <= trackEditCount) {
+        MP4Timestamp editMediaStart = MP4GetTrackEditMediaStart(_fileHandle, srcTrackId, i);
+        MP4Duration editDuration = MP4ConvertFromMovieDuration(_fileHandle,
+                                                               MP4GetTrackEditDuration(_fileHandle, srcTrackId, i),
+                                                               MP4GetTimeScale(dstFileHandle));
+        trackDuration += editDuration;
+        int8_t editDwell = MP4GetTrackEditDwell(_fileHandle, srcTrackId, i);
+        
+        MP4AddTrackEdit(dstFileHandle, dstTrackId, i, editMediaStart, editDuration, editDwell);
+        i++;
     }
-
+    if (trackEditCount) {
+        MP4SetTrackIntegerProperty(dstFileHandle, dstTrackId, "tkhd.duration", trackDuration);
+    }
+    else if (MP4GetSampleRenderingOffset(dstFileHandle, dstTrackId, 1)) {
+        uint32_t firstFrameOffset = MP4GetSampleRenderingOffset(dstFileHandle, dstTrackId, 1);
+        
+        MP4Duration editDuration = MP4ConvertFromTrackDuration(_fileHandle,
+                                                               srcTrackId,
+                                                               MP4GetTrackDuration(_fileHandle, srcTrackId),
+                                                               MP4GetTimeScale(dstFileHandle));
+        
+        MP4AddTrackEdit(dstFileHandle, dstTrackId, MP4_INVALID_EDIT_ID, firstFrameOffset,
+                        editDuration, 0);
+    }
+    
     return YES;
 }
 

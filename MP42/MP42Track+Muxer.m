@@ -8,25 +8,29 @@
 
 #import "MP42Track+Muxer.h"
 #import "MP42FileImporter+Private.h"
+#import "MP42Fifo.h"
+
+typedef struct muxer_helper {
+    // Input helpers
+    MP42FileImporter *importer;
+
+    // Output helpers
+    id <MP42ConverterProtocol> converter;
+    MP42Fifo<MP42SampleBuffer *> *fifo;
+} muxer_helper;
+
+@interface MP42Track (MP42TrackMuxerExtensions)
+
+@property (nonatomic, readonly, nullable) muxer_helper *muxer_helper;
+
+@end
 
 @implementation MP42Track (MP42TrackMuxerExtentions)
 
-@dynamic muxer_helper;
-
-- (id)demuxerHelper {
-    muxer_helper *helper = (muxer_helper *)_helper;
-    return helper->demuxer_context;
-}
-
-- (void)setDemuxerHelper:(id)demuxerHelper {
-    [demuxerHelper retain];
-    muxer_helper *helper = (muxer_helper *)_helper;
-    helper->demuxer_context = demuxerHelper;
-}
-
 - (MP42FileImporter *)importer
 {
-    return self.muxer_helper->importer;
+    muxer_helper *helper = (muxer_helper *)_helper;
+    return helper->importer;
 }
 
 - (void)setImporter:(MP42FileImporter *)importer
@@ -34,20 +38,28 @@
     self.muxer_helper->importer = importer;
 }
 
+- (MP42Fifo<MP42SampleBuffer *> *)fifo
+{
+    muxer_helper *helper = (muxer_helper *)_helper;
+    return helper->fifo;
+}
+
 - (id <MP42ConverterProtocol>)converter
 {
-    return self.muxer_helper->converter;
+    muxer_helper *helper = (muxer_helper *)_helper;
+    return helper->converter;
 }
 
 - (void)setConverter:(id <MP42ConverterProtocol>)converter
 {
-    self.muxer_helper->converter = converter;
+    self.muxer_helper->converter = [converter retain];
 }
 
 - (void *)copy_muxer_helper
 {
     muxer_helper *copy = calloc(1, sizeof(muxer_helper));
     copy->importer = ((muxer_helper *)_helper)->importer;
+    copy->fifo = [[MP42Fifo alloc] init];
 
     return copy;
 }
@@ -55,7 +67,24 @@
 - (void *)create_muxer_helper
 {
     muxer_helper *helper = calloc(1, sizeof(muxer_helper));
+    helper->fifo = [[MP42Fifo alloc] init];
     return helper;
+}
+
+- (void)free_muxer_helper {
+    muxer_helper *helper = (muxer_helper *)_helper;
+    [helper->fifo release];
+    [helper->converter release];
+}
+
+- (void)enqueue:(MP42SampleBuffer *)sample
+{
+    muxer_helper *helper = (muxer_helper *)_helper;
+    if (helper->converter) {
+        [helper->converter addSample:sample];
+    } else {
+        [helper->fifo enqueue:sample];
+    }
 }
 
 - (MP42SampleBuffer *)copyNextSample {

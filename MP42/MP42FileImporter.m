@@ -18,11 +18,8 @@
 #import "MP42AVFImporter.h"
 
 #import "MP42Track.h"
-#import "MP42Fifo.h"
-
-#import "MP42AudioConverter.h"
-#import "MP42Track+Muxer.h"
 #import "MP42Track+Private.h"
+#import "MP42Track+Muxer.h"
 
 #import "mp4v2.h"
 
@@ -35,9 +32,6 @@ static NSArray<Class> *_fileImporters;
 static NSArray<NSString *> *_supportedFileFormats;
 
 @implementation MP42FileImporter {
-@private
-    NSURL    *_fileURL;
-
     NSMutableArray<MP42Track *> *_tracksArray;
 
     NSMutableArray<MP42Track *> *_inputTracks;
@@ -53,7 +47,7 @@ static NSArray<NSString *> *_supportedFileFormats;
 
 + (void)initialize {
     if (self == [MP42FileImporter class]) {
-        _fileImporters = [@[[MP42MkvImporter class],
+        _fileImporters = @[[MP42MkvImporter class],
                            [MP42Mp4Importer class],
                            [MP42SrtImporter class],
                            [MP42CCImporter class],
@@ -61,7 +55,7 @@ static NSArray<NSString *> *_supportedFileFormats;
                            [MP42H264Importer class],
                            [MP42VobSubImporter class],
                            [MP42AVFImporter class],
-                           [MP42AC3Importer class]] retain];
+                           [MP42AC3Importer class]];
 
         NSMutableArray<NSString *> *formats = [[NSMutableArray alloc] init];
 
@@ -70,7 +64,6 @@ static NSArray<NSString *> *_supportedFileFormats;
         }
 
         _supportedFileFormats = [formats copy];
-        [formats release];
     }
 }
 
@@ -84,19 +77,16 @@ static NSArray<NSString *> *_supportedFileFormats;
 
 - (instancetype)initWithURL:(NSURL *)fileURL error:(NSError **)error;
 {
-    [self release];
     self = nil;
 
     // Initialize the right file importer subclass
     for (Class c in _fileImporters) {
         if ([c canInitWithFileType:fileURL.pathExtension]) {
 
-            [self release];
-
             self = [[c alloc] initWithURL:fileURL error:error];
             if (self) {
                 for (MP42Track *track in _tracksArray) {
-                    track.muxer_helper->importer = self;
+                    track.importer = self;
                 }
 
                 break;
@@ -111,7 +101,7 @@ static NSArray<NSString *> *_supportedFileFormats;
 {
     self = [super init];
     if (self) {
-        _fileURL = [fileURL retain];
+        _fileURL = fileURL;
         _tracksArray = [[NSMutableArray alloc] init];
     }
     return self;
@@ -120,32 +110,8 @@ static NSArray<NSString *> *_supportedFileFormats;
 - (void)dealloc
 {
     for (MP42Track *track in _inputTracks) {
-        [track.muxer_helper->demuxer_context release];
+        [track free_muxer_helper];
     }
-
-    for (MP42Track *track in _outputsTracks) {
-        [track.muxer_helper->fifo release];
-        [track.muxer_helper->converter release];
-    }
-
-    [_metadata release];
-    [_tracksArray release]; _tracksArray = nil;
-    [_inputTracks release]; _inputTracks = nil;
-    [_outputsTracks release]; _outputsTracks = nil;
-
-    [_fileURL release]; _fileURL = nil;
-    [_demuxerThread release]; _demuxerThread = nil;
-
-    if (_doneSem) {
-        dispatch_release(_doneSem);
-    }
-
-    [super dealloc];
-}
-
-- (NSURL *)fileURL
-{
-    return _fileURL;
 }
 
 - (void)addTrack:(MP42Track *)track
@@ -160,17 +126,17 @@ static NSArray<NSString *> *_supportedFileFormats;
 
 - (NSArray<MP42Track *> *)inputTracks
 {
-    return [[_inputTracks copy] autorelease];
+    return [_inputTracks copy];
 }
 
 - (NSArray<MP42Track *> *)outputsTracks
 {
-    return [[_outputsTracks copy] autorelease];
+    return [_outputsTracks copy];
 }
 
 - (void)setMetadata:(MP42Metadata * _Nonnull)metadata
 {
-    _metadata = [metadata retain];
+    _metadata = metadata;
 }
 
 @synthesize tracks = _tracksArray;
@@ -220,7 +186,7 @@ static NSArray<NSString *> *_supportedFileFormats;
     return NO;
 }
 
-- (BOOL)cleanUp:(MP4FileHandle)fileHandle
+- (BOOL)cleanUp:(MP42Track *)track fileHandle:(MP4FileHandle)fileHandle
 {
     return YES;
 }
@@ -247,10 +213,6 @@ static NSArray<NSString *> *_supportedFileFormats;
 
 - (void)startReading
 {
-    for (MP42Track *track in _outputsTracks) {
-        track.muxer_helper->fifo = [[MP42Fifo alloc] init];
-    }
-
     _doneSem = dispatch_semaphore_create(0);
 
     if (!_demuxerThread) {
@@ -274,15 +236,11 @@ static NSArray<NSString *> *_supportedFileFormats;
     dispatch_semaphore_wait(_doneSem, DISPATCH_TIME_FOREVER);
 }
 
-- (void)enqueue:(MP42SampleBuffer *)sample
+- (void)enqueue:(MP42SampleBuffer * NS_RELEASES_ARGUMENT)sample
 {
     for (MP42Track *track in _outputsTracks) {
         if (track.sourceId == sample->trackId) {
-            if (track.muxer_helper->converter) {
-                [track.muxer_helper->converter addSample:sample];
-            } else {
-                [track.muxer_helper->fifo enqueue:sample];
-            }
+            [track enqueue:sample];
         }
     }
 }
@@ -295,13 +253,8 @@ static NSArray<NSString *> *_supportedFileFormats;
     for (MP42Track *track in _outputsTracks) {
         MP42SampleBuffer *sample = [[MP42SampleBuffer alloc] init];
         sample->flags |= MP42SampleBufferFlagEndOfFile;
-
-        if (track.muxer_helper->converter) {
-            [track.muxer_helper->converter addSample:sample];
-        } else {
-            [track.muxer_helper->fifo enqueue:sample];
-        }
-        [sample release];
+        sample->trackId = track.sourceId;
+        [self enqueue:sample];
     }
 }
 
@@ -324,17 +277,6 @@ static NSArray<NSString *> *_supportedFileFormats;
 - (BOOL)isCancelled
 {
     return _cancelled;
-}
-
-- (MP42Track *)inputTrackWithTrackID:(MP4TrackId)trackId
-{
-    for (MP42Track *track in _inputTracks) {
-        if (track.sourceId == trackId) {
-            return track;;
-        }
-    }
-
-    return nil;
 }
 
 @end

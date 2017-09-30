@@ -27,14 +27,12 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, copy) NSArray<MP42Track *> *inputTracks;
 @property (nonatomic, copy) NSArray<MP42Track *> *outputsTracks;
 
-- (MP42Track *)inputTrackWithTrackID:(MP42TrackId)trackId;
-
 - (void)setActiveTrack:(MP42Track *)track;
 
 - (void)startReading;
 - (void)cancelReading;
 
-- (void)enqueue:(MP42SampleBuffer *)sample;
+- (void)enqueue:(MP42SampleBuffer * NS_RELEASES_ARGUMENT)sample;
 
 @property (nonatomic, readwrite) double progress;
 @property (nonatomic, readonly, getter=isCancelled) BOOL cancelled;
@@ -49,7 +47,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSSize)sizeForTrack:(MP42Track *)track;
 - (nullable NSData *)magicCookieForTrack:(MP42Track *)track;
 - (AudioStreamBasicDescription)audioDescriptionForTrack:(MP42Track *)track;
-- (BOOL)cleanUp:(MP42FileHandle)fileHandle;
+- (BOOL)cleanUp:(MP42Track *)track fileHandle:(MP42FileHandle)fileHandle;
 
 - (BOOL)audioTrackUsesExplicitEncoderDelay:(MP42Track *)track;
 - (BOOL)supportsPreciseTimestamps;

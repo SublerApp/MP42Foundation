@@ -8,10 +8,10 @@
 
 #import "MP42H264Importer.h"
 #import "MP42FileImporter+Private.h"
+#import "MP42Sample.h"
 
 #import "MP42Languages.h"
 #import "MP42File.h"
-#import "MP42Track+Muxer.h"
 #import "MP42Track+Private.h"
 
 #include <sys/stat.h>
@@ -1634,9 +1634,8 @@ NSData* H264Info(const char *filePath, uint32_t *pic_width, uint32_t *pic_height
     }
 }
 
-- (BOOL)cleanUp:(MP4FileHandle)fileHandle
+- (BOOL)cleanUp:(MP42Track *)track fileHandle:(MP4FileHandle)fileHandle
 {
-    MP42Track *track = self.inputTracks.lastObject;
     MP4TrackId trackId = track.trackId;
 
     if (h264_dpb.dpb.size_min > 0) {

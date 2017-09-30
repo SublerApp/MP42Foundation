@@ -41,6 +41,7 @@
 
 @implementation MP42AVFImporter {
     AVAsset *_localAsset;
+    NSMutableArray<AVFDemuxHelper *> *_helpers;
 }
 
 + (NSArray<NSString *> *)supportedFileFormats {
@@ -82,6 +83,7 @@
 - (instancetype)initWithURL:(NSURL *)fileURL error:(NSError **)outError {
     if ((self = [super initWithURL:fileURL])) {
         _localAsset = [AVAsset assetWithURL:self.fileURL];
+        _helpers = [NSMutableArray array];
 
         NSArray<AVAssetTrack *> *tracks = [_localAsset tracks];
         CMTime globaDuration = _localAsset.duration;
@@ -920,8 +922,8 @@
             demuxHelper->assetReaderOutput = assetReaderOutput;
             demuxHelper->editsConstructor = [[MP42EditListsReconstructor alloc] init];
 
-            track.demuxerHelper = demuxHelper;
             helpers[index] = demuxHelper;
+            [_helpers addObject:demuxHelper];
 
             totalDataLength += track.dataLength;
         }
@@ -1175,49 +1177,56 @@
     }
 }
 
-- (BOOL)cleanUp:(MP4FileHandle)fileHandle {
+- (AVFDemuxHelper *)helperWithTrackID:(MP4TrackId)trackID
+{
+    for (AVFDemuxHelper *helper in _helpers) {
+        if (helper->sourceID == trackID) {
+            return helper;
+        }
+    }
+
+    return nil;
+}
+
+- (BOOL)cleanUp:(MP42Track *)track fileHandle:(MP4FileHandle)fileHandle {
     uint32_t timescale = MP4GetTimeScale(fileHandle);
 
-    for (MP42Track *track in self.outputsTracks) {
-        MP4Duration trackDuration = 0;
-        MP4TrackId trackId = track.trackId;
+    MP4Duration trackDuration = 0;
+    MP4TrackId trackId = track.trackId;
 
-        MP42Track *inputTrack = [self inputTrackWithTrackID:track.sourceId];
-
-        AVFDemuxHelper *helper = inputTrack.demuxerHelper;
-        MP42EditListsReconstructor *editsConstructor = helper->editsConstructor;
-
-        // Make sure the sample offsets are all positive.
-        if (editsConstructor.minOffset < 0) {
-            MP4SampleId samplesCount = MP4GetTrackNumberOfSamples(fileHandle, trackId);
-            for (unsigned int i = 0; i < samplesCount; i++) {
-                MP4SetSampleRenderingOffset(fileHandle,
-                                            trackId,
-                                            1 + i,
-                                            MP4GetSampleRenderingOffset(fileHandle, trackId, 1 + i) - editsConstructor.minOffset);
-            }
+    AVFDemuxHelper *helper = [self helperWithTrackID:track.sourceId];
+    MP42EditListsReconstructor *editsConstructor = helper->editsConstructor;
+    
+    // Make sure the sample offsets are all positive.
+    if (editsConstructor.minOffset < 0) {
+        MP4SampleId samplesCount = MP4GetTrackNumberOfSamples(fileHandle, trackId);
+        for (unsigned int i = 0; i < samplesCount; i++) {
+            MP4SetSampleRenderingOffset(fileHandle,
+                                        trackId,
+                                        1 + i,
+                                        MP4GetSampleRenderingOffset(fileHandle, trackId, 1 + i) - editsConstructor.minOffset);
         }
-
-        // Add back the new constructed edit lists.
-        for (uint64_t i = 0; i < helper->editsConstructor.editsCount; i++) {
-            CMTimeRange timeRange = editsConstructor.edits[i];
-            CMTime duration = CMTimeConvertScale(timeRange.duration, timescale, kCMTimeRoundingMethod_Default);
-            int64_t offset = editsConstructor.minOffset < 0 ? editsConstructor.minOffset : 0;
-            int64_t offset2 = editsConstructor.minOffset > 0 && timeRange.start.value == 0 ? editsConstructor.minOffset : 0;
-            MP4Timestamp startTime = timeRange.start.value == -1 ? -1 : timeRange.start.value - offset + offset2;
-
-            MP4AddTrackEdit(fileHandle, trackId, MP4_INVALID_EDIT_ID,
-                            startTime,
-                            duration.value, 0);
-
-            trackDuration += duration.value;
-        }
-
-        if (trackDuration) {
-            MP4SetTrackIntegerProperty(fileHandle, trackId, "tkhd.duration", trackDuration);
-        }
-
     }
+    
+    // Add back the new constructed edit lists.
+    for (uint64_t i = 0; i < helper->editsConstructor.editsCount; i++) {
+        CMTimeRange timeRange = editsConstructor.edits[i];
+        CMTime duration = CMTimeConvertScale(timeRange.duration, timescale, kCMTimeRoundingMethod_Default);
+        int64_t offset = editsConstructor.minOffset < 0 ? editsConstructor.minOffset : 0;
+        int64_t offset2 = editsConstructor.minOffset > 0 && timeRange.start.value == 0 ? editsConstructor.minOffset : 0;
+        MP4Timestamp startTime = timeRange.start.value == -1 ? -1 : timeRange.start.value - offset + offset2;
+        
+        MP4AddTrackEdit(fileHandle, trackId, MP4_INVALID_EDIT_ID,
+                        startTime,
+                        duration.value, 0);
+        
+        trackDuration += duration.value;
+    }
+    
+    if (trackDuration) {
+        MP4SetTrackIntegerProperty(fileHandle, trackId, "tkhd.duration", trackDuration);
+    }
+
     return YES;
 }
 

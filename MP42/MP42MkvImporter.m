@@ -183,12 +183,14 @@ static int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, ui
     return 1;
 }
 
-@implementation MP42MkvImporter {
-@private
+@implementation MP42MkvImporter
+{
     struct MatroskaFile	*_matroskaFile;
     struct StdIoStream  *_ioStream;
 
     u_int64_t   _fileDuration;
+
+    NSMutableArray<MatroskaDemuxHelper *> *_helpers;
 }
 
 + (NSArray<NSString *> *)supportedFileFormats {
@@ -204,6 +206,7 @@ static int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, ui
     if ((self = [super initWithURL:fileURL])) {
         _ioStream = calloc(1, sizeof(StdIoStream));
         _matroskaFile = openMatroskaFile(self.fileURL.fileSystemRepresentation, _ioStream);
+        _helpers = [NSMutableArray array];
 
         if (!_matroskaFile) {
             if (outError) {
@@ -789,26 +792,22 @@ static NSString * TrackNameToString(TrackInfo *track)
         const unsigned int bufferSize = 20;
         unsigned long TrackMask = ~0;
 
-        NSArray<MP42Track *> *tracks = self.tracks;
         NSArray<MP42Track *> *inputTracks = self.inputTracks;
 
-        NSInteger tracksNumber = tracks.count;
+        NSInteger tracksNumber = inputTracks.count;
         MatroskaDemuxHelper * helpers[tracksNumber];
 
         for (NSUInteger index = 0; index < tracksNumber; index += 1) {
-            MP42Track *track = tracks[index];
-            if ([inputTracks containsObject:track]) {
+            MP42Track *track = inputTracks[index];
 
-                MatroskaDemuxHelper *demuxHelper = [[MatroskaDemuxHelper alloc] init];
-                demuxHelper->sourceID = track.sourceId;
-                demuxHelper->trackInfo = mkv_GetTrackInfo(_matroskaFile, track.sourceId);
+            MatroskaDemuxHelper *demuxHelper = [[MatroskaDemuxHelper alloc] init];
+            demuxHelper->sourceID = track.sourceId;
+            demuxHelper->trackInfo = mkv_GetTrackInfo(_matroskaFile, track.sourceId);
 
-                helpers[index] = demuxHelper;
+            helpers[index] = demuxHelper;
+            [_helpers addObject:demuxHelper];
 
-                track.demuxerHelper = demuxHelper;
-
-                TrackMask &= ~(1l << track.sourceId);
-            }
+            TrackMask &= ~(1l << track.sourceId);
         }
 
         // mask other tracks because we don't need them
@@ -1035,11 +1034,11 @@ static NSString * TrackNameToString(TrackInfo *track)
             }
         }
 
-        for (MP42Track *track in inputTracks) {
-            MatroskaDemuxHelper *demuxHelper = track.demuxerHelper;
+        for (NSUInteger index = 0; index < tracksNumber; index += 1) {
+            MatroskaDemuxHelper *demuxHelper = helpers[index];
+            TrackInfo *trackInfo = demuxHelper->trackInfo;
 
             if (demuxHelper->queue) {
-                TrackInfo *trackInfo = mkv_GetTrackInfo(_matroskaFile, [track sourceId]);
 
                 while ([demuxHelper->queue count]) {
                     if (demuxHelper->bufferFlush == 1) {
@@ -1081,7 +1080,7 @@ static NSString * TrackNameToString(TrackInfo *track)
                         sample->offset = offset / 10000.0f;
                         sample->decodeTimestamp = StartTime;
                         sample->flags |= (currentSample->frameFlags & FRAME_KF) ? MP42SampleBufferFlagIsSync : 0;
-                        sample->trackId = track.sourceId;
+                        sample->trackId = demuxHelper->sourceID;
 
                         demuxHelper->samplesWritten++;
 
@@ -1109,7 +1108,7 @@ static NSString * TrackNameToString(TrackInfo *track)
 
             if (demuxHelper->ss) {
                 MP42SampleBuffer *sample = nil;
-                MP4TrackId dstTrackId = track.sourceId;
+                MP4TrackId dstTrackId = demuxHelper->sourceID;
                 SBSubSerializer *ss = demuxHelper->ss;
 
                 [ss setFinished:YES];
@@ -1138,7 +1137,7 @@ static NSString * TrackNameToString(TrackInfo *track)
             }
 
             if (demuxHelper->previousSample) {
-                if (track.mediaType == kMP42MediaType_Subtitle) {
+                if (trackInfo->Type == TT_SUB) {
                     demuxHelper->previousSample->duration = 100;
                 }
 
@@ -1151,57 +1150,64 @@ static NSString * TrackNameToString(TrackInfo *track)
     }
 }
 
-- (BOOL)cleanUp:(MP4FileHandle)fileHandle
+- (MatroskaDemuxHelper *)helperWithTrackID:(MP4TrackId)trackID
 {
-    for (MP42Track *track in self.outputsTracks) {
-        MP42Track *inputTrack = [self inputTrackWithTrackID:track.sourceId];
-
-        MatroskaDemuxHelper *demuxHelper = inputTrack.demuxerHelper;
-        MP4TrackId trackId = track.trackId;
-
-        if (demuxHelper->minDisplayOffset != 0) {
-
-            for (unsigned int i = 1; i <= demuxHelper->samplesWritten; i++) {
-                int64_t correctedOffset = MP4GetSampleRenderingOffset(fileHandle, trackId, i) - demuxHelper->minDisplayOffset;
-                MP4SetSampleRenderingOffset(fileHandle,
-                                            trackId,
-                                            i,
-                                            correctedOffset);
-            }
-
-            MP4Duration editDuration = MP4ConvertFromTrackDuration(fileHandle, trackId,
-                                                                   MP4GetTrackDuration(fileHandle, trackId),
-                                                                   MP4GetTimeScale(fileHandle));
-
-
-            // Add an empty edit list if the first pts is not 0.
-            if (demuxHelper->startTime > 0) {
-                MP4Duration emptyDuration = MP4ConvertFromTrackDuration(fileHandle, trackId,
-                                                                       demuxHelper->startTime / 10000.0f,
-                                                                       MP4GetTimeScale(fileHandle));
-
-                MP4AddTrackEdit(fileHandle, trackId, MP4_INVALID_EDIT_ID, -1, emptyDuration, 0);
-            }
-
-            MP4AddTrackEdit(fileHandle,
-                            trackId,
-                            MP4_INVALID_EDIT_ID,
-                            - demuxHelper->minDisplayOffset + demuxHelper->startTime / 10000.0f,
-                            editDuration,
-                            0);
+    for (MatroskaDemuxHelper *helper in _helpers) {
+        if (helper->sourceID == trackID) {
+            return helper;
         }
-        else {
-            MP4Duration editDuration = MP4ConvertFromTrackDuration(fileHandle, trackId,
-                                                                   MP4GetTrackDuration(fileHandle, trackId),
-                                                                   MP4GetTimeScale(fileHandle));
+    }
 
-            MP4AddTrackEdit(fileHandle,
-                            trackId,
-                            MP4_INVALID_EDIT_ID,
-                            0,
-                            editDuration,
-                            0);
+    return nil;
+}
+
+- (BOOL)cleanUp:(MP42Track *)track fileHandle:(MP4FileHandle)fileHandle
+{
+    MatroskaDemuxHelper *demuxHelper = [self helperWithTrackID:track.sourceId];
+    MP4TrackId trackId = track.trackId;
+
+    if (demuxHelper->minDisplayOffset != 0) {
+
+        for (unsigned int i = 1; i <= demuxHelper->samplesWritten; i++) {
+            int64_t correctedOffset = MP4GetSampleRenderingOffset(fileHandle, trackId, i) - demuxHelper->minDisplayOffset;
+            MP4SetSampleRenderingOffset(fileHandle,
+                                        trackId,
+                                        i,
+                                        correctedOffset);
         }
+
+        MP4Duration editDuration = MP4ConvertFromTrackDuration(fileHandle, trackId,
+                                                               MP4GetTrackDuration(fileHandle, trackId),
+                                                               MP4GetTimeScale(fileHandle));
+
+        
+        // Add an empty edit list if the first pts is not 0.
+        if (demuxHelper->startTime > 0) {
+            MP4Duration emptyDuration = MP4ConvertFromTrackDuration(fileHandle, trackId,
+                                                                    demuxHelper->startTime / 10000.0f,
+                                                                    MP4GetTimeScale(fileHandle));
+
+            MP4AddTrackEdit(fileHandle, trackId, MP4_INVALID_EDIT_ID, -1, emptyDuration, 0);
+        }
+
+        MP4AddTrackEdit(fileHandle,
+                        trackId,
+                        MP4_INVALID_EDIT_ID,
+                        - demuxHelper->minDisplayOffset + demuxHelper->startTime / 10000.0f,
+                        editDuration,
+                        0);
+    }
+    else {
+        MP4Duration editDuration = MP4ConvertFromTrackDuration(fileHandle, trackId,
+                                                               MP4GetTrackDuration(fileHandle, trackId),
+                                                               MP4GetTimeScale(fileHandle));
+
+        MP4AddTrackEdit(fileHandle,
+                        trackId,
+                        MP4_INVALID_EDIT_ID,
+                        0,
+                        editDuration,
+                        0);
     }
 
     return YES;

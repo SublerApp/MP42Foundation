@@ -20,10 +20,10 @@
 #import "MP42FormatUtilites.h"
 #import "MP42PrivateUtilities.h"
 #import "MP42Track+Private.h"
+#import "MP42Track+Muxer.h"
 
 @implementation MP42Muxer
 {
-@private
     MP4FileHandle    _fileHandle;
 
     id <MP42MuxerDelegate>  _delegate;
@@ -548,8 +548,6 @@
             // If all tracks are done, exit the loop
             if (done == tracksCount) {
                 break;
-            } else {
-                done = 0;
             }
 
             // Update progress
@@ -596,9 +594,10 @@
     }
 
     // Stop the importers and clean ups
-    for (MP42FileImporter *importerHelper in trackImportersArray) {
-        if (!_cancelled) {
-            [importerHelper cleanUp:_fileHandle];
+    if (!_cancelled) {
+        for (MP42FileImporter *importerHelper in trackImportersArray) {
+            for (MP42Track *track in importerHelper.outputsTracks)
+                [importerHelper cleanUp:track fileHandle:_fileHandle];
         }
     }
 }

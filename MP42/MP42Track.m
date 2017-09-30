@@ -9,12 +9,9 @@
 #import "MP42Track.h"
 #import "MP42PrivateUtilities.h"
 #import "MP42Utilities.h"
-#import "MP42FileImporter.h"
-#import "MP42Sample.h"
-#import "MP42Fifo.h"
 #import "MP42Languages.h"
 
-#import "MP42Track+Private.h"
+#import "MP42Track+Muxer.h"
 
 @interface MP42Track ()
 {

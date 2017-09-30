@@ -9,8 +9,6 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @class MP42FileImporter;
-@class MP42SampleBuffer;
-@protocol MP42ConverterProtocol;
 
 @interface MP42Track (Private)
 
@@ -36,14 +34,6 @@ NS_ASSUME_NONNULL_BEGIN
 @property(nonatomic, readonly) NSMutableDictionary<NSString *, NSNumber *> *updatedProperty;
 
 @property (nonatomic, readwrite) MP42FileImporter *importer;
-
-@property (nonatomic, readwrite) id<MP42ConverterProtocol> converter;
-@property (nonatomic, readwrite) id demuxerHelper;
-
-- (MP42SampleBuffer *)copyNextSample;
-
-- (void *)copy_muxer_helper;
-- (void *)create_muxer_helper;
 
 @end
 
