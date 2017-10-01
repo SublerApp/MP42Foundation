@@ -107,13 +107,6 @@ static NSArray<NSString *> *_supportedFileFormats;
     return self;
 }
 
-- (void)dealloc
-{
-    for (MP42Track *track in _inputTracks) {
-        [track free_muxer_helper];
-    }
-}
-
 - (void)addTrack:(MP42Track *)track
 {
     [_tracksArray addObject:track];
@@ -213,6 +206,10 @@ static NSArray<NSString *> *_supportedFileFormats;
 
 - (void)startReading
 {
+    for (MP42Track *track in _outputsTracks) {
+        [track startReading];
+    }
+
     _doneSem = dispatch_semaphore_create(0);
 
     if (!_demuxerThread) {

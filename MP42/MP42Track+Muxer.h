@@ -17,6 +17,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (id <MP42ConverterProtocol>)converter;
 - (void)setConverter:(id <MP42ConverterProtocol>)converter;
 
+- (void)startReading;
+
 - (void)enqueue:(MP42SampleBuffer *)sample;
 - (MP42SampleBuffer *)copyNextSample;
 

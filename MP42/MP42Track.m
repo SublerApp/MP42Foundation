@@ -141,7 +141,7 @@
 }
 
 - (void)dealloc {
-    free(_helper);
+    [self free_muxer_helper];
 }
 
 - (instancetype)copyWithZone:(NSZone *)zone

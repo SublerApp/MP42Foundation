@@ -512,11 +512,16 @@
     NSUInteger tracksImportersCount = trackImportersArray.count;
     NSUInteger tracksCount = _activeTracks.count;
     NSMutableArray<MP42Track *> *tracks = [_activeTracks copy];
-
+    NSMutableArray<MP42Track *> *nextTracks = nil;
     for (;;) {
         @autoreleasepool {
 
             usleep(1000);
+
+            if (nextTracks) {
+                tracks = nextTracks;
+                nextTracks = nil;
+            }
 
             // Iterate the tracks array and mux the samples
             for (MP42Track *track in tracks) {
@@ -527,9 +532,8 @@
 
                     if (sampleBuffer->flags & MP42SampleBufferFlagEndOfFile) {
                         // Tracks done, remove it from the loop
-                        NSMutableArray<MP42Track *> *copy = [tracks mutableCopy];
-                        [copy removeObject:track];
-                        tracks = copy;
+                        NSMutableArray<MP42Track *> *nextTracks = [tracks mutableCopy];
+                        [nextTracks removeObject:track];
                         done += 1;
                     }
                     else if (!MP4WriteSample(_fileHandle, trackId,

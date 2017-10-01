@@ -795,7 +795,7 @@ static NSString * TrackNameToString(TrackInfo *track)
         NSArray<MP42Track *> *inputTracks = self.inputTracks;
 
         NSInteger tracksNumber = inputTracks.count;
-        MatroskaDemuxHelper * helpers[tracksNumber];
+        MatroskaDemuxHelper * helpers[self.tracks.count];
 
         for (NSUInteger index = 0; index < tracksNumber; index += 1) {
             MP42Track *track = inputTracks[index];
@@ -804,7 +804,7 @@ static NSString * TrackNameToString(TrackInfo *track)
             demuxHelper->sourceID = track.sourceId;
             demuxHelper->trackInfo = mkv_GetTrackInfo(_matroskaFile, track.sourceId);
 
-            helpers[index] = demuxHelper;
+            helpers[track.sourceId] = demuxHelper;
             [_helpers addObject:demuxHelper];
 
             TrackMask &= ~(1l << track.sourceId);
@@ -1034,8 +1034,7 @@ static NSString * TrackNameToString(TrackInfo *track)
             }
         }
 
-        for (NSUInteger index = 0; index < tracksNumber; index += 1) {
-            MatroskaDemuxHelper *demuxHelper = helpers[index];
+        for (MatroskaDemuxHelper *demuxHelper in _helpers) {
             TrackInfo *trackInfo = demuxHelper->trackInfo;
 
             if (demuxHelper->queue) {

@@ -38,12 +38,6 @@ typedef struct muxer_helper {
     self.muxer_helper->importer = importer;
 }
 
-- (MP42Fifo<MP42SampleBuffer *> *)fifo
-{
-    muxer_helper *helper = (muxer_helper *)_helper;
-    return helper->fifo;
-}
-
 - (id <MP42ConverterProtocol>)converter
 {
     muxer_helper *helper = (muxer_helper *)_helper;
@@ -59,7 +53,6 @@ typedef struct muxer_helper {
 {
     muxer_helper *copy = calloc(1, sizeof(muxer_helper));
     copy->importer = ((muxer_helper *)_helper)->importer;
-    copy->fifo = [[MP42Fifo alloc] init];
 
     return copy;
 }
@@ -67,14 +60,22 @@ typedef struct muxer_helper {
 - (void *)create_muxer_helper
 {
     muxer_helper *helper = calloc(1, sizeof(muxer_helper));
-    helper->fifo = [[MP42Fifo alloc] init];
     return helper;
 }
 
-- (void)free_muxer_helper {
+- (void)free_muxer_helper
+{
     muxer_helper *helper = (muxer_helper *)_helper;
-    [helper->fifo release];
-    [helper->converter release];
+    if (helper) {
+        [helper->fifo release];
+        [helper->converter release];
+        free(helper);
+    }
+}
+
+- (void)startReading
+{
+    self.muxer_helper->fifo = [[MP42Fifo alloc] init];
 }
 
 - (void)enqueue:(MP42SampleBuffer *)sample
