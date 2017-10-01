@@ -1366,6 +1366,7 @@ NSData* H264Info(const char *filePath, uint32_t *pic_width, uint32_t *pic_height
         }
     }
 
+    free(nal.buffer);
     fclose(inFile);
     return avcCData;
 }
@@ -1405,7 +1406,7 @@ NSData* H264Info(const char *filePath, uint32_t *pic_width, uint32_t *pic_height
 
         uint32_t tw, th;
         uint8_t profile, level;
-        if ((avcC = H264Info([self.fileURL.path cStringUsingEncoding:NSASCIIStringEncoding], &tw, &th, &profile, &level))) {
+        if ((avcC = H264Info(self.fileURL.fileSystemRepresentation, &tw, &th, &profile, &level))) {
             newTrack.width = newTrack.trackWidth = tw;
             newTrack.height = newTrack.trackHeight = th;
             newTrack.hSpacing = newTrack.vSpacing = 1;
@@ -1628,6 +1629,7 @@ NSData* H264Info(const char *filePath, uint32_t *pic_width, uint32_t *pic_height
         }
         
         DpbFlush(&h264_dpb);
+        free(nal.buffer);
         free(nal_buffer);
         
         [self setDone];
