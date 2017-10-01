@@ -38,6 +38,7 @@ struct MP42DecodeContext {
     int drop_samples;
 
     BOOL configured;
+    BOOL outputConfigured;
 };
 
 typedef struct MP42DecodeContext MP42DecodeContext;
@@ -398,6 +399,7 @@ static int resample(MP42DecodeContext *context, AVFrame *frame, uint8_t **output
                                                     context->matrix_encoding,
                                                     context->outputFormat->mSampleRate,
                                                     0);
+        context->configured = YES;
     }
 
     if (!context->resampler) {
@@ -542,9 +544,9 @@ static inline void enqueue(MP42AudioDecoder *self, MP42SampleBuffer *outSample)
                 else {
                     send_packet(_context, sampleBuffer);
                     while (!receive_frame(_context, &outSample)) {
-                        if (_context->configured == NO && outSample) {
+                        if (_context->outputConfigured == NO && outSample) {
                             [_outputUnit reconfigure];
-                            _context->configured = YES;
+                            _context->outputConfigured = YES;
                         }
                         enqueue(self, outSample);
                     }
