@@ -1,6 +1,6 @@
 //
 //  MP42SSAParser.m
-//  Subler
+//  SSA parser
 //
 //  Created by Damiano Galassi on 02/10/2017.
 //  Copyright © 2017 Damiano Galassi. All rights reserved.
@@ -8,34 +8,9 @@
 
 #import "MP42SSAParser.h"
 
-@interface MP42SSAStyle : NSObject
+@interface MP42SSAStyle ()
 
 - (instancetype)initWith:(NSArray<NSString *> *)style formats:(NSArray<NSString *> *)format;
-
-@property (nonatomic, readwrite) NSString *name;
-@property (nonatomic, readwrite) NSString *fontName;
-@property (nonatomic, readwrite) int fontSize;
-@property (nonatomic, readwrite) long primaryColour;
-@property (nonatomic, readwrite) long secondaryColour;
-@property (nonatomic, readwrite) long outlineColour;
-@property (nonatomic, readwrite) long backColour;
-@property (nonatomic, readwrite) BOOL bold;
-@property (nonatomic, readwrite) BOOL italic;
-@property (nonatomic, readwrite) BOOL underline;
-@property (nonatomic, readwrite) BOOL strikeOut;
-@property (nonatomic, readwrite) float scaleX;
-@property (nonatomic, readwrite) float scaleY;
-@property (nonatomic, readwrite) int spacing;
-@property (nonatomic, readwrite) float angle;
-@property (nonatomic, readwrite) short borderStyle;
-@property (nonatomic, readwrite) short outline;
-@property (nonatomic, readwrite) short shadow;
-@property (nonatomic, readwrite) short alignment;
-@property (nonatomic, readwrite) int marginL;
-@property (nonatomic, readwrite) int marginR;
-@property (nonatomic, readwrite) int marginV;
-@property (nonatomic, readwrite) int alphaLevel;
-@property (nonatomic, readwrite) int encoding;
 
 @end
 
@@ -47,11 +22,11 @@
     if (self) {
         NSUInteger stylesCount = style.count;
         NSUInteger formatsCount = format.count;
-        
+
         for (NSUInteger index = 0; index < stylesCount && index < formatsCount; index += 1) {
             NSString *value = style[index];
             NSString *formatName = format[index];
-            
+
             if ([formatName isEqualToString:@"Name"]) {
                 _name = value;
             }
@@ -76,13 +51,13 @@
                 _backColour = value.intValue;
             }
             else if ([formatName isEqualToString:@"Bold"]) {
-                _bold = value.intValue == -1 ? YES : NO;
+                _bold = value.intValue > 0; // Hack
             }
             else if ([formatName isEqualToString:@"Italic"]) {
-                _italic = value.intValue == -1 ? YES : NO;
+                _italic = value.intValue != 0;
             }
             else if ([formatName isEqualToString:@"Underline"]) {
-                _underline = value.intValue == -1 ? YES : NO;
+                _underline = value.intValue != 0;
             }
             else if ([formatName isEqualToString:@"StrikeOut"]) {
                 _strikeOut = value.intValue == -1 ? YES : NO;
@@ -127,8 +102,12 @@
                 _encoding = value.intValue;
             }
         }
+
+        if (_name == nil) {
+            return nil;
+        }
     }
-    
+
     return self;
 }
 
@@ -137,32 +116,24 @@
 
 @interface MP42SSALine ()
 
-- (instancetype)initWithString:(NSString *)string format:(NSArray<NSString *> *)format;
-
-@property (nonatomic, readwrite) int layer;
-@property (nonatomic, readwrite) NSString *style;
-@property (nonatomic, readwrite) NSString *name;
-@property (nonatomic, readwrite) int marginL;
-@property (nonatomic, readwrite) int marginR;
-@property (nonatomic, readwrite) int marginV;
-@property (nonatomic, readwrite) NSString *effect;
+- (instancetype)initWithString:(NSString *)string format:(NSArray<NSString *> *)format styles:(NSDictionary<NSString *, MP42SSAStyle *> *)styles skipEventType:(BOOL)skipEventType;
 
 @end
 
 @implementation MP42SSALine
 
-- (instancetype)initWithString:(NSString *)string format:(NSArray<NSString *> *)format
+- (instancetype)initWithString:(NSString *)string format:(NSArray<NSString *> *)format styles:(NSDictionary<NSString *, MP42SSAStyle *> *)styles skipEventType:(BOOL)skipEventType
 {
     self = [super init];
     if (self) {
         NSUInteger formatsCount = format.count;
-        NSArray<NSString *> *values = [self parse:string count:formatsCount];
+        NSArray<NSString *> *values = [self parse:string count:formatsCount skipEventType:skipEventType];
         NSUInteger valuesCount = values.count;
-        
+
         for (NSUInteger index = 0; index < valuesCount && index < formatsCount; index += 1) {
             NSString *value = values[index];
             NSString *formatName = format[index];
-            
+
             if ([formatName isEqualToString:@"Layer"]) {
                 _layer = value.intValue;
             }
@@ -173,7 +144,7 @@
                 _end = ParseSubTime(value.UTF8String, 1000, NO);
             }
             else if ([formatName isEqualToString:@"Style"]) {
-                _style = value;
+                _style = styles[value];
             }
             else if ([formatName isEqualToString:@"Name"]) {
                 _name = value;
@@ -194,21 +165,25 @@
                 _text = value;
             }
         }
+
+        if (!_text) {
+            return nil;
+        }
     }
-    
+
     return self;
 }
 
-- (NSArray<NSString *> *)parse:(NSString *)string count:(NSUInteger)count
+- (NSArray<NSString *> *)parse:(NSString *)string count:(NSUInteger)count skipEventType:(BOOL)skipEventType
 {
     NSScanner *sc = [NSScanner scannerWithString:string];
     NSMutableArray<NSString *> *valuesArray = [NSMutableArray array];
-    
-    if ([sc scanUpToString:@"Dialogue:" intoString:nil] || [sc scanString:@"Dialogue:" intoString:nil]) {
+
+    if (skipEventType || [sc scanUpToString:@"Dialogue:" intoString:nil] || [sc scanString:@"Dialogue:" intoString:nil]) {
         [sc scanString:@"Dialogue:" intoString:nil];
-        
+
         NSString *value;
-        
+
         for (NSUInteger index = 0; index < count - 1; index += 1) {
             if ([sc scanUpToString:@"," intoString:&value]) {
                 [valuesArray addObject:value];
@@ -218,13 +193,13 @@
             }
             [sc scanString:@"," intoString:nil];
         }
-        
+
         value = [sc.string substringFromIndex:sc.scanLocation];
         if (value) {
             [valuesArray addObject:value];
         }
     }
-    
+
     return valuesArray;
 }
 
@@ -233,30 +208,30 @@ static unsigned ParseSubTime(const char *time, unsigned secondScale, BOOL hasSig
     unsigned hour, minute, second, subsecond, timeval;
     char separator[3];
     int sign = 1;
-    
+
     if (hasSign && *time == '-') {
         sign = -1;
         time++;
     }
-    
+
     if (sscanf(time, "%u:%u:%u%[,.:]%u", &hour, &minute, &second, separator, &subsecond) < 5) {
         subsecond = 0;
         if (sscanf(time, "%u:%u:%u", &hour, &minute, &second) < 3) {
             return 0;
         }
     }
-    
+
     if (second > 60) {
         second = 0;
     }
-    
+
     while (subsecond > secondScale) {
         subsecond /= 10;
     }
-    
+
     timeval = hour * 60 * 60 + minute * 60 + second;
     timeval = secondScale * timeval + subsecond;
-    
+
     return timeval * sign;
 }
 
@@ -266,7 +241,6 @@ static unsigned ParseSubTime(const char *time, unsigned secondScale, BOOL hasSig
 @interface MP42SSAParser ()
 
 @property (nonatomic, readonly) NSString *info;
-@property (nonatomic, readonly) NSArray<MP42SSAStyle *> *styles;
 
 @property (nonatomic, readonly) NSArray<NSString *> *format;
 @property (nonatomic, readonly) NSMutableArray<MP42SSALine *> *lines_internal;
@@ -279,7 +253,7 @@ static unsigned ParseSubTime(const char *time, unsigned secondScale, BOOL hasSig
 {
     self = [super init];
     if (self) {
-        _styles = @[];
+        _styles = @{};
         _lines_internal = [NSMutableArray array];
     }
     return self;
@@ -295,12 +269,13 @@ static unsigned ParseSubTime(const char *time, unsigned secondScale, BOOL hasSig
     return self;
 }
 
-- (instancetype)initWithHeader:(NSString *)header
+- (instancetype)initWithMKVHeader:(NSString *)header
 {
     NSParameterAssert(header);
     self = [self init];
     if (self) {
         [self parseHeader:header];
+        _format = @[@"ReadOrder", @"Layer", @"Style", @"Name", @"MarginL",@ "MarginR", @"MarginV", @"Effect", @"Text"];
     }
     return self;
 }
@@ -318,18 +293,18 @@ static unsigned ParseSubTime(const char *time, unsigned secondScale, BOOL hasSig
     NSString *info;
     NSString *styles;
     NSString *format;
-    
+
     NSScanner *sc = [NSScanner scannerWithString:header];
     [sc setCharactersToBeSkipped:nil];
-    
+
     if ([sc scanUpToString:@"[V4+ Styles]" intoString:&info]) {
         _info = [self parseInfo:info];
     }
-    
+
     if ([sc scanUpToString:@"[Events]" intoString:&styles]) {
         _styles = [self parseStyles:styles];
     }
-    
+
     format = [sc.string substringFromIndex:sc.scanLocation];
     if (format.length) {
         _format = [self parseFormat:format];
@@ -341,12 +316,12 @@ static unsigned ParseSubTime(const char *time, unsigned secondScale, BOOL hasSig
     return info;
 }
 
-- (NSArray<MP42SSAStyle *> *)parseStyles:(NSString *)styles
+- (NSDictionary<NSString *, MP42SSAStyle *> *)parseStyles:(NSString *)styles
 {
     NSScanner *sc = [NSScanner scannerWithString:styles];
     NSMutableArray<NSString *> *formatsArray = [NSMutableArray array];
-    NSMutableArray<MP42SSAStyle *> *stylesArray = [NSMutableArray array];
-    
+    NSMutableDictionary<NSString *, MP42SSAStyle *> *stylesDict = [NSMutableDictionary dictionary];
+
     if ([sc scanUpToString:@"Format:" intoString:nil] || [sc scanString:@"Format:" intoString:nil]) {
         [sc scanString:@"Format:" intoString:nil];
         NSString *formats;
@@ -359,35 +334,35 @@ static unsigned ParseSubTime(const char *time, unsigned secondScale, BOOL hasSig
             }
         }
     }
-    
+
     while ([sc scanUpToString:@"Style:" intoString:nil] || [sc scanString:@"Style:" intoString:nil]) {
         [sc scanString:@"Style:" intoString:nil];
         NSString *styles;
         if ([sc scanUpToString:@"\n" intoString:&styles]) {
             NSMutableArray<NSString *> *stylesValueArray = [NSMutableArray array];
-            
+
             NSScanner *stylesScanner = [NSScanner scannerWithString:styles];
             NSString *styleValue;
             while ([stylesScanner scanUpToString:@"," intoString:&styleValue]) {
                 [stylesScanner scanString:@"," intoString:nil];
                 [stylesValueArray addObject:styleValue];
             }
-            
+
             MP42SSAStyle *style = [[MP42SSAStyle alloc] initWith:stylesValueArray formats:formatsArray];
             if (style) {
-                [stylesArray addObject:style];
+                stylesDict[style.name] = style;
             }
         }
     }
-    
-    return stylesArray;
+
+    return stylesDict;
 }
 
 - (NSArray<NSString *> *)parseFormat:(NSString *)format
 {
     NSScanner *sc = [NSScanner scannerWithString:format];
     NSMutableArray<NSString *> *formatsArray = [NSMutableArray array];
-    
+
     if ([sc scanUpToString:@"Format:" intoString:nil] || [sc scanString:@"Format:" intoString:nil]) {
         [sc scanString:@"Format:" intoString:nil];
         NSString *formats;
@@ -400,7 +375,7 @@ static unsigned ParseSubTime(const char *time, unsigned secondScale, BOOL hasSig
             }
         }
     }
-    
+
     return formatsArray;
 }
 
@@ -408,19 +383,23 @@ static unsigned ParseSubTime(const char *time, unsigned secondScale, BOOL hasSig
 {
     NSScanner *sc = [NSScanner scannerWithString:lines];
     NSMutableArray<MP42SSALine *> *linesArray = [NSMutableArray array];
-    
+
     [sc scanUpToString:@"[Events]" intoString:nil];
     [sc scanUpToString:@"Dialogue: " intoString:nil];
-    
+
     NSString *lineString;
-    
+
     while ([sc scanUpToString:@"\n" intoString:&lineString]) {
-        MP42SSALine *line = [[MP42SSALine alloc] initWithString:lineString format:_format];
+        MP42SSALine *line = [[MP42SSALine alloc] initWithString:lineString format:_format styles:_styles skipEventType:NO];
         if (line) {
             [linesArray addObject:line];
+            unsigned end = line.end;
+            if (end > _duration) {
+                _duration = end;
+            }
         }
     }
-    
+
     _lines_internal = linesArray;
 }
 
@@ -430,12 +409,13 @@ static unsigned ParseSubTime(const char *time, unsigned secondScale, BOOL hasSig
     return [_lines_internal copy];
 }
 
-- (void)addLine:(NSString *)lineString
+- (MP42SSALine *)addLine:(NSString *)lineString
 {
-    MP42SSALine *line = [[MP42SSALine alloc] initWithString:lineString format:_format];
+    MP42SSALine *line = [[MP42SSALine alloc] initWithString:lineString format:_format styles:_styles skipEventType:YES];
     if (line) {
         [_lines_internal addObject:line];
     }
+    return line;
 }
 
 @end

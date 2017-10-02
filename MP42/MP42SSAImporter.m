@@ -10,7 +10,10 @@
 #import "MP42FileImporter+Private.h"
 
 #import "MP42File.h"
+
 #import "MP42SSAParser.h"
+#import "MP42SSAConverter.h"
+
 #import "MP42SubUtilities.h"
 #import "MP42Languages.h"
 
@@ -42,6 +45,14 @@
         newTrack.language = getFilenameLanguage((__bridge CFStringRef)self.fileURL.path);
 
         NSString *stringFromFileAtURL = [NSString stringWithContentsOfURL:fileURL encoding:NSUTF8StringEncoding error:NULL];
+
+        if (!stringFromFileAtURL) {
+            if (outError) {
+                *outError = MP42Error(MP42LocalizedString(@"The file could not be opened.", @"ssa error message"),
+                                      MP42LocalizedString(@"The file is not a ssa file, or it does not contain any subtitles.", @"ssa error message"), 100);
+            }
+            return nil;
+        }
 
         // Check if a 10.10 only class is available, NSLinguisticTagger crashes on 10.9
         // if the string contains some characters.
@@ -98,21 +109,8 @@
             }
             return nil;
         }
-        
-        _ss = [[SBSubSerializer alloc] init];
-        [_ss setSSA:YES];
-        
-        for (MP42SSALine *line in _parser.lines) {
-            SBSubLine *sl = [[SBSubLine alloc] initWithLine:line.text start:line.start end: line.end];
-            [_ss addLine:sl];
-        }
-        [_ss setFinished:YES];
 
-        if ([_ss forced]) {
-            newTrack.someSamplesAreForced = YES;
-        }
-        
-        newTrack.duration = _parser.lines.lastObject.end;
+        newTrack.duration = _parser.duration;
 
         [self addTrack:newTrack];
     }
@@ -138,12 +136,26 @@
 - (void)demux
 {
     @autoreleasepool {
-        MP42SampleBuffer *sample;
+
+        MP42SSAConverter *converter = [[MP42SSAConverter alloc] initWithParser:_parser];
+
+        _ss = [[SBSubSerializer alloc] init];
+        [_ss setSSA:YES];
+
+        for (MP42SSALine *line in _parser.lines) {
+            NSString *text = [converter convertLine:line];
+            if (text.length) {
+                SBSubLine *sl = [[SBSubLine alloc] initWithLine:text start:line.start end: line.end];
+                [_ss addLine:sl];
+            }
+        }
+        [_ss setFinished:YES];
 
         for (MP42SubtitleTrack *track in self.inputTracks) {
             CGSize trackSize;
             trackSize.width = track.trackWidth;
             trackSize.height = track.trackHeight;
+            MP42SampleBuffer *sample;
 
             while (!_ss.isEmpty && !self.isCancelled) {
                 SBSubLine *sl = [_ss getSerializedPacket];

@@ -1,9 +1,9 @@
 //
-//  SBVobSubConverter.h
-//  Subler
+//  MP42TextSubConverter.h
+//  MP42Foundation
 //
-//  Created by Damiano Galassi on 26/03/11.
-//  Copyright 2011 Damiano Galassi. All rights reserved.
+//  Created by Damiano Galassi on 02/10/2017.
+//  Copyright © 2017 Damiano Galassi. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
@@ -14,7 +14,7 @@ NS_ASSUME_NONNULL_BEGIN
 @class MP42SampleBuffer;
 @class MP42SubtitleTrack;
 
-@interface MP42BitmapSubConverter : NSObject <MP42ConverterProtocol>
+@interface MP42TextSubConverter : NSObject <MP42ConverterProtocol>
 
 - (instancetype)initWithTrack:(MP42SubtitleTrack *)track error:(NSError **)outError;
 

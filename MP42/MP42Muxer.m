@@ -15,6 +15,7 @@
 #import "MP42Sample.h"
 #import "MP42AudioConverter.h"
 #import "MP42BitmapSubConverter.h"
+#import "MP42TextSubConverter.h"
 
 #import "mp4v2.h"
 #import "MP42FormatUtilites.h"
@@ -129,6 +130,18 @@
             track.converter = subConverter;
             format = track.conversionSettings.format;
         } else if ([track isMemberOfClass:[MP42SubtitleTrack class]] && track.conversionSettings) {
+            MP42TextSubConverter *subConverter = [[MP42TextSubConverter alloc] initWithTrack:(MP42SubtitleTrack *)track
+                                                                                           error:outError];
+
+            if (subConverter == nil) {
+                if (outError && *outError) {
+                    [_logger writeErrorToLog:*outError];
+                }
+                [unsupportedTracks addObject:track];
+                continue;
+            }
+
+            track.converter = subConverter;
             format = track.conversionSettings.format;
         }
 

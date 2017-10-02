@@ -11,7 +11,6 @@
 #import "MP42Sample.h"
 
 #import "MP42File.h"
-#import "MP42SubUtilities.h"
 #import "MP42Languages.h"
 
 #import "MatroskaParser.h"
@@ -50,7 +49,6 @@
     unsigned int buffer, samplesWritten, bufferFlush;
 
     MP42SampleBuffer *previousSample;
-    SBSubSerializer *ss;
 }
 @end
 
@@ -323,10 +321,10 @@ static int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, ui
                     uint8_t *avcCAtom = (uint8_t *)malloc(mkvTrack->CodecPrivateSize); // mkv stores h.264 avcC in CodecPrivate
                     memcpy(avcCAtom, mkvTrack->CodecPrivate, mkvTrack->CodecPrivateSize);
                     if (mkvTrack->CodecPrivateSize >= 3) {
-                        [(MP42VideoTrack*)newTrack setOrigProfile:avcCAtom[1]];
-                        [(MP42VideoTrack*)newTrack setNewProfile:avcCAtom[1]];
-                        [(MP42VideoTrack*)newTrack setOrigLevel:avcCAtom[3]];
-                        [(MP42VideoTrack*)newTrack setNewLevel:avcCAtom[3]];
+                        [(MP42VideoTrack *)newTrack setOrigProfile:avcCAtom[1]];
+                        [(MP42VideoTrack *)newTrack setNewProfile:avcCAtom[1]];
+                        [(MP42VideoTrack *)newTrack setOrigLevel:avcCAtom[3]];
+                        [(MP42VideoTrack *)newTrack setNewLevel:avcCAtom[3]];
                     }
                     free(avcCAtom);
                 }
@@ -879,7 +877,6 @@ static NSString * TrackNameToString(TrackInfo *track)
                     demuxHelper->previousSample = sample;
 #else
                     [self enqueue:sample];
-                    [sample release];
 #endif
                 }
             }
@@ -887,24 +884,19 @@ static NSString * TrackNameToString(TrackInfo *track)
             if (trackInfo->Type == TT_SUB) {
                 if (readMkvPacket(_ioStream, trackInfo, FilePos, &frame, &FrameSize)) {
                     if (strcmp(trackInfo->CodecID, "S_VOBSUB") && strcmp(trackInfo->CodecID, "S_HDMV/PGS")) {
-                        if (!demuxHelper->ss) {
-                            demuxHelper->ss = [[SBSubSerializer alloc] init];
-                            if (!strcmp(trackInfo->CodecID, "S_TEXT/ASS") || !strcmp(trackInfo->CodecID, "S_TEXT/SSA")) {
-                                [demuxHelper->ss setSSA:YES];
-                            }
-                        }
 
-                        NSString *string = [[NSString alloc] initWithBytes:frame length:FrameSize encoding:NSUTF8StringEncoding];
-                        if (!strcmp(trackInfo->CodecID, "S_TEXT/ASS") || !strcmp(trackInfo->CodecID, "S_TEXT/SSA")) {
-                            string = StripSSALine(string);
-                        }
+                        MP42SampleBuffer *sample = [[MP42SampleBuffer alloc] init];
+                        sample->data = frame;
+                        sample->size = FrameSize;
+                        sample->duration = EndTime / SCALE_FACTOR - StartTime / SCALE_FACTOR;
+                        sample->offset = 0;
+                        sample->decodeTimestamp = StartTime / SCALE_FACTOR;
+                        sample->flags |= MP42SampleBufferFlagIsSync;
+                        sample->trackId = demuxHelper->sourceID;
 
-                        if ([string length]) {
-                            SBSubLine *sl = [[SBSubLine alloc] initWithLine:string start:StartTime / SCALE_FACTOR end:EndTime / SCALE_FACTOR];
-                            [demuxHelper->ss addLine:sl];
-                        }
+                        [self enqueue:sample];
+
                         demuxHelper->samplesWritten++;
-                        free(frame);
                     } else {
                         MP42SampleBuffer *nextSample = [[MP42SampleBuffer alloc] init];
 
@@ -1102,36 +1094,6 @@ static NSString * TrackNameToString(TrackInfo *track)
                     else {
                         continue;
                     }
-                }
-            }
-
-            if (demuxHelper->ss) {
-                MP42SampleBuffer *sample = nil;
-                MP4TrackId dstTrackId = demuxHelper->sourceID;
-                SBSubSerializer *ss = demuxHelper->ss;
-
-                [ss setFinished:YES];
-
-                while (![ss isEmpty] && !self.isCancelled) {
-                    SBSubLine *sl = [ss getSerializedPacket];
-
-                    if ([sl->line isEqualToString:@"\n"]) {
-                        sample = copyEmptySubtitleSample(dstTrackId, sl->end_time - sl->begin_time, NO);
-                    }
-                    else {
-                        sample = copySubtitleSample(dstTrackId, sl->line, sl->end_time - sl->begin_time, NO, NO, YES, CGSizeMake(0, 0), 0);
-                    }
-
-                    if (!sample) {
-                        break;
-                    }
-
-                    demuxHelper->currentTime += sample->duration;
-                    sample->decodeTimestamp = demuxHelper->currentTime;
-
-                    [self enqueue:sample];
-
-                    demuxHelper->samplesWritten++;
                 }
             }
 

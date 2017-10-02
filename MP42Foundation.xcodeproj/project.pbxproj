@@ -95,6 +95,14 @@
 		A941A7B51DA7B08600FB2A7C /* MP42MetadataFormat.h in Headers */ = {isa = PBXBuildFile; fileRef = A941A7B21DA7B08600FB2A7C /* MP42MetadataFormat.h */; };
 		A941A7B61DA7B08600FB2A7C /* MP42MetadataFormat.m in Sources */ = {isa = PBXBuildFile; fileRef = A941A7B31DA7B08600FB2A7C /* MP42MetadataFormat.m */; };
 		A941A7B71DA7B08600FB2A7C /* MP42MetadataFormat.m in Sources */ = {isa = PBXBuildFile; fileRef = A941A7B31DA7B08600FB2A7C /* MP42MetadataFormat.m */; };
+		A941C9561F82996600FC5E8D /* MP42TextSubConverter.h in Headers */ = {isa = PBXBuildFile; fileRef = A941C9541F82996600FC5E8D /* MP42TextSubConverter.h */; };
+		A941C9571F82996600FC5E8D /* MP42TextSubConverter.h in Headers */ = {isa = PBXBuildFile; fileRef = A941C9541F82996600FC5E8D /* MP42TextSubConverter.h */; };
+		A941C9581F82996600FC5E8D /* MP42TextSubConverter.m in Sources */ = {isa = PBXBuildFile; fileRef = A941C9551F82996600FC5E8D /* MP42TextSubConverter.m */; };
+		A941C9591F82996600FC5E8D /* MP42TextSubConverter.m in Sources */ = {isa = PBXBuildFile; fileRef = A941C9551F82996600FC5E8D /* MP42TextSubConverter.m */; };
+		A941C95E1F82A9B900FC5E8D /* MP42SSAConverter.h in Headers */ = {isa = PBXBuildFile; fileRef = A941C95C1F82A9B800FC5E8D /* MP42SSAConverter.h */; };
+		A941C95F1F82A9B900FC5E8D /* MP42SSAConverter.h in Headers */ = {isa = PBXBuildFile; fileRef = A941C95C1F82A9B800FC5E8D /* MP42SSAConverter.h */; };
+		A941C9601F82A9B900FC5E8D /* MP42SSAConverter.m in Sources */ = {isa = PBXBuildFile; fileRef = A941C95D1F82A9B800FC5E8D /* MP42SSAConverter.m */; };
+		A941C9611F82A9B900FC5E8D /* MP42SSAConverter.m in Sources */ = {isa = PBXBuildFile; fileRef = A941C95D1F82A9B800FC5E8D /* MP42SSAConverter.m */; };
 		A9422FC51D4917AF000DB435 /* audio_resample.c in Sources */ = {isa = PBXBuildFile; fileRef = A9422FC31D4917AF000DB435 /* audio_resample.c */; };
 		A9422FC61D4917AF000DB435 /* audio_resample.c in Sources */ = {isa = PBXBuildFile; fileRef = A9422FC31D4917AF000DB435 /* audio_resample.c */; };
 		A9422FC71D4917AF000DB435 /* audio_resample.h in Headers */ = {isa = PBXBuildFile; fileRef = A9422FC41D4917AF000DB435 /* audio_resample.h */; };
@@ -319,6 +327,10 @@
 		A925AAAE18379AF800BE84D4 /* MP42Utilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MP42Utilities.m; sourceTree = "<group>"; };
 		A941A7B21DA7B08600FB2A7C /* MP42MetadataFormat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MP42MetadataFormat.h; sourceTree = "<group>"; };
 		A941A7B31DA7B08600FB2A7C /* MP42MetadataFormat.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MP42MetadataFormat.m; sourceTree = "<group>"; };
+		A941C9541F82996600FC5E8D /* MP42TextSubConverter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MP42TextSubConverter.h; sourceTree = "<group>"; };
+		A941C9551F82996600FC5E8D /* MP42TextSubConverter.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MP42TextSubConverter.m; sourceTree = "<group>"; };
+		A941C95C1F82A9B800FC5E8D /* MP42SSAConverter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MP42SSAConverter.h; sourceTree = "<group>"; };
+		A941C95D1F82A9B800FC5E8D /* MP42SSAConverter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MP42SSAConverter.m; sourceTree = "<group>"; };
 		A9422FC31D4917AF000DB435 /* audio_resample.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = audio_resample.c; sourceTree = "<group>"; };
 		A9422FC41D4917AF000DB435 /* audio_resample.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = audio_resample.h; sourceTree = "<group>"; };
 		A947BA9A1824F0B3004C734B /* Ratings.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = Ratings.json; sourceTree = "<group>"; };
@@ -755,6 +767,8 @@
 				A9B9C2371823923100416A4E /* MP42HtmlParser.m */,
 				A9ED5B091F824A9A00E0E4FA /* MP42SSAParser.h */,
 				A9ED5B0C1F824A9B00E0E4FA /* MP42SSAParser.m */,
+				A941C95C1F82A9B800FC5E8D /* MP42SSAConverter.h */,
+				A941C95D1F82A9B800FC5E8D /* MP42SSAConverter.m */,
 				A96523431BAC315900E994E0 /* NSString+MP42Additions.h */,
 				A96523441BAC315900E994E0 /* NSString+MP42Additions.m */,
 			);
@@ -772,6 +786,8 @@
 				A9B9C2451823923100416A4E /* MP42OCRWrapper.mm */,
 				A9B9C2251823923100416A4E /* MP42BitmapSubConverter.h */,
 				A9B9C2261823923100416A4E /* MP42BitmapSubConverter.m */,
+				A941C9541F82996600FC5E8D /* MP42TextSubConverter.h */,
+				A941C9551F82996600FC5E8D /* MP42TextSubConverter.m */,
 				A908010C1D4B83A3002B6950 /* MP42AudioDecoder.h */,
 				A908010D1D4B83A3002B6950 /* MP42AudioDecoder.m */,
 				A908010E1D4B83A3002B6950 /* MP42AudioEncoder.h */,
@@ -801,10 +817,12 @@
 				A9ED5B161F824BC100E0E4FA /* MP42SSAImporter.h in Headers */,
 				A9422FC81D4917AF000DB435 /* audio_resample.h in Headers */,
 				A917286719FD2BCE00348DF8 /* MP42Logging.h in Headers */,
+				A941C95F1F82A9B900FC5E8D /* MP42SSAConverter.h in Headers */,
 				A9ED5B0E1F824A9B00E0E4FA /* MP42SSAParser.h in Headers */,
 				A99FCBC51BAD65EF0058E27A /* MP42Track+Private.h in Headers */,
 				A9AEFE161B9B111B00771292 /* MP42FileImporter+Private.h in Headers */,
 				A96523461BAC315900E994E0 /* NSString+MP42Additions.h in Headers */,
+				A941C9571F82996600FC5E8D /* MP42TextSubConverter.h in Headers */,
 				A908011A1D4B83A3002B6950 /* MP42AudioUnit.h in Headers */,
 				A9022A951D6F3FD9005F0920 /* MP42MetadataItem.h in Headers */,
 			);
@@ -839,6 +857,7 @@
 				A99FCBC41BAD65EF0058E27A /* MP42Track+Private.h in Headers */,
 				A925AAAF18379AF800BE84D4 /* MP42Utilities.h in Headers */,
 				A9B9C28F1823923200416A4E /* MP42OCRWrapper.h in Headers */,
+				A941C9561F82996600FC5E8D /* MP42TextSubConverter.h in Headers */,
 				A9B9C2811823923200416A4E /* MP42HtmlParser.h in Headers */,
 				A9B9C2AA1823923200416A4E /* MatroskaParser.h in Headers */,
 				A9B9C26E1823923200416A4E /* MP42AVFImporter.h in Headers */,
@@ -854,6 +873,7 @@
 				A91711E6187D547D00459495 /* MP42PreviewGenerator.h in Headers */,
 				A9B9C2951823923200416A4E /* MP42SrtImporter.h in Headers */,
 				A9B9C2701823923200416A4E /* MP42BitmapSubConverter.h in Headers */,
+				A941C95E1F82A9B900FC5E8D /* MP42SSAConverter.h in Headers */,
 				A9B9C2721823923200416A4E /* MP42CCImporter.h in Headers */,
 				A9B9C2AF1823923200416A4E /* sfifo.h in Headers */,
 				A9B9C27F1823923200416A4E /* MP42H264Importer.h in Headers */,
@@ -1059,6 +1079,7 @@
 				A910B5E218394EB20064028F /* MP42Utilities.m in Sources */,
 				A910B5E418394EB20064028F /* MP42SubUtilities.m in Sources */,
 				A910B5E618394EB20064028F /* MP42XMLReader.m in Sources */,
+				A941C9611F82A9B900FC5E8D /* MP42SSAConverter.m in Sources */,
 				A910B5E818394EB20064028F /* MP42HtmlParser.m in Sources */,
 				A910B5F118394EB20064028F /* MP42Muxer.m in Sources */,
 				A910B5F418394EB20064028F /* MP42Sample.m in Sources */,
@@ -1070,6 +1091,7 @@
 				A910B5FF18394EB20064028F /* MP42BitmapSubConverter.m in Sources */,
 				A910B60118394EB20064028F /* MP42AudioConverter.m in Sources */,
 				A97EA7CA1D4B8A2D00257CEA /* FFmpegUtils.m in Sources */,
+				A941C9591F82996600FC5E8D /* MP42TextSubConverter.m in Sources */,
 				A910B60318394EB20064028F /* MP42H264Importer.mm in Sources */,
 				A910B60518394EB20064028F /* MP42VobSubImporter.m in Sources */,
 				A9ED5B141F824BC100E0E4FA /* MP42SSAImporter.m in Sources */,
@@ -1111,9 +1133,11 @@
 				A9B9C2AE1823923200416A4E /* sfifo.c in Sources */,
 				A9B9C27E1823923200416A4E /* MP42FileImporter.m in Sources */,
 				A9B9C27A1823923200416A4E /* MP42Fifo.m in Sources */,
+				A941C9581F82996600FC5E8D /* MP42TextSubConverter.m in Sources */,
 				A9DFBDA3195FF5BA00410060 /* MP42Heap.m in Sources */,
 				A9059DCC1D870B9C000D1B9A /* MP42ConversionSettings.m in Sources */,
 				A9B9C26B1823923200416A4E /* MP42AudioConverter.m in Sources */,
+				A941C9601F82A9B900FC5E8D /* MP42SSAConverter.m in Sources */,
 				A9B9C2711823923200416A4E /* MP42BitmapSubConverter.m in Sources */,
 				A9B9C28E1823923200416A4E /* MP42Muxer.m in Sources */,
 				A9ED5B0F1F824A9B00E0E4FA /* MP42SSAParser.m in Sources */,
