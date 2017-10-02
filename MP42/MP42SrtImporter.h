@@ -9,7 +9,5 @@
 #import <Foundation/Foundation.h>
 #import "MP42FileImporter.h"
 
-@class SBSubSerializer;
-
 @interface MP42SrtImporter : MP42FileImporter
 @end

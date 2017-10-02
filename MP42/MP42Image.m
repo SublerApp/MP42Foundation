@@ -16,14 +16,7 @@
 @end
 
 @implementation MP42Image {
-@private
     NSImage *_image;
-
-    NSURL   *_url;
-    NSData  *_data;
-    NSString *_uuid;
-
-    MP42TagArtworkType _type;
 }
 
 @synthesize url = _url;

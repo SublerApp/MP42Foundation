@@ -940,7 +940,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
             // this happens when the object was unarchived from a file.
             if (![track isMemberOfClass:[MP42ChapterTrack class]]) {
                 if (!track.importer && track.URL) {
-                    MP42FileImporter *fileImporter = [self.importers valueForKey:track.URL.path];
+                    MP42FileImporter *fileImporter = self.importers[track.URL.path];
 
                     if (!fileImporter) {
                         fileImporter = [[MP42FileImporter alloc] initWithURL:track.URL error:outError];
@@ -1060,9 +1060,14 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
     MP4SetTrackIntegerProperty(self.fileHandle, jpegTrack, "tkhd.layer", 1);
     MP4SetTrackDisabled(self.fileHandle, jpegTrack);
 
+    MP4SampleId samplesCount = MP4GetTrackNumberOfSamples(self.fileHandle, chapterTrack.trackId);
     NSUInteger idx = 1;
 
     for (MP42TextSample *chapterT in chapterTrack.chapters) {
+        if (idx > samplesCount) {
+            break;
+        }
+
         MP4Duration duration = MP4GetSampleDuration(self.fileHandle, chapterTrack.trackId, idx++);
 
         NSData *imageData = chapterT.image.data;
