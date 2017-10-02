@@ -50,6 +50,7 @@ FourCharCode getTrackMediaSubType(MP4FileHandle fileHandle, MP4TrackId Id);
 
 NSString * getTrackLanguage(MP4FileHandle fileHandle, MP4TrackId Id);
 NSString * getFilenameLanguage(CFStringRef filename);
+NSString * guessStringLanguage(NSString *string);
 
 MP4Duration getTrackDuration(MP4FileHandle fileHandle, MP4TrackId trackId);
 

@@ -54,51 +54,12 @@
             return nil;
         }
 
-        // Check if a 10.10 only class is available, NSLinguisticTagger crashes on 10.9
-        // if the string contains some characters.
-        if ([newTrack.language isEqualToString:@"und"] && NSClassFromString(@"NSVisualEffectView")) {
-			// we couldn't deduce language from the fileURL
-			// -> Let's look into the file itself
-
-			if (stringFromFileAtURL) { // try auto determining
-                NSArray *tagschemes = @[NSLinguisticTagSchemeLanguage];
-                NSCountedSet *languagesSet = [NSCountedSet new];
-				NSLinguisticTagger *tagger = [[NSLinguisticTagger alloc] initWithTagSchemes:tagschemes options:0];
-
-				[stringFromFileAtURL enumerateLinesUsingBlock:^(NSString *line, BOOL *stop) {
-
-					if (line.length > 1) {
-
-                        tagger.string = line;
-
-                        NSOrthography *ortho = [tagger orthographyAtIndex:0 effectiveRange:NULL];
-                        NSString *dominantLanguage = ortho.dominantLanguage;
-
-						if (dominantLanguage && ![dominantLanguage isEqualToString:@"und"]) {
-							[languagesSet addObject:dominantLanguage];
-						}
-					}
-				}];
-
-				NSArray *sortedValues = [languagesSet.allObjects sortedArrayUsingComparator:^(id obj1, id obj2) {
-					NSUInteger n = [languagesSet countForObject:obj1];
-					NSUInteger m = [languagesSet countForObject:obj2];
-					return (n <= m)? (n < m)? NSOrderedAscending : NSOrderedSame : NSOrderedDescending;
-				}];
-
-				NSString *language = sortedValues.lastObject;
-
-                if (language) {
-                    NSLocale *locale = [[NSLocale alloc] initWithLocaleIdentifier:@"en"];
-                    NSString *languageName = [locale displayNameForKey:NSLocaleLanguageCode
-															 value:language];
-
-                    if (languageName) {
-                        newTrack.language = [MP42Languages.defaultManager extendedTagForLang:languageName];
-                    }
-                }
-			}
-		}
+        if ([newTrack.language isEqualToString:@"und"]) {
+            NSString *guess = guessStringLanguage(stringFromFileAtURL);
+            if (guess) {
+                newTrack.language = guess;
+            }
+        }
 
         _parser = [[MP42SSAParser alloc] initWithString:stringFromFileAtURL];
 
@@ -180,7 +141,7 @@
 
 - (NSString *)description
 {
-    return @"SRT demuxer";
+    return @"SSA demuxer";
 }
 
 @end

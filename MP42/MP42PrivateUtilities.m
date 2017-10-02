@@ -327,6 +327,55 @@ NSString * getFilenameLanguage(CFStringRef filename)
 	return lang;
 }
 
+NSString *guessStringLanguage(NSString *stringFromFileAtURL)
+{
+    // Check if a 10.10 only class is available, NSLinguisticTagger crashes on 10.9
+    // if the string contains some characters.
+    if (NSClassFromString(@"NSVisualEffectView")) {
+        // we couldn't deduce language from the fileURL
+        // -> Let's look into the file itself
+
+        NSArray *tagschemes = @[NSLinguisticTagSchemeLanguage];
+        NSCountedSet *languagesSet = [NSCountedSet new];
+        NSLinguisticTagger *tagger = [[NSLinguisticTagger alloc] initWithTagSchemes:tagschemes options:0];
+
+        [stringFromFileAtURL enumerateLinesUsingBlock:^(NSString *line, BOOL *stop) {
+
+            if (line.length > 1) {
+
+                tagger.string = line;
+
+                NSOrthography *ortho = [tagger orthographyAtIndex:0 effectiveRange:NULL];
+                NSString *dominantLanguage = ortho.dominantLanguage;
+
+                if (dominantLanguage && ![dominantLanguage isEqualToString:@"und"]) {
+                    [languagesSet addObject:dominantLanguage];
+                }
+            }
+        }];
+
+        NSArray *sortedValues = [languagesSet.allObjects sortedArrayUsingComparator:^(id obj1, id obj2) {
+            NSUInteger n = [languagesSet countForObject:obj1];
+            NSUInteger m = [languagesSet countForObject:obj2];
+            return (n <= m)? (n < m)? NSOrderedAscending : NSOrderedSame : NSOrderedDescending;
+        }];
+
+        NSString *language = sortedValues.lastObject;
+
+        if (language) {
+            NSLocale *locale = [[NSLocale alloc] initWithLocaleIdentifier:@"en"];
+            NSString *languageName = [locale displayNameForKey:NSLocaleLanguageCode
+                                                         value:language];
+
+            if (languageName) {
+                return [MP42Languages.defaultManager extendedTagForLang:languageName];
+            }
+        }
+    }
+
+    return nil;
+}
+
 #pragma mark -
 
 NSTimeInterval getTrackStartOffset(MP4FileHandle fileHandle, MP4TrackId Id)
