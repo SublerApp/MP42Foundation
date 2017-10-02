@@ -10,6 +10,7 @@
 #import "MP42MkvImporter.h"
 #import "MP42Mp4Importer.h"
 #import "MP42SrtImporter.h"
+#import "MP42SSAImporter.h"
 #import "MP42CCImporter.h"
 #import "MP42AC3Importer.h"
 #import "MP42AACImporter.h"
@@ -55,7 +56,8 @@ static NSArray<NSString *> *_supportedFileFormats;
                            [MP42H264Importer class],
                            [MP42VobSubImporter class],
                            [MP42AVFImporter class],
-                           [MP42AC3Importer class]];
+                           [MP42AC3Importer class],
+                           [MP42SSAImporter class],];
 
         NSMutableArray<NSString *> *formats = [[NSMutableArray alloc] init];
 
