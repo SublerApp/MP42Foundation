@@ -806,63 +806,6 @@ int LoadSMIFromURL(NSURL *url, SBSubSerializer *ss, int subCount)
     return 1;
 }
 
-NSString * StripSSALine(NSString *line)
-{
-    NSUInteger i = 0;
-
-    NSScanner *sc = [NSScanner scannerWithString:line];
-    for (i = 0; i < 8; i++) {
-        [sc scanUpToString:@"," intoString:nil];
-        [sc scanString:@"," intoString:nil];
-    }
-
-    line = [sc.string substringFromIndex:sc.scanLocation];
-
-    NSRange startRange = [line rangeOfString: @"}"];
-    while (startRange.location != NSNotFound) {
-        NSRange endRange = [line rangeOfString: @"{"];
-        if (endRange.location != NSNotFound && endRange.length != 0) {
-            NSString *replacement = @"";
-            if (endRange.location + 3 < line.length) {
-                unichar tag = [line characterAtIndex:endRange.location + 2];
-                unichar tagState = [line characterAtIndex:endRange.location + 3];
-                if (tagState == '1') {
-                    if (tag == 'i') replacement = @"<i>";
-                    else if (tag == 'b') replacement = @"<b>";
-                    else if (tag == 'u') replacement = @"<u>";
-                }
-                else if (tagState == '0'){
-                    if (tag == 'i') replacement = @"</i>";
-                    else if (tag == 'b') replacement = @"</b>";
-                    else if (tag == 'u') replacement = @"</u>";
-                }
-            }
-            endRange.length = startRange.location - endRange.location +1;
-            line = [line stringByReplacingCharactersInRange:endRange withString:replacement];
-            startRange = [line rangeOfString: @"}"];
-        }
-        else {
-            break;
-        }
-    }
-
-    startRange = [line rangeOfString: @"\\N"];
-    while (startRange.location != NSNotFound) {
-        startRange.length = 2;
-        line = [line stringByReplacingCharactersInRange:startRange withString:@"\n"];
-        startRange = [line rangeOfString: @"\\N"];
-    }
-    
-    startRange = [line rangeOfString: @"\\n"];
-    while (startRange.location != NSNotFound) {
-        startRange.length = 2;
-        line = [line stringByReplacingCharactersInRange:startRange withString:@"\n"];
-        startRange = [line rangeOfString: @"\\n"];
-    }
-
-    return line;
-}
-
 u_int8_t* createStyleRecord(u_int16_t startChar, u_int16_t endChar, u_int16_t fontID, u_int8_t flags, rgba_color color, u_int8_t* style)
 {
     style[0] = (startChar >> 8) & 0xff; // startChar

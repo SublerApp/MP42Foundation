@@ -24,7 +24,6 @@
 @interface MP42SSAImporter ()
 
 @property (nonatomic, readonly) MP42SSAParser *parser;
-@property (nonatomic, readonly) SBSubSerializer *ss;
 
 @end
 
@@ -100,17 +99,17 @@
 
         MP42SSAConverter *converter = [[MP42SSAConverter alloc] initWithParser:_parser];
 
-        _ss = [[SBSubSerializer alloc] init];
-        [_ss setSSA:YES];
+        SBSubSerializer *ss = [[SBSubSerializer alloc] init];
+        [ss setSSA:YES];
 
         for (MP42SSALine *line in _parser.lines) {
             NSString *text = [converter convertLine:line];
             if (text.length) {
                 SBSubLine *sl = [[SBSubLine alloc] initWithLine:text start:line.start end: line.end];
-                [_ss addLine:sl];
+                [ss addLine:sl];
             }
         }
-        [_ss setFinished:YES];
+        [ss setFinished:YES];
 
         for (MP42SubtitleTrack *track in self.inputTracks) {
             CGSize trackSize;
@@ -118,8 +117,8 @@
             trackSize.height = track.trackHeight;
             MP42SampleBuffer *sample;
 
-            while (!_ss.isEmpty && !self.isCancelled) {
-                SBSubLine *sl = [_ss getSerializedPacket];
+            while (!ss.isEmpty && !self.isCancelled) {
+                SBSubLine *sl = [ss getSerializedPacket];
 
                 if ([sl->line isEqualToString:@"\n"]) {
                     sample = copyEmptySubtitleSample(track.sourceId, sl->end_time - sl->begin_time, NO);
