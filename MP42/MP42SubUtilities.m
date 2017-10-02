@@ -180,7 +180,7 @@ canOutput:
     ssa = isSSA;
 }
 
--(NSString*)description
+-(NSString *)description
 {
 	return [NSString stringWithFormat:@"lines left: %lu finished inputting: %d",(unsigned long)[lines count],finished];
 }
@@ -806,30 +806,8 @@ int LoadSMIFromURL(NSURL *url, SBSubSerializer *ss, int subCount)
     return 1;
 }
 
-int ParseSSAHeader(NSString *header) {
-    NSString *info;
-    NSString *styles;
-    //NSString *splitLine  = @"\\n+";
-    //NSArray * stylesArray;
-
-    //NSLog(@"%@", header);
-    NSScanner *sc = [NSScanner scannerWithString:header];
-	[sc setCharactersToBeSkipped:nil];
-
-    [sc scanUpToString:@"[V4+ Styles]" intoString:&info];
-    if (info) {
-    }
-    [sc scanUpToString:@"[Events]" intoString:&styles];
-    if (styles) {
-        //stylesArray = [styles componentsSeparatedByRegex:splitLine];
-        //NSLog(@"%@", styles);
-    }
-    [sc scanUpToString:@"Format:" intoString:nil];
-
-    return 0;
-}
-
-NSString* StripSSALine(NSString *line){
+NSString * StripSSALine(NSString *line)
+{
     NSUInteger i = 0;
 
     NSScanner *sc = [NSScanner scannerWithString:line];
@@ -838,14 +816,14 @@ NSString* StripSSALine(NSString *line){
         [sc scanString:@"," intoString:nil];
     }
 
-    line = [[sc string]substringFromIndex:[sc scanLocation]];
+    line = [sc.string substringFromIndex:sc.scanLocation];
 
     NSRange startRange = [line rangeOfString: @"}"];
     while (startRange.location != NSNotFound) {
         NSRange endRange = [line rangeOfString: @"{"];
         if (endRange.location != NSNotFound && endRange.length != 0) {
-            NSString * replacement = @"";
-            if (endRange.location + 3 < [line length]) {
+            NSString *replacement = @"";
+            if (endRange.location + 3 < line.length) {
                 unichar tag = [line characterAtIndex:endRange.location + 2];
                 unichar tagState = [line characterAtIndex:endRange.location + 3];
                 if (tagState == '1') {
@@ -863,8 +841,9 @@ NSString* StripSSALine(NSString *line){
             line = [line stringByReplacingCharactersInRange:endRange withString:replacement];
             startRange = [line rangeOfString: @"}"];
         }
-        else
+        else {
             break;
+        }
     }
 
     startRange = [line rangeOfString: @"\\N"];

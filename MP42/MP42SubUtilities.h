@@ -54,7 +54,6 @@ int LoadSRTFromURL(NSURL *url, SBSubSerializer *ss, MP4Duration *duration);
 int LoadSMIFromURL(NSURL *url, SBSubSerializer *ss, int subCount);
 
 int LoadChaptersFromURL(NSURL *url, NSMutableArray *ss);
-int ParseSSAHeader(NSString *header);
 NSString *StripSSALine(NSString *line);
 
 unsigned ParseSubTime(const char *time, unsigned secondScale, BOOL hasSign);
