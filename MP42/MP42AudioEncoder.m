@@ -9,7 +9,7 @@
 #import "MP42AudioEncoder.h"
 #import "MP42Fifo.h"
 #import "MP42Sample.h"
-#import "MP42PrivateUtilities.h"
+#import "MP42FormatUtilites.h"
 
 #include "sfifo.h"
 

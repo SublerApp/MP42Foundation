@@ -12,6 +12,9 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+    uint8_t *CreateEsdsFromSetupData(uint8_t *codecPrivate, size_t vosLen, size_t *esdsLen, int trackID, bool audio, bool write_version);
+    ComponentResult ReadESDSDescExt(void* descExt, UInt8 **buffer, int *size, int versionFlags);
+
     UInt32 getDefaultChannelLayout(UInt32 channelsCount);
 
     int readAC3Config(uint64_t acmod, uint64_t lfeon, UInt32 *channelsCount, UInt32 *channelLayoutTag);
