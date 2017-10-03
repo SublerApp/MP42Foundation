@@ -24,7 +24,7 @@
 }
 
 + (NSArray<NSString *> *)supportedFileFormats {
-    return @[@"srt"];
+    return @[@"srt", @"smi"];
 }
 
 - (instancetype)initWithURL:(NSURL *)fileURL error:(NSError **)outError
