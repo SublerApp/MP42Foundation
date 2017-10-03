@@ -14,6 +14,9 @@ NS_ASSUME_NONNULL_BEGIN
 @class MP42SampleBuffer;
 @class MP42SubtitleTrack;
 
+/**
+ Converts Sub Station Alpha subtitles to Text subtitles (plus html tags).
+ */
 @interface MP42TextSubConverter : NSObject <MP42ConverterProtocol>
 
 - (instancetype)initWithTrack:(MP42SubtitleTrack *)track error:(NSError **)outError;

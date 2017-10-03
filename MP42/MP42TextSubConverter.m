@@ -29,7 +29,7 @@
 
 @property (nonatomic, readonly) MP42Fifo<MP42SampleBuffer *> *inputSamplesBuffer;
 
-@property (nonatomic, readonly) SBSubSerializer *ss;
+@property (nonatomic, readonly) MP42SubSerializer *ss;
 
 @property (nonatomic, readonly) MP42SSAParser *parser;
 @property (nonatomic, readonly) MP42SSAConverter *converter;
@@ -63,12 +63,17 @@
                 if (_converter && text.length) {
                     if (_converter) {
                         MP42SSALine *SSAline = [_parser addLine:text];
-                        text = [_converter convertLine:SSAline];
+                        if (SSAline) {
+                            text = [_converter convertLine:SSAline];
+                        }
+                        else {
+                            text = nil;
+                        }
                     }
                 }
 
                 if (text.length) {
-                    SBSubLine *sl = [[SBSubLine alloc] initWithLine:text
+                    MP42SubLine *sl = [[MP42SubLine alloc] initWithLine:text
                                                               start:sampleBuffer->decodeTimestamp
                                                                 end:sampleBuffer->decodeTimestamp + sampleBuffer->duration];
                     [_ss addLine:sl];
@@ -91,7 +96,7 @@
             _converter = [[MP42SSAConverter alloc] initWithParser:_parser];
         }
 
-        _ss = [[SBSubSerializer alloc] init];
+        _ss = [[MP42SubSerializer alloc] init];
         _inputSamplesBuffer  = [[MP42Fifo alloc] initWithCapacity:100];
         _done = dispatch_semaphore_create(0);
         _trackID = track.sourceId;
@@ -113,7 +118,7 @@
 {
     if (_finished) {
         if (!_ss.isEmpty) {
-            SBSubLine *sl = [_ss getSerializedPacket];
+            MP42SubLine *sl = [_ss getSerializedPacket];
             MP42SampleBuffer *sample;
 
             if ([sl->line isEqualToString:@"\n"]) {

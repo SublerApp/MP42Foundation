@@ -10,7 +10,7 @@
 #import "MP42Sample.h"
 #import "MP42HtmlParser.h"
 
-@implementation SBSubSerializer
+@implementation MP42SubSerializer
 
 -(instancetype)init
 {
@@ -26,7 +26,7 @@
 
 static CFComparisonResult CompareLinesByBeginTime(const void *a, const void *b, void *unused)
 {
-	SBSubLine *al = (__bridge SBSubLine*)a, *bl = (__bridge SBSubLine*)b;
+	MP42SubLine *al = (__bridge MP42SubLine *)a, *bl = (__bridge MP42SubLine *)b;
 	
 	if (al->begin_time > bl->begin_time) return kCFCompareGreaterThan;
 	if (al->begin_time < bl->begin_time) return kCFCompareLessThan;
@@ -36,7 +36,7 @@ static CFComparisonResult CompareLinesByBeginTime(const void *a, const void *b, 
 	return kCFCompareEqualTo;
 }
 
--(void)addLine:(SBSubLine *)line
+-(void)addLine:(MP42SubLine *)line
 {
 	if (line->begin_time >= line->end_time) {
 		if (line->begin_time)
@@ -48,7 +48,7 @@ static CFComparisonResult CompareLinesByBeginTime(const void *a, const void *b, 
 	
 	NSUInteger nlines = [lines count];
 	
-	if (!nlines || line->begin_time > ((SBSubLine*)[lines objectAtIndex:nlines-1])->begin_time) {
+	if (!nlines || line->begin_time > ((MP42SubLine*)[lines objectAtIndex:nlines-1])->begin_time) {
 		[lines addObject:line];
 	} else {
 		CFIndex i = CFArrayBSearchValues((CFArrayRef)lines, CFRangeMake(0, nlines), (__bridge const void *)(line), CompareLinesByBeginTime, NULL);
@@ -61,10 +61,10 @@ static CFComparisonResult CompareLinesByBeginTime(const void *a, const void *b, 
 	
 }
 
--(SBSubLine*)getNextRealSerializedPacket
+-(MP42SubLine *)getNextRealSerializedPacket
 {
 	NSUInteger nlines = [lines count];
-	SBSubLine *first = [lines objectAtIndex:0];
+	MP42SubLine *first = [lines objectAtIndex:0];
     NSMutableString *str;
 	int i;
     
@@ -73,7 +73,7 @@ static CFComparisonResult CompareLinesByBeginTime(const void *a, const void *b, 
 			unsigned maxEndTime = first->end_time;
 			
 			for (i = 1; i < nlines; i++) {
-				SBSubLine *l = [lines objectAtIndex:i];
+				MP42SubLine *l = [lines objectAtIndex:i];
 				
 				if (l->begin_time >= maxEndTime) {
 					goto canOutput;
@@ -93,7 +93,7 @@ canOutput:
 	int deleted = 0;
     
 	for (i = 1; i < nlines; i++) {
-		SBSubLine *l = [lines objectAtIndex:i];
+		MP42SubLine *l = [lines objectAtIndex:i];
 		if (l->begin_time >= end_time) break;
 		
 		//shorten packet end time if another shorter time (begin or end) is found
@@ -112,7 +112,7 @@ canOutput:
 	}
 	
 	for (i = 0; i < nlines; i++) {
-		SBSubLine *l = [lines objectAtIndex:i - deleted];
+		MP42SubLine *l = [lines objectAtIndex:i - deleted];
 		
 		if (l->end_time == end_time) {
 			[lines removeObjectAtIndex:i - deleted];
@@ -120,19 +120,19 @@ canOutput:
 		}
 	}
 	
-	return [[SBSubLine alloc] initWithLine:str start:begin_time end:end_time top_pos:top_pos forced:frcd];
+	return [[MP42SubLine alloc] initWithLine:str start:begin_time end:end_time top_pos:top_pos forced:frcd];
 }
 
--(SBSubLine*)getSerializedPacket
+-(MP42SubLine*)getSerializedPacket
 {
 	NSUInteger nlines = [lines count];
     
 	if (!nlines) return nil;
 	
-	SBSubLine *nextline = [lines objectAtIndex:0], *ret;
+	MP42SubLine *nextline = [lines objectAtIndex:0], *ret;
 	
 	if (nextline->begin_time > last_end_time) {
-		ret = [[SBSubLine alloc] initWithLine:@"\n" start:last_end_time end:nextline->begin_time];
+		ret = [[MP42SubLine alloc] initWithLine:@"\n" start:last_end_time end:nextline->begin_time];
 	} else {
 		ret = [self getNextRealSerializedPacket];
 	}
@@ -187,7 +187,7 @@ canOutput:
 
 @end
 
-@implementation SBSubLine
+@implementation MP42SubLine
 
 -(instancetype)initWithLine:(NSString *)l start:(unsigned)s end:(unsigned)e
 {
@@ -367,7 +367,7 @@ static int ParseForced(NSString *str)
 	return res;
 }
 
-int LoadSRTFromURL(NSURL *url, SBSubSerializer *ss, MP4Duration *duration)
+int LoadSRTFromURL(NSURL *url, MP42SubSerializer *ss, MP4Duration *duration)
 {
 	NSMutableString *srt = STStandardizeStringNewlines(STLoadFileWithUnknownEncoding(url));
 	if (!srt.length) return 0;
@@ -418,7 +418,7 @@ int LoadSRTFromURL(NSURL *url, SBSubSerializer *ss, MP4Duration *duration)
 			case LINES:
 				[sc scanUpToString:@"\n\n" intoString:&res];
 				[sc scanString:@"\n\n" intoString:nil];
-				SBSubLine *sl = [[SBSubLine alloc] initWithLine:res start:startTime end:endTime top_pos:position forced:forced];
+				MP42SubLine *sl = [[MP42SubLine alloc] initWithLine:res start:startTime end:endTime top_pos:position forced:forced];
 				[ss addLine:sl];
 				state = INITIAL;
 				break;
@@ -648,7 +648,7 @@ static NSMutableString *StandardizeSMIWhitespace(NSString *str)
 	return ms;
 }
 
-int LoadSMIFromURL(NSURL *url, SBSubSerializer *ss, int subCount)
+int LoadSMIFromURL(NSURL *url, MP42SubSerializer *ss, int subCount)
 {
 	NSMutableString *smi = StandardizeSMIWhitespace(STLoadFileWithUnknownEncoding(url));
 	if (!smi) return 0;
@@ -694,7 +694,7 @@ int LoadSMIFromURL(NSURL *url, SBSubSerializer *ss, int subCount)
 					if (subCount == 2 && cc == 2)
 						[cmt insertString:@"{\\an8}" atIndex:0];
 					if ((subCount == 1 && cc == 1) || (subCount == 2 && cc == 2)) {
-						SBSubLine *sl = [[SBSubLine alloc] initWithLine:cmt start:startTime end:endTime];
+						MP42SubLine *sl = [[MP42SubLine alloc] initWithLine:cmt start:startTime end:endTime];
 						[ss addLine:sl];
 					}
 				}

@@ -1438,9 +1438,9 @@ NSData* H264Info(const char *filePath, uint32_t *pic_width, uint32_t *pic_height
     return timescale;
 }
 
-- (NSSize)sizeForTrack:(MP42Track *)track
+- (NSSize)sizeForTrack:(MP42VideoTrack *)track
 {
-    return NSMakeSize([(MP42VideoTrack*)track trackWidth], [(MP42VideoTrack*) track trackHeight]);
+    return NSMakeSize(track.trackWidth, track.trackHeight);
 }
 
 - (NSData *)magicCookieForTrack:(MP42Track *)track

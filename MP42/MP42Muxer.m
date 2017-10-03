@@ -153,7 +153,7 @@
                 continue;
             }
 
-            NSSize size = [importer sizeForTrack:track];
+            NSSize size = [importer sizeForTrack:(MP42VideoTrack *)track];
 
             uint8_t *avcCAtom = (uint8_t *)magicCookie.bytes;
             dstTrackId = MP4AddH264VideoTrack(_fileHandle, timeScale,
@@ -214,7 +214,7 @@
             // Check whether we can use hvc1 or hev1 fourcc.
             bool completeness = 0;
             if (magicCookie.length && !analyze_HEVC(magicCookie.bytes, magicCookie.length, &completeness)) {
-                NSSize size = [importer sizeForTrack:track];
+                NSSize size = [importer sizeForTrack:(MP42VideoTrack *)track];
 
                 dstTrackId = MP4AddH265VideoTrack(_fileHandle, timeScale, MP4_INVALID_DURATION, size.width, size.height, completeness);
 
@@ -440,7 +440,7 @@
 
         // WebVTT
         else if ([track isMemberOfClass:[MP42SubtitleTrack class]] && format ==kMP42SubtitleCodecType_WebVTT) {
-            NSSize videoSize = [importer sizeForTrack:track];
+            NSSize videoSize = [importer sizeForTrack:(MP42SubtitleTrack *)track];
 
             for (id workingTrack in _activeTracks)
                 if ([workingTrack isMemberOfClass:[MP42VideoTrack class]]) {
@@ -468,7 +468,7 @@
 
         // Closed Caption text track
         else if ([track isMemberOfClass:[MP42ClosedCaptionTrack class]]) {
-            NSSize videoSize = [importer sizeForTrack:track];
+            NSSize videoSize = [importer sizeForTrack:(MP42ClosedCaptionTrack *)track];
 
             for (id workingTrack in _activeTracks)
                 if ([workingTrack isMemberOfClass:[MP42VideoTrack class]]) {

@@ -63,7 +63,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly) NSDictionary<NSString *, MP42SSAStyle *> *styles;
 @property (nonatomic, readonly) unsigned duration;
 
-- (MP42SSALine *)addLine:(NSString *)line;
+- (nullable MP42SSALine *)addLine:(NSString *)line;
 
 @end
 

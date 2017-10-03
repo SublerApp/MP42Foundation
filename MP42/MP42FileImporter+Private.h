@@ -14,6 +14,8 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @class MP42SampleBuffer;
+@class MP42AudioTrack;
+@class MP42VideoTrack;
 
 @interface MP42FileImporter (Private)
 
@@ -44,9 +46,9 @@ NS_ASSUME_NONNULL_BEGIN
 @interface MP42FileImporter (Override)
 
 - (NSUInteger)timescaleForTrack:(MP42Track *)track;
-- (NSSize)sizeForTrack:(MP42Track *)track;
+- (NSSize)sizeForTrack:(MP42VideoTrack *)track;
 - (nullable NSData *)magicCookieForTrack:(MP42Track *)track;
-- (AudioStreamBasicDescription)audioDescriptionForTrack:(MP42Track *)track;
+- (AudioStreamBasicDescription)audioDescriptionForTrack:(MP42AudioTrack *)track;
 - (BOOL)cleanUp:(MP42Track *)track fileHandle:(MP42FileHandle)fileHandle;
 
 - (BOOL)audioTrackUsesExplicitEncoderDelay:(MP42Track *)track;

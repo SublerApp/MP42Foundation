@@ -58,11 +58,9 @@ typedef struct MP4DemuxHelper {
     return MP4GetTrackTimeScale(_fileHandle, track.sourceId);
 }
 
-- (NSSize)sizeForTrack:(MP42Track *)track
+- (NSSize)sizeForTrack:(MP42VideoTrack *)track
 {
-    MP42VideoTrack *currentTrack = (MP42VideoTrack *) track;
-
-    return NSMakeSize([currentTrack width], [currentTrack height]);
+    return NSMakeSize(track.width, track.height);
 }
 
 - (NSData *)magicCookieForTrack:(MP42Track *)track

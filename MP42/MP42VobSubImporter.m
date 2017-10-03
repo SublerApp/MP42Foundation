@@ -255,9 +255,9 @@ static NSArray<SBVobSubTrack *> * LoadVobSubSubtitles(NSURL *theDirectory, NSStr
     return 1000;
 }
 
-- (NSSize)sizeForTrack:(MP42Track *)track
+- (NSSize)sizeForTrack:(MP42VideoTrack *)track
 {
-    return NSMakeSize([(MP42SubtitleTrack *)track trackWidth], [(MP42SubtitleTrack *)track trackHeight]);
+    return NSMakeSize(track.trackWidth, track.trackHeight);
 }
 
 - (NSData *)magicCookieForTrack:(MP42Track *)track

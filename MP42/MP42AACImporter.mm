@@ -828,7 +828,7 @@ static bool GetFirstHeader(FILE* inFile)
     return samplesPerSecond;
 }
 
-- (NSSize)sizeForTrack:(MP42Track *)track
+- (NSSize)sizeForTrack:(MP42VideoTrack *)track
 {
     return NSMakeSize(0, 0);
 }

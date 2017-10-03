@@ -630,9 +630,9 @@ static NSString * TrackNameToString(TrackInfo *track)
     return 1000;
 }
 
-- (NSSize)sizeForTrack:(MP42Track *)track
+- (NSSize)sizeForTrack:(MP42VideoTrack *)track
 {
-      return NSMakeSize([(MP42VideoTrack *)track width], [(MP42VideoTrack *) track height]);
+      return NSMakeSize(track.width, track.height);
 }
 
 - (NSData *)magicCookieForTrack:(MP42Track *)track

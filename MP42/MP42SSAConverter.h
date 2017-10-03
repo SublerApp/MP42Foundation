@@ -8,6 +8,8 @@
 
 #import <Foundation/Foundation.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 @class MP42SSAParser;
 @class MP42SSALine;
 
@@ -17,3 +19,5 @@
 - (NSString *)convertLine:(MP42SSALine *)line;
 
 @end
+
+NS_ASSUME_NONNULL_END

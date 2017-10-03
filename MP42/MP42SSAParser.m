@@ -116,18 +116,18 @@
 
 @interface MP42SSALine ()
 
-- (instancetype)initWithString:(NSString *)string format:(NSArray<NSString *> *)format styles:(NSDictionary<NSString *, MP42SSAStyle *> *)styles skipEventType:(BOOL)skipEventType;
+- (instancetype)initWithString:(NSString *)string format:(NSArray<NSString *> *)format styles:(NSDictionary<NSString *, MP42SSAStyle *> *)styles mkvStyle:(BOOL)mkvStyle;
 
 @end
 
 @implementation MP42SSALine
 
-- (instancetype)initWithString:(NSString *)string format:(NSArray<NSString *> *)format styles:(NSDictionary<NSString *, MP42SSAStyle *> *)styles skipEventType:(BOOL)skipEventType
+- (instancetype)initWithString:(NSString *)string format:(NSArray<NSString *> *)format styles:(NSDictionary<NSString *, MP42SSAStyle *> *)styles mkvStyle:(BOOL)mkvStyle
 {
     self = [super init];
     if (self) {
         NSUInteger formatsCount = format.count;
-        NSArray<NSString *> *values = [self parse:string count:formatsCount skipEventType:skipEventType];
+        NSArray<NSString *> *values = [self parse:string count:formatsCount mkvStyle:mkvStyle];
         NSUInteger valuesCount = values.count;
 
         for (NSUInteger index = 0; index < valuesCount && index < formatsCount; index += 1) {
@@ -174,12 +174,12 @@
     return self;
 }
 
-- (NSArray<NSString *> *)parse:(NSString *)string count:(NSUInteger)count skipEventType:(BOOL)skipEventType
+- (NSArray<NSString *> *)parse:(NSString *)string count:(NSUInteger)count mkvStyle:(BOOL)mkvStyle
 {
     NSScanner *sc = [NSScanner scannerWithString:string];
     NSMutableArray<NSString *> *valuesArray = [NSMutableArray array];
 
-    if (skipEventType || [sc scanUpToString:@"Dialogue:" intoString:nil] || [sc scanString:@"Dialogue:" intoString:nil]) {
+    if (mkvStyle || [sc scanUpToString:@"Dialogue:" intoString:nil] || [sc scanString:@"Dialogue:" intoString:nil]) {
         [sc scanString:@"Dialogue:" intoString:nil];
 
         NSString *value;
@@ -230,7 +230,7 @@ static unsigned ParseSubTime(const char *time, unsigned secondScale, BOOL hasSig
     }
 
     timeval = hour * 60 * 60 + minute * 60 + second;
-    timeval = secondScale * timeval + subsecond;
+    timeval = secondScale * timeval + subsecond * 10;
 
     return timeval * sign;
 }
@@ -244,6 +244,8 @@ static unsigned ParseSubTime(const char *time, unsigned secondScale, BOOL hasSig
 
 @property (nonatomic, readonly) NSArray<NSString *> *format;
 @property (nonatomic, readonly) NSMutableArray<MP42SSALine *> *lines_internal;
+
+@property (nonatomic, readonly) BOOL mkvStyle;
 
 @end
 
@@ -276,6 +278,7 @@ static unsigned ParseSubTime(const char *time, unsigned secondScale, BOOL hasSig
     if (self) {
         [self parseHeader:header];
         _format = @[@"ReadOrder", @"Layer", @"Style", @"Name", @"MarginL",@ "MarginR", @"MarginV", @"Effect", @"Text"];
+        _mkvStyle = YES;
     }
     return self;
 }
@@ -390,7 +393,7 @@ static unsigned ParseSubTime(const char *time, unsigned secondScale, BOOL hasSig
     NSString *lineString;
 
     while ([sc scanUpToString:@"\n" intoString:&lineString]) {
-        MP42SSALine *line = [[MP42SSALine alloc] initWithString:lineString format:_format styles:_styles skipEventType:NO];
+        MP42SSALine *line = [[MP42SSALine alloc] initWithString:lineString format:_format styles:_styles mkvStyle:NO];
         if (line) {
             [linesArray addObject:line];
             unsigned end = line.end;
@@ -411,7 +414,7 @@ static unsigned ParseSubTime(const char *time, unsigned secondScale, BOOL hasSig
 
 - (MP42SSALine *)addLine:(NSString *)lineString
 {
-    MP42SSALine *line = [[MP42SSALine alloc] initWithString:lineString format:_format styles:_styles skipEventType:YES];
+    MP42SSALine *line = [[MP42SSALine alloc] initWithString:lineString format:_format styles:_styles mkvStyle:_mkvStyle];
     if (line) {
         [_lines_internal addObject:line];
     }

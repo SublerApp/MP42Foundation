@@ -41,9 +41,9 @@
     return 30000;
 }
 
-- (NSSize)sizeForTrack:(MP42Track *)track
+- (NSSize)sizeForTrack:(MP42VideoTrack *)track
 {
-      return NSMakeSize([(MP42ClosedCaptionTrack *)track trackWidth], [(MP42ClosedCaptionTrack *)track trackHeight]);
+      return NSMakeSize(track.trackWidth, track.trackHeight);
 }
 
 - (nullable NSData *)magicCookieForTrack:(MP42Track *)track

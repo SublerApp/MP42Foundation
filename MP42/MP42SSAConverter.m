@@ -128,6 +128,8 @@ typedef NS_ENUM(NSUInteger, MP42SSATokenType) {
 static inline NSArray<MP42SSAToken *> *tokenizer(NSString *line)
 {
     NSScanner *sc = [NSScanner scannerWithString:line];
+    [sc setCharactersToBeSkipped:nil];
+
     NSMutableArray<MP42SSAToken *> *tokens = [NSMutableArray array];
     NSString *string;
 
@@ -140,17 +142,30 @@ static inline NSArray<MP42SSAToken *> *tokenizer(NSString *line)
 
         if ([sc scanUpToString:@"}" intoString:&string] || [sc scanString:@"}" intoString:&string]) {
             NSScanner *tagSc = [NSScanner scannerWithString:string];
+            [sc setCharactersToBeSkipped:nil];
 
             while ([tagSc scanUpToString:@"\\" intoString:&string] || [tagSc scanString:@"\\" intoString:&string]) {
                 if (![string hasPrefix:@"\\"]) {
                     [sc scanString:@"\\" intoString:nil];
 
-                    if ([string hasPrefix:@"p"]) {
-                        if ([string hasPrefix:@"p0"]) {
-                            addToken(string, MP42SSATokenTypeDrawingClose, tokens);
-                        }
-                        else if (![string hasPrefix:@"pos"]) {
-                            addToken(string, MP42SSATokenTypeDrawingOpen, tokens);
+                    if (string.length > 1) {
+                        unichar tag = [string characterAtIndex:0];
+                        unichar tagState = [string characterAtIndex:1];
+
+                        if (tagState >= '0' && tagState <= '9')
+                        {
+                            if (tagState == '0') {
+                                if (tag == 'i') { addToken(string, MP42SSATokenTypeItalicClose, tokens); }
+                                else if (tag == 'b') { addToken(string, MP42SSATokenTypeBoldClose, tokens); }
+                                else if (tag == 'u') { addToken(string, MP42SSATokenTypeUnderlinedClose, tokens); }
+                                else if (tag == 'p') { addToken(string, MP42SSATokenTypeDrawingClose, tokens); }
+                            }
+                            else {
+                                if (tag == 'i') { addToken(string, MP42SSATokenTypeItalicOpen, tokens); }
+                                else if (tag == 'b') { addToken(string, MP42SSATokenTypeBoldOpen, tokens); }
+                                else if (tag == 'u') { addToken(string, MP42SSATokenTypeUnderlinedOpen, tokens); }
+                                else if (tag == 'p') { addToken(string, MP42SSATokenTypeDrawingOpen, tokens); }
+                            }
                         }
                     }
                 }

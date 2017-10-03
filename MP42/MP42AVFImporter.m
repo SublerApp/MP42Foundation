@@ -693,10 +693,9 @@
     return assetTrack.naturalTimeScale;
 }
 
-- (NSSize)sizeForTrack:(MP42Track *)track {
+- (NSSize)sizeForTrack:(MP42VideoTrack *)track {
     if ([track isKindOfClass:[MP42VideoTrack class]]) {
-        MP42VideoTrack *currentTrack = (MP42VideoTrack *)track;
-        return NSMakeSize(currentTrack.width, currentTrack.height);
+        return NSMakeSize(track.width, track.height);
     } else {
         return NSMakeSize(0, 0);
     }

@@ -19,7 +19,7 @@
 
 @implementation MP42SrtImporter {
 @private
-    SBSubSerializer *_ss;
+    MP42SubSerializer *_ss;
     BOOL _verticalPlacement;
 }
 
@@ -30,17 +30,14 @@
 - (instancetype)initWithURL:(NSURL *)fileURL error:(NSError **)outError
 {
     if ((self = [super initWithURL:fileURL])) {
-        NSInteger success = 0;
-        MP4Duration duration = 0;
+        MP42SubtitleTrack *track = [[MP42SubtitleTrack alloc] init];
 
-        MP42SubtitleTrack *newTrack = [[MP42SubtitleTrack alloc] init];
+        track.format = kMP42SubtitleCodecType_3GText;
+        track.URL = self.fileURL;
+        track.alternateGroup = 2;
+        track.language = getFilenameLanguage((__bridge CFStringRef)self.fileURL.path);
 
-        newTrack.format = kMP42SubtitleCodecType_3GText;
-        newTrack.URL = self.fileURL;
-        newTrack.alternateGroup = 2;
-        newTrack.language = getFilenameLanguage((__bridge CFStringRef)self.fileURL.path);
-
-        if ([newTrack.language isEqualToString:@"und"]) {
+        if ([track.language isEqualToString:@"und"]) {
 			NSString *stringFromFileAtURL = [[NSString alloc]
 											 initWithContentsOfURL:fileURL
 											 encoding:NSUTF8StringEncoding
@@ -48,19 +45,22 @@
 			if (stringFromFileAtURL) { // try auto determining
                 NSString *guess = guessStringLanguage(stringFromFileAtURL);
                 if (guess) {
-                    newTrack.language = guess;
+                    track.language = guess;
                 }
             }
         }
 
-        _ss = [[SBSubSerializer alloc] init];
+        NSInteger success = 0;
+        MP4Duration duration = 0;
+
+        _ss = [[MP42SubSerializer alloc] init];
         if ([self.fileURL.pathExtension caseInsensitiveCompare: @"srt"] == NSOrderedSame) {
             success = LoadSRTFromURL(self.fileURL, _ss, &duration);
         } else if ([self.fileURL.pathExtension caseInsensitiveCompare: @"smi"] == NSOrderedSame) {
             success = LoadSMIFromURL(self.fileURL, _ss, 1);
         }
 
-        newTrack.duration = duration;
+        track.duration = duration;
 
         if (!success) {
             if (outError) {
@@ -74,14 +74,14 @@
         [_ss setFinished:YES];
         
         if ([_ss positionInformation]) {
-            newTrack.verticalPlacement = YES;
+            track.verticalPlacement = YES;
             _verticalPlacement = YES;
         }
         if ([_ss forced]) {
-            newTrack.someSamplesAreForced = YES;
+            track.someSamplesAreForced = YES;
         }
 
-        [self addTrack:newTrack];
+        [self addTrack:track];
     }
 
     return self;
@@ -97,9 +97,9 @@
     return 1000;
 }
 
-- (NSSize)sizeForTrack:(MP42Track *)track
+- (NSSize)sizeForTrack:(MP42VideoTrack *)track
 {
-    return NSMakeSize([(MP42SubtitleTrack *)track trackWidth], [(MP42SubtitleTrack *) track trackHeight]);
+    return NSMakeSize(track.trackWidth, track.trackHeight);
 }
 
 - (void)demux
@@ -113,7 +113,7 @@
             trackSize.height = track.trackHeight;
 
             while (!_ss.isEmpty && !self.isCancelled) {
-                SBSubLine *sl = [_ss getSerializedPacket];
+                MP42SubLine *sl = [_ss getSerializedPacket];
 
                 if ([sl->line isEqualToString:@"\n"]) {
                     sample = copyEmptySubtitleSample(track.sourceId, sl->end_time - sl->begin_time, NO);

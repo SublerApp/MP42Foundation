@@ -11,7 +11,7 @@
 #import "MP42TextSample.h"
 #import "mp4v2.h"
 
-@interface SBSubLine : NSObject
+@interface MP42SubLine : NSObject
 {
 @public
 	NSString *line;
@@ -24,10 +24,10 @@
 -(instancetype)initWithLine:(NSString*)l start:(unsigned)s end:(unsigned)e top_pos:(unsigned)p forced:(unsigned)f;
 @end
 
-@interface SBSubSerializer : NSObject
+@interface MP42SubSerializer : NSObject
 {
 	// input lines, sorted by 1. beginning time 2. original insertion order
-	NSMutableArray<SBSubLine *> *lines;
+	NSMutableArray<MP42SubLine *> *lines;
 	BOOL finished;
 
     BOOL position_information, forced;
@@ -36,9 +36,9 @@
 
     BOOL ssa;
 }
--(void)addLine:(SBSubLine *)sline;
+-(void)addLine:(MP42SubLine *)sline;
 -(void)setFinished:(BOOL)finished;
--(SBSubLine*)getSerializedPacket;
+-(MP42SubLine *)getSerializedPacket;
 -(BOOL)isEmpty;
 -(BOOL)positionInformation;
 -(void)setPositionInformation:(BOOL)info;
@@ -50,8 +50,8 @@
 
 NSMutableString *STStandardizeStringNewlines(NSString *str);
 extern NSString *STLoadFileWithUnknownEncoding(NSURL *url);
-int LoadSRTFromURL(NSURL *url, SBSubSerializer *ss, MP4Duration *duration);
-int LoadSMIFromURL(NSURL *url, SBSubSerializer *ss, int subCount);
+int LoadSRTFromURL(NSURL *url, MP42SubSerializer *ss, MP4Duration *duration);
+int LoadSMIFromURL(NSURL *url, MP42SubSerializer *ss, int subCount);
 
 int LoadChaptersFromURL(NSURL *url, NSMutableArray *ss);
 
