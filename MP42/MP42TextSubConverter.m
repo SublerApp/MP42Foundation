@@ -56,27 +56,29 @@
                     break;
                 }
 
-                NSString *text = [[NSString alloc] initWithBytes:sampleBuffer->data
-                                                          length:sampleBuffer->size
-                                                        encoding:NSUTF8StringEncoding];
+                if (sampleBuffer->size > 1) {
+                    NSString *text = [[NSString alloc] initWithBytes:sampleBuffer->data
+                                                              length:sampleBuffer->size - 1
+                                                            encoding:NSUTF8StringEncoding];
 
-                if (_converter && text.length) {
-                    if (_converter) {
-                        MP42SSALine *SSAline = [_parser addLine:text];
-                        if (SSAline) {
-                            text = [_converter convertLine:SSAline];
-                        }
-                        else {
-                            text = nil;
+                    if (_converter && text.length) {
+                        if (_converter) {
+                            MP42SSALine *SSAline = [_parser addLine:text];
+                            if (SSAline) {
+                                text = [_converter convertLine:SSAline];
+                            }
+                            else {
+                                text = nil;
+                            }
                         }
                     }
-                }
 
-                if (text.length) {
-                    MP42SubLine *sl = [[MP42SubLine alloc] initWithLine:text
-                                                              start:sampleBuffer->decodeTimestamp
-                                                                end:sampleBuffer->decodeTimestamp + sampleBuffer->duration];
-                    [_ss addLine:sl];
+                    if (text.length) {
+                        MP42SubLine *sl = [[MP42SubLine alloc] initWithLine:text
+                                                                      start:sampleBuffer->decodeTimestamp
+                                                                        end:sampleBuffer->decodeTimestamp + sampleBuffer->duration];
+                        [_ss addLine:sl];
+                    }
                 }
             }
         }
@@ -89,16 +91,19 @@
     if ((self = [super init])) {
         MP42SubtitleCodecType format = track.format;
 
+        _ss = [[MP42SubSerializer alloc] init];
+        _inputSamplesBuffer  = [[MP42Fifo alloc] initWithCapacity:100];
+        _done = dispatch_semaphore_create(0);
+
         if (format == kMP42SubtitleCodecType_SSA) {
             NSData *cookie = [track.importer magicCookieForTrack:track];
             NSString *cookieString = [[NSString alloc] initWithData:cookie encoding:NSUTF8StringEncoding];
             _parser = [[MP42SSAParser alloc] initWithMKVHeader:cookieString];
             _converter = [[MP42SSAConverter alloc] initWithParser:_parser];
+
+            [_ss setSSA:YES];
         }
 
-        _ss = [[MP42SubSerializer alloc] init];
-        _inputSamplesBuffer  = [[MP42Fifo alloc] initWithCapacity:100];
-        _done = dispatch_semaphore_create(0);
         _trackID = track.sourceId;
 
         _decoderThread = [[NSThread alloc] initWithTarget:self selector:@selector(TextConverterThreadMainRoutine) object:nil];

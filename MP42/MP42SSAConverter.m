@@ -68,8 +68,25 @@ typedef NS_ENUM(NSUInteger, MP42SSATokenType) {
 {
     NSMutableString *result = [NSMutableString string];
     NSArray<MP42SSAToken *> *tokens = tokenizer(line.text);
+    NSUInteger textLength = 0;
 
     BOOL drawingMode = NO;
+    BOOL bold = NO;
+    BOOL italic = NO;
+    BOOL underlined = NO;
+    
+    if (line.style.bold) {
+        [result insertString:@"<b>" atIndex:0];
+        bold = YES;
+    }
+    if (line.style.underline) {
+        [result insertString:@"<u>" atIndex:0];
+        underlined = YES;
+    }
+    if (line.style.italic) {
+        [result insertString:@"<i>" atIndex:0];
+        italic = YES;
+    }
 
     for (MP42SSAToken *token in tokens) {
         NSString *textToAppend = nil;
@@ -77,23 +94,29 @@ typedef NS_ENUM(NSUInteger, MP42SSATokenType) {
         if (token->_type == MP42SSATokenTypeText) {
             textToAppend = token->_text;
         }
-        else if (token->_type == MP42SSATokenTypeBoldOpen) {
+        else if (token->_type == MP42SSATokenTypeBoldOpen && bold == NO) {
             textToAppend = @"<b>";
+            bold = YES;
         }
-        else if (token->_type == MP42SSATokenTypeBoldClose) {
+        else if (token->_type == MP42SSATokenTypeBoldClose && bold == YES) {
             textToAppend = @"</b>";
+            bold = NO;
         }
-        else if (token->_type == MP42SSATokenTypeItalicOpen) {
+        else if (token->_type == MP42SSATokenTypeItalicOpen && italic == NO) {
             textToAppend = @"<i>";
+            italic = YES;
         }
-        else if (token->_type == MP42SSATokenTypeItalicClose) {
+        else if (token->_type == MP42SSATokenTypeItalicClose && italic == YES) {
             textToAppend = @"</i>";
+            italic = NO;
         }
-        else if (token->_type == MP42SSATokenTypeUnderlinedOpen) {
+        else if (token->_type == MP42SSATokenTypeUnderlinedOpen && underlined == NO) {
             textToAppend = @"<u>";
+            underlined = YES;
         }
-        else if (token->_type == MP42SSATokenTypeUnderlinedClose) {
+        else if (token->_type == MP42SSATokenTypeUnderlinedClose && underlined == YES) {
             textToAppend = @"</u>";
+            underlined = NO;
         }
         else if (token->_type == MP42SSATokenTypeDrawingOpen) {
             drawingMode = YES;
@@ -104,25 +127,26 @@ typedef NS_ENUM(NSUInteger, MP42SSATokenType) {
 
         if (textToAppend && drawingMode == NO) {
             [result appendString:textToAppend];
+            if (token->_type == MP42SSATokenTypeText) {
+                textLength += textToAppend.length;
+            }
         }
+    }
+    
+    if (bold) {
+        [result appendString:@"</b>"];
+    }
+    if (underlined) {
+        [result appendString:@"</u>"];
+    }
+    if (italic) {
+        [result appendString:@"</i>"];
     }
 
     [result replaceOccurrencesOfString:@"\\N" withString:@"\n" options:NSLiteralSearch range:NSMakeRange(0, result.length)];
     [result replaceOccurrencesOfString:@"\\n" withString:@"\n" options:NSLiteralSearch range:NSMakeRange(0, result.length)];
 
-    if (result.length) {
-        if (line.style.bold) {
-            [result insertString:@"<b>" atIndex:0];
-        }
-        if (line.style.underline) {
-            [result insertString:@"<u>" atIndex:0];
-        }
-        if (line.style.italic) {
-            [result insertString:@"<i>" atIndex:0];
-        }
-    }
-
-    return result;
+    return textLength ? result : @"";
 }
 
 static inline NSArray<MP42SSAToken *> *tokenizer(NSString *line)
