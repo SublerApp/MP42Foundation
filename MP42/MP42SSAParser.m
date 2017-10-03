@@ -193,8 +193,22 @@
             }
             [sc scanString:@"," intoString:nil];
         }
+        
+        // Trim '\0' from string end.
+        NSUInteger index = string.length;
+        unichar c;
+        while (index > 0) {
+            c = [string characterAtIndex:index - 1];
+            if (c == '\0') {
+                index--;
+            }
+            else {
+                break;
+            }
+        }
 
-        value = [sc.string substringFromIndex:sc.scanLocation];
+        NSRange range = NSMakeRange(sc.scanLocation, index - sc.scanLocation);
+        value = [sc.string substringWithRange:range];
         if (value) {
             [valuesArray addObject:value];
         }

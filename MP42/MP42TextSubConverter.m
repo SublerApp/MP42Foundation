@@ -58,7 +58,7 @@
 
                 if (sampleBuffer->size > 1) {
                     NSString *text = [[NSString alloc] initWithBytes:sampleBuffer->data
-                                                              length:sampleBuffer->size - 1
+                                                              length:sampleBuffer->size
                                                             encoding:NSUTF8StringEncoding];
 
                     if (_converter && text.length) {
