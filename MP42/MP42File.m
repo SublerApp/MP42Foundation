@@ -1246,13 +1246,15 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 
 #pragma mark - NSSecureCoding
 
+#define MP42FILE_VERSION 5
+
 + (BOOL)supportsSecureCoding
 {
     return YES;
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder {
-    [coder encodeInt:4 forKey:@"MP42FileVersion"];
+    [coder encodeInt:MP42FILE_VERSION forKey:@"MP42FileVersion"];
 
 #ifdef SB_SANDBOX
     if ([fileURL respondsToSelector:@selector(startAccessingSecurityScopedResource)]) {
@@ -1288,6 +1290,12 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 
 - (id)initWithCoder:(NSCoder *)decoder {
     self = [self init];
+
+    NSInteger version = [decoder decodeIntForKey:@"MP42FileVersion"];
+
+    if (version < MP42FILE_VERSION) {
+        return nil;
+    }
 
     NSData *bookmarkData = [decoder decodeObjectOfClass:[NSData class] forKey:@"bookmark"];
     if (bookmarkData) {

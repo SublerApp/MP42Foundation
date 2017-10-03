@@ -412,11 +412,13 @@ static void insertTagsFromStyleRecord(style_record record, NSMutableString *samp
 {
     self = [super initWithCoder:decoder];
 
-    _verticalPlacement = [decoder decodeBoolForKey:@"verticalPlacement"];
-    _someSamplesAreForced = [decoder decodeBoolForKey:@"someSamplesAreForced"];
-    _allSamplesAreForced = [decoder decodeBoolForKey:@"allSamplesAreForced"];
+    if (self) {
+        _verticalPlacement = [decoder decodeBoolForKey:@"verticalPlacement"];
+        _someSamplesAreForced = [decoder decodeBoolForKey:@"someSamplesAreForced"];
+        _allSamplesAreForced = [decoder decodeBoolForKey:@"allSamplesAreForced"];
 
-    _forcedTrackId = [decoder decodeInt64ForKey:@"forcedTrackId"];
+        _forcedTrackId = [decoder decodeInt64ForKey:@"forcedTrackId"];
+    }
 
     return self;
 }

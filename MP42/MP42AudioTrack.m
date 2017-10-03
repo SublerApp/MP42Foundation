@@ -276,12 +276,14 @@
 {
     self = [super initWithCoder:decoder];
 
-    _volume = [decoder decodeFloatForKey:@"volume"];
+    if (self) {
+        _volume = [decoder decodeFloatForKey:@"volume"];
 
-    _channels = [decoder decodeInt64ForKey:@"channels"];
-    _channelLayoutTag = [decoder decodeInt64ForKey:@"channelLayoutTag"];
+        _channels = [decoder decodeInt64ForKey:@"channels"];
+        _channelLayoutTag = [decoder decodeInt64ForKey:@"channelLayoutTag"];
 
-    _fallbackTrackId = [decoder decodeInt64ForKey:@"fallbackTrackId"];
+        _fallbackTrackId = [decoder decodeInt64ForKey:@"fallbackTrackId"];
+    }
 
     return self;
 }

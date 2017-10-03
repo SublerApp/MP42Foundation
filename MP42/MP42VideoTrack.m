@@ -366,31 +366,33 @@
 {
     self = [super initWithCoder:decoder];
 
-    _width = [decoder decodeInt64ForKey:@"width"];
-    _height = [decoder decodeInt64ForKey:@"height"];
+    if (self) {
+        _width = [decoder decodeInt64ForKey:@"width"];
+        _height = [decoder decodeInt64ForKey:@"height"];
 
-    _trackWidth = [decoder decodeFloatForKey:@"trackWidth"];
-    _trackHeight = [decoder decodeFloatForKey:@"trackHeight"];
+        _trackWidth = [decoder decodeFloatForKey:@"trackWidth"];
+        _trackHeight = [decoder decodeFloatForKey:@"trackHeight"];
 
-    _colorPrimaries = [decoder decodeInt32ForKey:@"colorPrimaries"];
-    _transferCharacteristics = [decoder decodeInt32ForKey:@"transferCharacteristics"];
-    _matrixCoefficients = [decoder decodeInt32ForKey:@"matrixCoefficients"];
+        _colorPrimaries = [decoder decodeInt32ForKey:@"colorPrimaries"];
+        _transferCharacteristics = [decoder decodeInt32ForKey:@"transferCharacteristics"];
+        _matrixCoefficients = [decoder decodeInt32ForKey:@"matrixCoefficients"];
 
-    _hSpacing = [decoder decodeInt64ForKey:@"hSpacing"];
-    _vSpacing = [decoder decodeInt64ForKey:@"vSpacing"];
+        _hSpacing = [decoder decodeInt64ForKey:@"hSpacing"];
+        _vSpacing = [decoder decodeInt64ForKey:@"vSpacing"];
 
-    _transform.a = [decoder decodeDoubleForKey:@"transformA"];
-    _transform.b = [decoder decodeDoubleForKey:@"transformB"];
-    _transform.c = [decoder decodeDoubleForKey:@"transformC"];
-    _transform.d = [decoder decodeDoubleForKey:@"transformD"];
-    _transform.tx = [decoder decodeDoubleForKey:@"offsetX"];
-    _transform.ty = [decoder decodeDoubleForKey:@"offsetY"];
+        _transform.a = [decoder decodeDoubleForKey:@"transformA"];
+        _transform.b = [decoder decodeDoubleForKey:@"transformB"];
+        _transform.c = [decoder decodeDoubleForKey:@"transformC"];
+        _transform.d = [decoder decodeDoubleForKey:@"transformD"];
+        _transform.tx = [decoder decodeDoubleForKey:@"offsetX"];
+        _transform.ty = [decoder decodeDoubleForKey:@"offsetY"];
 
-    _origProfile = [decoder decodeIntForKey:@"origProfile"];
-    _origLevel = [decoder decodeIntForKey:@"origLevel"];
+        _origProfile = [decoder decodeIntForKey:@"origProfile"];
+        _origLevel = [decoder decodeIntForKey:@"origLevel"];
 
-    _newProfile = [decoder decodeIntForKey:@"newProfile"];
-    _newLevel = [decoder decodeIntForKey:@"newLevel"];
+        _newProfile = [decoder decodeIntForKey:@"newProfile"];
+        _newLevel = [decoder decodeIntForKey:@"newLevel"];
+    }
 
     return self;
 }
