@@ -30,7 +30,7 @@ typedef struct muxer_helper {
 - (MP42FileImporter *)importer
 {
     muxer_helper *helper = (muxer_helper *)_helper;
-    return helper->importer;
+    return helper ? helper->importer : nil;
 }
 
 - (void)setImporter:(MP42FileImporter *)importer
