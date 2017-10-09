@@ -22,7 +22,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property(nonatomic, readonly) MP42TrackId trackId;
 
-@property(nonatomic, readonly, copy) NSURL *URL;
+@property(nonatomic, readonly, copy, nullable) NSURL *URL;
 @property(nonatomic, readonly) MP42CodecType format;
 @property(nonatomic, readonly) MP42MediaType mediaType;
 

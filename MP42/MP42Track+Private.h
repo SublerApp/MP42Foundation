@@ -18,7 +18,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property(nonatomic, readwrite) MP42TrackId trackId;
 @property(nonatomic, readwrite) MP42TrackId sourceId;
 
-@property(nonatomic, readwrite, copy) NSURL *URL;
+@property(nonatomic, readwrite, copy, nullable) NSURL *URL;
 
 @property(nonatomic, readonly) MP42CodecType targetFormat;
 @property(nonatomic, readwrite) MP42CodecType format;
