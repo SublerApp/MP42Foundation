@@ -91,16 +91,6 @@ BOOL trackNeedConversion(FourCharCode format) {
     return NO;
 }
 
-int isHdVideo(uint64_t width, uint64_t height)
-{
-    if ((width > 1280) || (height > 720))
-        return 2;
-    else if (((width >= 960) && (height >= 720)) || width >= 1280)
-        return 1;
-
-    return 0;
-}
-
 NSString *nameForChannelLayoutTag(UInt32 channelLayoutTag)
 {
     UInt32 channelLayoutSize = sizeof(AudioChannelLayout);

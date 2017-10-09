@@ -16,8 +16,6 @@ MP42Duration TimeFromString(NSString *SMPTE_string, MP42Duration timeScale);
 BOOL isTrackMuxable(FourCharCode formatName);
 BOOL trackNeedConversion(FourCharCode formatName);
 
-int isHdVideo(uint64_t width, uint64_t height);
-
 NSString *nameForChannelLayoutTag(UInt32 channelLayoutTag);
 
 NS_ASSUME_NONNULL_END
