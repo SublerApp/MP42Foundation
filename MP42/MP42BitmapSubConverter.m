@@ -372,7 +372,7 @@
     }
 }
 
-- (instancetype)initWithTrack:(MP42SubtitleTrack *)track error:(NSError **)outError
+- (instancetype)initWithTrack:(MP42SubtitleTrack *)track error:(NSError * __autoreleasing *)outError
 {
     if ((self = [super init])) {
         FFInitFFmpeg();

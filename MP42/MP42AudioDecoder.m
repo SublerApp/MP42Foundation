@@ -72,7 +72,7 @@ typedef struct MP42DecodeContext MP42DecodeContext;
                                 drc:(float)drc
                      initialPadding:(UInt32)initialPadding
                         magicCookie:(NSData *)magicCookie
-                              error:(NSError **)error
+                              error:(NSError * __autoreleasing *)error
 {
     self = [super init];
 

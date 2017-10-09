@@ -27,7 +27,7 @@
     return @[@"srt", @"smi"];
 }
 
-- (instancetype)initWithURL:(NSURL *)fileURL error:(NSError **)outError
+- (instancetype)initWithURL:(NSURL *)fileURL error:(NSError * __autoreleasing *)outError
 {
     if ((self = [super initWithURL:fileURL])) {
         MP42SubtitleTrack *track = [[MP42SubtitleTrack alloc] init];

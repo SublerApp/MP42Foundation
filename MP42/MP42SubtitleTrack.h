@@ -13,7 +13,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MP42SubtitleTrack : MP42VideoTrack <NSSecureCoding>
 
-- (BOOL)exportToURL:(NSURL *)url error:(NSError **)error;
+- (BOOL)exportToURL:(NSURL *)url error:(NSError * __autoreleasing *)error;
 
 @property(nonatomic, readwrite) BOOL verticalPlacement;
 @property(nonatomic, readwrite) BOOL someSamplesAreForced;

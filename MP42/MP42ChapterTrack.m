@@ -175,7 +175,7 @@
     return [_chapters objectAtIndex:index];
 }
 
-- (BOOL)writeToFile:(MP4FileHandle)fileHandle error:(NSError **)outError
+- (BOOL)writeToFile:(MP4FileHandle)fileHandle error:(NSError * __autoreleasing *)outError
 {
     BOOL success = YES;
 
@@ -274,7 +274,7 @@
   return _chapters.count;
 }
 
-- (BOOL)exportToURL:(NSURL *)url error:(NSError **)error
+- (BOOL)exportToURL:(NSURL *)url error:(NSError * __autoreleasing *)error
 {
 	NSMutableString* file = [[NSMutableString alloc] init];
 	NSUInteger x = 0;
@@ -287,7 +287,7 @@
 	return [file writeToURL:url atomically:YES encoding:NSUTF8StringEncoding error:error];
 }
 
-- (BOOL)updateFromCSVFile:(NSURL *)URL error:(NSError **)outError {
+- (BOOL)updateFromCSVFile:(NSURL *)URL error:(NSError * __autoreleasing *)outError {
     NSArray *csvData = [NSArray arrayWithContentsOfCSVURL:URL];
     if (csvData.count == self.chapterCount) {
         for (NSUInteger i = 0; i < csvData.count; ++i) {

@@ -1387,7 +1387,7 @@ NSData* H264Info(const char *filePath, uint32_t *pic_width, uint32_t *pic_height
     return @[@"264", @"h264"];
 }
 
-- (instancetype)initWithURL:(NSURL *)fileURL error:(NSError **)outError
+- (instancetype)initWithURL:(NSURL *)fileURL error:(NSError * __autoreleasing *)outError
 {
     if ((self = [super initWithURL:fileURL])) {
 

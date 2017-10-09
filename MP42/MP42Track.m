@@ -181,7 +181,7 @@
     return copy;
 }
 
-- (BOOL)writeToFile:(MP4FileHandle)fileHandle error:(NSError **)outError
+- (BOOL)writeToFile:(MP4FileHandle)fileHandle error:(NSError * __autoreleasing *)outError
 {
     if (!fileHandle || !_trackId) {
         if ( outError != NULL) {

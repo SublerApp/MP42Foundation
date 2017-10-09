@@ -73,7 +73,7 @@
     }
 }
 
-- (BOOL)setup:(NSError **)outError
+- (BOOL)setup:(NSError * __autoreleasing *)outError
 {
     NSMutableArray<MP42Track *> *unsupportedTracks = [[NSMutableArray alloc] init];;
 

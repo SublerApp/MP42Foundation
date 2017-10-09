@@ -33,9 +33,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (NSUInteger)chapterCount;
 
-- (BOOL)updateFromCSVFile:(NSURL *)URL error:(NSError **)outError;
+- (BOOL)updateFromCSVFile:(NSURL *)URL error:(NSError * __autoreleasing *)outError;
 
-- (BOOL)exportToURL:(NSURL *)url error:(NSError **)error;
+- (BOOL)exportToURL:(NSURL *)url error:(NSError * __autoreleasing *)error;
 
 @property(nonatomic, readonly, retain) NSArray<MP42TextSample *> *chapters;
 

@@ -37,7 +37,7 @@ typedef struct MP4DemuxHelper {
     return @[@"mp4", @"m4v", @"m4a", @"m4r"];
 }
 
-- (instancetype)initWithURL:(NSURL *)fileURL error:(NSError **)outError;
+- (instancetype)initWithURL:(NSURL *)fileURL error:(NSError * __autoreleasing *)outError;
 {
     if ((self = [super initWithURL:fileURL])) {
         MP42File *sourceFile = [[MP42File alloc] initWithURL:self.fileURL error:outError];

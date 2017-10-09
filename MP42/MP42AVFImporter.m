@@ -80,7 +80,7 @@
     return result;
 }
 
-- (instancetype)initWithURL:(NSURL *)fileURL error:(NSError **)outError {
+- (instancetype)initWithURL:(NSURL *)fileURL error:(NSError * __autoreleasing *)outError {
     if ((self = [super initWithURL:fileURL])) {
         _localAsset = [AVAsset assetWithURL:self.fileURL];
         _helpers = [NSMutableArray array];

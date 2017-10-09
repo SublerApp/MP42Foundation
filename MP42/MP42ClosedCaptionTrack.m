@@ -22,7 +22,7 @@
     return self;
 }
 
-- (BOOL)writeToFile:(MP42FileHandle)fileHandle error:(NSError **)outError
+- (BOOL)writeToFile:(MP42FileHandle)fileHandle error:(NSError * __autoreleasing *)outError
 {
     return [super writeToFile:fileHandle error:outError];
 }

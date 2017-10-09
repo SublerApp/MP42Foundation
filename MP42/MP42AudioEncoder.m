@@ -66,7 +66,7 @@ typedef struct AudioFileIO
 
 @synthesize magicCookie = _magicCookie;
 
-- (instancetype)initWithInputUnit:(id<MP42AudioUnit>)unit bitRate:(NSUInteger)bitRate error:(NSError **)error
+- (instancetype)initWithInputUnit:(id<MP42AudioUnit>)unit bitRate:(NSUInteger)bitRate error:(NSError * __autoreleasing *)error
 {
     self = [super init];
     if (self) {

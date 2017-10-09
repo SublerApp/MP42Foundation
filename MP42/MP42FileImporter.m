@@ -79,7 +79,7 @@ static NSArray<NSString *> *_supportedFileFormats;
     return [[self supportedFileFormats] containsObject:fileType.lowercaseString];
 }
 
-- (instancetype)initWithURL:(NSURL *)fileURL error:(NSError **)error;
+- (instancetype)initWithURL:(NSURL *)fileURL error:(NSError * __autoreleasing *)error;
 {
     self = nil;
 

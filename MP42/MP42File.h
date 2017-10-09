@@ -183,7 +183,7 @@ typedef void (^MP42FileProgressHandler)(double progress);
  *
  *  @return YES if the movie file was successfully created, NO otherwise.
  */
-- (BOOL)writeToUrl:(NSURL *)url options:(nullable NSDictionary<NSString *, id> *)options error:(NSError **)outError;
+- (BOOL)writeToUrl:(NSURL *)url options:(nullable NSDictionary<NSString *, id> *)options error:(NSError * __autoreleasing *)outError;
 
 /**
  *  Updates a MP42File object.
@@ -193,7 +193,7 @@ typedef void (^MP42FileProgressHandler)(double progress);
  *
  *  @return YES if the movie file was successfully created, NO otherwise.
  */
-- (BOOL)updateMP4FileWithOptions:(nullable NSDictionary<NSString *, id> *)options error:(NSError **)outError;
+- (BOOL)updateMP4FileWithOptions:(nullable NSDictionary<NSString *, id> *)options error:(NSError * __autoreleasing *)outError;
 
 /**
  *  Cancels a write/update operation.

@@ -102,7 +102,7 @@
     return self;
 }
 
-- (BOOL)writeToFile:(MP4FileHandle)fileHandle error:(NSError **)outError __attribute__((no_sanitize("float-cast-overflow")))
+- (BOOL)writeToFile:(MP4FileHandle)fileHandle error:(NSError * __autoreleasing *)outError __attribute__((no_sanitize("float-cast-overflow")))
 {
     if (!fileHandle || !self.trackId || ![super writeToFile:fileHandle error:outError]) {
         if (outError != NULL) {

@@ -18,7 +18,7 @@ NS_ASSUME_NONNULL_BEGIN
 + (NSArray<NSString *> *)supportedFileFormats;
 + (BOOL)canInitWithFileType:(NSString *)fileType;
 
-- (instancetype)initWithURL:(NSURL *)fileURL error:(NSError **)error;
+- (instancetype)initWithURL:(NSURL *)fileURL error:(NSError * __autoreleasing *)error;
 
 @property (nonatomic, readonly) NSURL *fileURL;
 @property (nonatomic, readonly) MP42Metadata *metadata;

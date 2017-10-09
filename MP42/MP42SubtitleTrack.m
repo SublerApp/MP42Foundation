@@ -66,7 +66,7 @@
     return self;
 }
 
-- (BOOL)writeToFile:(MP4FileHandle)fileHandle error:(NSError **)outError
+- (BOOL)writeToFile:(MP4FileHandle)fileHandle error:(NSError * __autoreleasing *)outError
 {
     if (!fileHandle || !self.trackId || ![super writeToFile:fileHandle error:outError]) {
         if (outError != NULL) {
@@ -200,7 +200,7 @@ static void insertTagsFromStyleRecord(style_record record, NSMutableString *samp
     *numberOfInsertedChars += index - record.startChar - *numberOfInsertedChars;
 }
 
-- (BOOL)exportToURL:(NSURL *)url error:(NSError **)error
+- (BOOL)exportToURL:(NSURL *)url error:(NSError * __autoreleasing *)error
 {
     MP4FileHandle fileHandle = MP4Read(self.URL.fileSystemRepresentation);
     if (!fileHandle)

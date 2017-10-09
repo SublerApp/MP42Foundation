@@ -199,7 +199,7 @@ static int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, ui
     return YES;
 }
 
-- (instancetype)initWithURL:(NSURL *)fileURL error:(NSError **)outError
+- (instancetype)initWithURL:(NSURL *)fileURL error:(NSError * __autoreleasing *)outError
 {
     if ((self = [super initWithURL:fileURL])) {
         _ioStream = calloc(1, sizeof(StdIoStream));

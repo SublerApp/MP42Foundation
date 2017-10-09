@@ -22,7 +22,7 @@
     return @[@"scc"];
 }
 
-- (instancetype)initWithURL:(NSURL *)fileURL error:(NSError **)outError
+- (instancetype)initWithURL:(NSURL *)fileURL error:(NSError * __autoreleasing *)outError
 {
     if ((self = [super initWithURL:fileURL])) {
         MP42Track *newTrack = [[MP42ClosedCaptionTrack alloc] init];

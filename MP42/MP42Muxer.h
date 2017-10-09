@@ -25,7 +25,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (BOOL)canAddTrack:(MP42Track *)track;
 - (void)addTrack:(MP42Track *)track;
 
-- (BOOL)setup:(NSError **)outError;
+- (BOOL)setup:(NSError * __autoreleasing *)outError;
 - (void)work;
 - (void)cancel;
 

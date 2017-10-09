@@ -24,7 +24,7 @@ NS_ASSUME_NONNULL_BEGIN
                                 drc:(float)drc
                      initialPadding:(UInt32)initialPadding
                         magicCookie:(NSData *)magicCookie
-                              error:(NSError **)error;
+                              error:(NSError * __autoreleasing *)error;
 
 @property (nonatomic, readonly, nullable) AudioChannelLayout *inputLayout;
 @property (nonatomic, readonly) UInt32 inputLayoutSize;

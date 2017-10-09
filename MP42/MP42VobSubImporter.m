@@ -218,7 +218,7 @@ static NSArray<SBVobSubTrack *> * LoadVobSubSubtitles(NSURL *theDirectory, NSStr
     return @[@"idx"];
 }
 
-- (instancetype)initWithURL:(NSURL *)fileURL error:(NSError **)outError
+- (instancetype)initWithURL:(NSURL *)fileURL error:(NSError * __autoreleasing *)outError
 {
     if ((self = [super initWithURL:fileURL])) {
 

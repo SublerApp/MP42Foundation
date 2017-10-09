@@ -912,7 +912,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
     return success;
 }
 
-- (BOOL)updateMP4FileWithOptions:(nullable NSDictionary<NSString *, id> *)options error:(NSError **)outError {
+- (BOOL)updateMP4FileWithOptions:(nullable NSDictionary<NSString *, id> *)options error:(NSError * __autoreleasing *)outError {
 
     // Open the mp4 file
     if (![self startWriting]) {
