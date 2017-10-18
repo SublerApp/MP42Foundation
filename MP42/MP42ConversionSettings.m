@@ -66,10 +66,10 @@
 
 + (instancetype)audioConversionWithBitRate:(NSUInteger)bitRate mixDown:(NSString *)mixDown drc:(float)drc
 {
-    return [[MP42AudioConversionSettings alloc] initWitFormat:kMP42AudioCodecType_MPEG4AAC bitRate:bitRate mixDown:mixDown drc:drc];
+    return [[MP42AudioConversionSettings alloc] initWithFormat:kMP42AudioCodecType_MPEG4AAC bitRate:bitRate mixDown:mixDown drc:drc];
 }
 
-- (instancetype)initWitFormat:(FourCharCode)format bitRate:(NSUInteger)bitRate mixDown:(NSString *)mixDown drc:(float)drc
+- (instancetype)initWithFormat:(FourCharCode)format bitRate:(NSUInteger)bitRate mixDown:(NSString *)mixDown drc:(float)drc
 {
     self = [super initWitFormat:format];
     if (self) {

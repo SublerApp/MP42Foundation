@@ -22,7 +22,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (instancetype)audioConversionWithBitRate:(NSUInteger)bitrate mixDown:(NSString *)mixDown drc:(float)drc;
 
-- (instancetype)initWitFormat:(FourCharCode)format bitRate:(NSUInteger)bitRate mixDown:(NSString *)mixDown drc:(float)drc;
+- (instancetype)initWithFormat:(FourCharCode)format bitRate:(NSUInteger)bitRate mixDown:(NSString *)mixDown drc:(float)drc;
 
 @property (nonatomic, readonly) NSUInteger bitRate;
 
