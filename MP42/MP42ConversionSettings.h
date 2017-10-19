@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "MP42MediaFormat.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -20,13 +21,13 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MP42AudioConversionSettings : MP42ConversionSettings <NSCopying, NSSecureCoding>
 
-+ (instancetype)audioConversionWithBitRate:(NSUInteger)bitrate mixDown:(NSString *)mixDown drc:(float)drc;
++ (instancetype)audioConversionWithBitRate:(NSUInteger)bitrate mixDown:(MP42AudioMixdown)mixDown drc:(float)drc;
 
-- (instancetype)initWithFormat:(FourCharCode)format bitRate:(NSUInteger)bitRate mixDown:(NSString *)mixDown drc:(float)drc;
+- (instancetype)initWithFormat:(FourCharCode)format bitRate:(NSUInteger)bitRate mixDown:(MP42AudioMixdown)mixDown drc:(float)drc;
 
 @property (nonatomic, readonly) NSUInteger bitRate;
 
-@property (nonatomic, readonly) NSString *mixDown;
+@property (nonatomic, readonly) MP42AudioMixdown mixDown;
 @property (nonatomic, readonly) float drc;
 
 @end

@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-
+#import "MP42MediaFormat.h"
 #import "MP42AudioUnit.h"
 
 @class MP42SampleBuffer;
@@ -20,7 +20,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithAudioFormat:(AudioStreamBasicDescription)asbd
                       channelLayout:(AudioChannelLayout *)channelLayout
                   channelLayoutSize:(UInt32)channelLayoutSize
-                        mixdownType:(NSString *)mixdownType
+                        mixdownType:(MP42AudioMixdown)mixdownType
                                 drc:(float)drc
                      initialPadding:(UInt32)initialPadding
                         magicCookie:(NSData *)magicCookie

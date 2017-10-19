@@ -68,7 +68,7 @@ typedef struct MP42DecodeContext MP42DecodeContext;
 - (instancetype)initWithAudioFormat:(AudioStreamBasicDescription)asbd
                       channelLayout:(AudioChannelLayout *)channelLayout
                   channelLayoutSize:(UInt32)channelLayoutSize
-                        mixdownType:(NSString *)mixdownType
+                        mixdownType:(MP42AudioMixdown)mixdownType
                                 drc:(float)drc
                      initialPadding:(UInt32)initialPadding
                         magicCookie:(NSData *)magicCookie
@@ -164,19 +164,19 @@ typedef struct MP42DecodeContext MP42DecodeContext;
         UInt32 channels = _inputFormat.mChannelsPerFrame;
         enum AVMatrixEncoding matrix_encoding = AV_MATRIX_ENCODING_NONE;
         if (channels > 1) {
-            if ([mixdownType isEqualToString:SBMonoMixdown]) {
+            if (mixdownType == kMP42AudioMixdown_Mono) {
                 channels = 1;
             }
         }
         if (channels > 2) {
-            if ([mixdownType isEqualToString:SBStereoMixdown]) {
+            if (mixdownType == kMP42AudioMixdown_Stereo) {
                 channels = 2;
             }
-            else if ([mixdownType isEqualToString:SBDolbyMixdown]) {
+            else if (mixdownType == kMP42AudioMixdown_Dolby) {
                 matrix_encoding = AV_MATRIX_ENCODING_DOLBY;
                 channels = 2;
             }
-            else if ([mixdownType isEqualToString:SBDolbyPlIIMixdown]) {
+            else if (mixdownType == kMP42AudioMixdown_DolbyPlII) {
                 matrix_encoding = AV_MATRIX_ENCODING_DPLII;
                 channels = 2;
             }

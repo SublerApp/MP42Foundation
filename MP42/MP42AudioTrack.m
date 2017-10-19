@@ -195,11 +195,11 @@
     
     if ([self.name rangeOfString:@"surround" options:NSCaseInsensitiveSearch].location == NSNotFound) return;
     
-    if ([conversionSettings.mixDown isEqualToString:SBNoneMixdown] && self.channels > 3) {
+    if (conversionSettings.mixDown == kMP42AudioMixdown_None && self.channels > 3) {
         self.name = (self.channels > FFmpegMaximumSupportedChannels) ? [NSString stringWithFormat:@"Surround %d.1", FFmpegMaximumSupportedChannels - 1] : nameForChannelLayoutTag(self.channelLayoutTag);
     }
     else {
-        self.name = (self.channels == 1 || [conversionSettings.mixDown isEqualToString:SBMonoMixdown]) ? @"Mono" : @"Stereo";
+        self.name = (self.channels == 1 || conversionSettings.mixDown == kMP42AudioMixdown_Mono) ? @"Mono" : @"Stereo";
     }
 }
 
@@ -231,10 +231,10 @@
     if (self.conversionSettings && [self.conversionSettings isKindOfClass:[MP42AudioConversionSettings class]]) {
         MP42AudioConversionSettings *settings = (MP42AudioConversionSettings *)self.conversionSettings;
         unsigned int channels = _channels;
-        if ([settings.mixDown isEqualToString:SBMonoMixdown] || self.channels == 1) {
+        if (settings.mixDown == kMP42AudioMixdown_Mono || self.channels == 1) {
             channels = 1;
         }
-        else if ([settings.mixDown isEqualToString:SBNoneMixdown]) {
+        else if (settings.mixDown == kMP42AudioMixdown_None) {
             channels = MIN(channels, FFmpegMaximumSupportedChannels);
         }
         else {

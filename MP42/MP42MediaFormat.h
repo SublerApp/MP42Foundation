@@ -199,8 +199,12 @@ enum : MP42MetadataFormatType
 };
 
 // Audio downmixes
-extern NSString * const SBNoneMixdown;
-extern NSString * const SBMonoMixdown;
-extern NSString * const SBStereoMixdown;
-extern NSString * const SBDolbyMixdown;
-extern NSString * const SBDolbyPlIIMixdown;
+typedef SInt64 MP42AudioMixdown;
+enum : MP42AudioMixdown
+{
+    kMP42AudioMixdown_None       = 5,
+    kMP42AudioMixdown_Mono       = 4,
+    kMP42AudioMixdown_Stereo     = 3,
+    kMP42AudioMixdown_Dolby      = 2,
+    kMP42AudioMixdown_DolbyPlII  = 1
+};
