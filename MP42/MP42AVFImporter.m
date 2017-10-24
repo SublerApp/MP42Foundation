@@ -20,6 +20,8 @@
 
 #import <AVFoundation/AVFoundation.h>
 #import <AudioToolbox/AudioToolbox.h>
+#import <VideoToolbox/VideoToolbox.h>
+#import <MediaToolbox/MediaToolbox.h>
 
 @interface AVFDemuxHelper : NSObject {
 @public
@@ -45,7 +47,7 @@
 }
 
 + (NSArray<NSString *> *)supportedFileFormats {
-    return @[@"mov", @"qt", @"mp4", @"m4v", @"m4a", @"mp3", @"m2ts", @"ts", @"mts",
+    return @[@"mov", @"qt", @"mp4", @"m4v", @"m4a", @"mxf", @"mp3", @"m2ts", @"ts", @"mts",
              @"ac3", @"eac3", @"ec3", @"webvtt", @"vtt", @"caf", @"aif", @"aiff", @"aifc", @"wav", @"flac"];
 }
 
@@ -82,6 +84,10 @@
 
 - (instancetype)initWithURL:(NSURL *)fileURL error:(NSError * __autoreleasing *)outError {
     if ((self = [super initWithURL:fileURL])) {
+
+        VTRegisterProfessionalVideoWorkflowVideoDecoders();
+        MTRegisterProfessionalVideoWorkflowFormatReaders();
+
         _localAsset = [AVAsset assetWithURL:self.fileURL];
         _helpers = [NSMutableArray array];
 

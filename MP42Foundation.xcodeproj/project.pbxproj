@@ -225,6 +225,8 @@
 		A9B9C2E3182397E700416A4E /* libuniversaldetector.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A9B9C2C11823944700416A4E /* libuniversaldetector.a */; };
 		A9B9C4931823986200416A4E /* Quartz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9B9C4921823986200416A4E /* Quartz.framework */; };
 		A9BA1AE91DBF7DBE00FD0B38 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = A9BA1AEB1DBF7DBE00FD0B38 /* Localizable.strings */; };
+		A9D6CD641F9E3A7F00CCEE3E /* MediaToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9D6CD611F9E3A7F00CCEE3E /* MediaToolbox.framework */; };
+		A9D6CD661F9E3A8500CCEE3E /* VideoToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9D6CD651F9E3A8500CCEE3E /* VideoToolbox.framework */; };
 		A9D764311E278B8100ED2F78 /* MP42MetadataUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = A9D764301E278B8100ED2F78 /* MP42MetadataUtilities.m */; };
 		A9D764321E278B8100ED2F78 /* MP42MetadataUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = A9D764301E278B8100ED2F78 /* MP42MetadataUtilities.m */; };
 		A9DFBDA1195FF5BA00410060 /* MP42Heap.h in Headers */ = {isa = PBXBuildFile; fileRef = A9DFBD9F195FF5BA00410060 /* MP42Heap.h */; };
@@ -452,6 +454,8 @@
 		A9BA1ACD1DBF76FD00FD0B38 /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = it.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		A9BA1AEA1DBF7DBE00FD0B38 /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = it.lproj/Localizable.strings; sourceTree = "<group>"; };
 		A9D599BA1D4885E0001C22BD /* libswresample.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libswresample.a; path = contrib/ffmpeg/lib/libswresample.a; sourceTree = "<group>"; };
+		A9D6CD611F9E3A7F00CCEE3E /* MediaToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MediaToolbox.framework; path = System/Library/Frameworks/MediaToolbox.framework; sourceTree = SDKROOT; };
+		A9D6CD651F9E3A8500CCEE3E /* VideoToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = VideoToolbox.framework; path = System/Library/Frameworks/VideoToolbox.framework; sourceTree = SDKROOT; };
 		A9D764301E278B8100ED2F78 /* MP42MetadataUtilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MP42MetadataUtilities.m; sourceTree = "<group>"; };
 		A9D764351E278B9C00ED2F78 /* MP42MetadataUtilities.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MP42MetadataUtilities.h; sourceTree = "<group>"; };
 		A9DFBD9F195FF5BA00410060 /* MP42Heap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MP42Heap.h; sourceTree = "<group>"; };
@@ -515,6 +519,8 @@
 				A9B9C2D81823970E00416A4E /* AVFoundation.framework in Frameworks */,
 				A9B9C2DE1823973200416A4E /* CoreMedia.framework in Frameworks */,
 				A9B9C1F1182391DF00416A4E /* Cocoa.framework in Frameworks */,
+				A9D6CD661F9E3A8500CCEE3E /* VideoToolbox.framework in Frameworks */,
+				A9D6CD641F9E3A7F00CCEE3E /* MediaToolbox.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -554,6 +560,8 @@
 		A9B9C1EF182391DF00416A4E /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				A9D6CD651F9E3A8500CCEE3E /* VideoToolbox.framework */,
+				A9D6CD611F9E3A7F00CCEE3E /* MediaToolbox.framework */,
 				A90801051D4B830A002B6950 /* libavfilter.a */,
 				A90801061D4B830A002B6950 /* libavformat.a */,
 				A9D599BA1D4885E0001C22BD /* libswresample.a */,

@@ -190,6 +190,10 @@ NSString *localizedVideoDisplayName(FourCharCode mediaSubtype)
             result = NSLocalizedString(@"DVC Pro PAL", nil);
             break;
 
+        case kMP42VideoCodecType_XAVC_Long_GOP:
+            result = NSLocalizedString(@"XAVC Long GOP", nil);
+            break;
+
         case kMP42VideoCodecType_FairPlay:
             result = NSLocalizedString(@"FairPlay Video", nil);
             break;

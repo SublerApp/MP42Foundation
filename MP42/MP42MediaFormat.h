@@ -101,6 +101,8 @@ enum : MP42VideoCodecType
     kMP42VideoCodecType_DVCPROHD1080p30     = 'dvh3',
     kMP42VideoCodecType_DVCPROHD1080p25     = 'dvh2',
 
+    kMP42VideoCodecType_XAVC_Long_GOP       = 'xalg',
+
     kMP42VideoCodecType_FairPlay            = 'drmi',
 };
 
