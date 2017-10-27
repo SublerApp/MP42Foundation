@@ -255,7 +255,7 @@ static NSArray<NSString *> *_supportedFileFormats;
         MP42SampleBuffer *sample = [[MP42SampleBuffer alloc] init];
         sample->flags |= MP42SampleBufferFlagEndOfFile;
         sample->trackId = track.sourceId;
-        [self enqueue:sample];
+        [track enqueue:sample];
     }
 }
 

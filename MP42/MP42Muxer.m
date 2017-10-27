@@ -526,6 +526,7 @@
     NSUInteger tracksCount = _activeTracks.count;
     NSMutableArray<MP42Track *> *tracks = [_activeTracks copy];
     NSMutableArray<MP42Track *> *nextTracks = nil;
+
     for (;;) {
         @autoreleasepool {
 
@@ -545,7 +546,7 @@
 
                     if (sampleBuffer->flags & MP42SampleBufferFlagEndOfFile) {
                         // Tracks done, remove it from the loop
-                        NSMutableArray<MP42Track *> *nextTracks = [tracks mutableCopy];
+                        nextTracks = nextTracks != nil ? nextTracks : [tracks mutableCopy];
                         [nextTracks removeObject:track];
                         done += 1;
                     }
