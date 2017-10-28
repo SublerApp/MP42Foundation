@@ -24,6 +24,39 @@ extern "C" {
     CFDataRef createCookie_EAC3(void *context);
     void free_EAC3_context(void *context);
 
+    typedef struct {
+        uint16_t wFormatTag;
+        uint16_t nChannels;
+        uint32_t nSamplesPerSec;
+        uint32_t nAvgBytesPerSec;
+        uint16_t nBlockAlign;
+        uint16_t wBitsPerSample;
+        uint16_t cbSize;
+    } waveformatex_t;
+
+    typedef struct {
+        uint32_t  Data1;
+        uint16_t  Data2;
+        uint16_t  Data3;
+        uint8_t   Data4[8];
+    } waveformatex_guid_t;
+
+    typedef struct {
+        waveformatex_t Format;
+        union {
+            uint16_t wValidBitsPerSample;
+            uint16_t wSamplesPerBlock;
+            uint16_t wReserved;
+        } Samples;
+        uint32_t                dwChannelMask;
+        waveformatex_guid_t     SubFormat;
+    } waveformatextensible_t;
+
+    FourCharCode readWaveFormat(waveformatextensible_t *ex);
+    UInt32 readWaveChannelLayout(waveformatextensible_t *ex);
+
+    int analyze_WAVEFORMATEX(const uint8_t *cookie, uint32_t cookieLen, waveformatextensible_t *ex);
+
     typedef struct MPEG4AudioConfig {
         int object_type;
         int sampling_index;

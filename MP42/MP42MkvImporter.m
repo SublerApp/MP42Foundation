@@ -284,7 +284,7 @@ static int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, ui
             else if (mkvTrack->Type == TT_AUDIO) {
                 MP42AudioTrack *audioTrack = [[MP42AudioTrack alloc] init];
                 audioTrack.channels = mkvTrack->AV.Audio.Channels;
-                audioTrack.channelLayoutTag = getDefaultChannelLayout(mkvTrack->AV.Audio.Channels);
+                audioTrack.channelLayoutTag = channelLayout(mkvTrack);
                 audioTrack.alternateGroup = 1;
 
                 for (MP42Track *track in self.tracks) {
@@ -518,6 +518,16 @@ static int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, ui
     return sizes;
 }
 
+static UInt32 channelLayout(TrackInfo *trackInfo) {
+    if (!strcmp(trackInfo->CodecID, "A_MS/ACM")) {
+        waveformatextensible_t ex;
+        if (!analyze_WAVEFORMATEX(trackInfo->CodecPrivate, trackInfo->CodecPrivateSize, &ex)) {
+            return readWaveChannelLayout(&ex);
+        }
+    }
+    return getDefaultChannelLayout(trackInfo->AV.Audio.Channels);
+}
+
 // List of codec IDs we know about and that map to fourccs
 static const struct {
     const char *codecID;
@@ -569,11 +579,19 @@ static const struct {
 
 static FourCharCode CodecIDToFourCC(TrackInfo *track)
 {
-    for (int i = 0; kCodecIDMap[i].fourCC != kMP42MediaType_Unknown; i++) {
-        if (!strcmp(track->CodecID, kCodecIDMap[i].codecID)) {
-            return kCodecIDMap[i].fourCC;
+    if (!strcmp(track->CodecID, "A_MS/ACM")) {
+        waveformatextensible_t ex;
+        if (!analyze_WAVEFORMATEX(track->CodecPrivate, track->CodecPrivateSize, &ex)) {
+            return readWaveFormat(&ex);
+        }
+    } else {
+        for (int i = 0; kCodecIDMap[i].fourCC != kMP42MediaType_Unknown; i++) {
+            if (!strcmp(track->CodecID, kCodecIDMap[i].codecID)) {
+                return kCodecIDMap[i].fourCC;
+            }
         }
     }
+
     return kMP42MediaType_Unknown;
 }
 
@@ -773,6 +791,34 @@ static NSString * TrackNameToString(TrackInfo *track)
     else if (!strcmp(trackInfo->CodecID, "A_PCM/FLOAT/IEEE")) {
         result.mFormatID = kAudioFormatLinearPCM;
         result.mFormatFlags += kAudioFormatFlagIsFloat | kLinearPCMFormatFlagIsPacked;
+    }
+    else if (!strcmp(trackInfo->CodecID, "A_MS/ACM")) {
+        waveformatextensible_t ex;
+
+        if (!analyze_WAVEFORMATEX(trackInfo->CodecPrivate, trackInfo->CodecPrivateSize, &ex)) {
+
+            if (ex.Format.wFormatTag == 0xFFFE) {
+                if (ex.SubFormat.Data1 == 0x0001) {
+                    result.mFormatID = kAudioFormatLinearPCM;
+                    result.mFormatFlags += kLinearPCMFormatFlagIsSignedInteger | kLinearPCMFormatFlagIsPacked;
+                } else if (ex.SubFormat.Data1 == 0x0003) {
+                    result.mFormatID = kAudioFormatLinearPCM;
+                    result.mFormatFlags += kAudioFormatFlagIsFloat | kLinearPCMFormatFlagIsPacked;
+                }
+                result.mSampleRate = ex.Format.nSamplesPerSec;
+                result.mBitsPerChannel = ex.Samples.wSamplesPerBlock;
+            } else {
+                if (ex.SubFormat.Data1 == 0x0001) {
+                    result.mFormatID = kAudioFormatLinearPCM;
+                    result.mFormatFlags += kLinearPCMFormatFlagIsSignedInteger | kLinearPCMFormatFlagIsPacked;
+                } else if (ex.SubFormat.Data1 == 0x0003) {
+                    result.mFormatID = kAudioFormatLinearPCM;
+                    result.mFormatFlags += kAudioFormatFlagIsFloat | kLinearPCMFormatFlagIsPacked;
+                }
+                result.mSampleRate = ex.Format.nSamplesPerSec;
+                result.mBitsPerChannel = ex.Samples.wSamplesPerBlock;
+            }
+        }
     }
     return result;
 }

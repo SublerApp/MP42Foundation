@@ -8,6 +8,7 @@
 
 #include "MP42FormatUtilites.h"
 #include "mbs.h"
+#include "MP42MediaFormat.h"
 
 #import <CoreAudio/CoreAudio.h>
 
@@ -1010,6 +1011,135 @@ void free_EAC3_context(void *context)
 
     info->frame = NULL;
     free(context);
+}
+
+#pragma mark - WAVEFORMATEX
+
+#define WAVE_FORMAT_PCM          0x0001
+#define WAVE_FORMAT_IEEE_FLOAT   0x0003
+#define WAVE_FORMAT_ALAW         0x0006
+#define WAVE_FORMAT_MULAW        0x0007
+#define WAVE_FORMAT_EXTENSIBLE   0xFFFE
+
+#define SPEAKER_FRONT_LEFT               0x1
+#define SPEAKER_FRONT_RIGHT              0x2
+#define SPEAKER_FRONT_CENTER             0x4
+#define SPEAKER_LOW_FREQUENCY            0x8
+#define SPEAKER_BACK_LEFT                0x10
+#define SPEAKER_BACK_RIGHT               0x20
+#define SPEAKER_FRONT_LEFT_OF_CENTER     0x40
+#define SPEAKER_FRONT_RIGHT_OF_CENTER    0x80
+#define SPEAKER_BACK_CENTER              0x100
+#define SPEAKER_SIDE_LEFT                0x200
+#define SPEAKER_SIDE_RIGHT               0x400
+#define SPEAKER_TOP_CENTER               0x800
+#define SPEAKER_TOP_FRONT_LEFT           0x1000
+#define SPEAKER_TOP_FRONT_CENTER         0x2000
+#define SPEAKER_TOP_FRONT_RIGHT          0x4000
+#define SPEAKER_TOP_BACK_LEFT            0x8000
+#define SPEAKER_TOP_BACK_CENTER          0x10000
+#define SPEAKER_TOP_BACK_RIGHT           0x20000
+
+#define KSAUDIO_SPEAKER_DIRECTOUT 0 //(no speakers)
+#define KSAUDIO_SPEAKER_MONO (SPEAKER_FRONT_CENTER)
+#define KSAUDIO_SPEAKER_STEREO (SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT)
+#define KSAUDIO_SPEAKER_QUAD (SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT | SPEAKER_BACK_LEFT | SPEAKER_BACK_RIGHT)
+#define KSAUDIO_SPEAKER_SURROUND (SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT | SPEAKER_FRONT_CENTER | SPEAKER_BACK_CENTER)
+#define KSAUDIO_SPEAKER_5POINT1 (SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT | SPEAKER_FRONT_CENTER | SPEAKER_LOW_FREQUENCY | SPEAKER_BACK_LEFT | SPEAKER_BACK_RIGHT)
+#define KSAUDIO_SPEAKER_5POINT1_SURROUND (SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT | SPEAKER_FRONT_CENTER | SPEAKER_LOW_FREQUENCY | SPEAKER_SIDE_LEFT | SPEAKER_SIDE_RIGHT)
+#define KSAUDIO_SPEAKER_7POINT1 (SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT | SPEAKER_FRONT_CENTER | SPEAKER_LOW_FREQUENCY | SPEAKER_BACK_LEFT | SPEAKER_BACK_RIGHT | SPEAKER_FRONT_LEFT_OF_CENTER | SPEAKER_FRONT_RIGHT_OF_CENTER)
+#define KSAUDIO_SPEAKER_7POINT1_SURROUND (SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT | SPEAKER_FRONT_CENTER | SPEAKER_LOW_FREQUENCY | SPEAKER_BACK_LEFT | SPEAKER_BACK_RIGHT | SPEAKER_SIDE_LEFT | SPEAKER_SIDE_RIGHT)
+
+FourCharCode readWaveFormat(waveformatextensible_t *ex) {
+    uint32_t format = 0;
+
+    if (ex->Format.wFormatTag == 0xFFFE) {
+        format = ex->SubFormat.Data1;
+    } else {
+        format = ex->Format.wFormatTag;
+    }
+
+    switch (format) {
+        case WAVE_FORMAT_PCM:
+        case WAVE_FORMAT_IEEE_FLOAT:
+            return kMP42AudioCodecType_LinearPCM;
+
+        case WAVE_FORMAT_ALAW:
+            return kMP42AudioCodecType_ALaw;
+
+        case WAVE_FORMAT_MULAW:
+            return kMP42AudioCodecType_ULaw;
+
+        default:
+            return kMP42MediaType_Unknown;
+    }
+}
+
+UInt32 readWaveChannelLayout(waveformatextensible_t *ex)
+{
+    if (ex->Format.wFormatTag == WAVE_FORMAT_EXTENSIBLE) {
+        switch (ex->dwChannelMask) {
+            case KSAUDIO_SPEAKER_DIRECTOUT:
+                return 0;
+            case KSAUDIO_SPEAKER_MONO:
+                return kAudioChannelLayoutTag_Mono;
+            case KSAUDIO_SPEAKER_STEREO:
+                return kAudioChannelLayoutTag_Stereo;
+            case KSAUDIO_SPEAKER_QUAD:
+                return kAudioChannelLayoutTag_Quadraphonic;
+            case KSAUDIO_SPEAKER_SURROUND:
+                return kAudioChannelLayoutTag_MPEG_4_0_A;
+            case KSAUDIO_SPEAKER_5POINT1:
+                return kAudioChannelLayoutTag_MPEG_5_1_A;
+            case KSAUDIO_SPEAKER_5POINT1_SURROUND:
+                return kAudioChannelLayoutTag_MPEG_5_1_A;
+            case KSAUDIO_SPEAKER_7POINT1:
+                return kAudioChannelLayoutTag_MPEG_7_1_A;
+            case KSAUDIO_SPEAKER_7POINT1_SURROUND:
+                return kAudioChannelLayoutTag_MPEG_7_1_A;
+        }
+    }
+    return 0;
+}
+
+int analyze_WAVEFORMATEX(const uint8_t *cookie, uint32_t cookieLen, waveformatextensible_t *ex)
+{
+    CMemoryBitstream b;
+    b.SetBytes((u_int8_t *)cookie, cookieLen);
+    bzero(ex, sizeof(waveformatextensible_t));
+
+    try {
+        ex->Format.wFormatTag = EndianU16_BtoN(b.GetBits(16));
+        ex->Format.nChannels = EndianU16_BtoN(b.GetBits(16));
+        ex->Format.nSamplesPerSec = EndianU32_BtoN(b.GetBits(32));
+        ex->Format.nAvgBytesPerSec = EndianU32_BtoN(b.GetBits(32));
+        ex->Format.nBlockAlign = EndianU16_BtoN(b.GetBits(16));
+        ex->Format.wBitsPerSample = EndianU16_BtoN(b.GetBits(16));
+        ex->Format.cbSize = EndianU16_BtoN(b.GetBits(16));
+
+        if (ex->Format.wFormatTag == WAVE_FORMAT_EXTENSIBLE) {
+            ex->Samples.wValidBitsPerSample = EndianU16_BtoN(b.GetBits(16));
+            ex->dwChannelMask = EndianU32_BtoN(b.GetBits(32));
+
+            ex->SubFormat.Data1 = EndianU32_BtoN(b.GetBits(32));
+            ex->SubFormat.Data2 = EndianU16_BtoN(b.GetBits(16));
+            ex->SubFormat.Data3 = EndianU16_BtoN(b.GetBits(16));
+
+            ex->SubFormat.Data4[0] = b.GetBits(8);
+            ex->SubFormat.Data4[1] = b.GetBits(8);
+            ex->SubFormat.Data4[2] = b.GetBits(8);
+            ex->SubFormat.Data4[3] = b.GetBits(8);
+            ex->SubFormat.Data4[4] = b.GetBits(8);
+            ex->SubFormat.Data4[5] = b.GetBits(8);
+            ex->SubFormat.Data4[6] = b.GetBits(8);
+            ex->SubFormat.Data4[7] = b.GetBits(8);
+        }
+    }
+    catch (int e) {
+        return 1;
+    }
+
+    return 0;
 }
 
 #pragma mark - MPEG 4 Audio
