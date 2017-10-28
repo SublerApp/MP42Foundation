@@ -549,6 +549,7 @@
                         nextTracks = nextTracks != nil ? nextTracks : [tracks mutableCopy];
                         [nextTracks removeObject:track];
                         done += 1;
+                        break;
                     }
                     else if (!MP4WriteSample(_fileHandle, trackId,
                                              sampleBuffer->data, sampleBuffer->size,
