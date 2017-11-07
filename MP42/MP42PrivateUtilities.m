@@ -228,6 +228,8 @@ FourCharCode getTrackMediaSubType(MP4FileHandle fileHandle, MP4TrackId Id)
             return kMP42AudioCodecType_AC3;
         else if (!strcmp(dataName, "ec-3"))
             return kMP42AudioCodecType_EnhancedAC3;
+        else if (!strcmp(dataName, "twos"))
+            return kMP42AudioCodecType_LinearPCM;
         else if (!strcmp(dataName, "mp4v"))
             return kMP42VideoCodecType_MPEG4Video;
         else if (!strcmp(dataName, "text"))

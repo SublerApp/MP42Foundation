@@ -90,6 +90,7 @@
             uint64_t channels_count = 0;
             MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.twos.channels", &channels_count);
             _channels = channels_count;
+            _channelLayoutTag = getDefaultChannelLayout(channels_count);
         }
 
         if (MP4HaveTrackAtom(fileHandle, self.trackId, "tref.fall")) {

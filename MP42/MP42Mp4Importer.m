@@ -10,7 +10,6 @@
 #import "MP42FileImporter+Private.h"
 #import "MP42File.h"
 
-#import "MP42Languages.h"
 #import "MP42Sample.h"
 
 #import "mp4v2.h"
@@ -119,7 +118,7 @@ typedef struct MP4DemuxHelper {
                 free(ppValue);
             }
         }
-        else {
+        else if (!strcmp(media_data_name, "mp4a")) {
             uint8_t *ppConfig; uint32_t pConfigSize;
             MP4GetTrackESConfiguration(_fileHandle, srcTrackId, &ppConfig, &pConfigSize);
             magicCookie = [NSData dataWithBytes:ppConfig length:pConfigSize];
@@ -259,6 +258,32 @@ typedef struct MP4DemuxHelper {
     }
 
     return nil;
+}
+
+- (AudioStreamBasicDescription)audioDescriptionForTrack:(MP42AudioTrack *)track
+{
+    AudioStreamBasicDescription result;
+    bzero(&result, sizeof(AudioStreamBasicDescription));
+
+    MP42TrackId trackID = track.sourceId;
+
+    if (MP4HaveTrackAtom(_fileHandle, trackID, "mdia.minf.stbl.stsd.twos")) {
+        uint64_t channels_count = 0;
+        uint64_t sample_rate = 0;
+        uint64_t bit_depth = 0;
+
+        MP4GetTrackIntegerProperty(_fileHandle, trackID, "mdia.minf.stbl.stsd.twos.channels", &channels_count);
+        MP4GetTrackIntegerProperty(_fileHandle, trackID, "mdia.minf.stbl.stsd.twos.timeScale", &sample_rate);
+        MP4GetTrackIntegerProperty(_fileHandle, trackID, "mdia.minf.stbl.stsd.twos.sampleSize", &bit_depth);
+
+        result.mSampleRate = (sample_rate >> 16) + (sample_rate & 0xffff) / 65536.0;
+        result.mFormatID = kAudioFormatLinearPCM;
+        result.mFormatFlags +=  kLinearPCMFormatFlagIsSignedInteger | kLinearPCMFormatFlagIsPacked | kAudioFormatFlagIsBigEndian;
+        result.mBitsPerChannel = bit_depth;
+        result.mChannelsPerFrame = channels_count;
+    }
+
+    return result;
 }
 
 - (BOOL)audioTrackUsesExplicitEncoderDelay:(MP42Track *)track;
