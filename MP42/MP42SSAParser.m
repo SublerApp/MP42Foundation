@@ -127,7 +127,7 @@
     self = [super init];
     if (self) {
         NSUInteger formatsCount = format.count;
-        NSArray<NSString *> *values = [self parse:string count:formatsCount mkvStyle:mkvStyle];
+        NSArray<NSString *> *values = parse(string, formatsCount, mkvStyle);
         NSUInteger valuesCount = values.count;
 
         for (NSUInteger index = 0; index < valuesCount && index < formatsCount; index += 1) {
@@ -174,7 +174,8 @@
     return self;
 }
 
-- (NSArray<NSString *> *)parse:(NSString *)string count:(NSUInteger)count mkvStyle:(BOOL)mkvStyle
+static NSArray<NSString *> * parse(NSString * string, NSUInteger count, BOOL mkvStyle)
+//- (NSArray<NSString *> *)parse:(NSString *)string count:(NSUInteger)count mkvStyle:(BOOL)mkvStyle
 {
     NSScanner *sc = [NSScanner scannerWithString:string];
     NSMutableArray<NSString *> *valuesArray = [NSMutableArray array];
@@ -280,6 +281,7 @@ static unsigned ParseSubTime(const char *time, unsigned secondScale, BOOL hasSig
     NSParameterAssert(string);
     self = [self init];
     if (self) {
+        string = STStandardizeStringNewlines(string);
         [self parse:string];
     }
     return self;
@@ -295,6 +297,18 @@ static unsigned ParseSubTime(const char *time, unsigned secondScale, BOOL hasSig
         _mkvStyle = YES;
     }
     return self;
+}
+
+static NSMutableString *STStandardizeStringNewlines(NSString *str)
+{
+    if (str == nil) {
+        return nil;
+    }
+
+    NSMutableString *ms = [NSMutableString stringWithString:str];
+    [ms replaceOccurrencesOfString:@"\r\n" withString:@"\n" options:NSLiteralSearch range:NSMakeRange(0, ms.length)];
+    [ms replaceOccurrencesOfString:@"\r" withString:@"\n" options:NSLiteralSearch range:NSMakeRange(0, ms.length)];
+    return ms;
 }
 
 - (void)parse:(NSString *)ssa
