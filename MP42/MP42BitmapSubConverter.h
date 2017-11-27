@@ -16,7 +16,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MP42BitmapSubConverter : NSObject <MP42ConverterProtocol>
 
-- (instancetype)initWithTrack:(MP42SubtitleTrack *)track error:(NSError * __autoreleasing *)outError;
+- (nullable instancetype)initWithTrack:(MP42SubtitleTrack *)track error:(NSError * __autoreleasing *)outError;
 
 - (void)addSample:(MP42SampleBuffer *)sample;
 - (nullable MP42SampleBuffer *)copyEncodedSample;

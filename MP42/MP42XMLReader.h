@@ -14,7 +14,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MP42XMLReader : NSObject
 
-- (instancetype)initWithURL:(NSURL *)url error:(NSError * __autoreleasing *)error;
+- (nullable instancetype)initWithURL:(NSURL *)url error:(NSError * __autoreleasing *)error;
 
 @property (nonatomic, readonly) MP42Metadata *mMetadata;
 
