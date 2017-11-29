@@ -339,6 +339,8 @@ typedef struct MP4DemuxHelper {
                     MP4Duration renderingOffset;
                     MP4Timestamp pStartTime;
                     bool isSyncSample;
+                    bool hasDependencyFlags;
+                    uint32_t dependencyFlags;
 
                     demuxHelper->currentSampleId = demuxHelper->currentSampleId + 1;
                     if (demuxHelper->currentSampleId > demuxHelper->totalSampleNumber) {
@@ -347,12 +349,12 @@ typedef struct MP4DemuxHelper {
                         break;
                     }
 
-                    if (!MP4ReadSample(_fileHandle,
+                    if (!MP4ReadSampleSampleDependency(_fileHandle,
                                        demuxHelper->sourceID,
                                        demuxHelper->currentSampleId,
                                        &pBytes, &numBytes,
                                        &pStartTime, &duration, &renderingOffset,
-                                       &isSyncSample)) {
+                                       &isSyncSample, &hasDependencyFlags, &dependencyFlags)) {
                         demuxHelper->done++;
                         tracksDone++;
                         break;
@@ -366,6 +368,9 @@ typedef struct MP4DemuxHelper {
                     sample->decodeTimestamp = pStartTime;
                     sample->flags |= isSyncSample ? MP42SampleBufferFlagIsSync : 0;
                     sample->trackId = demuxHelper->sourceID;
+                    if (hasDependencyFlags) {
+                        sample->dependecyFlags = dependencyFlags;
+                    }
                     
                     [self enqueue:sample];
 

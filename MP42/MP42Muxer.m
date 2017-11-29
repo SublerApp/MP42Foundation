@@ -551,11 +551,21 @@
                         done += 1;
                         break;
                     }
-                    else if (!MP4WriteSample(_fileHandle, trackId,
-                                             sampleBuffer->data, sampleBuffer->size,
-                                             sampleBuffer->duration, sampleBuffer->offset,
-                                             sampleBuffer->flags & MP42SampleBufferFlagIsSync)) {
-                        _cancelled = YES;
+                    else {
+                        bool err = false;
+                        if (sampleBuffer->dependecyFlags) {
+                            err = MP4WriteSampleDependency(_fileHandle, trackId, sampleBuffer->data, sampleBuffer->size,
+                                                              sampleBuffer->duration, sampleBuffer->offset,
+                                                              sampleBuffer->flags & MP42SampleBufferFlagIsSync, sampleBuffer->dependecyFlags);
+                        } else {
+                            err = MP4WriteSample(_fileHandle, trackId,
+                                                 sampleBuffer->data, sampleBuffer->size,
+                                                 sampleBuffer->duration, sampleBuffer->offset,
+                                                 sampleBuffer->flags & MP42SampleBufferFlagIsSync);
+                        }
+                        if (!err) {
+                            _cancelled = YES;
+                        }
                     }
                 }
             }

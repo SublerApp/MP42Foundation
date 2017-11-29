@@ -962,17 +962,45 @@
                         CMTime currentOutputTimeStamp = CMTimeConvertScale(presentationOutputTimeStamp, demuxHelper->timescale, kCMTimeRoundingMethod_Default);
 
                         // Read sample attachment, to mark the frame as sync
-                        BOOL sync = 1;
+                        BOOL sync = YES;
                         BOOL doNotDisplay = NO;
+                        MP42SampleDepType dependecies = MP42SampleDepTypeUnknown;
+
                         CFArrayRef attachmentsArray = CMSampleBufferGetSampleAttachmentsArray(sampleBuffer, NO);
-                        if (attachmentsArray) {
-                            for (NSDictionary *dict in (__bridge NSArray *)attachmentsArray) {
-                                if (dict[(NSString *)kCMSampleAttachmentKey_NotSync]) {
-                                    sync = 0;
-                                }
-                                if (dict[(NSString *)kCMSampleAttachmentKey_DoNotDisplay]) {
-                                    doNotDisplay = YES;
-                                }
+                        if (attachmentsArray && CFArrayGetCount(attachmentsArray)) {
+                            CFDictionaryRef dict = CFArrayGetValueAtIndex(attachmentsArray, 0);
+
+                            CFBooleanRef value;
+                            BOOL keyExists;
+
+                            keyExists = CFDictionaryGetValueIfPresent(dict, kCMSampleAttachmentKey_NotSync, (const void **)&value);
+                            if (keyExists) {
+                                sync = !CFBooleanGetValue(value);
+                            }
+
+                            keyExists = CFDictionaryGetValueIfPresent(dict, kCMSampleAttachmentKey_DoNotDisplay, (const void **)&value);
+                            if (keyExists) {
+                                doNotDisplay = CFBooleanGetValue(value);
+                            }
+
+                            keyExists = CFDictionaryGetValueIfPresent(dict, kCMSampleAttachmentKey_HasRedundantCoding, (const void **)&value);
+                            if (keyExists) {
+                                dependecies |= CFBooleanGetValue(value) ? MP42SampleDepTypeHasRedundantCoding : MP42SampleDepTypeHasNoRedundantCoding;
+                            }
+
+                            keyExists = CFDictionaryGetValueIfPresent(dict, kCMSampleAttachmentKey_DependsOnOthers, (const void **)&value);
+                            if (keyExists) {
+                                dependecies |= CFBooleanGetValue(value) ? MP42SampleDepTypeIsDependent : MP42SampleDepTypeIsIndependent;
+                            }
+
+                            keyExists = CFDictionaryGetValueIfPresent(dict, kCMSampleAttachmentKey_IsDependedOnByOthers, (const void **)&value);
+                            if (keyExists) {
+                                dependecies |= CFBooleanGetValue(value) ? MP42SampleDepTypeHasDependents : MP42SampleDepTypeHasNoDependents;
+                            }
+
+                            keyExists = CFDictionaryGetValueIfPresent(dict, kCMSampleAttachmentKey_EarlierDisplayTimesAllowed, (const void **)&value);
+                            if (keyExists && CFBooleanGetValue(value)) {
+                                dependecies |= MP42SampleDepTypeEarlierDisplayTimesAllowed;
                             }
                         }
 
@@ -1001,6 +1029,7 @@
                             sample->timescale = demuxHelper->timescale;
                             sample->flags |= sync ? MP42SampleBufferFlagIsSync : 0;
                             sample->flags |= doNotDisplay ? MP42SampleBufferFlagDoNotDisplay : 0;
+                            sample->dependecyFlags = dependecies;
                             sample->trackId = demuxHelper->sourceID;
                             sample->attachments = (void *)attachments;
 
