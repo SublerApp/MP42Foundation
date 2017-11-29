@@ -70,6 +70,7 @@ typedef struct muxer_helper {
         [helper->fifo release];
         [helper->converter release];
         free(helper);
+        helper = NULL;
     }
 }
 

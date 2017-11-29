@@ -994,6 +994,9 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
     NSMutableArray<MP42Track *> *tracksToUpdate = [self.itracks mutableCopy];
     [tracksToUpdate removeObjectsInArray:unsupportedTracks];
 
+    for (MP42Track *track in self.itracks) {
+        track.importer = nil;
+    }
     [self.importers removeAllObjects];
 
     // Update modified tracks properties

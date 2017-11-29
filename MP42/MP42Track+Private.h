@@ -33,7 +33,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property(nonatomic, readonly) NSMutableDictionary<NSString *, NSNumber *> *updatedProperty;
 
-@property (nonatomic, readwrite) MP42FileImporter *importer;
+@property (nonatomic, readwrite, nullable) MP42FileImporter *importer;
 
 @end
 
