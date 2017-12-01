@@ -118,6 +118,10 @@ NSString *localizedVideoDisplayName(FourCharCode mediaSubtype)
             result = NSLocalizedString(@"H.264", nil);
             break;
 
+        case kMP42VideoCodecType_H264_PSinBitstream:
+            result = NSLocalizedString(@"H.264 (Parameter Sets in Bitstream)", nil);
+            break;
+
         case kMP42VideoCodecType_HEVC:
             result = NSLocalizedString(@"HEVC", nil);
             break;
