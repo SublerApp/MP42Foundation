@@ -954,9 +954,8 @@ extern "C" uint32_t h264_get_frame_dependency (h264_decode_t *dec)
     else
         dflags |= MP4_SDT_HAS_NO_DEPENDENTS; /* disposable */
     
-    if (dec->nal_unit_type != H264_NAL_TYPE_IDR_SLICE) {
-        if (H264_TYPE_IS_P(dec->slice_type)) dflags |= MP4_SDT_EARLIER_DISPLAY_TIMES_ALLOWED;
-        if (H264_TYPE_IS_I(dec->slice_type)) dflags |= MP4_SDT_EARLIER_DISPLAY_TIMES_ALLOWED;;
+    if (dec->nal_unit_type == H264_NAL_TYPE_IDR_SLICE) {
+        dflags |= MP4_SDT_IS_INDEPENDENT;
     }
     
     return dflags;
@@ -1532,6 +1531,7 @@ NSData* H264Info(const char *filePath, uint32_t *pic_width, uint32_t *pic_height
                     sample->size = nal_buffer_size;
                     sample->duration = mp4FrameDuration;
                     sample->flags = nal_is_sync ? MP42SampleBufferFlagIsSync : 0;
+                    sample->dependecyFlags = dflags;
                     sample->trackId = trackId;
 
                     [self enqueue:sample];
@@ -1551,7 +1551,6 @@ NSData* H264Info(const char *filePath, uint32_t *pic_width, uint32_t *pic_height
                        h264_dec.nal_unit_type, nal.buffer_on);
             }
             if (h264_nal_unit_type_is_slice(h264_dec.nal_unit_type)) {
-                dflags = h264_get_frame_dependency(&h264_dec);
                 // copy all seis, etc before indicating first
                 first = false;
                 copy_nal_to_buffer = true;
@@ -1559,6 +1558,7 @@ NSData* H264Info(const char *filePath, uint32_t *pic_width, uint32_t *pic_height
                 poc = h264_dec.pic_order_cnt;
 
                 nal_is_sync = h264_slice_is_idr(&h264_dec);
+                dflags = h264_get_frame_dependency(&h264_dec);
             } else {
 
                 switch (h264_dec.nal_unit_type) {
@@ -1618,6 +1618,7 @@ NSData* H264Info(const char *filePath, uint32_t *pic_width, uint32_t *pic_height
             sample->size = nal_buffer_size;
             sample->duration = mp4FrameDuration;
             sample->flags = nal_is_sync ? MP42SampleBufferFlagIsSync : 0;
+            sample->dependecyFlags = dflags;
             sample->trackId = trackId;
             
             [self enqueue:sample];
