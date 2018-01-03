@@ -1004,6 +1004,10 @@
                             }
                         }
 
+                        if (dependecies == MP42SampleDepTypeUnknown) {
+                            dependecies = sync ? MP42SampleDepTypeIsIndependent : MP42SampleDepTypeIsDependent;
+                        }
+
                         CFDictionaryRef attachments = CMCopyDictionaryOfAttachments(NULL, sampleBuffer, kCMAttachmentMode_ShouldPropagate);
 
                         // Get CMBlockBufferRef to extract the actual data later
