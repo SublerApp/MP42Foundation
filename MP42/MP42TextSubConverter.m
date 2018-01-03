@@ -35,6 +35,7 @@
 @property (nonatomic, readonly) MP42SSAConverter *converter;
 
 @property (nonatomic, readonly) MP4TrackId trackID;
+@property (nonatomic, readonly) MP42SubtitleTrack *track;
 
 @property (nonatomic, readonly) _Atomic int32_t finished;
 
@@ -105,6 +106,7 @@
         }
 
         _trackID = track.sourceId;
+        _track = track;
 
         _decoderThread = [[NSThread alloc] initWithTarget:self selector:@selector(TextConverterThreadMainRoutine) object:nil];
         [_decoderThread setName:@"Text Converter"];
@@ -123,6 +125,7 @@
 {
     if (_finished) {
         if (!_ss.isEmpty) {
+            CGSize trackSize = CGSizeMake(_track.trackWidth, _track.trackHeight);
             MP42SubLine *sl = [_ss getSerializedPacket];
             MP42SampleBuffer *sample;
 
@@ -130,7 +133,7 @@
                 sample = copyEmptySubtitleSample(_trackID, sl->end_time - sl->begin_time, NO);
             }
             else {
-                sample = copySubtitleSample(_trackID, sl->line, sl->end_time - sl->begin_time, sl->forced, NO, YES, CGSizeMake(0, 0), 0);
+                sample = copySubtitleSample(_trackID, sl->line, sl->end_time - sl->begin_time, sl->forced, NO, YES, trackSize, 0);
             }
 
             return sample;

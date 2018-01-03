@@ -112,9 +112,7 @@
         [ss setFinished:YES];
 
         for (MP42SubtitleTrack *track in self.inputTracks) {
-            CGSize trackSize;
-            trackSize.width = track.trackWidth;
-            trackSize.height = track.trackHeight;
+            CGSize trackSize = CGSizeMake(track.trackWidth, track.trackHeight);
             MP42SampleBuffer *sample;
 
             while (!ss.isEmpty && !self.isCancelled) {

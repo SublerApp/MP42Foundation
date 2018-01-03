@@ -806,7 +806,7 @@ int LoadSMIFromURL(NSURL *url, MP42SubSerializer *ss, int subCount)
     return 1;
 }
 
-u_int8_t* createStyleRecord(u_int16_t startChar, u_int16_t endChar, u_int16_t fontID, u_int8_t flags, rgba_color color, u_int8_t* style)
+u_int8_t * createStyleRecord(u_int16_t startChar, u_int16_t endChar, u_int16_t fontID, u_int8_t flags, rgba_color color, u_int8_t* style, u_int8_t fontSize)
 {
     style[0] = (startChar >> 8) & 0xff; // startChar
     style[1] = startChar & 0xff;
@@ -814,12 +814,12 @@ u_int8_t* createStyleRecord(u_int16_t startChar, u_int16_t endChar, u_int16_t fo
     style[3] = endChar & 0xff;
     style[4] = (fontID >> 8) & 0xff;    // font-ID
     style[5] = fontID & 0xff;
-    style[6] = flags;   // face-style-flags: 1 bold; 2 italic; 4 underline
-    style[7] = 24;      // font-size
-    style[8] = color.r;     // r
-    style[9] = color.g;     // g
-    style[10] = color.b;    // b
-    style[11] = color.a;    // a
+    style[6] = flags;            // face-style-flags: 1 bold; 2 italic; 4 underline
+    style[7] = fontSize;         // font-size
+    style[8] = color.r;          // r
+    style[9] = color.g;          // g
+    style[10] = color.b;         // b
+    style[11] = color.a;         // a
 
     return style;
 }
@@ -837,7 +837,7 @@ size_t closeStyleAtom(u_int16_t styleCount, u_int8_t* styleAtom)
     return styleSize;
 }
 
-NSString* createStyleAtomForString(NSString* string, u_int8_t** buffer, size_t *size)
+NSString * createStyleAtomForString(NSString *string, u_int8_t fontSize, u_int8_t **buffer, size_t *size)
 {
     MP42HtmlParser *parser = [[MP42HtmlParser alloc] initWithString:string];
     parser.defaultColor = make_color(255, 255, 255, 255);
@@ -852,7 +852,7 @@ NSString* createStyleAtomForString(NSString* string, u_int8_t** buffer, size_t *
 
     for (MP42Style *style in parser.styles) {
         u_int8_t styleRecord[12];
-        createStyleRecord(style.location, style.location + style.length, 1, style.style, style.color, styleRecord);
+        createStyleRecord(style.location, style.location + style.length, 1, style.style, style.color, styleRecord, fontSize);
         memcpy(*buffer + 10 + (12 * styleCount), styleRecord, 12);
         styleCount++;
     }
@@ -912,19 +912,21 @@ MP42SampleBuffer * copySubtitleSample(MP4TrackId subtitleTrackId, NSString *stri
     size_t styleSize = 0, sampleSize = 0, stringLength = 0;
     u_int64_t pos = 0;
 
+    u_int8_t fontSize = verticalPlacement ? trackSize.height * 0.05 : trackSize.height / 0.15 * 0.05;
+
     string = removeNewLines(string);
     if (styles) {
-        string = createStyleAtomForString(string, &styleAtom, &styleSize);
+        string = createStyleAtomForString(string, fontSize, &styleAtom, &styleSize);
     }
 
-    stringLength = strlen([string UTF8String]);
+    stringLength = strlen(string.UTF8String);
     sampleSize = 2 + (stringLength * sizeof(char)) + styleSize + (forced == 1 ? 8 : 0) + (verticalPlacement == 1 ? 16 : 0);
     sampleData = malloc(sampleSize);
 
     pos = 2;
 
     if (stringLength) {
-        memcpy(sampleData + pos, [string UTF8String], stringLength);
+        memcpy(sampleData + pos, string.UTF8String, stringLength);
         pos += stringLength;
     }
 
