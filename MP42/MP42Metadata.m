@@ -409,7 +409,9 @@
         }
     }
 
-    [self addMetadataItems:metadata.items];
+    for (MP42MetadataItem *item in metadata.items) {
+        [self addMetadataItem:[item copy]];
+    }
 
     self.edited = YES;
     self.artworkEdited = YES;

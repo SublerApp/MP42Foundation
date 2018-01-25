@@ -64,7 +64,7 @@
     return _imgContext;
 }
 
-- (CGImageRef)createfilteredCGImage:(CGImageRef)image CF_RETURNS_RETAINED {
+- (nullable CGImageRef)createfilteredCGImage:(CGImageRef)image CF_RETURNS_RETAINED {
     CIImage *ciImage = [CIImage imageWithCGImage:image];
 
     // A filter to increase the subtitle image contrast
@@ -227,7 +227,7 @@
                     CGColorSpaceRelease(colorSpace);
 
                     CGImageRef filteredCGImage = [self createfilteredCGImage:cgImage];
-                    NSString *text = [_ocr performOCROnCGImage:filteredCGImage];
+                    NSString *text = [_ocr performOCROnCGImage:filteredCGImage ? filteredCGImage : cgImage];
 
                     MP42SampleBuffer *subSample = nil;
                     if (text) {
@@ -240,7 +240,9 @@
                     [_outputSamplesBuffer enqueue:subSample];
 
                     CGImageRelease(cgImage);
-                    CGImageRelease(filteredCGImage);
+                    if (filteredCGImage) {
+                        CGImageRelease(filteredCGImage);
+                    }
                     CGDataProviderRelease(provider);
                     CFRelease(imgData);
                     
@@ -339,7 +341,7 @@
                     CGImageRef filteredCGImage = [self createfilteredCGImage:cgImage];
 
                     NSString *ocrText;
-                    if ((ocrText = [_ocr performOCROnCGImage:filteredCGImage])) {
+                    if ((ocrText = [_ocr performOCROnCGImage:filteredCGImage ? filteredCGImage : cgImage])) {
                         if (text.length) {
                             [text appendString:@"\n"];
                         }
@@ -349,7 +351,9 @@
                     CGImageRelease(cgImage);
                     CGDataProviderRelease(provider);
                     CFRelease(imgData);
-                    CFRelease(filteredCGImage);
+                    if (filteredCGImage) {
+                        CFRelease(filteredCGImage);
+                    }
                     
                     free(imageData);
                 }
