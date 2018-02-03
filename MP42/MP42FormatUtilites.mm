@@ -836,6 +836,7 @@ int analyze_EAC3(void **context ,uint8_t *frame, uint32_t size)
 
     b.SetBytes(frame, size);
     if (ac3_parse_header(b, &hdr) < 0) {
+        free(hdr);
         return -1;
     }
 
@@ -887,9 +888,11 @@ int analyze_EAC3(void **context ,uint8_t *frame, uint32_t size)
                 gbc.SetBytes(frame + cumul_size, (size - cumul_size) * 8);
 
                 if (ac3_parse_header(gbc, &hdr) < 0) {
+                    free(hdr);
                     return -1;
                 }
                 if (hdr->frame_type != EAC3_FRAME_TYPE_DEPENDENT) {
+                    free(hdr);
                     return -1;
                 }
                 cumul_size += hdr->frame_size;
