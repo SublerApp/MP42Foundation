@@ -363,20 +363,16 @@
                 newTrack.language = [MP42Languages.defaultManager extendedTagForISO_639_2:track.languageCode];
             }
 
-            // Media characteristic tags, requires 10.10 or later
-            if ([[AVMetadataItem class] respondsToSelector:@selector(metadataItemsFromArray:filteredByIdentifier:)]) {
-
-                NSArray<AVMetadataItem *> *mediaTags = [AVMetadataItem metadataItemsFromArray:trackMetadata
+            NSArray<AVMetadataItem *> *mediaTags = [AVMetadataItem metadataItemsFromArray:trackMetadata
                                                                      filteredByIdentifier:AVMetadataIdentifierQuickTimeUserDataTaggedCharacteristic];
-
-                if (mediaTags.count) {
-                    NSMutableSet<NSString *> *tags = [NSMutableSet set];
-
-                    for (AVMetadataItem *tag in mediaTags) {
-                        [tags addObject:tag.stringValue];
-                    }
-                    newTrack.mediaCharacteristicTags = tags;
+            
+            if (mediaTags.count) {
+                NSMutableSet<NSString *> *tags = [NSMutableSet set];
+                
+                for (AVMetadataItem *tag in mediaTags) {
+                    [tags addObject:tag.stringValue];
                 }
+                newTrack.mediaCharacteristicTags = tags;
             }
 
             [self addTrack:newTrack];

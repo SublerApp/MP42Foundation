@@ -219,11 +219,7 @@ static NSArray<NSString *> *_supportedFileFormats;
     if (!_demuxerThread) {
         _demuxerThread = [[NSThread alloc] initWithTarget:self selector:@selector(demux) object:nil];
         _demuxerThread.name = self.description;
-
-        // 10.10+
-        if ([_demuxerThread respondsToSelector:@selector(setQualityOfService:)]) {
-            _demuxerThread.qualityOfService = NSQualityOfServiceUtility;
-        }
+        _demuxerThread.qualityOfService = NSQualityOfServiceUtility;
 
         [_demuxerThread start];
     }

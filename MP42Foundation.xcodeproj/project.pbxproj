@@ -1372,7 +1372,6 @@
 					"$(SRCROOT)/contrib/**",
 					"$(SRCROOT)/UniversalDetector",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "";
@@ -1435,7 +1434,6 @@
 					"$(SRCROOT)/contrib/**",
 					"$(SRCROOT)/UniversalDetector",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "";
