@@ -323,6 +323,11 @@
     return localizedDisplayName(_mediaType, self.targetFormat);
 }
 
+- (BOOL)exportToURL:(NSURL *)url error:(NSError * __autoreleasing *)error
+{
+    return YES;
+}
+
 #pragma mark - NSSecureCoding
 
 + (BOOL)supportsSecureCoding

@@ -482,16 +482,10 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
     [self.itracks addObject:track];
 }
 
-- (void)removeTrackAtIndex:(NSUInteger)index {
+- (void)removeTracks:(NSArray<MP42Track *> *)tracks {
     NSAssert(self.status != MP42StatusWriting, @"Unsupported operation: trying to remove a track while the file is open for writing");
-    [self removeTracksAtIndexes:[NSIndexSet indexSetWithIndex:index]];
-}
 
-- (void)removeTracksAtIndexes:(NSIndexSet *)indexes {
-    NSUInteger index = [indexes firstIndex];
-    while (index != NSNotFound) {
-        MP42Track *track = [self.itracks objectAtIndex:index];
-
+    for (MP42Track *track in tracks) {
         // track is muxed, it needs to be removed from the file
         if (track.muxed)
             [_tracksToBeDeleted addObject:track];
@@ -511,10 +505,9 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
                     a.forcedTrack = nil;
             }
         }
-        index = [indexes indexGreaterThanIndex:index];
     }
 
-    [self.itracks removeObjectsAtIndexes:indexes];
+    [self.itracks removeObjectsInArray:tracks];
 }
 
 - (void)moveTrackAtIndex:(NSUInteger)index toIndex:(NSUInteger)newIndex {

@@ -119,18 +119,11 @@ typedef void (^MP42FileProgressHandler)(double progress);
 - (void)addTrack:(MP42Track *)track;
 
 /**
- *  Removes a track at the index.
+ *  Removes the passed tracks.
  *
- *  @param index The track index.
+ *  @param tracks A NSArray of tracks.
  */
-- (void)removeTrackAtIndex:(NSUInteger)index;
-
-/**
- *  Removes the tracks at the passed indexes.
- *
- *  @param indexes A NSIndexSet of indexes.
- */
-- (void)removeTracksAtIndexes:(NSIndexSet *)indexes;
+- (void)removeTracks:(NSArray<MP42Track *> *)tracks;
 
 - (void)moveTrackAtIndex:(NSUInteger)index toIndex:(NSUInteger)newIndex;
 
