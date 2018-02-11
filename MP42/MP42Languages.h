@@ -28,6 +28,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSString *)extendedTagForLocalizedLang:(NSString *)language;
 - (NSString *)localizedLangForExtendedTag:(NSString *)tag;
 
+- (BOOL)validateExtendedTag:(NSString *)tag;
+
 /**
  Returns the complete ISO-639-1 language code list
  */

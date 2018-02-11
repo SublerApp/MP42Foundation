@@ -284,6 +284,8 @@ NSString * getFilenameLanguage(CFStringRef filename)
 	CFStringRef langStr = NULL;
 	NSString *lang = @"en";
 
+    MP42Languages *langManager = MP42Languages.defaultManager;
+
 	// find and strip the extension
 	findResult = CFStringFind(filename, CFSTR("."), kCFCompareBackwards);
 	findResult.length = findResult.location;
@@ -301,7 +303,7 @@ NSString * getFilenameLanguage(CFStringRef filename)
 
 		langStr = CFStringCreateWithSubstring(NULL, baseName, findResult);
 		CFStringGetCString(langStr, langCStr, 4, kCFStringEncodingASCII);
-        lang = [MP42Languages.defaultManager extendedTagForISO_639_2:@(langCStr)];
+        lang = [langManager extendedTagForISO_639_2:@(langCStr)];
 
 		CFRelease(langStr);
 
@@ -311,7 +313,7 @@ NSString * getFilenameLanguage(CFStringRef filename)
 
 		langStr = CFStringCreateWithSubstring(NULL, baseName, findResult);
 		CFStringGetCString(langStr, langCStr, 3, kCFStringEncodingASCII);
-        lang = [MP42Languages.defaultManager extendedTagForISO_639_1:@(langCStr)];
+        lang = [langManager extendedTagForISO_639_1:@(langCStr)];
 
 		CFRelease(langStr);
 	}
@@ -320,7 +322,11 @@ NSString * getFilenameLanguage(CFStringRef filename)
 
 		langStr = CFStringCreateWithSubstring(NULL, baseName, findResult);
 		CFStringGetCString(langStr, langCStr, 40, kCFStringEncodingASCII);
-        lang = [MP42Languages.defaultManager extendedTagForLang:@(langCStr)];
+        lang = [langManager extendedTagForLang:@(langCStr)];
+
+        if ([lang isEqualToString:@"und"] || [langManager validateExtendedTag:@(langCStr)]) {
+            lang = @(langCStr);
+        }
         
         CFRelease(langStr);
     }

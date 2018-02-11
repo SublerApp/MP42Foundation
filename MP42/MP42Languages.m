@@ -753,7 +753,15 @@ iso639_lang_t * lang_for_english( const char * english )
 {
     NSString *language = _localizedCodeToLanguagesDict[code];
     if (!language) {
-        language = code;
+        if ([code isEqualToString:@"cmn-Hans"]) {
+            language = _localizedCodeToLanguagesDict[@"zh-Hans"];
+        }
+        else if ([code isEqualToString:@"cmn-Hant"]) {
+            language = _localizedCodeToLanguagesDict[@"zh-Hant"];
+        }
+        else {
+            language = code;
+        }
     }
     return language;
 }
@@ -803,6 +811,14 @@ iso639_lang_t * lang_for_english( const char * english )
 - (NSArray<NSString *> *)localizedExtendedLanguages {
     return [_localizedLanguagesArray copy];
 }
+
+#pragma mark - Validation
+
+- (BOOL)validateExtendedTag:(NSString *)tag {
+    NSString *fixedCode = [tag stringByReplacingOccurrencesOfString:@"-" withString:@"_"];
+    return [NSLocale.availableLocaleIdentifiers containsObject:fixedCode];
+}
+
 
 #pragma mark - Conversions
 
