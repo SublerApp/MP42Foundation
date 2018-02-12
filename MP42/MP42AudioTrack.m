@@ -244,7 +244,12 @@
         return [NSString stringWithFormat:@"%@, %u ch", localizedDisplayName(self.mediaType, self.conversionSettings.format), channels];
     }
     else {
-        return [NSString stringWithFormat:@"%@, %u ch", localizedDisplayName(self.mediaType, self.format), (unsigned int)_channels];
+        if (_channels > 0) {
+            return [NSString stringWithFormat:@"%@, %u ch", localizedDisplayName(self.mediaType, self.format), (unsigned int)_channels];
+        }
+        else {
+            return [NSString stringWithFormat:@"%@", localizedDisplayName(self.mediaType, self.format)];
+        }
     }
 }
 
