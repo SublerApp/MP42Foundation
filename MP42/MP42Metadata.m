@@ -436,6 +436,18 @@
     [self addMetadataItemWithString:string identifier:idenfitier];
 }
 
+- (void)addMetadataItemWithDateString:(const char *)value identifier:(NSString *)idenfitier
+{
+    NSString *string = [NSString stringWithCString:value encoding:NSUTF8StringEncoding];
+
+    MP42MetadataItem *item = [MP42MetadataItem metadataItemWithIdentifier:idenfitier
+                                                                    value:string
+                                                                 dataType:MP42MetadataItemDataTypeUnspecified
+                                                      extendedLanguageTag:nil];
+    [self.itemsArray addObject:item];
+    [self.itemsMap setObject:item forKey:idenfitier];
+}
+
 - (void)addMetadataItemWithString:(NSString *)value identifier:(NSString *)idenfitier
 {
     MP42MetadataItem *item = [MP42MetadataItem metadataItemWithIdentifier:idenfitier
@@ -529,7 +541,7 @@
         }
     }
     if (tags->releaseDate) {
-        [self addMetadataItemWithUTF8String:tags->releaseDate identifier:MP42MetadataKeyReleaseDate];
+        [self addMetadataItemWithDateString:tags->releaseDate identifier:MP42MetadataKeyReleaseDate];
     }
     if (tags->track) {
         [self addMetadataItemWithIntegerArray:@[@(tags->track->index), @(tags->track->total)] identifier:MP42MetadataKeyTrackNumber];

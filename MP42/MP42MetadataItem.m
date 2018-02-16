@@ -15,11 +15,13 @@
 @implementation MP42MetadataItem
 
 static NSDictionary<NSString *, NSNumber *> *_defaultTypes;
+static NSDateFormatter *_formatter;
+static NSDateFormatter *_partialFormatter;
 
 + (void)initialize
 {
     if (self == [MP42MetadataItem class]) {
-        _defaultTypes = @{ MP42MetadataKeyReleaseDate:         @(MP42MetadataItemDataTypeString),
+        _defaultTypes = @{ MP42MetadataKeyReleaseDate:         @(MP42MetadataItemDataTypeDate),
                            MP42MetadataKeyPurchasedDate:       @(MP42MetadataItemDataTypeString),
                            MP42MetadataKeyCoverArt:            @(MP42MetadataItemDataTypeImage),
                            MP42MetadataKeyCast:                @(MP42MetadataItemDataTypeStringArray),
@@ -49,6 +51,15 @@ static NSDictionary<NSString *, NSNumber *> *_defaultTypes;
                            MP42MetadataKeyPodcast:             @(MP42MetadataItemDataTypeBool),
                            MP42MetadataKeyShowWorkAndMovement: @(MP42MetadataItemDataTypeBool)};
     }
+
+    _formatter = [[NSDateFormatter alloc] init];
+    _formatter.locale = [NSLocale localeWithLocaleIdentifier:@"en_US_POSIX"];
+    _formatter.dateFormat = @"yyyy-MM-dd'T'HH:mm:ssZZZZZ";
+    _formatter.timeZone = [NSTimeZone timeZoneForSecondsFromGMT:0];
+
+    _partialFormatter = [[NSDateFormatter alloc] init];
+    _partialFormatter.dateFormat = @"yyyy-MM-dd";
+    _partialFormatter.timeZone = [NSTimeZone timeZoneForSecondsFromGMT:0];
 }
 
 - (instancetype)initWithIdentifier:(NSString *)identifier
@@ -114,13 +125,15 @@ static NSDictionary<NSString *, NSNumber *> *_defaultTypes;
             _value = @(stringValue.integerValue);
             break;
         case MP42MetadataItemDataTypeDate:
-        {
-            NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
-            formatter.dateFormat = @"yyyy-MM-dd";
-            formatter.timeZone = [NSTimeZone defaultTimeZone];
-            _value = [formatter dateFromString:stringValue];
+            _value = [_formatter dateFromString:stringValue];
+            if (!_value) {
+                _value = [_partialFormatter dateFromString:stringValue];
+            }
+            if (!_value) {
+                _value = stringValue;
+                _dataType = MP42MetadataItemDataTypeString;
+            }
             break;
-        }
         case MP42MetadataItemDataTypeStringArray:
             _value = [self stringsArrayFromString:stringValue];
             break;
@@ -317,11 +330,7 @@ static NSDictionary<NSString *, NSNumber *> *_defaultTypes;
         case MP42MetadataItemDataTypeInteger:
             return [(NSNumber *)_value stringValue];
         case MP42MetadataItemDataTypeDate:
-        {
-            NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
-            formatter.dateFormat = @"yyyy-MM-dd";
-            return [formatter stringFromDate:(NSDate *)_value];
-        }
+            return [_formatter stringFromDate:(NSDate *)_value];
         case MP42MetadataItemDataTypeStringArray:
             return [self stringFromStringArray:(NSArray *)_value];
         case MP42MetadataItemDataTypeIntegerArray:
@@ -349,6 +358,15 @@ static NSDictionary<NSString *, NSNumber *> *_defaultTypes;
     switch (_dataType) {
         case MP42MetadataItemDataTypeDate:
             return (NSDate *)_value;
+        case MP42MetadataItemDataTypeString:
+        {
+            NSDate *date = [_formatter dateFromString:(NSString *)_value];
+            if (!_value) {
+                date = [_partialFormatter dateFromString:(NSString *)_value];
+            }
+            return date;
+        }
+
         default:
             return nil;
     }
