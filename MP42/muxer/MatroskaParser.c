@@ -1250,7 +1250,7 @@ static void parseVideoInfo(MatroskaFile *mf,ulonglong toplen,struct TrackInfo *t
       ti->AV.Video.GammaValue = readFloat(mf,(unsigned)len);
       break;
     case 0x55b0: // Colour
-      parseColourInfo(mf,len,&ti);
+      parseColourInfo(mf,len,ti);
       break;
   ENDFOR(mf);
 }
