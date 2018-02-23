@@ -336,6 +336,7 @@
 		A9422FC31D4917AF000DB435 /* audio_resample.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = audio_resample.c; sourceTree = "<group>"; };
 		A9422FC41D4917AF000DB435 /* audio_resample.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = audio_resample.h; sourceTree = "<group>"; };
 		A947BA9A1824F0B3004C734B /* Ratings.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = Ratings.json; sourceTree = "<group>"; };
+		A957E5A7203FF96800A5F776 /* CoreImage.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreImage.framework; path = System/Library/Frameworks/CoreImage.framework; sourceTree = SDKROOT; };
 		A96523431BAC315900E994E0 /* NSString+MP42Additions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+MP42Additions.h"; sourceTree = "<group>"; };
 		A96523441BAC315900E994E0 /* NSString+MP42Additions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+MP42Additions.m"; sourceTree = "<group>"; };
 		A96D28921BAD390400403327 /* MP42Metadata+Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "MP42Metadata+Private.h"; sourceTree = "<group>"; };
@@ -560,6 +561,7 @@
 		A9B9C1EF182391DF00416A4E /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				A957E5A7203FF96800A5F776 /* CoreImage.framework */,
 				A9D6CD651F9E3A8500CCEE3E /* VideoToolbox.framework */,
 				A9D6CD611F9E3A7F00CCEE3E /* MediaToolbox.framework */,
 				A90801051D4B830A002B6950 /* libavfilter.a */,
@@ -1372,6 +1374,7 @@
 					"$(SRCROOT)/contrib/**",
 					"$(SRCROOT)/UniversalDetector",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "";
@@ -1434,6 +1437,7 @@
 					"$(SRCROOT)/contrib/**",
 					"$(SRCROOT)/UniversalDetector",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "";
