@@ -35,7 +35,7 @@
 @property (nonatomic, readonly) MP42SSAConverter *converter;
 
 @property (nonatomic, readonly) MP4TrackId trackID;
-@property (nonatomic, readonly) MP42SubtitleTrack *track;
+@property (nonatomic, readonly, weak) MP42SubtitleTrack *track;
 
 @property (nonatomic, readonly) _Atomic int32_t finished;
 
