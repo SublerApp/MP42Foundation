@@ -59,7 +59,7 @@ static NSArray<NSString *> *_supportedFileFormats;
                            [MP42VobSubImporter class],
                            [MP42AVFImporter class],
                            [MP42AC3Importer class],
-                           [MP42SSAImporter class],];
+                           [MP42SSAImporter class]];
 
         NSMutableArray<NSString *> *formats = [[NSMutableArray alloc] init];
 
@@ -107,6 +107,7 @@ static NSArray<NSString *> *_supportedFileFormats;
     if (self) {
         _fileURL = fileURL;
         _tracksArray = [[NSMutableArray alloc] init];
+        _doneSem = dispatch_semaphore_create(0);
     }
     return self;
 }
@@ -213,8 +214,6 @@ static NSArray<NSString *> *_supportedFileFormats;
     for (MP42Track *track in _outputsTracks) {
         [track startReading];
     }
-
-    _doneSem = dispatch_semaphore_create(0);
 
     if (!_demuxerThread) {
         _demuxerThread = [[NSThread alloc] initWithTarget:self selector:@selector(demux) object:nil];

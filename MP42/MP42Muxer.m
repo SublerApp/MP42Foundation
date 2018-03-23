@@ -23,6 +23,8 @@
 #import "MP42Track+Private.h"
 #import "MP42Track+Muxer.h"
 
+#include <stdatomic.h>
+
 @implementation MP42Muxer
 {
     MP4FileHandle    _fileHandle;
@@ -31,7 +33,10 @@
     id <MP42Logging>        _logger;
 
     NSMutableArray<MP42Track *> *_activeTracks;
-    int32_t         _cancelled;
+
+    dispatch_semaphore_t _setupDone;
+    int32_t              _cancelled;
+    _Atomic bool      _readingCancelled;
 }
 
 - (instancetype)init
@@ -49,6 +54,7 @@
         _fileHandle = fileHandle;
         _delegate = del;
         _logger = logger;
+        _setupDone = dispatch_semaphore_create(0);
     }
 
     return self;
@@ -505,6 +511,8 @@
 
     [_activeTracks removeObjectsInArray:unsupportedTracks];
 
+    dispatch_semaphore_signal(_setupDone);
+
     return YES;
 }
 
@@ -633,8 +641,12 @@
 
 - (void)cancel
 {
-    for (MP42FileImporter *importerHelper in self.fileImporters) {
-        [importerHelper cancelReading];
+    bool expected = false;
+    if (atomic_compare_exchange_strong(&_readingCancelled, &expected, true)) {
+        dispatch_semaphore_wait(_setupDone, DISPATCH_TIME_FOREVER);
+        for (MP42FileImporter *importerHelper in self.fileImporters) {
+            [importerHelper cancelReading];
+        }
     }
 }
 
