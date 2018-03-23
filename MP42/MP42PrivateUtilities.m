@@ -324,7 +324,7 @@ NSString * getFilenameLanguage(CFStringRef filename)
 		CFStringGetCString(langStr, langCStr, 40, kCFStringEncodingASCII);
         lang = [langManager extendedTagForLang:@(langCStr)];
 
-        if ([lang isEqualToString:@"und"] || [langManager validateExtendedTag:@(langCStr)]) {
+        if ([lang isEqualToString:@"und"] && [langManager validateExtendedTag:@(langCStr)]) {
             lang = @(langCStr);
         }
         
