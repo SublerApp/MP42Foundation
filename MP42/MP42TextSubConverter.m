@@ -102,7 +102,7 @@
             _parser = [[MP42SSAParser alloc] initWithMKVHeader:cookieString];
             _converter = [[MP42SSAConverter alloc] initWithParser:_parser];
 
-            [_ss setSSA:YES];
+            _ss.ssa = YES;
         }
 
         _trackID = track.sourceId;

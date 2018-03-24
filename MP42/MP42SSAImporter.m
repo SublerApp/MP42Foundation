@@ -100,7 +100,7 @@
         MP42SSAConverter *converter = [[MP42SSAConverter alloc] initWithParser:_parser];
 
         MP42SubSerializer *ss = [[MP42SubSerializer alloc] init];
-        [ss setSSA:YES];
+        ss.ssa = YES;
 
         for (MP42SSALine *line in _parser.lines) {
             NSString *text = [converter convertLine:line];

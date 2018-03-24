@@ -11,12 +11,19 @@
 #import "MP42HtmlParser.h"
 
 @implementation MP42SubSerializer
+{
+    // input lines, sorted by 1. beginning time 2. original insertion order
+    NSMutableArray<MP42SubLine *> *lines;
+
+    unsigned last_begin_time, last_end_time;
+    unsigned linesInput;
+}
 
 -(instancetype)init
 {
 	if ((self = [super init])) {
 		lines = [[NSMutableArray alloc] init];
-		finished = NO;
+		_finished = NO;
 		last_begin_time = last_end_time = 0;
 		linesInput = 0;
 	}
@@ -68,7 +75,7 @@ static CFComparisonResult CompareLinesByBeginTime(const void *a, const void *b, 
     NSMutableString *str;
 	int i;
     
-	if (!finished) {
+    if (!_finished) {
 		if (nlines > 1) {
 			unsigned maxEndTime = first->end_time;
 			
@@ -105,7 +112,7 @@ canOutput:
         if (l->begin_time <= begin_time) {
             // Try to be a bit smart and avoid duplicated lines
             // from ssa.
-            if (!ssa || [str rangeOfString:l->line].location == NSNotFound) {
+            if (!_ssa || [str rangeOfString:l->line].location == NSNotFound) {
                 [str appendString:l->line];
             }
         }
@@ -145,44 +152,15 @@ canOutput:
 	return ret;
 }
 
--(void)setFinished:(BOOL)_finished
-{
-	finished = _finished;
-}
-
 -(BOOL)isEmpty
 {
 	return [lines count] == 0;
 }
 
--(BOOL)positionInformation
-{
-    return position_information;
-}
-
--(void)setPositionInformation:(BOOL)info
-{
-    position_information = info;
-}
-
--(BOOL)forced
-{
-    return forced;
-}
-
--(void)setForced:(BOOL)info
-{
-    forced = info;
-}
-
--(void)setSSA:(BOOL)isSSA
-{
-    ssa = isSSA;
-}
 
 -(NSString *)description
 {
-	return [NSString stringWithFormat:@"lines left: %lu finished inputting: %d",(unsigned long)[lines count],finished];
+    return [NSString stringWithFormat:@"lines left: %lu finished inputting: %d",(unsigned long)[lines count],_finished];
 }
 
 @end
@@ -297,12 +275,25 @@ extern NSString *STLoadFileWithUnknownEncoding(NSURL *url)
 {
 	NSData *data = [NSData dataWithContentsOfURL:url];
 
-    if (!data)
+    if (!data) {
         return nil;
+    }
 
 	UniversalDetector *ud = [[UniversalDetector alloc] init];
 	NSString *res = nil;
 	NSStringEncoding enc;
+
+    BOOL lossy = NO;
+    enc = [NSString stringEncodingForData:data
+                          encodingOptions:nil
+                          convertedString:&res
+                      usedLossyConversion:&lossy];
+
+    if (res && lossy == NO) {
+        NSLog(@"Encoding %lu failed, retrying.\n", (unsigned long)enc);
+        return res;
+    }
+
 	float conf;
 	NSString *enc_str;
 	BOOL latin2;
@@ -329,12 +320,13 @@ extern NSString *STLoadFileWithUnknownEncoding(NSURL *url)
 
 	if (!res) {
 		if (latin2) {
-			NSLog(@"Encoding %s failed, retrying.\n",[enc_str UTF8String]);
+			NSLog(@"Encoding %s failed, retrying.\n", enc_str.UTF8String);
 			enc = (enc == NSWindowsCP1252StringEncoding) ? NSWindowsCP1250StringEncoding : NSWindowsCP1252StringEncoding;
 			res = [[NSString alloc] initWithData:data encoding:enc];
 			if (!res) NSLog(@"Both of latin1/2 failed.\n");
-		} else {
-            res = [[NSString alloc] initWithData:data encoding:NSASCIIStringEncoding];
+		}
+        if (!res) {
+            res = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
             if (!res) { NSLog(@"ASCII failed."); NSLog(@"Failed to load file as guessed encoding %@.",enc_str); }
         }
 	}

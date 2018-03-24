@@ -11,6 +11,8 @@
 #import "MP42TextSample.h"
 #import "mp4v2.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface MP42SubLine : NSObject
 {
 @public
@@ -20,31 +22,23 @@
     unsigned top;
     unsigned forced;
 }
--(instancetype)initWithLine:(NSString*)l start:(unsigned)s end:(unsigned)e;
--(instancetype)initWithLine:(NSString*)l start:(unsigned)s end:(unsigned)e top_pos:(unsigned)p forced:(unsigned)f;
+- (instancetype)initWithLine:(NSString *)l start:(unsigned)s end:(unsigned)e;
+- (instancetype)initWithLine:(NSString *)l start:(unsigned)s end:(unsigned)e top_pos:(unsigned)p forced:(unsigned)f;
 @end
 
 @interface MP42SubSerializer : NSObject
-{
-	// input lines, sorted by 1. beginning time 2. original insertion order
-	NSMutableArray<MP42SubLine *> *lines;
-	BOOL finished;
 
-    BOOL position_information, forced;
-	unsigned last_begin_time, last_end_time;
-	unsigned linesInput;
+- (void)addLine:(MP42SubLine *)sline;
 
-    BOOL ssa;
-}
--(void)addLine:(MP42SubLine *)sline;
--(void)setFinished:(BOOL)finished;
--(MP42SubLine *)getSerializedPacket;
--(BOOL)isEmpty;
--(BOOL)positionInformation;
--(void)setPositionInformation:(BOOL)info;
--(BOOL)forced;
--(void)setForced:(BOOL)info;
--(void)setSSA:(BOOL)ssa;
+@property (nonatomic) BOOL finished;
+
+- (nullable MP42SubLine *)getSerializedPacket;
+
+@property (nonatomic, readonly) BOOL isEmpty;
+
+@property (nonatomic) BOOL positionInformation;
+@property (nonatomic) BOOL forced;
+@property (nonatomic) BOOL ssa;
 
 @end
 
@@ -68,6 +62,9 @@ typedef struct {
 	UInt32  duration;
 } PacketControlData;
 
-int ExtractVobSubPacket(UInt8 *dest, UInt8 *framedSrc, int srcSize, int *usedSrcBytes, int index);
-ComponentResult ReadPacketControls(UInt8 *packet, UInt32 palette[16], PacketControlData *controlDataOut,BOOL *forced);
+int ExtractVobSubPacket(UInt8 *dest, UInt8 *framedSrc, int srcSize, int * _Nullable usedSrcBytes, int index);
+ComponentResult ReadPacketControls(UInt8 *packet, UInt32 palette[_Nonnull 16], PacketControlData *controlDataOut, BOOL *forced);
 Boolean ReadPacketTimes(uint8_t *packet, uint32_t length, uint16_t *startTime, uint16_t *endTime, uint8_t *forced);
+
+NS_ASSUME_NONNULL_END
+
