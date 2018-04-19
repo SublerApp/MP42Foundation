@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6661A2EE20890B4400B1A669 /* MP42Foundation.h in Headers */ = {isa = PBXBuildFile; fileRef = 6661A2ED20890B4400B1A669 /* MP42Foundation.h */; };
 		A9022A941D6F3FD9005F0920 /* MP42MetadataItem.h in Headers */ = {isa = PBXBuildFile; fileRef = A9022A921D6F3FD9005F0920 /* MP42MetadataItem.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A9022A951D6F3FD9005F0920 /* MP42MetadataItem.h in Headers */ = {isa = PBXBuildFile; fileRef = A9022A921D6F3FD9005F0920 /* MP42MetadataItem.h */; };
 		A9022A961D6F3FD9005F0920 /* MP42MetadataItem.m in Sources */ = {isa = PBXBuildFile; fileRef = A9022A931D6F3FD9005F0920 /* MP42MetadataItem.m */; };
@@ -308,6 +309,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		6661A2ED20890B4400B1A669 /* MP42Foundation.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MP42Foundation.h; sourceTree = "<group>"; };
 		A9022A921D6F3FD9005F0920 /* MP42MetadataItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MP42MetadataItem.h; sourceTree = "<group>"; };
 		A9022A931D6F3FD9005F0920 /* MP42MetadataItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MP42MetadataItem.m; sourceTree = "<group>"; };
 		A9059DC91D870B9C000D1B9A /* MP42ConversionSettings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MP42ConversionSettings.h; sourceTree = "<group>"; };
@@ -603,6 +605,7 @@
 		A9B9C1F6182391DF00416A4E /* MP42 */ = {
 			isa = PBXGroup;
 			children = (
+				6661A2ED20890B4400B1A669 /* MP42Foundation.h */,
 				A9B9C2301823923100416A4E /* MP42File.h */,
 				A9B9C2311823923100416A4E /* MP42File.m */,
 				A9B9C2501823923100416A4E /* MP42Track.h */,
@@ -900,6 +903,7 @@
 				A91C3AD01BF20CF1008BCF87 /* MP42FormatUtilites.h in Headers */,
 				A9422FC71D4917AF000DB435 /* audio_resample.h in Headers */,
 				A9B9C2AC1823923200416A4E /* mbs.h in Headers */,
+				6661A2EE20890B4400B1A669 /* MP42Foundation.h in Headers */,
 				A9B9C2891823923200416A4E /* MP42MkvImporter.h in Headers */,
 				A96D28931BAD390400403327 /* MP42Metadata+Private.h in Headers */,
 				A97EA7C71D4B8A2D00257CEA /* FFmpegUtils.h in Headers */,
@@ -1451,6 +1455,7 @@
 			buildSettings = {
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				FRAMEWORK_VERSION = A;
@@ -1476,6 +1481,7 @@
 			buildSettings = {
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				FRAMEWORK_VERSION = A;
