@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		6661A2EE20890B4400B1A669 /* MP42Foundation.h in Headers */ = {isa = PBXBuildFile; fileRef = 6661A2ED20890B4400B1A669 /* MP42Foundation.h */; };
+		6661A2EE20890B4400B1A669 /* MP42Foundation.h in Headers */ = {isa = PBXBuildFile; fileRef = 6661A2ED20890B4400B1A669 /* MP42Foundation.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A9022A941D6F3FD9005F0920 /* MP42MetadataItem.h in Headers */ = {isa = PBXBuildFile; fileRef = A9022A921D6F3FD9005F0920 /* MP42MetadataItem.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A9022A951D6F3FD9005F0920 /* MP42MetadataItem.h in Headers */ = {isa = PBXBuildFile; fileRef = A9022A921D6F3FD9005F0920 /* MP42MetadataItem.h */; };
 		A9022A961D6F3FD9005F0920 /* MP42MetadataItem.m in Sources */ = {isa = PBXBuildFile; fileRef = A9022A931D6F3FD9005F0920 /* MP42MetadataItem.m */; };
@@ -845,6 +845,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6661A2EE20890B4400B1A669 /* MP42Foundation.h in Headers */,
 				A917286619FD2BCE00348DF8 /* MP42Logging.h in Headers */,
 				A9B9C27D1823923200416A4E /* MP42FileImporter.h in Headers */,
 				A9B9C27B1823923200416A4E /* MP42File.h in Headers */,
@@ -903,7 +904,6 @@
 				A91C3AD01BF20CF1008BCF87 /* MP42FormatUtilites.h in Headers */,
 				A9422FC71D4917AF000DB435 /* audio_resample.h in Headers */,
 				A9B9C2AC1823923200416A4E /* mbs.h in Headers */,
-				6661A2EE20890B4400B1A669 /* MP42Foundation.h in Headers */,
 				A9B9C2891823923200416A4E /* MP42MkvImporter.h in Headers */,
 				A96D28931BAD390400403327 /* MP42Metadata+Private.h in Headers */,
 				A97EA7C71D4B8A2D00257CEA /* FFmpegUtils.h in Headers */,
