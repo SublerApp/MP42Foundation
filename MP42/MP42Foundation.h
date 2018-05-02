@@ -11,8 +11,21 @@
 
 #import <MP42Foundation/MP42File.h>
 #import <MP42Foundation/MP42FileImporter.h>
+
+#import <MP42Foundation/MP42Track.h>
+#import <MP42Foundation/MP42VideoTrack.h>
+#import <MP42Foundation/MP42AudioTrack.h>
+#import <MP42Foundation/MP42ChapterTrack.h>
+#import <MP42Foundation/MP42SubtitleTrack.h>
+#import <MP42Foundation/MP42ClosedCaptionTrack.h>
+
+#import <MP42Foundation/MP42Metadata.h>
+#import <MP42Foundation/MP42MetadataItem.h>
+
+#import <MP42Foundation/MP42Logging.h>
 #import <MP42Foundation/MP42Utilities.h>
 #import <MP42Foundation/NSString+MP42Additions.h>
+
 #import <MP42Foundation/MP42Languages.h>
 #import <MP42Foundation/MP42Ratings.h>
 
