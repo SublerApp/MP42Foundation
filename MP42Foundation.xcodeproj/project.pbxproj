@@ -74,7 +74,6 @@
 		A910B61818394EB20064028F /* MatroskaFile.c in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C25D1823923200416A4E /* MatroskaFile.c */; };
 		A910B61A18394EB20064028F /* MatroskaParser.c in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C25F1823923200416A4E /* MatroskaParser.c */; settings = {COMPILER_FLAGS = "-w -Xanalyzer -analyzer-disable-checker"; }; };
 		A910B61C18394EB20064028F /* mbs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2611823923200416A4E /* mbs.cpp */; };
-		A910B62218394F6A0064028F /* libuniversaldetector.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A9B9C2C11823944700416A4E /* libuniversaldetector.a */; };
 		A910B62F183950F10064028F /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9B9C2DD1823973200416A4E /* CoreMedia.framework */; };
 		A910B630183950F80064028F /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9B9C2D71823970E00416A4E /* AVFoundation.framework */; };
 		A910B6321839510B0064028F /* Quartz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9B9C4921823986200416A4E /* Quartz.framework */; };
@@ -223,7 +222,6 @@
 		A9B9C2D81823970E00416A4E /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9B9C2D71823970E00416A4E /* AVFoundation.framework */; settings = {ATTRIBUTES = (Required, ); }; };
 		A9B9C2DA1823971F00416A4E /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9B9C2D91823971F00416A4E /* AudioToolbox.framework */; };
 		A9B9C2DE1823973200416A4E /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9B9C2DD1823973200416A4E /* CoreMedia.framework */; settings = {ATTRIBUTES = (Required, ); }; };
-		A9B9C2E3182397E700416A4E /* libuniversaldetector.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A9B9C2C11823944700416A4E /* libuniversaldetector.a */; };
 		A9B9C4931823986200416A4E /* Quartz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9B9C4921823986200416A4E /* Quartz.framework */; };
 		A9BA1AE91DBF7DBE00FD0B38 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = A9BA1AEB1DBF7DBE00FD0B38 /* Localizable.strings */; };
 		A9D6CD641F9E3A7F00CCEE3E /* MediaToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9D6CD611F9E3A7F00CCEE3E /* MediaToolbox.framework */; };
@@ -251,47 +249,12 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		A910B62018394F300064028F /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = A9B9C2B61823944700416A4E /* UniversalDetector.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 3DBF4F560BCD396800DA401A;
-			remoteInfo = universaldetector;
-		};
-		A989F10A1823AEA90070AD8C /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = A9B9C2B61823944700416A4E /* UniversalDetector.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 3DBF4F560BCD396800DA401A;
-			remoteInfo = universaldetector;
-		};
 		A9B9C208182391DF00416A4E /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = A9B9C1E4182391DF00416A4E /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = A9B9C1EC182391DF00416A4E;
 			remoteInfo = MP42;
-		};
-		A9B9C2BC1823944700416A4E /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = A9B9C2B61823944700416A4E /* UniversalDetector.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 8DC2EF5B0486A6940098B216;
-			remoteInfo = UniversalDetector;
-		};
-		A9B9C2BE1823944700416A4E /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = A9B9C2B61823944700416A4E /* UniversalDetector.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 1B0DDCAB0A2D0AD10009B697;
-			remoteInfo = DetectorTest;
-		};
-		A9B9C2C01823944700416A4E /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = A9B9C2B61823944700416A4E /* UniversalDetector.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 3DBF4F570BCD396800DA401A;
-			remoteInfo = universaldetector;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -444,7 +407,6 @@
 		A9B9C2631823923200416A4E /* mpeg4ip_bitstream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mpeg4ip_bitstream.h; sourceTree = "<group>"; };
 		A9B9C2641823923200416A4E /* sfifo.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = sfifo.c; sourceTree = "<group>"; };
 		A9B9C2651823923200416A4E /* sfifo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sfifo.h; sourceTree = "<group>"; };
-		A9B9C2B61823944700416A4E /* UniversalDetector.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = UniversalDetector.xcodeproj; path = UniversalDetector/UniversalDetector.xcodeproj; sourceTree = "<group>"; };
 		A9B9C2C21823957800416A4E /* MP42Languages.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MP42Languages.h; sourceTree = "<group>"; };
 		A9B9C2C31823957800416A4E /* MP42Languages.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MP42Languages.m; sourceTree = "<group>"; };
 		A9B9C2CD182396A100416A4E /* MP42Ratings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MP42Ratings.h; sourceTree = "<group>"; };
@@ -494,7 +456,6 @@
 				A910B6321839510B0064028F /* Quartz.framework in Frameworks */,
 				A910B630183950F80064028F /* AVFoundation.framework in Frameworks */,
 				A910B62F183950F10064028F /* CoreMedia.framework in Frameworks */,
-				A910B62218394F6A0064028F /* libuniversaldetector.a in Frameworks */,
 				A910B5A418394E900064028F /* Cocoa.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -515,7 +476,6 @@
 				A99DB6AB1D4648B700C6E56C /* libtesseract.a in Frameworks */,
 				A99DB6A51D4648A800C6E56C /* libmp4v2.a in Frameworks */,
 				A9B9C4931823986200416A4E /* Quartz.framework in Frameworks */,
-				A9B9C2E3182397E700416A4E /* libuniversaldetector.a in Frameworks */,
 				A9B9C2DA1823971F00416A4E /* AudioToolbox.framework in Frameworks */,
 				A9A0C99C19814B0800A72763 /* CoreAudio.framework in Frameworks */,
 				A9A0C9A419814C9B00A72763 /* AudioUnit.framework in Frameworks */,
@@ -585,7 +545,6 @@
 				A9B9C2D91823971F00416A4E /* AudioToolbox.framework */,
 				A9A0C99B19814B0800A72763 /* CoreAudio.framework */,
 				A9B9C2D71823970E00416A4E /* AVFoundation.framework */,
-				A9B9C2B61823944700416A4E /* UniversalDetector.xcodeproj */,
 				A9B9C1F0182391DF00416A4E /* Cocoa.framework */,
 				A9B9C1F2182391DF00416A4E /* Other Frameworks */,
 			);
@@ -686,16 +645,6 @@
 			);
 			name = others;
 			path = muxer;
-			sourceTree = "<group>";
-		};
-		A9B9C2B71823944700416A4E /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				A9B9C2BD1823944700416A4E /* UniversalDetector.framework */,
-				A9B9C2BF1823944700416A4E /* DetectorTest */,
-				A9B9C2C11823944700416A4E /* libuniversaldetector.a */,
-			);
-			name = Products;
 			sourceTree = "<group>";
 		};
 		A9B9C4A218239B6F00416A4E /* Muxer */ = {
@@ -925,7 +874,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				A910B62118394F300064028F /* PBXTargetDependency */,
 			);
 			name = mp42;
 			productName = mp42lib;
@@ -945,7 +893,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				A989F10B1823AEA90070AD8C /* PBXTargetDependency */,
 			);
 			name = MP42Foundation;
 			productName = MP42;
@@ -997,12 +944,6 @@
 			mainGroup = A9B9C1E3182391DF00416A4E;
 			productRefGroup = A9B9C1EE182391DF00416A4E /* Products */;
 			projectDirPath = "";
-			projectReferences = (
-				{
-					ProductGroup = A9B9C2B71823944700416A4E /* Products */;
-					ProjectRef = A9B9C2B61823944700416A4E /* UniversalDetector.xcodeproj */;
-				},
-			);
 			projectRoot = "";
 			targets = (
 				A9B9C1EC182391DF00416A4E /* MP42Foundation */,
@@ -1011,30 +952,6 @@
 			);
 		};
 /* End PBXProject section */
-
-/* Begin PBXReferenceProxy section */
-		A9B9C2BD1823944700416A4E /* UniversalDetector.framework */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.framework;
-			path = UniversalDetector.framework;
-			remoteRef = A9B9C2BC1823944700416A4E /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		A9B9C2BF1823944700416A4E /* DetectorTest */ = {
-			isa = PBXReferenceProxy;
-			fileType = "compiled.mach-o.executable";
-			path = DetectorTest;
-			remoteRef = A9B9C2BE1823944700416A4E /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		A9B9C2C11823944700416A4E /* libuniversaldetector.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libuniversaldetector.a;
-			remoteRef = A9B9C2C01823944700416A4E /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		A9AA2B811DBF954000C9D897 /* Resources */ = {
@@ -1207,16 +1124,6 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		A910B62118394F300064028F /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = universaldetector;
-			targetProxy = A910B62018394F300064028F /* PBXContainerItemProxy */;
-		};
-		A989F10B1823AEA90070AD8C /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = universaldetector;
-			targetProxy = A989F10A1823AEA90070AD8C /* PBXContainerItemProxy */;
-		};
 		A9B9C209182391DF00416A4E /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = A9B9C1EC182391DF00416A4E /* MP42Foundation */;
@@ -1376,7 +1283,6 @@
 					"$(inherited)",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
 					"$(SRCROOT)/contrib/**",
-					"$(SRCROOT)/UniversalDetector",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				ONLY_ACTIVE_ARCH = YES;
@@ -1439,7 +1345,6 @@
 					"$(inherited)",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
 					"$(SRCROOT)/contrib/**",
-					"$(SRCROOT)/UniversalDetector",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				ONLY_ACTIVE_ARCH = YES;

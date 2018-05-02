@@ -279,7 +279,6 @@ extern NSString *STLoadFileWithUnknownEncoding(NSURL *url)
         return nil;
     }
 
-	UniversalDetector *ud = [[UniversalDetector alloc] init];
 	NSString *res = nil;
 	NSStringEncoding enc;
 
@@ -289,49 +288,16 @@ extern NSString *STLoadFileWithUnknownEncoding(NSURL *url)
                           convertedString:&res
                       usedLossyConversion:&lossy];
 
+
     if (res && lossy == NO) {
-        NSLog(@"Encoding %lu failed, retrying.\n", (unsigned long)enc);
+        NSLog(@"Guessed encoding %lu.\n", (unsigned long)enc);
         return res;
+    } else if (res) {
+        NSLog(@"Guessed encoding %lu, lossy convertion\n", (unsigned long)enc);
+        return res;
+    } else {
+        return nil;
     }
-
-	float conf;
-	NSString *enc_str;
-	BOOL latin2;
-
-	[ud analyzeData:data];
-
-	enc = [ud encoding];
-	conf = [ud confidence];
-	enc_str = [ud MIMECharset];
-	latin2 = enc == NSWindowsCP1250StringEncoding;
-
-	if (latin2) {
-		if (SubDifferentiateLatin12([data bytes], [data length])) { // seems to actually be latin1
-			enc = NSWindowsCP1252StringEncoding;
-			enc_str = @"windows-1252";
-		}
-	}
-
-	if ((conf < .6 || latin2) && enc != NSASCIIStringEncoding) {
-		NSLog(@"Guessed encoding \"%s\" for \"%s\", but not sure (confidence %f%%).\n", enc_str.UTF8String, url.path.UTF8String, conf*100.);
-	}
-
-	res = [[NSString alloc] initWithData:data encoding:enc];
-
-	if (!res) {
-		if (latin2) {
-			NSLog(@"Encoding %s failed, retrying.\n", enc_str.UTF8String);
-			enc = (enc == NSWindowsCP1252StringEncoding) ? NSWindowsCP1250StringEncoding : NSWindowsCP1252StringEncoding;
-			res = [[NSString alloc] initWithData:data encoding:enc];
-			if (!res) NSLog(@"Both of latin1/2 failed.\n");
-		}
-        if (!res) {
-            res = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-            if (!res) { NSLog(@"ASCII failed."); NSLog(@"Failed to load file as guessed encoding %@.",enc_str); }
-        }
-	}
-
-	return res;
 }
 
 static int ParsePosition(NSString *str)

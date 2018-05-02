@@ -7,7 +7,6 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "UniversalDetector.h"
 #import "MP42TextSample.h"
 #import "mp4v2.h"
 
