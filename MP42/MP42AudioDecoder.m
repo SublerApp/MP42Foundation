@@ -77,8 +77,6 @@ typedef struct MP42DecodeContext MP42DecodeContext;
     self = [super init];
 
     if (self) {
-        FFInitFFmpeg();
-
         _inputFormat = asbd;
 
         enum AVCodecID codecID = ASBDToCodecID(asbd);
@@ -408,7 +406,7 @@ static int resample(MP42DecodeContext *context, AVFrame *frame, uint8_t **output
 
     AVFrameSideData *side_data;
     if ((side_data =
-         av_frame_get_side_data(frame,  AV_FRAME_DATA_DOWNMIX_INFO)) != NULL)
+         av_frame_get_side_data(frame, AV_FRAME_DATA_DOWNMIX_INFO)) != NULL)
     {
         double          surround_mix_level, center_mix_level;
         AVDownmixInfo * downmix_info;
@@ -443,7 +441,7 @@ static int resample(MP42DecodeContext *context, AVFrame *frame, uint8_t **output
         return 1;
     }
     ret = hb_audio_resample(context->resampler,
-                            frame->extended_data, frame->nb_samples,
+                            (const uint8_t **)frame->extended_data, frame->nb_samples,
                             output_data, output_data_size);
 
 

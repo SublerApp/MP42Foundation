@@ -156,7 +156,7 @@ int hb_audio_resample_update(hb_audio_resample_t *resample)
     {
         if (resample->avresample == NULL)
         {
-            resample->avresample = avresample_alloc_context();
+            resample->avresample = swr_alloc();
             if (resample->avresample == NULL)
             {
                 //hb_error("hb_audio_resample_update: avresample_alloc_context() failed");
@@ -176,7 +176,7 @@ int hb_audio_resample_update(hb_audio_resample_t *resample)
         }
         else if (resample_changed)
         {
-            avresample_close(resample->avresample);
+            swr_close(resample->avresample);
         }
 
         av_opt_set_int(resample->avresample, "in_sample_fmt",
@@ -192,14 +192,14 @@ int hb_audio_resample_update(hb_audio_resample_t *resample)
         av_opt_set_double(resample->avresample, "surround_mix_level",
                           resample->in.surround_mix_level, 0);
 
-        if ((ret = avresample_open(resample->avresample)))
+        if ((ret = swr_init(resample->avresample)))
         {
             char err_desc[64];
             av_strerror(ret, err_desc, 63);
             //hb_error("hb_audio_resample_update: avresample_open() failed (%s)",
             //         err_desc);
             // avresample won't open, start over
-            avresample_free(&resample->avresample);
+            swr_free(&resample->avresample);
             return ret;
         }
 
@@ -222,14 +222,14 @@ void hb_audio_resample_free(hb_audio_resample_t *resample)
     {
         if (resample->avresample != NULL)
         {
-            avresample_free(&resample->avresample);
+            swr_free(&resample->avresample);
         }
         free(resample);
     }
 }
 
 int hb_audio_resample(hb_audio_resample_t *resample,
-                               uint8_t **samples, int nsamples,
+                               const uint8_t **samples, int nsamples,
                                uint8_t **out_data, int *out_size_external)
 {
     if (resample == NULL)
@@ -254,18 +254,17 @@ int hb_audio_resample(hb_audio_resample_t *resample,
         av_samples_get_buffer_size(&in_linesize,
                                    resample->resample.channels, nsamples,
                                    resample->resample.sample_fmt, 0);
-        int expected_out_samples = avresample_available(resample->avresample) +
-                                        av_rescale_rnd(avresample_get_delay(resample->avresample) +
-                                           nsamples, resample->out.sample_rate, resample->in.sample_rate, AV_ROUND_UP);
+        int expected_out_samples = av_rescale_rnd(swr_get_delay(resample->avresample, resample->in.sample_rate) +
+                                                nsamples, resample->out.sample_rate, resample->in.sample_rate, AV_ROUND_UP);
 
         out_size = av_samples_get_buffer_size(&out_linesize,
                                               resample->out.channels, expected_out_samples,
                                               resample->out.sample_fmt, 0);
         out = malloc(out_size + AV_INPUT_BUFFER_PADDING_SIZE);
 
-        out_samples = avresample_convert(resample->avresample,
-                                         &out, out_linesize, expected_out_samples,
-                                         samples, in_linesize, nsamples);
+        out_samples = swr_convert(resample->avresample,
+                                  &out, expected_out_samples,
+                                  samples, nsamples);
 
         if (out_samples <= 0)
         {

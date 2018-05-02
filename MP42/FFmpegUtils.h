@@ -13,8 +13,6 @@
 #include <CoreAudio/CoreAudio.h>
 #include <avcodec.h>
 
-void FFInitFFmpeg(void);
-
 enum AVCodecID ASBDToCodecID(AudioStreamBasicDescription asbd);
 enum AVCodecID FourCCToCodecID(OSType formatID);
 OSType CodecIDToFourCC(enum AVCodecID codecID);

@@ -20,7 +20,6 @@
 		A90800FF1D4B82FB002B6950 /* liblept.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A99DB6A71D4648B700C6E56C /* liblept.a */; };
 		A90801001D4B82FB002B6950 /* libtesseract.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A99DB6A81D4648B700C6E56C /* libtesseract.a */; };
 		A90801011D4B830A002B6950 /* libavcodec.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A99DB6AC1D4648D100C6E56C /* libavcodec.a */; };
-		A90801021D4B830A002B6950 /* libavresample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A99DB6AD1D4648D100C6E56C /* libavresample.a */; };
 		A90801031D4B830A002B6950 /* libavutil.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A99DB6AE1D4648D100C6E56C /* libavutil.a */; };
 		A90801041D4B830A002B6950 /* libswresample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A9D599BA1D4885E0001C22BD /* libswresample.a */; };
 		A90801071D4B830A002B6950 /* libavfilter.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A90801051D4B830A002B6950 /* libavfilter.a */; };
@@ -89,7 +88,6 @@
 		A91C3AD11BF20CF1008BCF87 /* MP42FormatUtilites.h in Headers */ = {isa = PBXBuildFile; fileRef = A91C3ACD1BF20CF1008BCF87 /* MP42FormatUtilites.h */; };
 		A925AAAF18379AF800BE84D4 /* MP42Utilities.h in Headers */ = {isa = PBXBuildFile; fileRef = A925AAAD18379AF800BE84D4 /* MP42Utilities.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A925AAB018379AF800BE84D4 /* MP42Utilities.m in Sources */ = {isa = PBXBuildFile; fileRef = A925AAAE18379AF800BE84D4 /* MP42Utilities.m */; };
-		A93EE6E91D489FFC003E3B56 /* libavresample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A99DB6AD1D4648D100C6E56C /* libavresample.a */; };
 		A93EE6EA1D48A01A003E3B56 /* libswresample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A9D599BA1D4885E0001C22BD /* libswresample.a */; };
 		A941A7B41DA7B08600FB2A7C /* MP42MetadataFormat.h in Headers */ = {isa = PBXBuildFile; fileRef = A941A7B21DA7B08600FB2A7C /* MP42MetadataFormat.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A941A7B51DA7B08600FB2A7C /* MP42MetadataFormat.h in Headers */ = {isa = PBXBuildFile; fileRef = A941A7B21DA7B08600FB2A7C /* MP42MetadataFormat.h */; };
@@ -316,7 +314,6 @@
 		A99DB6A71D4648B700C6E56C /* liblept.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = liblept.a; path = contrib/Tesseract/lib/liblept.a; sourceTree = "<group>"; };
 		A99DB6A81D4648B700C6E56C /* libtesseract.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libtesseract.a; path = contrib/Tesseract/lib/libtesseract.a; sourceTree = "<group>"; };
 		A99DB6AC1D4648D100C6E56C /* libavcodec.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavcodec.a; path = contrib/ffmpeg/lib/libavcodec.a; sourceTree = "<group>"; };
-		A99DB6AD1D4648D100C6E56C /* libavresample.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavresample.a; path = contrib/ffmpeg/lib/libavresample.a; sourceTree = "<group>"; };
 		A99DB6AE1D4648D100C6E56C /* libavutil.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavutil.a; path = contrib/ffmpeg/lib/libavutil.a; sourceTree = "<group>"; };
 		A99DB6B21D46497B00C6E56C /* libiconv.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libiconv.tbd; path = usr/lib/libiconv.tbd; sourceTree = SDKROOT; };
 		A99DB6B41D4649C300C6E56C /* eng.traineddata */ = {isa = PBXFileReference; lastKnownFileType = file; name = eng.traineddata; path = ../contrib/Tesseract/share/tessdata/eng.traineddata; sourceTree = "<group>"; };
@@ -445,7 +442,6 @@
 				A90801071D4B830A002B6950 /* libavfilter.a in Frameworks */,
 				A90801081D4B830A002B6950 /* libavformat.a in Frameworks */,
 				A90801011D4B830A002B6950 /* libavcodec.a in Frameworks */,
-				A90801021D4B830A002B6950 /* libavresample.a in Frameworks */,
 				A90801031D4B830A002B6950 /* libavutil.a in Frameworks */,
 				A90801041D4B830A002B6950 /* libswresample.a in Frameworks */,
 				A90800FE1D4B82FB002B6950 /* libjpeg.a in Frameworks */,
@@ -465,7 +461,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				A93EE6EA1D48A01A003E3B56 /* libswresample.a in Frameworks */,
-				A93EE6E91D489FFC003E3B56 /* libavresample.a in Frameworks */,
 				A9E8FB871D4664F70071A5F1 /* libz.tbd in Frameworks */,
 				A9E8FB851D4664E80071A5F1 /* libbz2.tbd in Frameworks */,
 				A99DB6B31D46497B00C6E56C /* libiconv.tbd in Frameworks */,
@@ -533,7 +528,6 @@
 				A9E8FB841D4664E80071A5F1 /* libbz2.tbd */,
 				A99DB6B21D46497B00C6E56C /* libiconv.tbd */,
 				A99DB6AC1D4648D100C6E56C /* libavcodec.a */,
-				A99DB6AD1D4648D100C6E56C /* libavresample.a */,
 				A99DB6AE1D4648D100C6E56C /* libavutil.a */,
 				A99DB6A61D4648B700C6E56C /* libjpeg.a */,
 				A99DB6A71D4648B700C6E56C /* liblept.a */,

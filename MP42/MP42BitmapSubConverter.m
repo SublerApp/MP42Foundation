@@ -379,7 +379,6 @@
 - (instancetype)initWithTrack:(MP42SubtitleTrack *)track error:(NSError * __autoreleasing *)outError
 {
     if ((self = [super init])) {
-        FFInitFFmpeg();
         MP42SubtitleCodecType format = track.format;
 
         if (format == kMP42SubtitleCodecType_VobSub) {

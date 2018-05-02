@@ -20,7 +20,7 @@
 #include <math.h>
 #include <stdint.h>
 #include <libavutil/channel_layout.h>
-#include <libavresample/avresample.h>
+#include <libswresample/swresample.h>
 
 typedef struct
 {
@@ -28,7 +28,7 @@ typedef struct
     int dual_mono_right_only;
 
     int resample_needed;
-    AVAudioResampleContext *avresample;
+    SwrContext *avresample;
 
     struct
     {
@@ -110,7 +110,7 @@ void                 hb_audio_resample_free(hb_audio_resample_t *resample);
  * resampling is only done when necessary.
  */
 int hb_audio_resample(hb_audio_resample_t *resample,
-                       uint8_t **samples, int nsamples,
+                       const uint8_t **samples, int nsamples,
                        uint8_t **out_date, int *out_size);
 
 #endif /* AUDIO_RESAMPLE_H */
