@@ -762,6 +762,8 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
                 } else {
                     [_logger writeErrorToLog:error];
                 }
+            } else {
+                [_logger writeToLog:@"Couldn't optimize file"];
             }
 
             if (!noErr) {
