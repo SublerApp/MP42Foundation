@@ -1054,6 +1054,7 @@
                             err = CMSampleBufferGetSampleTimingInfoArray(sampleBuffer, timingArrayEntries, NULL, &timingArrayEntriesNeededOut);
                             if (err) {
                                 CFRelease(sampleBuffer);
+                                CFRelease(attachments);
                                 continue;
                             }
 
@@ -1063,6 +1064,7 @@
                             if (err) {
                                 free(timingArrayOut);
                                 CFRelease(sampleBuffer);
+                                CFRelease(attachments);
                                 continue;
                             }
 
@@ -1073,6 +1075,7 @@
                             if (err) {
                                 free(timingArrayOut);
                                 CFRelease(sampleBuffer);
+                                CFRelease(attachments);
                                 continue;
                             }
 
@@ -1083,6 +1086,7 @@
                                 free(timingArrayOut);
                                 free(sizeArrayOut);
                                 CFRelease(sampleBuffer);
+                                CFRelease(attachments);
                                 continue;
                             }
 
