@@ -14,9 +14,6 @@
 #import "MP42Track+Muxer.h"
 
 @interface MP42Track ()
-{
-    NSString *_name;
-}
 
 @property(nonatomic, readwrite) MP42TrackId trackId;
 @property(nonatomic, readwrite) MP42TrackId sourceId;
@@ -245,6 +242,8 @@
 {
     return StringFromTime(_duration, 1000);
 }
+
+@synthesize name = _name;
 
 - (NSString *)name {
     if (_name == nil) {
