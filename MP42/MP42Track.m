@@ -344,22 +344,18 @@
     [coder encodeInt64:_sourceId forKey:@"sourceId"];
 
 #ifdef SB_SANDBOX
-    if ([sourceURL respondsToSelector:@selector(startAccessingSecurityScopedResource)]) {
-        NSData *bookmarkData = nil;
-        NSError *error = nil;
-        bookmarkData = [sourceURL bookmarkDataWithOptions:NSURLBookmarkCreationWithSecurityScope
-                         includingResourceValuesForKeys:nil
-                                          relativeToURL:nil // Make it app-scoped
-                                                  error:&error];
-        if (error) {
-            NSLog(@"Error creating bookmark for URL (%@): %@", sourceURL, error);
-        }
-        
-        [coder encodeObject:bookmarkData forKey:@"bookmark"];
+    NSData *bookmarkData = nil;
+    NSError *error = nil;
+    bookmarkData = [self.URL bookmarkDataWithOptions:NSURLBookmarkCreationWithSecurityScope
+                      includingResourceValuesForKeys:nil
+                                       relativeToURL:nil // Make it app-scoped
+                                               error:&error];
+    if (error) {
+        NSLog(@"Error creating bookmark for URL (%@): %@", self.URL, error);
     }
-    else {
-        [coder encodeObject:sourceURL forKey:@"sourceURL"];
-    }
+
+    [coder encodeObject:bookmarkData forKey:@"bookmark"];
+
 #else
     [coder encodeObject:_URL forKey:@"sourceURL"];
 #endif

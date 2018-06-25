@@ -707,8 +707,8 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 - (NSURL *)tempURL {
     NSURL *tempURL = nil;
     #ifdef SB_SANDBOX
-        NSURL *folderURL = [fileURL URLByDeletingLastPathComponent];
-        tempURL = [fileManager URLForDirectory:NSItemReplacementDirectory inDomain:NSUserDomainMask appropriateForURL:folderURL create:YES error:&error];
+        NSURL *folderURL = [self.URL URLByDeletingLastPathComponent];
+        tempURL = [NSFileManager.defaultManager URLForDirectory:NSItemReplacementDirectory inDomain:NSUserDomainMask appropriateForURL:folderURL create:YES error:nil];
     #else
         tempURL = [self.URL URLByDeletingLastPathComponent];
     #endif
@@ -1255,22 +1255,17 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
     [coder encodeInt:MP42FILE_VERSION forKey:@"MP42FileVersion"];
 
 #ifdef SB_SANDBOX
-    if ([fileURL respondsToSelector:@selector(startAccessingSecurityScopedResource)]) {
-            NSData *bookmarkData = nil;
-            NSError *error = nil;
-            bookmarkData = [fileURL bookmarkDataWithOptions:NSURLBookmarkCreationWithSecurityScope
-                             includingResourceValuesForKeys:nil
-                                              relativeToURL:nil // Make it app-scoped
-                                                      error:&error];
+    NSData *bookmarkData = nil;
+    NSError *error = nil;
+    bookmarkData = [self.URL bookmarkDataWithOptions:NSURLBookmarkCreationWithSecurityScope
+                      includingResourceValuesForKeys:nil
+                                       relativeToURL:nil // Make it app-scoped
+                                               error:&error];
         if (error) {
-            NSLog(@"Error creating bookmark for URL (%@): %@", fileURL, error);
+            NSLog(@"Error creating bookmark for URL (%@): %@", self.URL, error);
         }
-        
-        [coder encodeObject:bookmarkData forKey:@"bookmark"];
 
-    } else {
-        [coder encodeObject:fileURL forKey:@"fileUrl"];
-    }
+        [coder encodeObject:bookmarkData forKey:@"bookmark"];
 #else
     if ([self.URL isFileReferenceURL]) {
         [coder encodeObject:[self.URL filePathURL] forKey:@"fileUrl"];
