@@ -613,18 +613,24 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
                 continue;
             }
 
+            NSString *lowercaseName = track.name.lowercaseString;
+
             // Try to create some useful tags from the track name.
-            if ([track.name rangeOfString:@"Director"].location != NSNotFound ||
-                [track.name rangeOfString:@"Commentary"].location != NSNotFound ||
-                [track.name rangeOfString:@"Lyric"].location != NSNotFound ||
-                [track.name rangeOfString:@"Karaoke"].location != NSNotFound ||
-                [track.name rangeOfString:@"Sign"].location != NSNotFound) {
+            if ([lowercaseName containsString:@"director"] ||
+                [lowercaseName containsString:@"commentary"] ||
+                [lowercaseName containsString:@"lyric"] ||
+                [lowercaseName containsString:@"karaoke"] ||
+                [lowercaseName containsString:@"sign"]) {
                 [tags addObject:@"public.auxiliary-content"];
             }
 
             if (mediaType == kMP42MediaType_Subtitle) {
-                if ([track.name rangeOfString:@"Lyric"].location != NSNotFound ||
-                    [track.name rangeOfString:@"Karaoke"].location != NSNotFound) {
+                if ([lowercaseName containsString:@"lyric"] ||
+                    [lowercaseName containsString:@"karaoke"]) {
+                    [tags addObject:@"public.accessibility.describes-music-and-sound"];
+                }
+                if ([lowercaseName containsString:@"sdh"]) {
+                    [tags addObject:@"public.accessibility.transcribes-spoken-dialog"];
                     [tags addObject:@"public.accessibility.describes-music-and-sound"];
                 }
             }
@@ -675,8 +681,9 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
         [self setTrack:mainTrackCandidate mediaCharacteristics:tags];
 
         for (MP42Track *track in subGroup) {
-            if (track.mediaCharacteristicTags.count == 0) {
-                NSSet<NSString *> *tags = [NSSet setWithObject:@"public.auxiliary-content"];
+            if ([track.mediaCharacteristicTags containsObject:@"public.main-program-content"] == NO) {
+                NSMutableSet<NSString *> *tags = [track.mediaCharacteristicTags mutableCopy];
+                [tags addObject:@"public.auxiliary-content"];
                 [self setTrack:track mediaCharacteristics:tags];
             }
         }
