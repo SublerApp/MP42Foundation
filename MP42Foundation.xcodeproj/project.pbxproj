@@ -1178,9 +1178,6 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					/Users/damians/Dev/sublercli/MP42Foundation/ffmpeg/lib,
-					/Users/damians/Dev/sublercli/MP42Foundation/Tesseract/lib,
-					/Users/damians/Dev/sublercli/MP42Foundation/mp4v2,
 					"$(PROJECT_DIR)/contrib/mp42v2",
 					"$(PROJECT_DIR)/contrib/Tesseract/lib",
 					"$(PROJECT_DIR)/contrib/ffmpeg/lib",
@@ -1205,9 +1202,6 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					/Users/damians/Dev/sublercli/MP42Foundation/ffmpeg/lib,
-					/Users/damians/Dev/sublercli/MP42Foundation/Tesseract/lib,
-					/Users/damians/Dev/sublercli/MP42Foundation/mp4v2,
 					"$(PROJECT_DIR)/contrib/mp42v2",
 					"$(PROJECT_DIR)/contrib/Tesseract/lib",
 					"$(PROJECT_DIR)/contrib/ffmpeg/lib",
