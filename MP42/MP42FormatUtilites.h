@@ -18,10 +18,11 @@ extern "C" {
     UInt32 getDefaultChannelLayout(UInt32 channelsCount);
 
     int readAC3Config(uint64_t acmod, uint64_t lfeon, UInt32 *channelsCount, UInt32 *channelLayoutTag);
-    int readEAC3Config(const uint8_t *cookie, uint32_t cookieLen, UInt32 *channelsCount, UInt32 *channelLayoutTag);
+    int readEAC3Config(const uint8_t *cookie, uint32_t cookieLen, UInt32 *channelsCount, UInt32 *channelLayoutTag, UInt8 *numAtmosObjects);
 
     int analyze_EAC3(void **context ,uint8_t *frame, uint32_t size);
     CFDataRef createCookie_EAC3(void *context);
+	uint8_t get_num_objects_EAC3(void *context);
     void free_EAC3_context(void *context);
 
     typedef struct {
@@ -71,6 +72,42 @@ extern "C" {
         int ps;  ///< -1 implicit, 1 presence
         int frame_length_short;
     } MPEG4AudioConfig;
+	
+	struct eac3_info {
+		uint8_t *frame;
+		uint32_t size;
+		
+		uint8_t ec3_done;
+		uint8_t num_blocks;
+		
+		/* Layout of the EC3SpecificBox */
+		/* maximum bitrate */
+		uint16_t data_rate;
+		/* number of independent substreams */
+		uint8_t  num_ind_sub;
+		uint8_t  num_objects_oamd;				//OAMD>0 && JOC>0 indicates Atmos
+		uint8_t  num_objects_joc;				//OAMD>0 && JOC>0 indicates Atmos
+		struct {
+			/* sample rate code (see ff_ac3_sample_rate_tab) 2 bits */
+			uint8_t fscod;
+			/* bit stream identification 5 bits */
+			uint8_t bsid;
+			/* one bit reserved */
+			/* audio service mixing (not supported yet) 1 bit */
+			/* bit stream mode 3 bits */
+			uint8_t bsmod;
+			/* audio coding mode 3 bits */
+			uint8_t acmod;
+			/* sub woofer on 1 bit */
+			uint8_t lfeon;
+			/* 3 bits reserved */
+			/* number of dependent substreams associated with this substream 4 bits */
+			uint8_t num_dep_sub;
+			/* channel locations of the dependent substream(s), if any, 9 bits */
+			uint16_t chan_loc;
+			/* if there is no dependent substream, then one bit reserved instead */
+		} substream[1]; /* TODO: support 8 independent substreams */
+	};
 
     int analyze_ESDS(MPEG4AudioConfig *c, const uint8_t *cookie, uint32_t cookieLen);
 

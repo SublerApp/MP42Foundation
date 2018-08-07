@@ -16,6 +16,7 @@
 
 @property(nonatomic, readwrite) UInt32 channels;
 @property(nonatomic, readwrite) UInt32 channelLayoutTag;
+@property(nonatomic, readwrite) MP42EmbeddedAudioCodecType embeddedAudioFormat;
 
 @property(nonatomic, readonly) MP42TrackId fallbackTrackId;
 @property(nonatomic, readonly) MP42TrackId followsTrackId;

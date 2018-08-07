@@ -6,8 +6,8 @@
 //  Copyright © 2015 Damiano Galassi. All rights reserved.
 //
 
-#include "MP42FormatUtilites.h"
 #include "mbs.h"
+#include "MP42FormatUtilites.h"
 #include "MP42MediaFormat.h"
 
 #import <CoreAudio/CoreAudio.h>
@@ -32,9 +32,11 @@ uint8_t *write_int16(uint8_t *target, int16_t data)
     return write_data(target, (uint8_t*)&data, sizeof(data));
 } /* write_int16() */
 
-#define MP4ESDescrTag                   0x03
-#define MP4DecConfigDescrTag            0x04
-#define MP4DecSpecificDescrTag          0x05
+#define MP4ESDescrTag					0x03
+#define MP4DecConfigDescrTag			0x04
+#define MP4DecSpecificDescrTag			0x05
+#define AC3MaxChan						0x05
+#define AC3MaxBlkPerFrame				0x06
 
 // from perian
 // based off of mov_mp4_read_descr_len from mov.c in ffmpeg's libavformat
@@ -267,7 +269,7 @@ static const int eac3_layout_lfe[8] = {
 
 #pragma mark - EAC3
 
-int readEAC3Config(const uint8_t *cookie, uint32_t cookieLen, UInt32 *channelsCount, UInt32 *channelLayoutTag)
+int readEAC3Config(const uint8_t *cookie, uint32_t cookieLen, UInt32 *channelsCount, UInt32 *channelLayoutTag, UInt8 *numAtmosObjects)
 {
     if (cookieLen < 5) {
         return 0;
@@ -283,10 +285,10 @@ int readEAC3Config(const uint8_t *cookie, uint32_t cookieLen, UInt32 *channelsCo
     for (int i = 0; i < 1; i++)
     {
         //uint32_t fscod, bsid, asvc, bsmod;
-        uint8_t acmod, lfeon;
+        uint8_t acmod, lfeon, bsid;
 
         b.GetBits(2); // fscod
-        b.GetBits(5); // bsid
+        bsid = b.GetBits(5); // bsid
         b.SkipBits(1); // reserved
         b.GetBits(1); // asvc
         b.GetBits(3); // bsmod
@@ -303,7 +305,9 @@ int readEAC3Config(const uint8_t *cookie, uint32_t cookieLen, UInt32 *channelsCo
 
         if (num_dep_sub > 0 && cookieLen > 5) {
             chan_loc = b.GetBits(9);
-        }
+		} else {
+			b.GetBits(1); //reserved
+		}
 
         if (acmod == 7 && lfeon && chan_loc != 0) {
             // TODO: complete the list
@@ -345,6 +349,11 @@ int readEAC3Config(const uint8_t *cookie, uint32_t cookieLen, UInt32 *channelsCo
         }
 
         *channelsCount = AudioChannelLayoutTag_GetNumberOfChannels(*channelLayoutTag);
+		if (bsid >= 16 && cookieLen >= 7 && !num_dep_sub) {
+			uint8_t atmos_version = b.GetBits(8);
+			if (atmos_version > 0)
+				*numAtmosObjects = b.GetBits(8);
+		}
     }
 
     return 1;
@@ -650,6 +659,12 @@ typedef struct AC3HeaderInfo {
     uint16_t channel_map;
     int num_blocks;                         ///< number of audio blocks
     int dolby_surround_mode;
+	uint8_t	skipflde;						//If true, full skip field syntax is present in each audio block
+	uint16_t skipl;							//indicates the number of dummy bytes to skip (ignore) before unpacking the mantissas of the current audio block
+	uint8_t blkswe;							//If true, full block switch syntax shall be present in each audio block
+	uint8_t dithflage;						//If true, full dither flag syntax shall be present in each audio block
+	uint8_t  num_objects_oamd;				//OAMD>0 && JOC>0 indicates Atmos
+	uint8_t  num_objects_joc;				//OAMD>0 && JOC>0 indicates Atmos
     /** @} */
 
     /** @name Derived values
@@ -663,6 +678,13 @@ typedef struct AC3HeaderInfo {
     uint64_t channel_layout;
     /** @} */
 } AC3HeaderInfo;
+
+void analyze_ac3_atmos(CMemoryBitstream &b, AC3HeaderInfo *phdr);
+void analyze_ac3_skipfld(CMemoryBitstream &b, AC3HeaderInfo *phdr);
+void analyze_ac3_auxdata(CMemoryBitstream &b, AC3HeaderInfo *phdr);
+void parse_eac3_bsi(CMemoryBitstream &gbc, AC3HeaderInfo *hdr);
+void parse_eac3_audfrm(CMemoryBitstream &gbc, AC3HeaderInfo *hdr);
+void parse_eac3_audblk(CMemoryBitstream &gbc, AC3HeaderInfo *hdr, int blk);
 
 static int ac3_parse_header(CMemoryBitstream &b, AC3HeaderInfo **phdr)
 {
@@ -713,7 +735,8 @@ static int ac3_parse_header(CMemoryBitstream &b, AC3HeaderInfo **phdr)
         if (frame_size_code > 37) {
             return AAC_AC3_PARSE_ERROR_FRAME_SIZE;
         }
-
+        //end syncinfo()
+        //bsi()
         b.SkipBits(5); // skip bsid, already got it
 
         hdr->bitstream_mode = b.GetBits(3);
@@ -730,7 +753,7 @@ static int ac3_parse_header(CMemoryBitstream &b, AC3HeaderInfo **phdr)
             }
         }
         hdr->lfe_on = b.GetBits(1);
-
+        //next unparsed field - dialnorm
         hdr->sr_shift = MAX(hdr->bitstream_id, 8) - 8;
         hdr->sample_rate = ff_ac3_sample_rate_tab[hdr->sr_code] >> hdr->sr_shift;
         hdr->bit_rate = (ff_ac3_bitrate_tab[frame_size_code>>1] * 1000) >> hdr->sr_shift;
@@ -742,19 +765,20 @@ static int ac3_parse_header(CMemoryBitstream &b, AC3HeaderInfo **phdr)
     else {
         /* Enhanced AC-3 */
         hdr->crc1 = 0;
-        hdr->frame_type = b.GetBits(2);
+        //bsi()
+        hdr->frame_type = b.GetBits(2);			//strmtyp
         if (hdr->frame_type == EAC3_FRAME_TYPE_RESERVED) {
             return AAC_AC3_PARSE_ERROR_FRAME_TYPE;
         }
 
-        hdr->substreamid = b.GetBits(3);
+        hdr->substreamid = b.GetBits(3);		//substreamid
 
-        hdr->frame_size = (b.GetBits(11) + 1) << 1;
+        hdr->frame_size = (b.GetBits(11) + 1) << 1;	//frmsiz
         if (hdr->frame_size < AC3_HEADER_SIZE) {
             return AAC_AC3_PARSE_ERROR_FRAME_SIZE;
         }
 
-        hdr->sr_code = b.GetBits(2);
+        hdr->sr_code = b.GetBits(2);			//fscod
         if (hdr->sr_code == 3) {
             int sr_code2 = b.GetBits(2);
             if(sr_code2 == 3) {
@@ -763,14 +787,15 @@ static int ac3_parse_header(CMemoryBitstream &b, AC3HeaderInfo **phdr)
             hdr->sample_rate = ff_ac3_sample_rate_tab[sr_code2] / 2;
             hdr->sr_shift = 1;
         } else {
-            hdr->num_blocks = eac3_blocks[b.GetBits(2)];
+            hdr->num_blocks = eac3_blocks[b.GetBits(2)];	//numblkscod
             hdr->sample_rate = ff_ac3_sample_rate_tab[hdr->sr_code];
             hdr->sr_shift = 0;
         }
 
-        hdr->channel_mode = b.GetBits(3);
-        hdr->lfe_on = b.GetBits(1);
-
+        hdr->channel_mode = b.GetBits(3);	//acmod
+        hdr->lfe_on = b.GetBits(1);			//lfeon
+		b.SkipBits(5);						//bsid already taken
+		//next unparsed field - dialnorm
         hdr->bit_rate = 8LL * hdr->frame_size * hdr->sample_rate /
         (hdr->num_blocks * 256);
         hdr->channels = ff_ac3_channels_tab[hdr->channel_mode] + hdr->lfe_on;
@@ -779,46 +804,25 @@ static int ac3_parse_header(CMemoryBitstream &b, AC3HeaderInfo **phdr)
     if (hdr->lfe_on) {
         hdr->channel_layout |= AV_CH_LOW_FREQUENCY;
     }
-    
-    return 0;
+	//location in stream - bsi().dialnorm(5)
+	analyze_ac3_atmos(b, hdr);
+
+	return 0;
 }
 
-struct eac3_info {
-    uint8_t *frame;
-    uint32_t size;
+void analyze_ac3_atmos(CMemoryBitstream &b, AC3HeaderInfo *phdr)
+{
+	uint32_t savedbitpos = b.GetBitPosition();	//calling routines assume bit pos in b after this fn returns!
+	parse_eac3_bsi(b, phdr);					//resets bit_pos to frame start + 2
+	parse_eac3_audfrm(b, phdr);					//starts from bit_pos where bsi left off
+	//for (int blk = 0; blk < hdr->num_blocks; blk++)
+		parse_eac3_audblk(b, phdr, 0 /*blk*/);	//starts from bit_pos where audfrm left off
+	analyze_ac3_skipfld(b, phdr);				//shall start from the skipfield
+	analyze_ac3_auxdata(b, phdr);				//shall start from the frame end
+	b.SetBitPosition(savedbitpos);				//so that analyze_EAC3() does not raise exception
+}
 
-    uint8_t ec3_done;
-    uint8_t num_blocks;
-
-    /* Layout of the EC3SpecificBox */
-    /* maximum bitrate */
-    uint16_t data_rate;
-    /* number of independent substreams */
-    uint8_t  num_ind_sub;
-    struct {
-        /* sample rate code (see ff_ac3_sample_rate_tab) 2 bits */
-        uint8_t fscod;
-        /* bit stream identification 5 bits */
-        uint8_t bsid;
-        /* one bit reserved */
-        /* audio service mixing (not supported yet) 1 bit */
-        /* bit stream mode 3 bits */
-        uint8_t bsmod;
-        /* audio coding mode 3 bits */
-        uint8_t acmod;
-        /* sub woofer on 1 bit */
-        uint8_t lfeon;
-        /* 3 bits reserved */
-        /* number of dependent substreams associated with this substream 4 bits */
-        uint8_t num_dep_sub;
-        /* channel locations of the dependent substream(s), if any, 9 bits */
-        uint16_t chan_loc;
-        /* if there is no dependent substream, then one bit reserved instead */
-    } substream[1]; /* TODO: support 8 independent substreams */
-};
-
-
-int analyze_EAC3(void **context ,uint8_t *frame, uint32_t size)
+int analyze_EAC3(void **context, uint8_t *frame, uint32_t size)
 {
     CMemoryBitstream b;
     AC3HeaderInfo *hdr = NULL;
@@ -839,7 +843,6 @@ int analyze_EAC3(void **context ,uint8_t *frame, uint32_t size)
         free(hdr);
         return -1;
     }
-
     info->data_rate = MAX(info->data_rate, hdr->bit_rate / 1000);
     num_blocks = hdr->num_blocks;
 
@@ -885,8 +888,7 @@ int analyze_EAC3(void **context ,uint8_t *frame, uint32_t size)
             while (cumul_size != size) {
                 int i;
                 CMemoryBitstream gbc;
-                gbc.SetBytes(frame + cumul_size, (size - cumul_size) * 8);
-
+                gbc.SetBytes(frame + cumul_size, (size - cumul_size)/* * 8*/);
                 if (ac3_parse_header(gbc, &hdr) < 0) {
                     free(hdr);
                     return -1;
@@ -922,6 +924,9 @@ int analyze_EAC3(void **context ,uint8_t *frame, uint32_t size)
     }
 
 concatenate:
+	//hdr->num_objects_xxx freshly updated from stream in ac3_parse_header()
+	info->num_objects_oamd = hdr->num_objects_oamd > info->num_objects_oamd ? hdr->num_objects_oamd : info->num_objects_oamd;
+	info->num_objects_joc  = hdr->num_objects_joc  > info->num_objects_joc  ? hdr->num_objects_joc  : info->num_objects_joc;
 
     free(hdr);
 
@@ -959,8 +964,1177 @@ concatenate:
         }
         info->num_blocks = 0;
     }
-    
+
     return 0;
+}
+
+/**
+ *  General approach and part of code from MediaInfoLib ac3 parser.
+ *  https://github.com/MediaArea/MediaInfoLib/blob/master/Source/MediaInfo/Audio/File_Ac3.cpp
+ */
+//---------------------------------------------------------------------------
+//E.1.2.2 bsi - Bit stream information
+void parse_eac3_bsi(CMemoryBitstream &gbc, AC3HeaderInfo *hdr)
+{
+	if(hdr->bitstream_id != 16)
+		return;
+
+#ifdef DEBUG_PARSER
+	printf("***parse_eac3_bsi start bit pos: %d remaining bits: %d\n", gbc.GetBitPosition(), gbc.GetRemainingBits());
+#endif
+	gbc.SetBitPosition(16);					//skip syncword
+	gbc.SkipBits(2+3+11+2+2+3+1);			//strmtyp,substreamid,frmsiz,fscod,numblkscod,acmod,lfeon
+	if(gbc.GetBits(1))						//compre ..................................................................................... 1
+		gbc.SkipBits(8);					//{compr} ......................................................................... 8
+	if(hdr->channel_mode == 0x0) 			/* if 1+1 mode (dual mono, so some items need a second value) */
+	{
+		gbc.SkipBits(5);					//dialnorm2 ............................................................................... 5
+		if(gbc.GetBits(1))					//compr2e ................................................................................. 1
+			gbc.SkipBits(8);				//{compr2} .................................................................... 8
+	}
+	if(hdr->frame_type == 0x1) 				/* if dependent stream */
+	{
+		if(gbc.GetBits(1))					//chanmape ................................................................................ 1
+			gbc.SkipBits(16);				// {chanmap} ................................................................. 16
+	}
+	/* mixing metadata */
+	if(gbc.GetBits(1))						//mixmdate ................................................................................... 1
+	{
+		if(hdr->channel_mode > 0x2) 		/* if more than 2 channels */
+			gbc.SkipBits(2);				//{dmixmod} ................................. 2
+		if((hdr->channel_mode & 0x1) && (hdr->channel_mode > 0x2)) /* if three front channels exist */
+			gbc.SkipBits(6);				//ltrtcmixlev,lorocmixlev .......................................................................... 3
+		if(hdr->channel_mode & 0x4) 		/* if a surround channel exists */
+			gbc.SkipBits(6+3);				//ltrtsurmixlev,lorosurmixlev
+		if(hdr->lfe_on) 					/* if the LFE channel exists */
+		{
+			if(gbc.GetBits(1)) 				//lfemixlevcode
+				gbc.SkipBits(5);			//lfemixlevcod
+		}
+		if(hdr->frame_type == 0x0) 			/* if independent stream */
+		{
+			if(gbc.GetBits(1)) 				//pgmscle
+				gbc.SkipBits(6);			//pgmscl
+			if(hdr->channel_mode == 0x0) 	/* if 1+1 mode (dual mono, so some items need a second value) */
+			{
+				if(gbc.GetBits(1)) 			//pgmscl2e
+					gbc.SkipBits(6);		//pgmscl2
+			}
+			if(gbc.GetBits(1)) 				//extpgmscle
+				gbc.SkipBits(6);			//extpgmscl
+			uint8_t mixdef = gbc.GetBits(2);
+			if(mixdef == 0x1) 				/* mixing option 2 */
+				gbc.SkipBits(1+1+3);		//premixcmpsel, drcsrc, premixcmpscl
+			else if(mixdef == 0x2) 			/* mixing option 3 */ {
+				gbc.SkipBits(12);
+			}
+			else if(mixdef == 0x3) 			/* mixing option 4 */
+			{
+				uint8_t mixdeflen = gbc.GetBits(5);	//mixdeflen
+				if (gbc.GetBits(1))			//mixdata2e
+				{
+					gbc.SkipBits(1+1+3);	//premixcmpsel,drcsrc,premixcmpscl
+					if(gbc.GetBits(1)) 		//extpgmlscle
+						gbc.SkipBits(4);	//extpgmlscl
+					if(gbc.GetBits(1)) 		//extpgmcscle
+						gbc.SkipBits(4);	//extpgmcscl
+					if(gbc.GetBits(1)) 		//extpgmrscle
+						gbc.SkipBits(4);	//extpgmrscl
+					if(gbc.GetBits(1)) 		//extpgmlsscle
+						gbc.SkipBits(4);	//extpgmlsscl
+					if(gbc.GetBits(1)) 		//extpgmrsscle
+						gbc.SkipBits(4);	//extpgmrsscl
+					if(gbc.GetBits(1)) 		//extpgmlfescle
+						gbc.SkipBits(4);	//extpgmlfescl
+					if(gbc.GetBits(1)) 		//dmixscle
+						gbc.SkipBits(4);	//dmixscl
+					if (gbc.GetBits(1))		//addche
+					{
+						if(gbc.GetBits(1))	//extpgmaux1scle
+							gbc.SkipBits(4);//extpgmaux1scl
+						if(gbc.GetBits(1))	//extpgmaux2scle
+							gbc.SkipBits(4);//extpgmaux2scl
+					}
+				}
+				if(gbc.GetBits(1))			//mixdata3e
+				{
+					gbc.SkipBits(5);		//spchdat
+					if(gbc.GetBits(1))		//addspchdate
+					{
+						gbc.SkipBits(5+2);	//spchdat1,spchan1att
+						if(gbc.GetBits(1))	//addspchdat1e
+							gbc.SkipBits(5+3);	//spchdat2,spchan2att
+					}
+				}
+				//mixdata ........................................ (8*(mixdeflen+2)) - no. mixdata bits
+				gbc.SkipBytes(mixdeflen + 2);
+				if(gbc.GetBitPosition() & 0x7)
+					//mixdatafill ................................................................... 0 - 7
+					//used to round up the size of the mixdata field to the nearest byte
+					gbc.SkipBits(8 - (gbc.GetBitPosition() & 0x7));
+			}
+			if(hdr->channel_mode < 0x2) /* if mono or dual mono source */
+			{
+				if(gbc.GetBits(1))			//paninfoe
+					gbc.SkipBits(8+6);		//panmean,paninfo
+				if(hdr->channel_mode == 0x0) /* if 1+1 mode (dual mono - some items need a second value) */
+				{
+					if(gbc.GetBits(1))		//paninfo2e
+						gbc.SkipBits(8+6);	//panmean2,paninfo2
+				}
+			}
+			/* mixing configuration information */
+			if(gbc.GetBits(1))				//frmmixcfginfoe
+			{
+				if(hdr->num_blocks == 1) {	//if(numblkscod == 0x0)
+					gbc.SkipBits(5);		//blkmixcfginfo[0]
+				}
+				else
+				{
+					for(int blk = 0; blk < hdr->num_blocks; blk++)
+					{
+						if(gbc.GetBits(1))	//blkmixcfginfoe[blk]
+							gbc.SkipBits(5);//blkmixcfginfo[blk]
+					}
+				}
+			}
+		}
+	}
+	/* informational metadata */
+	if(gbc.GetBits(1))						//infomdate
+	{
+		gbc.SkipBits(3+1+1);				//bsmod,copyrightb,origbs
+		if(hdr->channel_mode == 0x2) 		/* if in 2/0 mode */
+			gbc.SkipBits(2+2);				//dsurmod,dheadphonmod
+		if(hdr->channel_mode >= 0x6) 		/* if both surround channels exist */
+			gbc.SkipBits(2);				//dsurexmod
+		if(gbc.GetBits(1))					//audprodie
+			gbc.SkipBits(5+2+1);			//mixlevel,roomtyp,adconvtyp
+		if(hdr->channel_mode == 0x0)		/* if 1+1 mode (dual mono, so some items need a second value) */
+		{
+			if(gbc.GetBits(1))				//audprodi2e
+				gbc.SkipBits(5+2+1);		//mixlevel2,roomtyp2,adconvtyp2
+		}
+		if(hdr->sr_code < 0x3) 				/* if not half sample rate */
+			gbc.SkipBits(1);				//sourcefscod
+	}
+	if(hdr->frame_type == 0x0 && hdr->num_blocks != 6)	//(numblkscod != 0x3)
+		gbc.SkipBits(1);					//convsync
+	if(hdr->frame_type == 0x2) 				/* if bit stream converted from AC-3 */
+	{
+		uint8_t blkid = 0;
+		if(hdr->num_blocks == 6) 			/* 6 blocks per syncframe */
+			blkid = 1;
+		else
+			blkid = gbc.GetBits(1);
+		if(blkid)
+			gbc.SkipBits(6);				//frmsizecod
+	}
+	if(gbc.GetBits(1))						//addbsie
+	{
+		uint8_t addbsil = gbc.GetBits(6) + 1;//addbsil
+		gbc.SkipBytes(addbsil);				//addbsi
+	}
+#ifdef DEBUG_PARSER
+	printf("***parse_eac3_bsi end bit pos: %d remaining bits: %d\n", gbc.GetBitPosition(), gbc.GetRemainingBits());
+#endif
+} 											/* end of bsi */
+
+/** Compute ceil(log2(x)).
+ * @param x value used to compute ceil(log2(x))
+ * @return computed ceiling of log2(x)
+ */
+static int ff_log2_c(unsigned int v);
+static int av_ceil_log2_c(int x);
+
+static int av_ceil_log2_c(int x)
+{
+	return ff_log2_c((x - 1) << 1);
+}
+
+const uint8_t ff_log2_tab[256] = {
+	0,0,1,1,2,2,2,2,3,3,3,3,3,3,3,3,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,
+	5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,
+	6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,
+	6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,
+	7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
+	7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
+	7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
+	7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7
+};
+
+static int ff_log2_c(unsigned int v)
+{
+	int n = 0;
+	if (v & 0xffff0000) {
+		v >>= 16;
+		n += 16;
+	}
+	if (v & 0xff00) {
+		v >>= 8;
+		n += 8;
+	}
+	n += ff_log2_tab[v];
+	
+	return n;
+}
+
+uint8_t cplinu[AC3MaxBlkPerFrame] = {0,0,0,0,0,0};
+uint8_t cplstre[AC3MaxBlkPerFrame] = {0,0,0,0,0,0};
+uint8_t chexpstr[AC3MaxBlkPerFrame][AC3MaxChan] = {{0,0,0,0,0},{0,0,0,0,0},{0,0,0,0,0},{0,0,0,0,0},{0,0,0,0,0},{0,0,0,0,0}};
+uint8_t cplexpstr[AC3MaxBlkPerFrame] = {0,0,0,0,0,0};
+uint8_t lfeexpstr[AC3MaxChan] = {0,0,0,0,0};
+uint8_t bamode = 0;
+uint8_t snroffststr = 0;
+uint8_t frmfgaincode = 0;
+uint8_t dbaflde = 0;
+
+//E.1.2.3 audfrm - Audio frame
+void parse_eac3_audfrm(CMemoryBitstream &gbc, AC3HeaderInfo *hdr)
+{
+	if(hdr->bitstream_id != 16)
+		return;
+#ifdef DEBUG_PARSER
+	printf("***parse_eac3_audfrm start bit pos: %d remaining bits: %d\n", gbc.GetBitPosition(), gbc.GetRemainingBits());
+#endif
+	uint8_t nfchans = hdr->channels - hdr->lfe_on;
+	uint8_t expstre, ahte, /*cplahtinu, lfeahtinu,*/ ncplblks = 0;
+	
+	/* these fields for audio frame exist flags and strategy data */
+    if (hdr->num_blocks == 6) { 				/* six blocks per syncframe */
+		expstre = gbc.GetBits(1);
+		ahte 	= gbc.GetBits(1);
+	} else {
+		expstre = 1;
+		ahte 	= 0;
+	}
+	snroffststr = gbc.GetBits(2);
+	uint8_t transproce = gbc.GetBits(1);
+	hdr->blkswe = gbc.GetBits(1);
+	hdr->dithflage = gbc.GetBits(1);
+	bamode = gbc.GetBits(1);
+	frmfgaincode = gbc.GetBits(1);
+	dbaflde = gbc.GetBits(1);
+	hdr->skipflde = gbc.GetBits(1);
+#ifdef DEBUG_PARSER
+	printf("skipflde: 0x%0x\n", hdr->skipflde);
+#endif
+//	if(!hdr->skipflde)
+//		return;										//no need to look further, no skipfield in this frame
+	uint8_t spxattene = gbc.GetBits(1);
+	/* these fields for coupling data */
+	//uint8_t feexpstr[AC3MaxBlkPerFrame] = {0,0,0,0,0,0};
+	uint8_t cplexpstr[AC3MaxBlkPerFrame] = {0,0,0,0,0,0};
+	//uint8_t nchregs[AC3MaxChan] = {0,0,0,0,0};
+	uint8_t frmchexpstr[AC3MaxChan] = {0,0,0,0,0};
+	uint8_t convexpstr[AC3MaxChan] = {0,0,0,0,0};
+	uint8_t chahtinu[AC3MaxChan] = {0,0,0,0,0};
+	//uint8_t chintransproc[AC3MaxChan] = {0,0,0,0,0};
+	
+	if(hdr->channel_mode > 0x1)
+	{
+		cplinu[0] = gbc.GetBits(1);
+		cplstre[0] = 1;
+		for(int blk = 1; blk < hdr->num_blocks; blk++)
+		{
+			if((cplstre[blk] = gbc.GetBits(1)))		//cplstre[blk]
+				cplinu[blk] = gbc.GetBits(1);		//cplinu[blk]
+			else
+				cplinu[blk] = cplinu[blk-1];
+		}
+	}
+	/* these fields for exponent strategy data */
+	if(expstre)
+	{
+		for(int blk = 0; blk < hdr->num_blocks; blk++)
+		{
+			/* cplexpstr[blk] and chexpstr[blk][ch] derived from table lookups - see Table E.1.8*/
+			if(cplinu[blk])
+				cplexpstr[blk] = gbc.GetBits(2);
+			for(int ch = 0; ch < nfchans; ch++)
+				chexpstr[blk][ch] = gbc.GetBits(2);
+		}
+	} else {
+		for(int blk = 0; blk < hdr->num_blocks; blk++)
+			ncplblks += cplinu[blk];
+		if((hdr->channel_mode > 0x1) && (ncplblks > 0))
+			gbc.SkipBits(5);						//frmcplexpstr
+		for(int ch = 0; ch < nfchans; ch++)
+			frmchexpstr[ch] = gbc.GetBits(5);		//frmchexpstr[ch]
+	}
+	if(hdr->lfe_on)
+	{
+		for(int blk = 0; blk < hdr->num_blocks; blk++)
+			lfeexpstr[blk] = gbc.GetBits(1);		//lfeexpstr[blk]
+	}
+	/* These fields for converter exponent strategy data */
+	if(hdr->frame_type == 0x0)						//strmtyp == 0x0
+	{
+		uint8_t convexpstre = 1;
+		if(hdr->num_blocks != 6)					//(numblkscod != 0x3)
+			convexpstre = gbc.GetBits(1);			//convexpstre
+		if(convexpstre)
+		{
+			for(int ch = 0; ch < nfchans; ch++)
+				convexpstr[ch] = gbc.GetBits(5);	//convexpstr[ch]
+		}
+	}
+	/* these fields for AHT data */
+	if(ahte)
+	{
+		//E.2.4.2 Bit stream helper variables
+		/* only compute ncplregs if coupling in use for all 6 blocks */
+		uint8_t ncplregs = 0, nlferegs = 0, nchregs[16];
+		/* AHT is only available in 6 block mode (numblkscod == 0x3) */
+		for (int blk = 0; blk < 6; blk++)
+		{
+			if((cplstre[blk] == 1) || (cplexpstr[blk] != 0 /*reuse*/))
+				ncplregs++;
+			if(lfeexpstr[blk] !=  0 /*reuse*/)
+				nlferegs++;
+		}
+		for (int ch = 0; ch < nfchans; ch++)
+		{
+			nchregs[ch] = 0;
+			/* AHT is only available in 6 block mode (numblkscod ==0x3) */
+			for(int blk = 0; blk < 6; blk++)
+			{
+				if(chexpstr[blk][ch] != 0 /*reuse*/)
+					nchregs[ch]++;
+			}
+		}
+		/* coupling can use AHT only when coupling in use for all blocks */
+		/* ncplregs derived from cplstre and cplexpstr - see clause E.2.4.2 */
+        if ((ncplblks == 6) && (ncplregs == 1)) {
+            gbc.SkipBits(1); //cplahtinu = gbc.GetBits(1);
+        } else {
+			//cplahtinu = 0;
+        }
+		for (int ch = 0; ch < nfchans; ch++)
+		{	/* nchregs derived from chexpstr - see clause E.2.4.2 */
+			if(nchregs[ch])
+				chahtinu[ch] = gbc.GetBits(1);		//chahtinu[ch]
+			else
+				chahtinu[ch] = 0;
+		}
+		if(hdr->lfe_on)
+		{
+			/* nlferegs derived from lfeexpstr - see clause E.2.4.2 */
+            if (nlferegs) {
+                gbc.SkipBits(1); //lfeahtinu = gbc.GetBits(1);			//lfeahtinu
+            } else {
+				//lfeahtinu = 0;
+            }
+		}
+	}
+	/* these fields for audio frame SNR offset data */
+	if(snroffststr == 0x0)
+		gbc.SkipBits(6+4);							//frmcsnroffst,frmfsnroffst
+	/* these fields for audio frame transient pre-noise processing data */
+	if(transproce)
+	{
+		for(int ch = 0; ch < nfchans; ch++)
+		{
+			if(gbc.GetBits(1))				//chintransproc[ch]
+				gbc.SkipBits(10+8);			//transprocloc[ch],transproclen[ch]
+		}
+	}
+	/* These fields for spectral extension attenuation data */
+	if(spxattene)
+	{
+		for(int ch = 0; ch < nfchans; ch++)
+		{
+			if(gbc.GetBits(1))				//chinspxatten[ch]
+				gbc.SkipBits(5);			//spxattencod[ch]
+		}
+	}
+	/* these fields for block start information */
+	uint8_t blkstrtinfoe = 0;
+	if(hdr->num_blocks != 1)				//(numblkscod != 0x0)
+		blkstrtinfoe = gbc.GetBits(1);		//blkstrtinfoe
+	if(blkstrtinfoe)
+	{
+		/* nblkstrtbits determined from frmsiz (see clause E.1.3.2.27) */
+		int nblkstrtbits = (int)((hdr->num_blocks - 1) * (4 + av_ceil_log2_c(hdr->frame_size >> 1)));
+		gbc.SkipBits(nblkstrtbits);			//blkstrtinfo .......................................... nblkstrtbits
+	}
+	/* these fields for syntax state initialization */
+//	for(int ch = 0; ch < nfchans; ch++)
+//	{
+//		firstspxcos[ch] = 1;
+//		firstcplcos[ch] = 1;
+//	}
+//	firstcplleak = 1;
+#ifdef DEBUG_PARSER
+	printf("***parse_eac3_audfrm end bit pos: %d remaining bits: %d\n", gbc.GetBitPosition(), gbc.GetRemainingBits());
+#endif
+} 											/* end of e-ac-3 audfrm */
+
+void parse_eac3_audblk(CMemoryBitstream &gbc, AC3HeaderInfo *hdr, int blk)
+{
+    if (hdr->bitstream_id != 16) {
+		return;
+    }
+
+	uint8_t nfchans = hdr->channels - hdr->lfe_on;
+	uint8_t spxinu = 0, chinspx[AC3MaxChan], spxbegf, spxendf, ncplsubnd = 0, cplbndstrc[32], cplbegf = 0, cplendf = 0, ecplinu = 0, ecpl_begin_subbnd = 0, ecpl_end_subbnd = 0, spx_begin_subbnd = 0, spx_end_subbnd = 0, chincpl[16], phsflginu = 0, ecplbegf;
+
+	/* these fields for syntax state initialization */
+	uint8_t firstspxcos[AC3MaxChan] = {1,1,1,1,1};
+	uint8_t firstcplcos[AC3MaxChan] = {1,1,1,1,1};
+	uint8_t chbwcod[AC3MaxChan] = {0,0,0,0,0};
+
+    bzero(chinspx, sizeof(uint8_t) * AC3MaxChan);
+    bzero(cplbndstrc, sizeof(uint8_t) * 32);
+    bzero(chincpl, sizeof(uint8_t) * 16);
+	
+	uint8_t firstcplleak = 1;
+#ifdef DEBUG_PARSER
+	printf("***parse_eac3_audblk start bit pos: %d remaining bits: %d\n", gbc.GetBitPosition(), gbc.GetRemainingBits());
+#endif
+	/* these fields for block switch and dither flags */
+    if (hdr->blkswe) {
+        gbc.SkipBits(1*nfchans);					//blksw[ch]
+    }
+	//else
+		//for(ch = 0; ch < nfchans; ch++) {blksw[ch] = 0}
+    if (hdr->dithflage) {
+        gbc.SkipBits(1*nfchans);					//dithflag[ch]
+    }
+	//else
+		//for(ch = 0; ch < nfchans; ch++) {dithflag[ch] = 1} /* dither on */
+	/* these fields for dynamic range control */
+    if (gbc.GetBits(1))	{								//dynrnge
+		gbc.SkipBits(8);								//dynrng
+    }
+    if (hdr->channel_mode == 0x0) {									/* if 1+1 mode */
+        if(gbc.GetBits(1)) {								//dynrng2e
+			gbc.SkipBits(8);							//dynrng2
+        }
+	}
+	/* these fields for spectral extension strategy information */
+	uint8_t spxstre;
+    if (blk == 0) {
+		spxstre = 1;
+    } else {
+		spxstre = gbc.GetBits(1);						//spxstre
+    }
+
+	uint8_t spxbndstrc[32];
+	if (spxstre) {
+		if((spxinu = gbc.GetBits(1)))					//spxinu
+		{
+            if (hdr->channel_mode == 0x1) {
+				chinspx[0] = 1;
+            } else {
+                for (int ch = 0; ch < nfchans; ch++) {
+					chinspx[ch] = gbc.GetBits(1);		//chinspx[ch]
+                }
+			}
+			gbc.SkipBits(2);							//spxstrtf
+			spxbegf = gbc.GetBits(3);					//spxbegf
+			spxendf = gbc.GetBits(3);					//spxendf
+			if (spxbegf < 6) {
+				spx_begin_subbnd = spxbegf + 2;
+			} else {
+				spx_begin_subbnd = spxbegf * 2 - 3;
+			}
+			if (spxendf < 3) {
+				spx_end_subbnd = spxendf + 5;
+			} else {
+				spx_end_subbnd = spxendf * 2 + 3;
+			}
+            if (gbc.GetBits(1)) {							//spxbndstrce
+                for (int bnd = spx_begin_subbnd + 1; bnd < spx_end_subbnd ; bnd++) {
+					spxbndstrc[bnd] = gbc.GetBits(1);	//spxbndstrc[bnd]
+                }
+			}
+        } else {/* !spxinu */
+			for (int ch = 0; ch < nfchans; ch++) {
+				chinspx[ch] = 0;
+				firstspxcos[ch] = 1;
+			}
+		}
+	}
+	//E.2.6.2 Sub-band structure for spectral extension
+	uint8_t nspxbnds = 1;
+	uint8_t spxbndsztab[32];
+	spxbndsztab[0] = 12;
+	for (int bnd = spx_begin_subbnd + 1; bnd < spx_end_subbnd; bnd ++) {
+		if (spxbndstrc[bnd] == 0) {
+			spxbndsztab[nspxbnds] = 12;
+			nspxbnds++;
+		} else {
+			spxbndsztab[nspxbnds - 1] += 12;
+		}
+	}
+	//end E.2.6.2 Sub-band structure for spectral extension
+	/* these fields for spectral extension coordinates */
+	if (spxinu) {
+		uint8_t spxcoe[16];
+		for (int ch = 0; ch < nfchans; ch++) {
+			if (chinspx[ch]) {
+				if (firstspxcos[ch]) {
+					spxcoe[ch] = 1;
+					firstspxcos[ch] = 0;
+                } else {								/* !firstspxcos[ch] */
+					spxcoe[ch] = gbc.GetBits(1);	//spxcoe[ch]
+                }
+				if(spxcoe[ch]) {
+					gbc.SkipBits(5+2);				//spxblnd[ch],mstrspxco[ch]
+					/* nspxbnds determined from spx_begin_subbnd, spx_end_subbnd, and spxbndstrc[ ] */
+                    for (int bnd = 0; bnd < nspxbnds; bnd++) {
+						gbc.SkipBits(2+2);			//spxcoexp[ch][bnd],spxcomant[ch][bnd]
+                    }
+				}
+            } else {									/* !chinspx[ch] */
+				firstspxcos[ch] = 1;
+            }
+		}
+	}
+	/* These fields for coupling strategy and enhanced coupling strategy information */
+	if (cplstre[blk]) {
+		if (cplinu[blk]) {
+			uint8_t ecplinu = gbc.GetBits(1);
+			if (hdr->channel_mode == 0x2) {
+				chincpl[0] = 1;
+				chincpl[1] = 1;
+			} else {
+                for (int ch = 0; ch < nfchans; ch++) {
+					chincpl[ch] = gbc.GetBits(1);
+                }
+			}
+			if (ecplinu == 0) 						/* standard coupling in use */
+			{
+				if(hdr->channel_mode == 0x2) 		/* if in 2/0 mode */
+					phsflginu = gbc.GetBits(1);
+				cplbegf = gbc.GetBits(4);
+				if(spxinu == 0) 					/* if SPX not in use */
+					cplendf = gbc.GetBits(4);
+				else /* SPX in use */
+				{
+					if(spxbegf < 6)					/* note that in this case the value of cplendf may be negative */
+						cplendf = spxbegf - 2;
+					else
+						cplendf = (spxbegf * 2) - 7;
+				}
+				ncplsubnd = 3 + cplendf - cplbegf;
+				if(gbc.GetBits(1))					//cplbndstrce
+					gbc.SkipBits(1*ncplsubnd);
+			} else { 								/* enhanced coupling in use */
+				ecplbegf = gbc.GetBits(4);
+				if(ecplbegf < 3) {
+					ecpl_begin_subbnd = ecplbegf * 2;
+				} else if(ecplbegf < 13) {
+					ecpl_begin_subbnd = ecplbegf + 2;
+				} else {
+					ecpl_begin_subbnd = ecplbegf * 2 - 10;
+				}
+                if (spxinu == 0) { 					/* if SPX not in use */
+					uint8_t ecplendf = gbc.GetBits(4);
+					ecpl_end_subbnd = ecplendf + 7;
+				} else {							/* SPX in use */
+                    if (spxbegf < 6) {
+						ecpl_end_subbnd = spxbegf + 5;
+                    } else {
+						ecpl_end_subbnd = spxbegf * 2;
+                    }
+				}
+                if (gbc.GetBits(1)) {			//ecplbndstrce
+					for (int sbnd = MAX(9, ecpl_begin_subbnd + 1); sbnd < ecpl_end_subbnd; sbnd++)
+						gbc.SkipBits(1);		//ecplbndstrc[sbnd]
+				}
+			} /* ecplinu[blk] */
+		} else { /* !cplinu[blk] */
+			for(int ch = 0; ch < nfchans; ch++)
+			{
+				chincpl[ch] = 0;
+				firstcplcos[ch] = 1;
+			}
+			firstcplleak = 1;
+			phsflginu = 0;
+			ecplinu = 0;
+		}
+	} /* cplstre[blk] */
+	/* These fields for coupling coordinates */
+	if (cplinu[blk]) {
+		uint8_t cplcoe[16];
+        bzero(cplcoe, sizeof(uint8_t) * 16);
+        if (ecplinu == 0) { 						/* standard coupling in use */
+			//4.4.3.13 cplbndstrc[sbnd] - Coupling band structure - 1 bit
+			//ncplbnd = (ncplsubnd - (cplbndstrc[1] + ... + cplbndstrc[ncplsubnd - 1]))
+			int ncplbnd = 0;
+            for (int i = 1; i < ncplsubnd; i++) {
+				ncplbnd += cplbndstrc[i];
+            }
+			ncplbnd = ncplsubnd - ncplbnd;
+			//end 4.4.3.13 cplbndstrc[sbnd] - Coupling band structure - 1 bit
+			for (int ch = 0; ch < nfchans; ch++) {
+				if (chincpl[ch]) {
+					if (firstcplcos[ch]) {
+						cplcoe[ch] = 1;
+						firstcplcos[ch] = 0;
+                    } else {						/* !firstcplcos[ch] */
+						cplcoe[ch] = gbc.GetBits(1);
+                    }
+					if (cplcoe[ch]) {
+						gbc.SkipBits(2);			//mstrcplco[ch]
+						/* ncplbnd derived from ncplsubnd and cplbndstrc */
+                        for (int bnd = 0; bnd < ncplbnd; bnd++) {
+							gbc.SkipBits(4+4);		//cplcoexp[ch][bnd],//cplcomant[ch][bnd]
+                        }
+					} /* cplcoe[ch] */
+				} else /* !chincpl[ch] */
+					firstcplcos[ch] = 1;
+			} /* ch */
+			if ((hdr->channel_mode == 0x2) && phsflginu && (cplcoe[0] || cplcoe[1])) {
+				//for(int bnd = 0; bnd < ncplbnd; bnd++)
+					gbc.SkipBits(1*ncplbnd);	//phsflg[bnd]
+			}
+		} else { /* enhanced coupling in use */
+			int firstchincpl = -1;
+			gbc.SkipBits(1);					//reserved
+			uint8_t ecplparam1e[16], rsvdfieldse[16];
+			for(int ch = 0; ch < nfchans; ch++)
+			{
+				if(chincpl[ch])
+				{
+					if(firstchincpl == -1)
+						firstchincpl = ch;
+					if(firstcplcos[ch])
+					{
+						ecplparam1e[ch] = 1;
+						if (ch > firstchincpl)
+							rsvdfieldse[ch] = 1;
+						else
+							rsvdfieldse[ch] = 0;
+						firstcplcos[ch] = 0;
+					} else { /* !firstcplcos[ch] */
+						ecplparam1e[ch] = gbc.GetBits(1);
+						if(ch > firstchincpl)
+							rsvdfieldse[ch] = gbc.GetBits(1);
+						else
+							rsvdfieldse[ch] = 0;
+					}
+					//E.1.3.3.19 ecplbndstrc[sbnd] - Enhanced coupling band (and sub-band) structure - 1 bit
+					uint8_t necplbnd = ecpl_end_subbnd - ecpl_begin_subbnd;
+					if(ecplparam1e[ch])
+					{
+						/* necplbnd derived from ecpl_begin_subbnd, ecpl_end_subbnd, and ecplbndstrc */
+						//for(int bnd = 0; bnd < necplbnd; bnd++)
+							gbc.SkipBits(5*necplbnd);		//ecplamp[ch][bnd]
+					}
+					if(rsvdfieldse[ch])
+						gbc.SkipBits(9 * (necplbnd - 1));	//reserved ................ 9 x (necplbnd - 1)
+					if(ch > firstchincpl)
+						gbc.SkipBits(1);					//reserved
+				} else										/* !chincpl[ch] */
+					firstcplcos[ch] = 1;
+			} /* ch */
+		} /* ecplinu[blk] */
+	} /* cplinu[blk] */
+	/* these fields for rematrixing operation in the 2/0 mode */
+    if(hdr->channel_mode == 0x2) { /* if in 2/0 mode */
+		uint8_t rematstr;
+        if (blk == 0) {
+			rematstr = 1;
+        } else {
+			rematstr = gbc.GetBits(1);						//rematstr
+        }
+		if (rematstr) {
+			uint8_t nrematbd = 0;
+			//E.2.3.2 nrematbd - Number of rematrixing bands
+			if(cplinu[blk]) {
+				if (ecplinu) {
+					if 		(ecplbegf == 0)	{nrematbd = 0;}
+					else if (ecplbegf == 1)	{nrematbd = 1;}
+					else if (ecplbegf == 2)	{nrematbd = 2;}
+					else if (ecplbegf < 5)	{nrematbd = 3;}
+					else 					{nrematbd = 4;}
+				} else { /* standard coupling */
+					if 		(cplbegf == 0)	{nrematbd = 2;}
+					else if (cplbegf < 3)	{nrematbd = 3;}
+					else 					{nrematbd = 4;}
+				}
+			} else if (spxinu) {
+				if (spxbegf < 2)	{nrematbd = 3;}
+				else 				{nrematbd = 4;}
+			} else {
+				nrematbd = 4;
+            }
+			//end E.2.3.2 nrematbd - Number of rematrixing bands
+			/* nrematbd determined from cplinu, ecplinu, spxinu, cplbegf, ecplbegf and spxbegf */
+			//for(int bnd = 0; bnd < nrematbd; bnd++)
+				gbc.SkipBits(1*nrematbd);					//rematflg[bnd]
+		}
+	}
+	/* this field for channel bandwidth code */
+	for (int ch = 0; ch < nfchans; ch++) {
+		if (chexpstr[blk][ch] != 0 /*reuse*/) {
+            if ((!chincpl[ch]) && (!chinspx[ch])) {
+				chbwcod[ch] = gbc.GetBits(6);				//chbwcod[ch]
+            }
+		}
+	}
+	/* these fields for exponents */
+	const uint8_t ecplsubbndtab[] = {13, 19, 25, 31, 37, 49, 61, 73, 85, 97, 109, 121, 133, 145, 157, 169, 181, 193, 205, 217, 229, 241, 253};
+	uint8_t ecplstartmant = ecplsubbndtab[ecpl_begin_subbnd];
+	uint8_t ecplendmant = ecplsubbndtab[ecpl_end_subbnd];
+	uint8_t cplstrtmant = (cplbegf * 12) + 37;
+	uint8_t cplendmant = ((cplendf + 3) * 12) + 37;
+	uint8_t endmant[16], nchgrps[16];
+
+    bzero(nchgrps, sizeof(uint8_t) * 16);
+	//4.4.3.29 lfeexps[grp] - Low frequency effects channel exponents - 4 bits or 7 bits -> The total number of lfe channel exponents (nlfemant) is 7
+
+	if(cplinu[blk]) /* exponents for the coupling channel */
+	{
+		if(cplexpstr[blk] != 0 /*reuse*/)
+		{
+			gbc.SkipBits(4);					//cplabsexp
+			uint8_t ncplgrps = 0;
+			//E.2.3.5 ncplgrps - Number of coupled exponent groups
+			if (ecplinu)
+			{
+				//Table 6.4: Exponent strategy coding 00=reuse, 01=D15, 10=D25, 11=D45
+				if 		(cplexpstr[blk] == 1 /*D15*/) {ncplgrps = (ecplendmant - ecplstartmant) /  3;}
+				else if (cplexpstr[blk] == 2 /*D25*/) {ncplgrps = (ecplendmant - ecplstartmant) /  6;}
+				else if (cplexpstr[blk] == 3 /*D45*/) {ncplgrps = (ecplendmant - ecplstartmant) / 12;}
+			} else { /* standard coupling */
+				/* see clause 6.1.3 */
+				if 		(cplexpstr[blk] == 1 /*D15*/) {ncplgrps = (cplendmant - cplstrtmant) /  3;}
+				else if (cplexpstr[blk] == 2 /*D25*/) {ncplgrps = (cplendmant - cplstrtmant) /  6;}
+				else if (cplexpstr[blk] == 3 /*D45*/) {ncplgrps = (cplendmant - cplstrtmant) / 12;}
+			}
+			//end E.2.3.5 ncplgrps - Number of coupled exponent groups
+			/* ncplgrps derived from cplexpstr, cplbegf, cplendf, ecplinu, ecpl_begin_subbnd, and ecpl_end_subbnd */
+			//for(int grp = 0; grp < ncplgrps; grp++)
+				gbc.SkipBits(7*ncplgrps);		//cplexps[grp]
+		}
+	}
+    for (int ch = 0; ch < nfchans; ch++) {		/* exponents for full bandwidth channels */
+		if (chexpstr[blk][ch] != 0 /*reuse*/) {
+			gbc.SkipBits(4);					//exps[ch][0]
+			//6.1.3 Exponent decoding
+			if(cplinu[blk] == 1)
+				endmant[ch] = cplstrtmant; 		/* (ch is coupled) */
+			else
+				endmant[ch] = ((chbwcod[ch] + 12) * 3) + 37; /* (ch is not coupled) */
+			if 		(cplexpstr[blk] == 1 /*D15*/) {nchgrps[ch] = trunc((endmant[ch] - 1)     /  3);}
+			else if (cplexpstr[blk] == 2 /*D25*/) {nchgrps[ch] = trunc((endmant[ch] - 1 + 3) /  6);}
+			else if (cplexpstr[blk] == 3 /*D45*/) {nchgrps[ch] = trunc((endmant[ch] - 1 + 9) / 12);}
+			//end 6.1.3 Exponent decoding
+			/* nchgrps derived from chexpstr[ch], and endmant[ch] */
+            for (int grp = 1; grp <= nchgrps[ch]; grp++) {
+				gbc.GetBits(7);					//exps[ch][grp]
+            }
+			gbc.GetBits(2);						//gainrng[ch]
+		}
+	}
+    if (hdr->lfe_on) {							/* exponents for the low frequency effects channel */
+		if (lfeexpstr[blk] != 0 /*reuse*/) {
+			gbc.SkipBits(4);					//lfeexps[0]
+			//nlfegrps = 2
+			for (int grp = 1; grp <= 2; grp++) {
+				gbc.SkipBits(7);				//lfeexps[grp]
+			}
+		}
+	}
+	/* these fields for bit-allocation parametric information */
+	if (bamode) {
+        if (gbc.GetBits(1)) {					//baie
+			gbc.SkipBits(2+2+2+2+2);			//sdcycod,fdcycod,sgaincod,dbpbcod,floorcod
+        }
+	} else {
+		//sdcycod = 0x2
+		//fdcycod = 0x1
+		//sgaincod = 0x1
+		//dbpbcod = 0x2
+		//floorcod = 0x7
+	}
+	if (snroffststr == 0x0) {
+		//if(cplinu[blk]) {cplfsnroffst = frmfsnroffst}
+		//for(ch = 0; ch < nfchans; ch++) {fsnroffst[ch] = frmfsnroffst}
+		//if(lfeon) {lfefsnroffst = frmfsnroffst}
+	} else {
+		uint8_t snroffste;
+        if (blk == 0) {
+			snroffste = 1;
+        } else {
+			snroffste = gbc.GetBits(1);
+        }
+		if (snroffste) {
+			gbc.SkipBits(6);					//csnroffst
+			if (snroffststr == 0x1) {
+				gbc.SkipBits(4);				//blkfsnroffst
+				//cplfsnroffst = blkfsnroffst
+				//for(ch = 0; ch < nfchans; ch++) {fsnroffst[ch] = blkfsnroffst}
+				//lfefsnroffst = blkfsnroffst
+			} else if(snroffststr == 0x2) {
+                if (cplinu[blk]) {
+					gbc.SkipBits(4);			//cplfsnroffst
+                }
+				//for(int ch = 0; ch < nfchans; ch++)
+					gbc.GetBits(4*nfchans);		//fsnroffst[ch]
+                if (hdr->lfe_on) {
+					gbc.SkipBits(4);			//lfefsnroffst
+                }
+			}
+		}
+	}
+	uint8_t fgaincode;
+    if (frmfgaincode) {
+		fgaincode = gbc.GetBits(1);
+    } else {
+		fgaincode = 0;
+        }
+	if (fgaincode)
+	{
+        if (cplinu[blk]) {
+			gbc.GetBits(3);						//cplfgaincod
+        }
+		//for(int ch = 0; ch < nfchans; ch++)
+			gbc.GetBits(3*nfchans);				//fgaincod[ch]
+        if (hdr->lfe_on) {
+			gbc.SkipBits(3);					//lfefgaincod
+        }
+	} else {
+		//if(cplinu[blk]) {cplfgaincod = 0x4}
+		//for(ch= 0; ch < nfchans; ch++) {fgaincod[ch] = 0x4}
+		//if(lfeon) {lfefgaincod = 0x4}
+	}
+	if (hdr->frame_type == 0x0)					//strmtyp == 0x0
+	{
+        if (gbc.GetBits(1)) {					//convsnroffste
+			gbc.GetBits(10);					//convsnroffst
+        }
+	}
+	if (cplinu[blk])
+	{
+		uint8_t cplleake;
+		if (firstcplleak)
+		{
+			cplleake = 1;
+			//firstcplleak = 0;
+        } else {								/* !firstcplleak */
+			cplleake = gbc.GetBits(1);			//cplleake
+        }
+        if (cplleake) {
+			gbc.SkipBits(3+3);					//cplfleak,cplsleak
+        }
+	}
+	/* these fields for delta bit allocation information */
+	if(dbaflde)
+	{
+		uint8_t deltnseg[AC3MaxChan], deltbae[AC3MaxChan];
+		if(gbc.GetBits(1))						//deltbaie
+		{
+			uint8_t cpldeltbae = 0;
+			if(cplinu[blk])
+				cpldeltbae = gbc.GetBits(2);
+			for(int ch = 0; ch < nfchans; ch++)
+				deltbae[ch] = gbc.GetBits(2);
+			if(cplinu[blk])
+			{
+				if(cpldeltbae == 1 /*new info follows*/)
+				{
+					uint8_t cpldeltnseg = gbc.GetBits(3);
+					for(int seg = 0; seg <= cpldeltnseg; seg++)
+						gbc.GetBits(5+4+3);			//cpldeltoffst[seg],cpldeltlen[seg],cpldeltba[seg]					}
+				}
+			}
+			for(int ch = 0; ch < nfchans; ch++)
+			{
+				if(deltbae[ch] == 1 /*new info follows*/) //Table 4.11: Delta bit allocation exist states
+				{
+					deltnseg[ch] = gbc.GetBits(3);
+					for(int seg = 0; seg <= deltnseg[ch]; seg++)
+						gbc.GetBits(5+4+3);					//deltoffst[ch][seg],deltlen[ch][seg],deltba[ch][seg]					}
+				}
+			}
+		}	/* if(deltbaie) */
+	}		/* if(dbaflde) */
+	/* these fields for inclusion of unused dummy data */
+	if (hdr->skipflde) {
+		uint8_t skiple = gbc.GetBits(1);
+#ifdef DEBUG_PARSER
+		printf("skiple: 0x%0x\n", skiple);
+#endif
+        if (skiple) {									//NB! both skipflde and skiple must exist for the skipfld to be embedded!
+			hdr->skipl = gbc.GetBits(9) * 8;			//because value indicates skip field length in BYTES
+#ifdef DEBUG_PARSER
+			printf("skipl: 0x%0x (%d)\n", hdr->skipl, hdr->skipl);
+#endif
+			//skipfld ...................................................................... skipl × 8
+			//we leave bit pos here and return to call EMDF parser in outer routine
+		}
+	}
+#ifdef DEBUG_PARSER
+	printf("***parse_eac3_audblk end bit pos: %d remaining bits: %d\n", gbc.GetBitPosition(), gbc.GetRemainingBits());
+#endif
+	//the rest uninteresting but first we need to parse EMDF inside skip field!
+} /* end of audblk */
+
+uint32_t variable_bits(CMemoryBitstream &b, uint8_t n_bits)
+{
+	uint32_t value = 0;
+	uint8_t  read_more = 0;
+	
+	do {
+		value += b.GetBits(n_bits);		//value += read ...................................................................... n_bits
+		read_more = b.GetBits(1);		//read_more ............................................................................... 1
+		if (read_more) {
+			value <<= n_bits;
+			value += (1 << n_bits);
+		}
+	} while(read_more);
+	return value;
+}
+
+bool parse_ac3_oamd(CMemoryBitstream &b, uint32_t emdf_payload_size, uint8_t *num_objects_oamd)
+{
+	uint8_t object_count = 0;
+	uint32_t start_bitPos = b.GetBitPosition();
+	
+	uint8_t oa_md_version_bits = b.GetBits(2);	//oa_md_version_bits; ........................................................................ 2
+	if (oa_md_version_bits == 0x3) {
+        b.SkipBits(3); //oa_md_version_bits += b.GetBits(3);		//oa_md_version_bits_ext; .................................................................... 3
+	}
+	object_count = b.GetBits(5);				//object_count_bits; ......................................................................... 5
+	if (object_count == 0x1F) {
+		object_count += b.GetBits(7);			//object_count_bits_ext; ..................................................................... 7
+	}
+	object_count++; 							//object_count = object_count_bits + 1 - object_count indicates the total number of objects in the bitstream
+	object_count = MIN(object_count, 16);		//ugly hack, but tvOS 12 public beta only seems to accept 0x10(16) as maximum
+	if (object_count > *num_objects_oamd) {
+		*num_objects_oamd = object_count;		//update only if more objects discovered than the previous value (unclear, if object count can fluctuate in given stream?)
+	}
+#ifdef DEBUG_PARSER
+	printf("found oamd_object_count: 0x%0x\n", object_count);
+#endif
+	emdf_payload_size -= b.GetBitPosition() - start_bitPos;
+	b.SkipBits(emdf_payload_size);				//rest of payload not interesting
+	return object_count ? true : false;
+}
+
+bool parse_ac3_joc(CMemoryBitstream &b, uint32_t emdf_payload_size, uint8_t *num_objects_joc)
+{
+	uint8_t object_count = 0;
+	uint32_t start_bitPos = b.GetBitPosition();
+
+	//joc_dmx_config_idx; .......................................................................... 3
+	b.SkipBits(3);
+	//joc_num_objects_bits; ........................................................................ 6
+	object_count = b.GetBits(3) + 1; 			//joc_num_objects = joc_num_objects_bits+ 1
+	if(object_count > *num_objects_joc) {
+		*num_objects_joc = object_count;		//update only if more objects discovered than the previous value (unclear, if object count can fluctuate in given stream?)
+	}
+#ifdef DEBUG_PARSER
+	printf("found joc_object_count: 0x%0x\n", object_count);
+#endif
+	emdf_payload_size -= b.GetBitPosition() - start_bitPos;
+	b.SkipBits(emdf_payload_size);				//rest of payload not interesting
+	return object_count ? true : false;
+}
+
+const char* Ac3_emdf_payload_id[32]=
+{
+	"Container End",
+	"Programme loudness data",
+	"Programme information",
+	"E-AC-3 substream structure",
+	"Dynamic range compression data for portable devices",
+	"Programme Language",
+	"External Data",
+	"Headphone rendering data",
+	"-",
+	"-",
+	"-",
+	"OAMD",
+	"-",
+	"-",
+	"JOC",
+	"-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"
+};
+
+bool parse_ac3_emdf(CMemoryBitstream &b, AC3HeaderInfo *hdr)
+{
+	//NB! b.head still points to emdf syncword because we peeked and did not get the bits!
+	//Could use CMemoryBitstream.PutBytes() to create a copy of CMBS	
+	uint16_t	emdf_sync = b.GetBits(16); 					//syncword 0x5838
+    if (emdf_sync != 0x5838) {
+        printf("WTF");
+    }
+	uint32_t	emdf_container_length = b.GetBits(16) * 8;	//emdf_container_length
+	//bool		have_oamd = false, have_joc = false;		//for the lack of better, lets expect only sequence OAMD-JOC-END
+#ifdef DEBUG_PARSER
+	printf("found EMDF container length: 0x%0x (%u)\n", emdf_container_length, emdf_container_length);
+#endif
+	if(emdf_container_length > b.GetRemainingBits())
+		return false;
+	if(b.GetBits(2))					//the emdf_version field shall be set to '0'
+		return false;
+	if(b.GetBits(3) == 0x7)				//key_id irrelevant but may have extended bits
+		variable_bits(b, 3);
+	for(;;)								//work until payload id 0x00 (Container End) is detected
+	{
+		uint8_t emdf_payload_id = b.GetBits(5);
+#ifdef DEBUG_PARSER
+		printf("found EMDF Payload 0x%x (%s) at bit pos: 0x%0x (%d)\n", emdf_payload_id, Ac3_emdf_payload_id[emdf_payload_id & 0x1F], b.GetBitPosition(), b.GetBitPosition());
+#endif
+		if (!emdf_payload_id)			//0x00 = Container End -> loop exit condition!
+			break;
+		//For now, lets consider only triplets OAMD-JOC-END
+        if (emdf_payload_id > 7 && emdf_payload_id != 11 && emdf_payload_id != 14) {
+			return false;
+        }
+        if (emdf_payload_id == 0x1F) {
+			emdf_payload_id += variable_bits(b, 5);
+        }
+		//emdf_payload_config()
+		bool smploffste = b.GetBits(1);
+        if (smploffste) {
+			b.SkipBits(12);
+        }
+        if (b.GetBits(1)) {				//duratione
+			variable_bits(b, 11);		//duration
+        }
+		//ETSI TS 103 420 V1.1.1 (2016-07), 8.2 Requirements on EMDF container requires codecdatae = 1 and groupid equal for OAMD payload and JOC payload !!
+        if (b.GetBits(1)) { 				//groupide
+			/*uint32_t groupid =*/ variable_bits(b, 2);		//groupid
+        }
+		b.SkipBits(1); 					//codecdatae
+		if(!b.GetBits(1)) 				//discard_unknown_payload
+		{
+			bool payload_frame_aligned = false;
+			if(!smploffste)
+			{
+				payload_frame_aligned = b.GetBits(1);
+				if(payload_frame_aligned)
+					b.SkipBits(2);		//create_duplicate, remove_duplicate
+			}
+			if (smploffste || payload_frame_aligned)
+				b.SkipBits(7);			//priority, proc_allowed
+		}
+		//end emdf_payload_config()
+		uint32_t emdf_payload_size = variable_bits(b, 8) * 8;
+#ifdef DEBUG_PARSER
+		printf("EMDF Payload size: 0x%x (%d)\n", emdf_payload_size, emdf_payload_size);
+#endif
+        if (emdf_payload_size > emdf_container_length) {
+			return false;
+        }
+		//for (i = 0; i < emdf_payload_size; i++)
+		//{
+		//	emdf_payload_byte .................................................................... 8
+		//}
+		if (emdf_payload_id == 11) {
+			parse_ac3_oamd(b, emdf_payload_size, &hdr->num_objects_oamd);
+			// have_oamd = true;
+		} else if (emdf_payload_id == 14) {
+			parse_ac3_joc(b, emdf_payload_size, &hdr->num_objects_joc);
+			// have_joc = true;
+		} else {
+			b.SkipBits(emdf_payload_size);
+		}
+	}
+	//emdf_protection()
+	uint8_t protection_length_primary = b.GetBits(2);
+	switch(protection_length_primary)
+	{
+		case 0: return false;
+		case 1: protection_length_primary =   8; break;
+		case 2: protection_length_primary =  32; break;
+		case 3: protection_length_primary = 128; break;
+		default: ;
+	}
+	uint8_t protection_bits_secondary = b.GetBits(2);
+	switch(protection_bits_secondary)
+	{
+		case 0: protection_bits_secondary =   0; break;
+		case 1: protection_bits_secondary =   8; break;
+		case 2: protection_bits_secondary =  32; break;
+		case 3: protection_bits_secondary = 128; break;
+		default: ;
+	}
+	b.SkipBits(protection_length_primary);
+	b.SkipBits(protection_bits_secondary);
+	return hdr->num_objects_oamd && hdr->num_objects_joc ? true : false;
+}
+
+//Atmos in E-AC-3 is detected by looking for OAMD payload (see ETSI TS 103 420)
+// in EMDF container in skipfld inside audblk() of E-AC-3 frame (see ETSI TS 102 366)
+void analyze_ac3_skipfld(CMemoryBitstream &b, AC3HeaderInfo *hdr)
+{	//Let's take a look at frame's auxdata()
+	uint16_t	emdf_syncword;
+
+	if(hdr->bitstream_id != 16)
+		return;
+	while(b.GetRemainingBits() > 16) {
+		emdf_syncword = b.PeakBits(16);
+		if(emdf_syncword == 0x5838) {					//NB! b.head still points to emdf syncword because we peeked and did not get the bits!
+#ifdef DEBUG_PARSER
+			printf("parsing bitstream_id: 0x%X frame_type: 0x%0X substreamid: 0x%0X\n", hdr->bitstream_id, hdr->frame_type, hdr->substreamid);
+			printf("SKIPFLD: found EMDF syncword 0x%x at bit pos: 0x%0x (%d)\n", emdf_syncword, b.GetBitPosition(), b.GetBitPosition());
+#endif
+			if(parse_ac3_emdf(b, hdr))
+				break;
+//			else										//false positive
+//				b.SkipBits(1);
+		} else {
+			b.SkipBits(1);								//NB! EMDF syncword may start anywhere in stream, also mid-byte!
+		}
+	}
+}
+//---------------------------------------------------------------------------
+//Atmos in E-AC-3 is detected by looking for OAMD payload (see ETSI TS 103 420) in EMDF container in auxdata() of E-AC-3 frame (see ETSI TS 102 366)
+void analyze_ac3_auxdata(CMemoryBitstream &b, AC3HeaderInfo *hdr)
+{	//Let's take a look at frame's auxdata()
+	uint16_t	auxdatal, emdf_syncword;
+	
+	if(hdr->bitstream_id != 16)
+		return;
+	b.SetBitPosition((hdr->frame_size * 8) - 18);
+	/*4.4.4 auxdata - Auxiliary data field
+	 Thus the aux data decoder (which may not decode any audio) may
+	 simply look to the end of the AC-3 syncframe to find auxdatal, backup auxdatal bits (from the beginning of auxdatal)
+	 in the data stream, and then unpack auxdatal bits moving forward in the data stream.
+	 */
+	 if(b.GetBits(1)) { 								//auxdatae
+		b.SkipBits(-14); 								//back up to beginning of auxdatal field
+		auxdatal = b.GetBits(14);						//auxdatal
+		b.SkipBits(-auxdatal); 							//back up to beginning of auxdatal payload
+		while(b.GetRemainingBits() > 16) {
+		//while(b.GetBitPosition() + 16 < hdr->frame_size * 8) {
+			emdf_syncword = b.PeakBits(16);
+			if(emdf_syncword == 0x5838)
+			{					//NB! b.head still points to emdf syncword because we peeked and did not get the bits!
+				uint16_t emdf_container_length = b.PeakBits(32) & 0xFFFF;
+				if(emdf_container_length > hdr->frame_size - ((b.GetBitPosition() + 7) >> 3))
+				{
+					b.SkipBits(1);
+					continue;
+				}
+#ifdef DEBUG_PARSER
+				printf("parsing bitstream_id: 0x%X frame_type: 0x%0X substreamid: 0x%0X\n", hdr->bitstream_id, hdr->frame_type, hdr->substreamid);
+				printf("AUXDATA: found EMDF syncword 0x%x at bit pos: 0x%0x (%d)\n", emdf_syncword, b.GetBitPosition(), b.GetBitPosition());
+#endif
+				if(parse_ac3_emdf(b, hdr))
+					break;
+//				else										//false positive
+//					b.SkipBits(1);
+			} else
+				b.SkipBits(1);								//NB! EMDF syncword may start anywhere in stream, also mid-byte!
+		}
+	}
+}
+
+uint8_t get_num_objects_EAC3(void *context)
+{
+	struct eac3_info *info = (struct eac3_info *) context;
+	uint8_t nrobjects = info->num_objects_oamd && info->num_objects_joc ? info->num_objects_oamd : 0;
+	
+	return nrobjects;
 }
 
 CFDataRef createCookie_EAC3(void *context)
@@ -970,39 +2144,43 @@ CFDataRef createCookie_EAC3(void *context)
     // Recreate the dec3 atom
     CMemoryBitstream cookie;
     cookie.AllocBytes(32);
-    cookie.PutBits(info->data_rate, 13); // data_rate
-    cookie.PutBits(info->num_ind_sub, 3);  // num_ind_sub
+    cookie.PutBits(info->data_rate, 13);    // data_rate
+    cookie.PutBits(info->num_ind_sub, 3);   // num_ind_sub
 
     for (int i = 0; i <= info->num_ind_sub; i++) {
         cookie.PutBits(info->substream[i].fscod, 2);
-        cookie.PutBits(info->substream[i].bsid, 5);
+        // this is required to enforce Atmos for AC-3-embedded E-AC-3 substream
+        cookie.PutBits((info->num_objects_oamd ? 16 : info->substream[i].bsid), 5); //Atmos requires BSID 16!
 
         cookie.PutBits(0, 1); // reserved
+		//end byte #1
         cookie.PutBits(0, 1); // asvc
 
         cookie.PutBits(info->substream[i].bsmod, 3);
         cookie.PutBits(info->substream[i].acmod, 3);
         cookie.PutBits(info->substream[i].lfeon, 1);
-
+		//end byte #2
         cookie.PutBits(0, 3); // reserved
 
-        cookie.PutBits(info->substream[i].num_dep_sub, 4); // num_dep_sub
+        cookie.PutBits((info->num_objects_oamd ? 0 : info->substream[i].num_dep_sub), 4); // num_dep_sub seems to be 0 for Atmos
 
-        if (!info->substream[i].num_dep_sub) {
+        if (!info->substream[i].num_dep_sub || (info->num_objects_oamd && info->num_objects_joc)) {
             cookie.PutBits(0, 1); // reserved
-        }
-        else {
+        } else {
             cookie.PutBits(info->substream[i].chan_loc, 9); // chan_loc
         }
+		if (info->num_objects_oamd && info->num_objects_joc) {
+			cookie.PutBits(1, 8); 						// Atmos version?
+			cookie.PutBits(info->num_objects_oamd, 8); 	// numAtmosObjects
+		}
     }
 
     free(info->frame);
     info->frame = NULL;
-
     uint8_t *buffer = cookie.GetBuffer();
     size_t size = cookie.GetBitPosition() / 8;
-    CFDataRef cookieData = CFDataCreate(kCFAllocatorDefault, buffer, size);
-    free (buffer);
+	CFDataRef cookieData = CFDataCreate(kCFAllocatorDefault, buffer, size);
+	free (buffer);
 
     return cookieData;
 }

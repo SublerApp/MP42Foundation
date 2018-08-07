@@ -77,8 +77,12 @@
         else if (MP4HaveTrackAtom(fileHandle, self.trackId, "mdia.minf.stbl.stsd.ec-3.dec3")) {
             uint8_t    *ppValue;
             uint32_t    pValueSize;
-            MP4GetTrackBytesProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.ec-3.dec3.content", &ppValue, &pValueSize);
-            readEAC3Config(ppValue, pValueSize, &_channels, &_channelLayoutTag);
+            UInt8       numObjects = 0;
+			MP4GetTrackBytesProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.ec-3.dec3.content", &ppValue, &pValueSize);
+			readEAC3Config(ppValue, pValueSize, &_channels, &_channelLayoutTag, &numObjects);
+            if (numObjects > 0) {
+                _embeddedAudioFormat = kMP42EmbeddedAudioCodecType_Atmos;
+            }
             free(ppValue);
         }
         else if (MP4HaveTrackAtom(fileHandle, self.trackId, "mdia.minf.stbl.stsd.alac")) {
@@ -245,7 +249,13 @@
     }
     else {
         if (_channels > 0) {
-            return [NSString stringWithFormat:@"%@, %u ch", localizedDisplayName(self.mediaType, self.format), (unsigned int)_channels];
+			if (_embeddedAudioFormat) {
+				return [NSString stringWithFormat:@"%@ + %@, %u ch", localizedDisplayName(self.mediaType, self.format),
+                        localizedDisplayName(self.mediaType, self.embeddedAudioFormat),
+                        (unsigned int)_channels];
+			} else {
+				return [NSString stringWithFormat:@"%@, %u ch", localizedDisplayName(self.mediaType, self.format), (unsigned int)_channels];
+			}
         }
         else {
             return [NSString stringWithFormat:@"%@", localizedDisplayName(self.mediaType, self.format)];
