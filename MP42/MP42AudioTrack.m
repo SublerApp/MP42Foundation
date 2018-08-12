@@ -250,7 +250,7 @@
     else {
         if (_channels > 0) {
 			if (_embeddedAudioFormat) {
-				return [NSString stringWithFormat:@"%@ + %@, %u ch", localizedDisplayName(self.mediaType, self.format),
+				return [NSString stringWithFormat:@"%@+%@, %u ch", localizedDisplayName(self.mediaType, self.format),
                         localizedDisplayName(self.mediaType, self.embeddedAudioFormat),
                         (unsigned int)_channels];
 			} else {
@@ -278,12 +278,14 @@
 {
     [super encodeWithCoder:coder];
 
-    [coder encodeInt:1 forKey:@"MP42AudioTrackVersion"];
+    [coder encodeInt:2 forKey:@"MP42AudioTrackVersion"];
 
     [coder encodeFloat:_volume forKey:@"volume"];
 
     [coder encodeInt64:_channels forKey:@"channels"];
     [coder encodeInt64:_channelLayoutTag forKey:@"channelLayoutTag"];
+
+    [coder encodeInteger:_embeddedAudioFormat forKey:@"embeddedAudioFormat"];
 
     [coder encodeInt64:_fallbackTrackId forKey:@"fallbackTrackId"];
 }
@@ -297,6 +299,8 @@
 
         _channels = [decoder decodeInt64ForKey:@"channels"];
         _channelLayoutTag = [decoder decodeInt64ForKey:@"channelLayoutTag"];
+
+        _embeddedAudioFormat = [decoder decodeIntegerForKey:@"embeddedAudioFormat"];
 
         _fallbackTrackId = [decoder decodeInt64ForKey:@"fallbackTrackId"];
     }

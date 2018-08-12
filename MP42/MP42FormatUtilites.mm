@@ -679,12 +679,10 @@ typedef struct AC3HeaderInfo {
     /** @} */
 } AC3HeaderInfo;
 
-void analyze_ac3_atmos(CMemoryBitstream &b, AC3HeaderInfo *phdr);
+void analyze_eac3_atmos(CMemoryBitstream &b, AC3HeaderInfo *phdr);
 void analyze_ac3_skipfld(CMemoryBitstream &b, AC3HeaderInfo *phdr);
 void analyze_ac3_auxdata(CMemoryBitstream &b, AC3HeaderInfo *phdr);
-void parse_eac3_bsi(CMemoryBitstream &gbc, AC3HeaderInfo *hdr);
-void parse_eac3_audfrm(CMemoryBitstream &gbc, AC3HeaderInfo *hdr);
-void parse_eac3_audblk(CMemoryBitstream &gbc, AC3HeaderInfo *hdr, int blk);
+void parse_eac3_bsi(CMemoryBitstream &b, AC3HeaderInfo *hdr);
 
 static int ac3_parse_header(CMemoryBitstream &b, AC3HeaderInfo **phdr)
 {
@@ -805,18 +803,21 @@ static int ac3_parse_header(CMemoryBitstream &b, AC3HeaderInfo **phdr)
         hdr->channel_layout |= AV_CH_LOW_FREQUENCY;
     }
 	//location in stream - bsi().dialnorm(5)
-	analyze_ac3_atmos(b, hdr);
+	analyze_eac3_atmos(b, hdr);
 
 	return 0;
 }
 
-void analyze_ac3_atmos(CMemoryBitstream &b, AC3HeaderInfo *phdr)
+void analyze_eac3_atmos(CMemoryBitstream &b, AC3HeaderInfo *phdr)
 {
+	if(phdr->bitstream_id != 16)
+		return;
+	
 	uint32_t savedbitpos = b.GetBitPosition();	//calling routines assume bit pos in b after this fn returns!
 	parse_eac3_bsi(b, phdr);					//resets bit_pos to frame start + 2
-	parse_eac3_audfrm(b, phdr);					//starts from bit_pos where bsi left off
+	//parse_eac3_audfrm(b, phdr);					//starts from bit_pos where bsi left off
 	//for (int blk = 0; blk < hdr->num_blocks; blk++)
-		parse_eac3_audblk(b, phdr, 0 /*blk*/);	//starts from bit_pos where audfrm left off
+	//	parse_eac3_audblk(b, phdr, 0 /*blk*/);	//starts from bit_pos where audfrm left off
 	analyze_ac3_skipfld(b, phdr);				//shall start from the skipfield
 	analyze_ac3_auxdata(b, phdr);				//shall start from the frame end
 	b.SetBitPosition(savedbitpos);				//so that analyze_EAC3() does not raise exception
@@ -974,166 +975,163 @@ concatenate:
  */
 //---------------------------------------------------------------------------
 //E.1.2.2 bsi - Bit stream information
-void parse_eac3_bsi(CMemoryBitstream &gbc, AC3HeaderInfo *hdr)
+void parse_eac3_bsi(CMemoryBitstream &b, AC3HeaderInfo *hdr)
 {
-	if(hdr->bitstream_id != 16)
-		return;
-
 #ifdef DEBUG_PARSER
 	printf("***parse_eac3_bsi start bit pos: %d remaining bits: %d\n", gbc.GetBitPosition(), gbc.GetRemainingBits());
 #endif
-	gbc.SetBitPosition(16);					//skip syncword
-	gbc.SkipBits(2+3+11+2+2+3+1);			//strmtyp,substreamid,frmsiz,fscod,numblkscod,acmod,lfeon
-	if(gbc.GetBits(1))						//compre ..................................................................................... 1
-		gbc.SkipBits(8);					//{compr} ......................................................................... 8
+	b.SetBitPosition(16);					//skip syncword
+	b.SkipBits(2+3+11+2+2+3+1);			//strmtyp,substreamid,frmsiz,fscod,numblkscod,acmod,lfeon
+	if(b.GetBits(1))						//compre ..................................................................................... 1
+		b.SkipBits(8);					//{compr} ......................................................................... 8
 	if(hdr->channel_mode == 0x0) 			/* if 1+1 mode (dual mono, so some items need a second value) */
 	{
-		gbc.SkipBits(5);					//dialnorm2 ............................................................................... 5
-		if(gbc.GetBits(1))					//compr2e ................................................................................. 1
-			gbc.SkipBits(8);				//{compr2} .................................................................... 8
+		b.SkipBits(5);					//dialnorm2 ............................................................................... 5
+		if(b.GetBits(1))					//compr2e ................................................................................. 1
+			b.SkipBits(8);				//{compr2} .................................................................... 8
 	}
 	if(hdr->frame_type == 0x1) 				/* if dependent stream */
 	{
-		if(gbc.GetBits(1))					//chanmape ................................................................................ 1
-			gbc.SkipBits(16);				// {chanmap} ................................................................. 16
+		if(b.GetBits(1))					//chanmape ................................................................................ 1
+			b.SkipBits(16);				// {chanmap} ................................................................. 16
 	}
 	/* mixing metadata */
-	if(gbc.GetBits(1))						//mixmdate ................................................................................... 1
+	if(b.GetBits(1))						//mixmdate ................................................................................... 1
 	{
 		if(hdr->channel_mode > 0x2) 		/* if more than 2 channels */
-			gbc.SkipBits(2);				//{dmixmod} ................................. 2
+			b.SkipBits(2);				//{dmixmod} ................................. 2
 		if((hdr->channel_mode & 0x1) && (hdr->channel_mode > 0x2)) /* if three front channels exist */
-			gbc.SkipBits(6);				//ltrtcmixlev,lorocmixlev .......................................................................... 3
+			b.SkipBits(6);				//ltrtcmixlev,lorocmixlev .......................................................................... 3
 		if(hdr->channel_mode & 0x4) 		/* if a surround channel exists */
-			gbc.SkipBits(6+3);				//ltrtsurmixlev,lorosurmixlev
+			b.SkipBits(6+3);				//ltrtsurmixlev,lorosurmixlev
 		if(hdr->lfe_on) 					/* if the LFE channel exists */
 		{
-			if(gbc.GetBits(1)) 				//lfemixlevcode
-				gbc.SkipBits(5);			//lfemixlevcod
+			if(b.GetBits(1)) 				//lfemixlevcode
+				b.SkipBits(5);			//lfemixlevcod
 		}
 		if(hdr->frame_type == 0x0) 			/* if independent stream */
 		{
-			if(gbc.GetBits(1)) 				//pgmscle
-				gbc.SkipBits(6);			//pgmscl
+			if(b.GetBits(1)) 				//pgmscle
+				b.SkipBits(6);			//pgmscl
 			if(hdr->channel_mode == 0x0) 	/* if 1+1 mode (dual mono, so some items need a second value) */
 			{
-				if(gbc.GetBits(1)) 			//pgmscl2e
-					gbc.SkipBits(6);		//pgmscl2
+				if(b.GetBits(1)) 			//pgmscl2e
+					b.SkipBits(6);		//pgmscl2
 			}
-			if(gbc.GetBits(1)) 				//extpgmscle
-				gbc.SkipBits(6);			//extpgmscl
-			uint8_t mixdef = gbc.GetBits(2);
+			if(b.GetBits(1)) 				//extpgmscle
+				b.SkipBits(6);			//extpgmscl
+			uint8_t mixdef = b.GetBits(2);
 			if(mixdef == 0x1) 				/* mixing option 2 */
-				gbc.SkipBits(1+1+3);		//premixcmpsel, drcsrc, premixcmpscl
+				b.SkipBits(1+1+3);		//premixcmpsel, drcsrc, premixcmpscl
 			else if(mixdef == 0x2) 			/* mixing option 3 */ {
-				gbc.SkipBits(12);
+				b.SkipBits(12);
 			}
 			else if(mixdef == 0x3) 			/* mixing option 4 */
 			{
-				uint8_t mixdeflen = gbc.GetBits(5);	//mixdeflen
-				if (gbc.GetBits(1))			//mixdata2e
+				uint8_t mixdeflen = b.GetBits(5);	//mixdeflen
+				if (b.GetBits(1))			//mixdata2e
 				{
-					gbc.SkipBits(1+1+3);	//premixcmpsel,drcsrc,premixcmpscl
-					if(gbc.GetBits(1)) 		//extpgmlscle
-						gbc.SkipBits(4);	//extpgmlscl
-					if(gbc.GetBits(1)) 		//extpgmcscle
-						gbc.SkipBits(4);	//extpgmcscl
-					if(gbc.GetBits(1)) 		//extpgmrscle
-						gbc.SkipBits(4);	//extpgmrscl
-					if(gbc.GetBits(1)) 		//extpgmlsscle
-						gbc.SkipBits(4);	//extpgmlsscl
-					if(gbc.GetBits(1)) 		//extpgmrsscle
-						gbc.SkipBits(4);	//extpgmrsscl
-					if(gbc.GetBits(1)) 		//extpgmlfescle
-						gbc.SkipBits(4);	//extpgmlfescl
-					if(gbc.GetBits(1)) 		//dmixscle
-						gbc.SkipBits(4);	//dmixscl
-					if (gbc.GetBits(1))		//addche
+					b.SkipBits(1+1+3);	//premixcmpsel,drcsrc,premixcmpscl
+					if(b.GetBits(1)) 		//extpgmlscle
+						b.SkipBits(4);	//extpgmlscl
+					if(b.GetBits(1)) 		//extpgmcscle
+						b.SkipBits(4);	//extpgmcscl
+					if(b.GetBits(1)) 		//extpgmrscle
+						b.SkipBits(4);	//extpgmrscl
+					if(b.GetBits(1)) 		//extpgmlsscle
+						b.SkipBits(4);	//extpgmlsscl
+					if(b.GetBits(1)) 		//extpgmrsscle
+						b.SkipBits(4);	//extpgmrsscl
+					if(b.GetBits(1)) 		//extpgmlfescle
+						b.SkipBits(4);	//extpgmlfescl
+					if(b.GetBits(1)) 		//dmixscle
+						b.SkipBits(4);	//dmixscl
+					if (b.GetBits(1))		//addche
 					{
-						if(gbc.GetBits(1))	//extpgmaux1scle
-							gbc.SkipBits(4);//extpgmaux1scl
-						if(gbc.GetBits(1))	//extpgmaux2scle
-							gbc.SkipBits(4);//extpgmaux2scl
+						if(b.GetBits(1))	//extpgmaux1scle
+							b.SkipBits(4);//extpgmaux1scl
+						if(b.GetBits(1))	//extpgmaux2scle
+							b.SkipBits(4);//extpgmaux2scl
 					}
 				}
-				if(gbc.GetBits(1))			//mixdata3e
+				if(b.GetBits(1))			//mixdata3e
 				{
-					gbc.SkipBits(5);		//spchdat
-					if(gbc.GetBits(1))		//addspchdate
+					b.SkipBits(5);		//spchdat
+					if(b.GetBits(1))		//addspchdate
 					{
-						gbc.SkipBits(5+2);	//spchdat1,spchan1att
-						if(gbc.GetBits(1))	//addspchdat1e
-							gbc.SkipBits(5+3);	//spchdat2,spchan2att
+						b.SkipBits(5+2);	//spchdat1,spchan1att
+						if(b.GetBits(1))	//addspchdat1e
+							b.SkipBits(5+3);	//spchdat2,spchan2att
 					}
 				}
 				//mixdata ........................................ (8*(mixdeflen+2)) - no. mixdata bits
-				gbc.SkipBytes(mixdeflen + 2);
-				if(gbc.GetBitPosition() & 0x7)
+				b.SkipBytes(mixdeflen + 2);
+				if(b.GetBitPosition() & 0x7)
 					//mixdatafill ................................................................... 0 - 7
 					//used to round up the size of the mixdata field to the nearest byte
-					gbc.SkipBits(8 - (gbc.GetBitPosition() & 0x7));
+					b.SkipBits(8 - (b.GetBitPosition() & 0x7));
 			}
 			if(hdr->channel_mode < 0x2) /* if mono or dual mono source */
 			{
-				if(gbc.GetBits(1))			//paninfoe
-					gbc.SkipBits(8+6);		//panmean,paninfo
+				if(b.GetBits(1))			//paninfoe
+					b.SkipBits(8+6);		//panmean,paninfo
 				if(hdr->channel_mode == 0x0) /* if 1+1 mode (dual mono - some items need a second value) */
 				{
-					if(gbc.GetBits(1))		//paninfo2e
-						gbc.SkipBits(8+6);	//panmean2,paninfo2
+					if(b.GetBits(1))		//paninfo2e
+						b.SkipBits(8+6);	//panmean2,paninfo2
 				}
 			}
 			/* mixing configuration information */
-			if(gbc.GetBits(1))				//frmmixcfginfoe
+			if(b.GetBits(1))				//frmmixcfginfoe
 			{
 				if(hdr->num_blocks == 1) {	//if(numblkscod == 0x0)
-					gbc.SkipBits(5);		//blkmixcfginfo[0]
+					b.SkipBits(5);		//blkmixcfginfo[0]
 				}
 				else
 				{
 					for(int blk = 0; blk < hdr->num_blocks; blk++)
 					{
-						if(gbc.GetBits(1))	//blkmixcfginfoe[blk]
-							gbc.SkipBits(5);//blkmixcfginfo[blk]
+						if(b.GetBits(1))	//blkmixcfginfoe[blk]
+							b.SkipBits(5);//blkmixcfginfo[blk]
 					}
 				}
 			}
 		}
 	}
 	/* informational metadata */
-	if(gbc.GetBits(1))						//infomdate
+	if(b.GetBits(1))						//infomdate
 	{
-		gbc.SkipBits(3+1+1);				//bsmod,copyrightb,origbs
+		b.SkipBits(3+1+1);				//bsmod,copyrightb,origbs
 		if(hdr->channel_mode == 0x2) 		/* if in 2/0 mode */
-			gbc.SkipBits(2+2);				//dsurmod,dheadphonmod
+			b.SkipBits(2+2);				//dsurmod,dheadphonmod
 		if(hdr->channel_mode >= 0x6) 		/* if both surround channels exist */
-			gbc.SkipBits(2);				//dsurexmod
-		if(gbc.GetBits(1))					//audprodie
-			gbc.SkipBits(5+2+1);			//mixlevel,roomtyp,adconvtyp
+			b.SkipBits(2);				//dsurexmod
+		if(b.GetBits(1))					//audprodie
+			b.SkipBits(5+2+1);			//mixlevel,roomtyp,adconvtyp
 		if(hdr->channel_mode == 0x0)		/* if 1+1 mode (dual mono, so some items need a second value) */
 		{
-			if(gbc.GetBits(1))				//audprodi2e
-				gbc.SkipBits(5+2+1);		//mixlevel2,roomtyp2,adconvtyp2
+			if(b.GetBits(1))				//audprodi2e
+				b.SkipBits(5+2+1);		//mixlevel2,roomtyp2,adconvtyp2
 		}
 		if(hdr->sr_code < 0x3) 				/* if not half sample rate */
-			gbc.SkipBits(1);				//sourcefscod
+			b.SkipBits(1);				//sourcefscod
 	}
 	if(hdr->frame_type == 0x0 && hdr->num_blocks != 6)	//(numblkscod != 0x3)
-		gbc.SkipBits(1);					//convsync
+		b.SkipBits(1);					//convsync
 	if(hdr->frame_type == 0x2) 				/* if bit stream converted from AC-3 */
 	{
 		uint8_t blkid = 0;
 		if(hdr->num_blocks == 6) 			/* 6 blocks per syncframe */
 			blkid = 1;
 		else
-			blkid = gbc.GetBits(1);
+			blkid = b.GetBits(1);
 		if(blkid)
-			gbc.SkipBits(6);				//frmsizecod
+			b.SkipBits(6);				//frmsizecod
 	}
-	if(gbc.GetBits(1))						//addbsie
+	if(b.GetBits(1))						//addbsie
 	{
-		uint8_t addbsil = gbc.GetBits(6) + 1;//addbsil
-		gbc.SkipBytes(addbsil);				//addbsi
+		uint8_t addbsil = b.GetBits(6) + 1;//addbsil
+		b.SkipBytes(addbsil);				//addbsi
 	}
 #ifdef DEBUG_PARSER
 	printf("***parse_eac3_bsi end bit pos: %d remaining bits: %d\n", gbc.GetBitPosition(), gbc.GetRemainingBits());
@@ -1183,697 +1181,11 @@ uint8_t cplinu[AC3MaxBlkPerFrame] = {0,0,0,0,0,0};
 uint8_t cplstre[AC3MaxBlkPerFrame] = {0,0,0,0,0,0};
 uint8_t chexpstr[AC3MaxBlkPerFrame][AC3MaxChan] = {{0,0,0,0,0},{0,0,0,0,0},{0,0,0,0,0},{0,0,0,0,0},{0,0,0,0,0},{0,0,0,0,0}};
 uint8_t cplexpstr[AC3MaxBlkPerFrame] = {0,0,0,0,0,0};
-uint8_t lfeexpstr[AC3MaxChan] = {0,0,0,0,0};
+uint8_t lfeexpstr[AC3MaxBlkPerFrame] = {0,0,0,0,0,0};
 uint8_t bamode = 0;
 uint8_t snroffststr = 0;
 uint8_t frmfgaincode = 0;
 uint8_t dbaflde = 0;
-
-//E.1.2.3 audfrm - Audio frame
-void parse_eac3_audfrm(CMemoryBitstream &gbc, AC3HeaderInfo *hdr)
-{
-	if(hdr->bitstream_id != 16)
-		return;
-#ifdef DEBUG_PARSER
-	printf("***parse_eac3_audfrm start bit pos: %d remaining bits: %d\n", gbc.GetBitPosition(), gbc.GetRemainingBits());
-#endif
-	uint8_t nfchans = hdr->channels - hdr->lfe_on;
-	uint8_t expstre, ahte, /*cplahtinu, lfeahtinu,*/ ncplblks = 0;
-	
-	/* these fields for audio frame exist flags and strategy data */
-    if (hdr->num_blocks == 6) { 				/* six blocks per syncframe */
-		expstre = gbc.GetBits(1);
-		ahte 	= gbc.GetBits(1);
-	} else {
-		expstre = 1;
-		ahte 	= 0;
-	}
-	snroffststr = gbc.GetBits(2);
-	uint8_t transproce = gbc.GetBits(1);
-	hdr->blkswe = gbc.GetBits(1);
-	hdr->dithflage = gbc.GetBits(1);
-	bamode = gbc.GetBits(1);
-	frmfgaincode = gbc.GetBits(1);
-	dbaflde = gbc.GetBits(1);
-	hdr->skipflde = gbc.GetBits(1);
-#ifdef DEBUG_PARSER
-	printf("skipflde: 0x%0x\n", hdr->skipflde);
-#endif
-//	if(!hdr->skipflde)
-//		return;										//no need to look further, no skipfield in this frame
-	uint8_t spxattene = gbc.GetBits(1);
-	/* these fields for coupling data */
-	//uint8_t feexpstr[AC3MaxBlkPerFrame] = {0,0,0,0,0,0};
-	uint8_t cplexpstr[AC3MaxBlkPerFrame] = {0,0,0,0,0,0};
-	//uint8_t nchregs[AC3MaxChan] = {0,0,0,0,0};
-	uint8_t frmchexpstr[AC3MaxChan] = {0,0,0,0,0};
-	uint8_t convexpstr[AC3MaxChan] = {0,0,0,0,0};
-	uint8_t chahtinu[AC3MaxChan] = {0,0,0,0,0};
-	//uint8_t chintransproc[AC3MaxChan] = {0,0,0,0,0};
-	
-	if(hdr->channel_mode > 0x1)
-	{
-		cplinu[0] = gbc.GetBits(1);
-		cplstre[0] = 1;
-		for(int blk = 1; blk < hdr->num_blocks; blk++)
-		{
-			if((cplstre[blk] = gbc.GetBits(1)))		//cplstre[blk]
-				cplinu[blk] = gbc.GetBits(1);		//cplinu[blk]
-			else
-				cplinu[blk] = cplinu[blk-1];
-		}
-	}
-	/* these fields for exponent strategy data */
-	if(expstre)
-	{
-		for(int blk = 0; blk < hdr->num_blocks; blk++)
-		{
-			/* cplexpstr[blk] and chexpstr[blk][ch] derived from table lookups - see Table E.1.8*/
-			if(cplinu[blk])
-				cplexpstr[blk] = gbc.GetBits(2);
-			for(int ch = 0; ch < nfchans; ch++)
-				chexpstr[blk][ch] = gbc.GetBits(2);
-		}
-	} else {
-		for(int blk = 0; blk < hdr->num_blocks; blk++)
-			ncplblks += cplinu[blk];
-		if((hdr->channel_mode > 0x1) && (ncplblks > 0))
-			gbc.SkipBits(5);						//frmcplexpstr
-		for(int ch = 0; ch < nfchans; ch++)
-			frmchexpstr[ch] = gbc.GetBits(5);		//frmchexpstr[ch]
-	}
-	if(hdr->lfe_on)
-	{
-		for(int blk = 0; blk < hdr->num_blocks; blk++)
-			lfeexpstr[blk] = gbc.GetBits(1);		//lfeexpstr[blk]
-	}
-	/* These fields for converter exponent strategy data */
-	if(hdr->frame_type == 0x0)						//strmtyp == 0x0
-	{
-		uint8_t convexpstre = 1;
-		if(hdr->num_blocks != 6)					//(numblkscod != 0x3)
-			convexpstre = gbc.GetBits(1);			//convexpstre
-		if(convexpstre)
-		{
-			for(int ch = 0; ch < nfchans; ch++)
-				convexpstr[ch] = gbc.GetBits(5);	//convexpstr[ch]
-		}
-	}
-	/* these fields for AHT data */
-	if(ahte)
-	{
-		//E.2.4.2 Bit stream helper variables
-		/* only compute ncplregs if coupling in use for all 6 blocks */
-		uint8_t ncplregs = 0, nlferegs = 0, nchregs[16];
-		/* AHT is only available in 6 block mode (numblkscod == 0x3) */
-		for (int blk = 0; blk < 6; blk++)
-		{
-			if((cplstre[blk] == 1) || (cplexpstr[blk] != 0 /*reuse*/))
-				ncplregs++;
-			if(lfeexpstr[blk] !=  0 /*reuse*/)
-				nlferegs++;
-		}
-		for (int ch = 0; ch < nfchans; ch++)
-		{
-			nchregs[ch] = 0;
-			/* AHT is only available in 6 block mode (numblkscod ==0x3) */
-			for(int blk = 0; blk < 6; blk++)
-			{
-				if(chexpstr[blk][ch] != 0 /*reuse*/)
-					nchregs[ch]++;
-			}
-		}
-		/* coupling can use AHT only when coupling in use for all blocks */
-		/* ncplregs derived from cplstre and cplexpstr - see clause E.2.4.2 */
-        if ((ncplblks == 6) && (ncplregs == 1)) {
-            gbc.SkipBits(1); //cplahtinu = gbc.GetBits(1);
-        } else {
-			//cplahtinu = 0;
-        }
-		for (int ch = 0; ch < nfchans; ch++)
-		{	/* nchregs derived from chexpstr - see clause E.2.4.2 */
-			if(nchregs[ch])
-				chahtinu[ch] = gbc.GetBits(1);		//chahtinu[ch]
-			else
-				chahtinu[ch] = 0;
-		}
-		if(hdr->lfe_on)
-		{
-			/* nlferegs derived from lfeexpstr - see clause E.2.4.2 */
-            if (nlferegs) {
-                gbc.SkipBits(1); //lfeahtinu = gbc.GetBits(1);			//lfeahtinu
-            } else {
-				//lfeahtinu = 0;
-            }
-		}
-	}
-	/* these fields for audio frame SNR offset data */
-	if(snroffststr == 0x0)
-		gbc.SkipBits(6+4);							//frmcsnroffst,frmfsnroffst
-	/* these fields for audio frame transient pre-noise processing data */
-	if(transproce)
-	{
-		for(int ch = 0; ch < nfchans; ch++)
-		{
-			if(gbc.GetBits(1))				//chintransproc[ch]
-				gbc.SkipBits(10+8);			//transprocloc[ch],transproclen[ch]
-		}
-	}
-	/* These fields for spectral extension attenuation data */
-	if(spxattene)
-	{
-		for(int ch = 0; ch < nfchans; ch++)
-		{
-			if(gbc.GetBits(1))				//chinspxatten[ch]
-				gbc.SkipBits(5);			//spxattencod[ch]
-		}
-	}
-	/* these fields for block start information */
-	uint8_t blkstrtinfoe = 0;
-	if(hdr->num_blocks != 1)				//(numblkscod != 0x0)
-		blkstrtinfoe = gbc.GetBits(1);		//blkstrtinfoe
-	if(blkstrtinfoe)
-	{
-		/* nblkstrtbits determined from frmsiz (see clause E.1.3.2.27) */
-		int nblkstrtbits = (int)((hdr->num_blocks - 1) * (4 + av_ceil_log2_c(hdr->frame_size >> 1)));
-		gbc.SkipBits(nblkstrtbits);			//blkstrtinfo .......................................... nblkstrtbits
-	}
-	/* these fields for syntax state initialization */
-//	for(int ch = 0; ch < nfchans; ch++)
-//	{
-//		firstspxcos[ch] = 1;
-//		firstcplcos[ch] = 1;
-//	}
-//	firstcplleak = 1;
-#ifdef DEBUG_PARSER
-	printf("***parse_eac3_audfrm end bit pos: %d remaining bits: %d\n", gbc.GetBitPosition(), gbc.GetRemainingBits());
-#endif
-} 											/* end of e-ac-3 audfrm */
-
-void parse_eac3_audblk(CMemoryBitstream &gbc, AC3HeaderInfo *hdr, int blk)
-{
-    if (hdr->bitstream_id != 16) {
-		return;
-    }
-
-	uint8_t nfchans = hdr->channels - hdr->lfe_on;
-	uint8_t spxinu = 0, chinspx[AC3MaxChan], spxbegf, spxendf, ncplsubnd = 0, cplbndstrc[32], cplbegf = 0, cplendf = 0, ecplinu = 0, ecpl_begin_subbnd = 0, ecpl_end_subbnd = 0, spx_begin_subbnd = 0, spx_end_subbnd = 0, chincpl[16], phsflginu = 0, ecplbegf;
-
-	/* these fields for syntax state initialization */
-	uint8_t firstspxcos[AC3MaxChan] = {1,1,1,1,1};
-	uint8_t firstcplcos[AC3MaxChan] = {1,1,1,1,1};
-	uint8_t chbwcod[AC3MaxChan] = {0,0,0,0,0};
-
-    bzero(chinspx, sizeof(uint8_t) * AC3MaxChan);
-    bzero(cplbndstrc, sizeof(uint8_t) * 32);
-    bzero(chincpl, sizeof(uint8_t) * 16);
-	
-	uint8_t firstcplleak = 1;
-#ifdef DEBUG_PARSER
-	printf("***parse_eac3_audblk start bit pos: %d remaining bits: %d\n", gbc.GetBitPosition(), gbc.GetRemainingBits());
-#endif
-	/* these fields for block switch and dither flags */
-    if (hdr->blkswe) {
-        gbc.SkipBits(1*nfchans);					//blksw[ch]
-    }
-	//else
-		//for(ch = 0; ch < nfchans; ch++) {blksw[ch] = 0}
-    if (hdr->dithflage) {
-        gbc.SkipBits(1*nfchans);					//dithflag[ch]
-    }
-	//else
-		//for(ch = 0; ch < nfchans; ch++) {dithflag[ch] = 1} /* dither on */
-	/* these fields for dynamic range control */
-    if (gbc.GetBits(1))	{								//dynrnge
-		gbc.SkipBits(8);								//dynrng
-    }
-    if (hdr->channel_mode == 0x0) {									/* if 1+1 mode */
-        if(gbc.GetBits(1)) {								//dynrng2e
-			gbc.SkipBits(8);							//dynrng2
-        }
-	}
-	/* these fields for spectral extension strategy information */
-	uint8_t spxstre;
-    if (blk == 0) {
-		spxstre = 1;
-    } else {
-		spxstre = gbc.GetBits(1);						//spxstre
-    }
-
-	uint8_t spxbndstrc[32];
-	if (spxstre) {
-		if((spxinu = gbc.GetBits(1)))					//spxinu
-		{
-            if (hdr->channel_mode == 0x1) {
-				chinspx[0] = 1;
-            } else {
-                for (int ch = 0; ch < nfchans; ch++) {
-					chinspx[ch] = gbc.GetBits(1);		//chinspx[ch]
-                }
-			}
-			gbc.SkipBits(2);							//spxstrtf
-			spxbegf = gbc.GetBits(3);					//spxbegf
-			spxendf = gbc.GetBits(3);					//spxendf
-			if (spxbegf < 6) {
-				spx_begin_subbnd = spxbegf + 2;
-			} else {
-				spx_begin_subbnd = spxbegf * 2 - 3;
-			}
-			if (spxendf < 3) {
-				spx_end_subbnd = spxendf + 5;
-			} else {
-				spx_end_subbnd = spxendf * 2 + 3;
-			}
-            if (gbc.GetBits(1)) {							//spxbndstrce
-                for (int bnd = spx_begin_subbnd + 1; bnd < spx_end_subbnd ; bnd++) {
-					spxbndstrc[bnd] = gbc.GetBits(1);	//spxbndstrc[bnd]
-                }
-			}
-        } else {/* !spxinu */
-			for (int ch = 0; ch < nfchans; ch++) {
-				chinspx[ch] = 0;
-				firstspxcos[ch] = 1;
-			}
-		}
-	}
-	//E.2.6.2 Sub-band structure for spectral extension
-	uint8_t nspxbnds = 1;
-	uint8_t spxbndsztab[32];
-	spxbndsztab[0] = 12;
-	for (int bnd = spx_begin_subbnd + 1; bnd < spx_end_subbnd; bnd ++) {
-		if (spxbndstrc[bnd] == 0) {
-			spxbndsztab[nspxbnds] = 12;
-			nspxbnds++;
-		} else {
-			spxbndsztab[nspxbnds - 1] += 12;
-		}
-	}
-	//end E.2.6.2 Sub-band structure for spectral extension
-	/* these fields for spectral extension coordinates */
-	if (spxinu) {
-		uint8_t spxcoe[16];
-		for (int ch = 0; ch < nfchans; ch++) {
-			if (chinspx[ch]) {
-				if (firstspxcos[ch]) {
-					spxcoe[ch] = 1;
-					firstspxcos[ch] = 0;
-                } else {								/* !firstspxcos[ch] */
-					spxcoe[ch] = gbc.GetBits(1);	//spxcoe[ch]
-                }
-				if(spxcoe[ch]) {
-					gbc.SkipBits(5+2);				//spxblnd[ch],mstrspxco[ch]
-					/* nspxbnds determined from spx_begin_subbnd, spx_end_subbnd, and spxbndstrc[ ] */
-                    for (int bnd = 0; bnd < nspxbnds; bnd++) {
-						gbc.SkipBits(2+2);			//spxcoexp[ch][bnd],spxcomant[ch][bnd]
-                    }
-				}
-            } else {									/* !chinspx[ch] */
-				firstspxcos[ch] = 1;
-            }
-		}
-	}
-	/* These fields for coupling strategy and enhanced coupling strategy information */
-	if (cplstre[blk]) {
-		if (cplinu[blk]) {
-			uint8_t ecplinu = gbc.GetBits(1);
-			if (hdr->channel_mode == 0x2) {
-				chincpl[0] = 1;
-				chincpl[1] = 1;
-			} else {
-                for (int ch = 0; ch < nfchans; ch++) {
-					chincpl[ch] = gbc.GetBits(1);
-                }
-			}
-			if (ecplinu == 0) 						/* standard coupling in use */
-			{
-				if(hdr->channel_mode == 0x2) 		/* if in 2/0 mode */
-					phsflginu = gbc.GetBits(1);
-				cplbegf = gbc.GetBits(4);
-				if(spxinu == 0) 					/* if SPX not in use */
-					cplendf = gbc.GetBits(4);
-				else /* SPX in use */
-				{
-					if(spxbegf < 6)					/* note that in this case the value of cplendf may be negative */
-						cplendf = spxbegf - 2;
-					else
-						cplendf = (spxbegf * 2) - 7;
-				}
-				ncplsubnd = 3 + cplendf - cplbegf;
-				if(gbc.GetBits(1))					//cplbndstrce
-					gbc.SkipBits(1*ncplsubnd);
-			} else { 								/* enhanced coupling in use */
-				ecplbegf = gbc.GetBits(4);
-				if(ecplbegf < 3) {
-					ecpl_begin_subbnd = ecplbegf * 2;
-				} else if(ecplbegf < 13) {
-					ecpl_begin_subbnd = ecplbegf + 2;
-				} else {
-					ecpl_begin_subbnd = ecplbegf * 2 - 10;
-				}
-                if (spxinu == 0) { 					/* if SPX not in use */
-					uint8_t ecplendf = gbc.GetBits(4);
-					ecpl_end_subbnd = ecplendf + 7;
-				} else {							/* SPX in use */
-                    if (spxbegf < 6) {
-						ecpl_end_subbnd = spxbegf + 5;
-                    } else {
-						ecpl_end_subbnd = spxbegf * 2;
-                    }
-				}
-                if (gbc.GetBits(1)) {			//ecplbndstrce
-					for (int sbnd = MAX(9, ecpl_begin_subbnd + 1); sbnd < ecpl_end_subbnd; sbnd++)
-						gbc.SkipBits(1);		//ecplbndstrc[sbnd]
-				}
-			} /* ecplinu[blk] */
-		} else { /* !cplinu[blk] */
-			for(int ch = 0; ch < nfchans; ch++)
-			{
-				chincpl[ch] = 0;
-				firstcplcos[ch] = 1;
-			}
-			firstcplleak = 1;
-			phsflginu = 0;
-			ecplinu = 0;
-		}
-	} /* cplstre[blk] */
-	/* These fields for coupling coordinates */
-	if (cplinu[blk]) {
-		uint8_t cplcoe[16];
-        bzero(cplcoe, sizeof(uint8_t) * 16);
-        if (ecplinu == 0) { 						/* standard coupling in use */
-			//4.4.3.13 cplbndstrc[sbnd] - Coupling band structure - 1 bit
-			//ncplbnd = (ncplsubnd - (cplbndstrc[1] + ... + cplbndstrc[ncplsubnd - 1]))
-			int ncplbnd = 0;
-            for (int i = 1; i < ncplsubnd; i++) {
-				ncplbnd += cplbndstrc[i];
-            }
-			ncplbnd = ncplsubnd - ncplbnd;
-			//end 4.4.3.13 cplbndstrc[sbnd] - Coupling band structure - 1 bit
-			for (int ch = 0; ch < nfchans; ch++) {
-				if (chincpl[ch]) {
-					if (firstcplcos[ch]) {
-						cplcoe[ch] = 1;
-						firstcplcos[ch] = 0;
-                    } else {						/* !firstcplcos[ch] */
-						cplcoe[ch] = gbc.GetBits(1);
-                    }
-					if (cplcoe[ch]) {
-						gbc.SkipBits(2);			//mstrcplco[ch]
-						/* ncplbnd derived from ncplsubnd and cplbndstrc */
-                        for (int bnd = 0; bnd < ncplbnd; bnd++) {
-							gbc.SkipBits(4+4);		//cplcoexp[ch][bnd],//cplcomant[ch][bnd]
-                        }
-					} /* cplcoe[ch] */
-				} else /* !chincpl[ch] */
-					firstcplcos[ch] = 1;
-			} /* ch */
-			if ((hdr->channel_mode == 0x2) && phsflginu && (cplcoe[0] || cplcoe[1])) {
-				//for(int bnd = 0; bnd < ncplbnd; bnd++)
-					gbc.SkipBits(1*ncplbnd);	//phsflg[bnd]
-			}
-		} else { /* enhanced coupling in use */
-			int firstchincpl = -1;
-			gbc.SkipBits(1);					//reserved
-			uint8_t ecplparam1e[16], rsvdfieldse[16];
-			for(int ch = 0; ch < nfchans; ch++)
-			{
-				if(chincpl[ch])
-				{
-					if(firstchincpl == -1)
-						firstchincpl = ch;
-					if(firstcplcos[ch])
-					{
-						ecplparam1e[ch] = 1;
-						if (ch > firstchincpl)
-							rsvdfieldse[ch] = 1;
-						else
-							rsvdfieldse[ch] = 0;
-						firstcplcos[ch] = 0;
-					} else { /* !firstcplcos[ch] */
-						ecplparam1e[ch] = gbc.GetBits(1);
-						if(ch > firstchincpl)
-							rsvdfieldse[ch] = gbc.GetBits(1);
-						else
-							rsvdfieldse[ch] = 0;
-					}
-					//E.1.3.3.19 ecplbndstrc[sbnd] - Enhanced coupling band (and sub-band) structure - 1 bit
-					uint8_t necplbnd = ecpl_end_subbnd - ecpl_begin_subbnd;
-					if(ecplparam1e[ch])
-					{
-						/* necplbnd derived from ecpl_begin_subbnd, ecpl_end_subbnd, and ecplbndstrc */
-						//for(int bnd = 0; bnd < necplbnd; bnd++)
-							gbc.SkipBits(5*necplbnd);		//ecplamp[ch][bnd]
-					}
-					if(rsvdfieldse[ch])
-						gbc.SkipBits(9 * (necplbnd - 1));	//reserved ................ 9 x (necplbnd - 1)
-					if(ch > firstchincpl)
-						gbc.SkipBits(1);					//reserved
-				} else										/* !chincpl[ch] */
-					firstcplcos[ch] = 1;
-			} /* ch */
-		} /* ecplinu[blk] */
-	} /* cplinu[blk] */
-	/* these fields for rematrixing operation in the 2/0 mode */
-    if(hdr->channel_mode == 0x2) { /* if in 2/0 mode */
-		uint8_t rematstr;
-        if (blk == 0) {
-			rematstr = 1;
-        } else {
-			rematstr = gbc.GetBits(1);						//rematstr
-        }
-		if (rematstr) {
-			uint8_t nrematbd = 0;
-			//E.2.3.2 nrematbd - Number of rematrixing bands
-			if(cplinu[blk]) {
-				if (ecplinu) {
-					if 		(ecplbegf == 0)	{nrematbd = 0;}
-					else if (ecplbegf == 1)	{nrematbd = 1;}
-					else if (ecplbegf == 2)	{nrematbd = 2;}
-					else if (ecplbegf < 5)	{nrematbd = 3;}
-					else 					{nrematbd = 4;}
-				} else { /* standard coupling */
-					if 		(cplbegf == 0)	{nrematbd = 2;}
-					else if (cplbegf < 3)	{nrematbd = 3;}
-					else 					{nrematbd = 4;}
-				}
-			} else if (spxinu) {
-				if (spxbegf < 2)	{nrematbd = 3;}
-				else 				{nrematbd = 4;}
-			} else {
-				nrematbd = 4;
-            }
-			//end E.2.3.2 nrematbd - Number of rematrixing bands
-			/* nrematbd determined from cplinu, ecplinu, spxinu, cplbegf, ecplbegf and spxbegf */
-			//for(int bnd = 0; bnd < nrematbd; bnd++)
-				gbc.SkipBits(1*nrematbd);					//rematflg[bnd]
-		}
-	}
-	/* this field for channel bandwidth code */
-	for (int ch = 0; ch < nfchans; ch++) {
-		if (chexpstr[blk][ch] != 0 /*reuse*/) {
-            if ((!chincpl[ch]) && (!chinspx[ch])) {
-				chbwcod[ch] = gbc.GetBits(6);				//chbwcod[ch]
-            }
-		}
-	}
-	/* these fields for exponents */
-	const uint8_t ecplsubbndtab[] = {13, 19, 25, 31, 37, 49, 61, 73, 85, 97, 109, 121, 133, 145, 157, 169, 181, 193, 205, 217, 229, 241, 253};
-	uint8_t ecplstartmant = ecplsubbndtab[ecpl_begin_subbnd];
-	uint8_t ecplendmant = ecplsubbndtab[ecpl_end_subbnd];
-	uint8_t cplstrtmant = (cplbegf * 12) + 37;
-	uint8_t cplendmant = ((cplendf + 3) * 12) + 37;
-	uint8_t endmant[16], nchgrps[16];
-
-    bzero(nchgrps, sizeof(uint8_t) * 16);
-	//4.4.3.29 lfeexps[grp] - Low frequency effects channel exponents - 4 bits or 7 bits -> The total number of lfe channel exponents (nlfemant) is 7
-
-	if(cplinu[blk]) /* exponents for the coupling channel */
-	{
-		if(cplexpstr[blk] != 0 /*reuse*/)
-		{
-			gbc.SkipBits(4);					//cplabsexp
-			uint8_t ncplgrps = 0;
-			//E.2.3.5 ncplgrps - Number of coupled exponent groups
-			if (ecplinu)
-			{
-				//Table 6.4: Exponent strategy coding 00=reuse, 01=D15, 10=D25, 11=D45
-				if 		(cplexpstr[blk] == 1 /*D15*/) {ncplgrps = (ecplendmant - ecplstartmant) /  3;}
-				else if (cplexpstr[blk] == 2 /*D25*/) {ncplgrps = (ecplendmant - ecplstartmant) /  6;}
-				else if (cplexpstr[blk] == 3 /*D45*/) {ncplgrps = (ecplendmant - ecplstartmant) / 12;}
-			} else { /* standard coupling */
-				/* see clause 6.1.3 */
-				if 		(cplexpstr[blk] == 1 /*D15*/) {ncplgrps = (cplendmant - cplstrtmant) /  3;}
-				else if (cplexpstr[blk] == 2 /*D25*/) {ncplgrps = (cplendmant - cplstrtmant) /  6;}
-				else if (cplexpstr[blk] == 3 /*D45*/) {ncplgrps = (cplendmant - cplstrtmant) / 12;}
-			}
-			//end E.2.3.5 ncplgrps - Number of coupled exponent groups
-			/* ncplgrps derived from cplexpstr, cplbegf, cplendf, ecplinu, ecpl_begin_subbnd, and ecpl_end_subbnd */
-			//for(int grp = 0; grp < ncplgrps; grp++)
-				gbc.SkipBits(7*ncplgrps);		//cplexps[grp]
-		}
-	}
-    for (int ch = 0; ch < nfchans; ch++) {		/* exponents for full bandwidth channels */
-		if (chexpstr[blk][ch] != 0 /*reuse*/) {
-			gbc.SkipBits(4);					//exps[ch][0]
-			//6.1.3 Exponent decoding
-			if(cplinu[blk] == 1)
-				endmant[ch] = cplstrtmant; 		/* (ch is coupled) */
-			else
-				endmant[ch] = ((chbwcod[ch] + 12) * 3) + 37; /* (ch is not coupled) */
-			if 		(cplexpstr[blk] == 1 /*D15*/) {nchgrps[ch] = trunc((endmant[ch] - 1)     /  3);}
-			else if (cplexpstr[blk] == 2 /*D25*/) {nchgrps[ch] = trunc((endmant[ch] - 1 + 3) /  6);}
-			else if (cplexpstr[blk] == 3 /*D45*/) {nchgrps[ch] = trunc((endmant[ch] - 1 + 9) / 12);}
-			//end 6.1.3 Exponent decoding
-			/* nchgrps derived from chexpstr[ch], and endmant[ch] */
-            for (int grp = 1; grp <= nchgrps[ch]; grp++) {
-				gbc.GetBits(7);					//exps[ch][grp]
-            }
-			gbc.GetBits(2);						//gainrng[ch]
-		}
-	}
-    if (hdr->lfe_on) {							/* exponents for the low frequency effects channel */
-		if (lfeexpstr[blk] != 0 /*reuse*/) {
-			gbc.SkipBits(4);					//lfeexps[0]
-			//nlfegrps = 2
-			for (int grp = 1; grp <= 2; grp++) {
-				gbc.SkipBits(7);				//lfeexps[grp]
-			}
-		}
-	}
-	/* these fields for bit-allocation parametric information */
-	if (bamode) {
-        if (gbc.GetBits(1)) {					//baie
-			gbc.SkipBits(2+2+2+2+2);			//sdcycod,fdcycod,sgaincod,dbpbcod,floorcod
-        }
-	} else {
-		//sdcycod = 0x2
-		//fdcycod = 0x1
-		//sgaincod = 0x1
-		//dbpbcod = 0x2
-		//floorcod = 0x7
-	}
-	if (snroffststr == 0x0) {
-		//if(cplinu[blk]) {cplfsnroffst = frmfsnroffst}
-		//for(ch = 0; ch < nfchans; ch++) {fsnroffst[ch] = frmfsnroffst}
-		//if(lfeon) {lfefsnroffst = frmfsnroffst}
-	} else {
-		uint8_t snroffste;
-        if (blk == 0) {
-			snroffste = 1;
-        } else {
-			snroffste = gbc.GetBits(1);
-        }
-		if (snroffste) {
-			gbc.SkipBits(6);					//csnroffst
-			if (snroffststr == 0x1) {
-				gbc.SkipBits(4);				//blkfsnroffst
-				//cplfsnroffst = blkfsnroffst
-				//for(ch = 0; ch < nfchans; ch++) {fsnroffst[ch] = blkfsnroffst}
-				//lfefsnroffst = blkfsnroffst
-			} else if(snroffststr == 0x2) {
-                if (cplinu[blk]) {
-					gbc.SkipBits(4);			//cplfsnroffst
-                }
-				//for(int ch = 0; ch < nfchans; ch++)
-					gbc.GetBits(4*nfchans);		//fsnroffst[ch]
-                if (hdr->lfe_on) {
-					gbc.SkipBits(4);			//lfefsnroffst
-                }
-			}
-		}
-	}
-	uint8_t fgaincode;
-    if (frmfgaincode) {
-		fgaincode = gbc.GetBits(1);
-    } else {
-		fgaincode = 0;
-        }
-	if (fgaincode)
-	{
-        if (cplinu[blk]) {
-			gbc.GetBits(3);						//cplfgaincod
-        }
-		//for(int ch = 0; ch < nfchans; ch++)
-			gbc.GetBits(3*nfchans);				//fgaincod[ch]
-        if (hdr->lfe_on) {
-			gbc.SkipBits(3);					//lfefgaincod
-        }
-	} else {
-		//if(cplinu[blk]) {cplfgaincod = 0x4}
-		//for(ch= 0; ch < nfchans; ch++) {fgaincod[ch] = 0x4}
-		//if(lfeon) {lfefgaincod = 0x4}
-	}
-	if (hdr->frame_type == 0x0)					//strmtyp == 0x0
-	{
-        if (gbc.GetBits(1)) {					//convsnroffste
-			gbc.GetBits(10);					//convsnroffst
-        }
-	}
-	if (cplinu[blk])
-	{
-		uint8_t cplleake;
-		if (firstcplleak)
-		{
-			cplleake = 1;
-			//firstcplleak = 0;
-        } else {								/* !firstcplleak */
-			cplleake = gbc.GetBits(1);			//cplleake
-        }
-        if (cplleake) {
-			gbc.SkipBits(3+3);					//cplfleak,cplsleak
-        }
-	}
-	/* these fields for delta bit allocation information */
-	if(dbaflde)
-	{
-		uint8_t deltnseg[AC3MaxChan], deltbae[AC3MaxChan];
-		if(gbc.GetBits(1))						//deltbaie
-		{
-			uint8_t cpldeltbae = 0;
-			if(cplinu[blk])
-				cpldeltbae = gbc.GetBits(2);
-			for(int ch = 0; ch < nfchans; ch++)
-				deltbae[ch] = gbc.GetBits(2);
-			if(cplinu[blk])
-			{
-				if(cpldeltbae == 1 /*new info follows*/)
-				{
-					uint8_t cpldeltnseg = gbc.GetBits(3);
-					for(int seg = 0; seg <= cpldeltnseg; seg++)
-						gbc.GetBits(5+4+3);			//cpldeltoffst[seg],cpldeltlen[seg],cpldeltba[seg]					}
-				}
-			}
-			for(int ch = 0; ch < nfchans; ch++)
-			{
-				if(deltbae[ch] == 1 /*new info follows*/) //Table 4.11: Delta bit allocation exist states
-				{
-					deltnseg[ch] = gbc.GetBits(3);
-					for(int seg = 0; seg <= deltnseg[ch]; seg++)
-						gbc.GetBits(5+4+3);					//deltoffst[ch][seg],deltlen[ch][seg],deltba[ch][seg]					}
-				}
-			}
-		}	/* if(deltbaie) */
-	}		/* if(dbaflde) */
-	/* these fields for inclusion of unused dummy data */
-	if (hdr->skipflde) {
-		uint8_t skiple = gbc.GetBits(1);
-#ifdef DEBUG_PARSER
-		printf("skiple: 0x%0x\n", skiple);
-#endif
-        if (skiple) {									//NB! both skipflde and skiple must exist for the skipfld to be embedded!
-			hdr->skipl = gbc.GetBits(9) * 8;			//because value indicates skip field length in BYTES
-#ifdef DEBUG_PARSER
-			printf("skipl: 0x%0x (%d)\n", hdr->skipl, hdr->skipl);
-#endif
-			//skipfld ...................................................................... skipl × 8
-			//we leave bit pos here and return to call EMDF parser in outer routine
-		}
-	}
-#ifdef DEBUG_PARSER
-	printf("***parse_eac3_audblk end bit pos: %d remaining bits: %d\n", gbc.GetBitPosition(), gbc.GetRemainingBits());
-#endif
-	//the rest uninteresting but first we need to parse EMDF inside skip field!
-} /* end of audblk */
 
 uint32_t variable_bits(CMemoryBitstream &b, uint8_t n_bits)
 {
