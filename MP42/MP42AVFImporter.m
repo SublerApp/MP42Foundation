@@ -253,6 +253,7 @@
 
                 // Audio type, check the channel layout and channels number
                 MP42AudioTrack *audioTrack = [[MP42AudioTrack alloc] init];
+                UInt32 objectsCount = 0;
 
                 if (formatDescription) {
                     size_t layoutSize = 0;
@@ -264,13 +265,17 @@
                     }
                     else {
                         // Guess the layout.
-                        const AudioStreamBasicDescription *asbd = CMAudioFormatDescriptionGetStreamBasicDescription(formatDescription);
+						const AudioStreamBasicDescription *asbd = CMAudioFormatDescriptionGetStreamBasicDescription(formatDescription);
                         audioTrack.channels = asbd->mChannelsPerFrame;
                         audioTrack.channelLayoutTag = getDefaultChannelLayout(asbd->mChannelsPerFrame);
                     }
+					FourCharCode audioFormat = CMFormatDescriptionGetMediaSubType(formatDescription);
+					if (audioFormat == kAudioFormatAC3 || audioFormat == kAudioFormatEnhancedAC3) {
+						objectsCount = [self numObjectsForAudioTrack:audioTrack];
+					}
                 }
+				audioTrack.embeddedAudioFormat = objectsCount > 0 ? kMP42EmbeddedAudioCodecType_Atmos : 0;
                 newTrack = audioTrack;
-
             }
             else if ([track.mediaType isEqualToString:AVMediaTypeSubtitle]) {
 
@@ -779,8 +784,19 @@
                 cookieBuffer += 8;
                 cookieSizeOut = cookieSizeOut - 8;
 
-                return [NSData dataWithBytes:cookieBuffer length:cookieSizeOut];
-            }
+				NSMutableData *ac3Info = [NSMutableData dataWithBytes:cookieBuffer length:cookieSizeOut];
+				MP42AudioTrack *audiotrack = (MP42AudioTrack *)track;
+				
+				if (audiotrack.embeddedAudioFormat == kMP42EmbeddedAudioCodecType_Atmos)
+				{
+//                    uint8_t atmosversion = 1;
+//                    uint8_t numobjects = (uint8_t)(audiotrack.objects & 0xFF);
+//                    [ac3Info appendBytes:&atmosversion length:sizeof(uint8_t)];
+//                    [ac3Info appendBytes:&numobjects   length:sizeof(uint8_t)];
+				}
+				
+				return ac3Info;
+			}
 
             else if (code == kAudioFormatAC3 ||
                      code == 'ms \0') {
@@ -841,7 +857,17 @@
                 [ac3Info appendBytes:&lfeon length:sizeof(uint64_t)];
                 [ac3Info appendBytes:&bit_rate_code length:sizeof(uint64_t)];
 
-                return ac3Info;
+//				MP42AudioTrack *audiotrack = (MP42AudioTrack *)track;
+//
+//				if (audiotrack.embeddedAudioFormat == kMP42EmbeddedAudioCodecType_Atmos)
+//				{
+//					uint8_t atmosversion = 1;
+//					uint8_t numobjects = (uint8_t)(audiotrack.objects & 0xFF);
+//					[ac3Info appendBytes:&atmosversion length:sizeof(uint8_t)];
+//					[ac3Info appendBytes:&numobjects   length:sizeof(uint8_t)];
+//				}
+
+				return ac3Info;
 
             } else if (cookieSizeOut) {
                 return [NSData dataWithBytes:cookieBuffer length:cookieSizeOut];
@@ -1271,6 +1297,45 @@
 - (NSString *)description
 {
     return @"AVFoundation demuxer";
+}
+
+- (UInt32)numObjectsForAudioTrack:(MP42AudioTrack *)track
+{
+	AudioFileID audioFile;
+	uint8_t *syncframe;
+	UInt32 ioNumPackets = 1;
+	UInt32 ioNumBytes = 2 * 4096;							//E-AC-3 max syncframe is 4096 bytes. If embedded as substream inside AC-3 frame, tandem will occupy 2560+4096 bytes
+	AudioStreamPacketDescription outPacketDescriptions;
+	SInt64 inStartingPacket = 0;
+    UInt32 objectsCount = 0;
+	EAC3Info *eac3Info = NULL;
+
+	syncframe = (uint8_t *)malloc(ioNumBytes);
+	if (syncframe) {
+		memset(syncframe, 0, ioNumBytes);
+		OSStatus result = AudioFileOpenURL((__bridge CFURLRef _Nonnull)(self.fileURL), kAudioFileReadPermission, 0, &audioFile); //kAudioFileAC3Type
+		if (result == noErr) {
+			while(inStartingPacket < 10 && result == noErr) {
+				result = AudioFileReadPacketData(audioFile, false, &ioNumBytes, &outPacketDescriptions, inStartingPacket, &ioNumPackets, syncframe);
+				if(result == noErr) {
+#ifdef DEBUG_PARSER
+					printf("\n\nMP42AVFimporter analyzing %s packet number %lld with size 0x%X (%u) bits\n", [self.fileURL.resourceSpecifier UTF8String], inStartingPacket, outPacketDescriptions.mDataByteSize, outPacketDescriptions.mDataByteSize);
+#endif
+					analyze_EAC3((void *)&eac3Info, syncframe, ioNumBytes);		//NB! This routine allocates buffer for eac3Info, because we're passing NULL as input!
+				}
+				inStartingPacket++;
+			}
+			AudioFileClose(audioFile);
+		}
+		free(syncframe);
+	}
+
+	if (eac3Info) {
+        objectsCount = get_num_objects_EAC3(eac3Info);
+		free(eac3Info);
+	}
+	
+	return objectsCount;
 }
 
 @end

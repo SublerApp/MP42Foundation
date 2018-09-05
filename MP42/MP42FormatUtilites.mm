@@ -803,16 +803,21 @@ static int ac3_parse_header(CMemoryBitstream &b, AC3HeaderInfo **phdr)
         hdr->channel_layout |= AV_CH_LOW_FREQUENCY;
     }
 	//location in stream - bsi().dialnorm(5)
-	analyze_eac3_atmos(b, hdr);
+    try {
+        analyze_eac3_atmos(b, hdr);
+    }  catch (int e) {
+        return 1;
+    }
 
 	return 0;
 }
 
 void analyze_eac3_atmos(CMemoryBitstream &b, AC3HeaderInfo *phdr)
 {
-	if(phdr->bitstream_id != 16)
+    if (phdr->bitstream_id != 16) {
 		return;
-	
+    }
+
 	uint32_t savedbitpos = b.GetBitPosition();	//calling routines assume bit pos in b after this fn returns!
 	parse_eac3_bsi(b, phdr);					//resets bit_pos to frame start + 2
 	//parse_eac3_audfrm(b, phdr);					//starts from bit_pos where bsi left off
@@ -978,7 +983,7 @@ concatenate:
 void parse_eac3_bsi(CMemoryBitstream &b, AC3HeaderInfo *hdr)
 {
 #ifdef DEBUG_PARSER
-	printf("***parse_eac3_bsi start bit pos: %d remaining bits: %d\n", gbc.GetBitPosition(), gbc.GetRemainingBits());
+	printf("***parse_eac3_bsi start bit pos: %d remaining bits: %d\n", b.GetBitPosition(), b.GetRemainingBits());
 #endif
 	b.SetBitPosition(16);					//skip syncword
 	b.SkipBits(2+3+11+2+2+3+1);			//strmtyp,substreamid,frmsiz,fscod,numblkscod,acmod,lfeon
@@ -1134,7 +1139,7 @@ void parse_eac3_bsi(CMemoryBitstream &b, AC3HeaderInfo *hdr)
 		b.SkipBytes(addbsil);				//addbsi
 	}
 #ifdef DEBUG_PARSER
-	printf("***parse_eac3_bsi end bit pos: %d remaining bits: %d\n", gbc.GetBitPosition(), gbc.GetRemainingBits());
+	printf("***parse_eac3_bsi end bit pos: %d remaining bits: %d\n", b.GetBitPosition(), b.GetRemainingBits());
 #endif
 } 											/* end of bsi */
 
@@ -1884,7 +1889,6 @@ int analyze_ESDS(MPEG4AudioConfig *c, const uint8_t *cookie, uint32_t cookieLen)
 
     } catch (int e) {
         return -1;
-
     }
 
     return specific_config_bitindex;

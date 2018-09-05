@@ -73,7 +73,7 @@ extern "C" {
         int frame_length_short;
     } MPEG4AudioConfig;
 	
-	struct eac3_info {
+	typedef struct eac3_info {
 		uint8_t *frame;
 		uint32_t size;
 		
@@ -107,7 +107,7 @@ extern "C" {
 			uint16_t chan_loc;
 			/* if there is no dependent substream, then one bit reserved instead */
 		} substream[1]; /* TODO: support 8 independent substreams */
-	};
+	} EAC3Info;
 
     int analyze_ESDS(MPEG4AudioConfig *c, const uint8_t *cookie, uint32_t cookieLen);
 

@@ -319,7 +319,7 @@
             [importer setActiveTrack:track];
         }
 
-        // EAC-3 audio tack
+        // EAC-3 audio track
         else if ([track isMemberOfClass:[MP42AudioTrack class]] && format == kMP42AudioCodecType_EnhancedAC3) {
             dstTrackId = MP4AddEAC3AudioTrack(_fileHandle, timeScale, magicCookie.bytes, magicCookie.length);
 
