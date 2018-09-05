@@ -633,6 +633,9 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
                     [tags addObject:@"public.accessibility.transcribes-spoken-dialog"];
                     [tags addObject:@"public.accessibility.describes-music-and-sound"];
                 }
+                if ([lowercaseName containsString:@"forced"]) {
+                    [tags addObject:@"public.subtitles.forced-only"];
+                }
             }
 
             [self setTrack:track mediaCharacteristics:tags];
