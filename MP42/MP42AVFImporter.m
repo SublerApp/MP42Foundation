@@ -122,131 +122,141 @@
 
             if ([track.mediaType isEqualToString:AVMediaTypeVideo]) {
 
-                // Video type, do the usual video things
-                MP42VideoTrack *videoTrack = [[MP42VideoTrack alloc] init];
-                CGSize naturalSize = track.naturalSize;
-
-                videoTrack.trackWidth = naturalSize.width;
-                videoTrack.trackHeight = naturalSize.height;
-
-                videoTrack.width = naturalSize.width;
-                videoTrack.height = naturalSize.height;
-                
-                videoTrack.transform = track.preferredTransform;
-
+                FourCharCode code = 0;
                 if (formatDescription) {
-
-                    CMVideoDimensions dimensions = CMVideoFormatDescriptionGetDimensions(formatDescription);
-                    videoTrack.width = dimensions.width;
-                    videoTrack.height = dimensions.height;
-
-                    // Reads the pixel aspect ratio information
-                    CFDictionaryRef pixelAspectRatioFromCMFormatDescription = CMFormatDescriptionGetExtension(formatDescription, kCMFormatDescriptionExtension_PixelAspectRatio);
-
-                    if (pixelAspectRatioFromCMFormatDescription) {
-                        int hSpacing, vSpacing;
-                        CFNumberGetValue(CFDictionaryGetValue(pixelAspectRatioFromCMFormatDescription, kCMFormatDescriptionKey_PixelAspectRatioHorizontalSpacing), kCFNumberIntType, &hSpacing);
-                        CFNumberGetValue(CFDictionaryGetValue(pixelAspectRatioFromCMFormatDescription, kCMFormatDescriptionKey_PixelAspectRatioVerticalSpacing), kCFNumberIntType, &vSpacing);
-                        videoTrack.hSpacing = hSpacing;
-                        videoTrack.vSpacing = vSpacing;
-                    }
-                    else {
-                        videoTrack.hSpacing = 1;
-                        videoTrack.vSpacing = 1;
-                    }
-
-                    // Reads the clean aperture information
-                    CFDictionaryRef cleanApertureFromCMFormatDescription = CMFormatDescriptionGetExtension(formatDescription, kCMFormatDescriptionExtension_CleanAperture);
-
-                    if (cleanApertureFromCMFormatDescription) {
-                        double cleanApertureWidth, cleanApertureHeight;
-                        double cleanApertureHorizontalOffset, cleanApertureVerticalOffset;
-                        CFNumberGetValue(CFDictionaryGetValue(cleanApertureFromCMFormatDescription, kCMFormatDescriptionKey_CleanApertureWidth),
-                                         kCFNumberDoubleType, &cleanApertureWidth);
-                        CFNumberGetValue(CFDictionaryGetValue(cleanApertureFromCMFormatDescription, kCMFormatDescriptionKey_CleanApertureHeight),
-                                         kCFNumberDoubleType, &cleanApertureHeight);
-                        CFNumberGetValue(CFDictionaryGetValue(cleanApertureFromCMFormatDescription, kCMFormatDescriptionKey_CleanApertureHorizontalOffset),
-                                         kCFNumberDoubleType, &cleanApertureHorizontalOffset);
-                        CFNumberGetValue(CFDictionaryGetValue(cleanApertureFromCMFormatDescription, kCMFormatDescriptionKey_CleanApertureVerticalOffset),
-                                         kCFNumberDoubleType, &cleanApertureVerticalOffset);
-
-                        videoTrack.cleanApertureWidthN = cleanApertureWidth;
-                        videoTrack.cleanApertureWidthD = 1;
-                        videoTrack.cleanApertureHeightN = cleanApertureHeight;
-                        videoTrack.cleanApertureHeightD = 1;
-                        videoTrack.horizOffN = cleanApertureHorizontalOffset;
-                        videoTrack.horizOffD = 1;
-                        videoTrack.vertOffN = cleanApertureVerticalOffset;
-                        videoTrack.vertOffD = 1;
-                    }
-
-                    // Color
-                    CFStringRef colorPrimaries = CMFormatDescriptionGetExtension(formatDescription, kCMFormatDescriptionExtension_ColorPrimaries);
-
-                    if (colorPrimaries) {
-                        if (CFEqual(colorPrimaries, kCMFormatDescriptionColorPrimaries_ITU_R_709_2)) {
-                            videoTrack.colorPrimaries = 1;
-                        }
-                        else if (CFEqual(colorPrimaries, kCMFormatDescriptionColorPrimaries_EBU_3213)) {
-                            videoTrack.colorPrimaries = 5;
-                        }
-                        else if (CFEqual(colorPrimaries, kCMFormatDescriptionColorPrimaries_SMPTE_C)) {
-                            videoTrack.colorPrimaries = 6;
-                        }
-                        else if (CFEqual(colorPrimaries, kCMFormatDescriptionColorPrimaries_ITU_R_2020)) {
-                            videoTrack.colorPrimaries = 9;
-                        }
-                        else if (CFEqual(colorPrimaries, kCMFormatDescriptionColorPrimaries_DCI_P3)) {
-                            videoTrack.colorPrimaries = 11;
-                        }
-                        else if (CFEqual(colorPrimaries, kCMFormatDescriptionColorPrimaries_P3_D65)) {
-                            videoTrack.colorPrimaries = 12;
-                        }
-                        else if (CFEqual(colorPrimaries, kCMFormatDescriptionColorPrimaries_P22)) {
-                            // ???
-                            videoTrack.colorPrimaries = 1;
-                        }
-                    }
-
-                    CFStringRef transferFunctions = CMFormatDescriptionGetExtension(formatDescription, kCMFormatDescriptionExtension_TransferFunction);
-
-                    if (transferFunctions) {
-                        if (CFEqual(transferFunctions, kCMFormatDescriptionTransferFunction_ITU_R_709_2) ||
-                            CFEqual(transferFunctions, kCMFormatDescriptionTransferFunction_ITU_R_2020)) {
-                            videoTrack.transferCharacteristics = 1;
-                        }
-                        else if (CFEqual(transferFunctions, kCMFormatDescriptionTransferFunction_SMPTE_240M_1995)) {
-                            videoTrack.transferCharacteristics = 7;
-                        }
-                        else if (CFEqual(transferFunctions, CFSTR("SMPTE_ST_2084_PQ"))) { // kCMFormatDescriptionTransferFunction_SMPTE_ST_2084_PQ
-                            videoTrack.transferCharacteristics = 16;
-                        }
-                        else if (CFEqual(transferFunctions, kCMFormatDescriptionTransferFunction_SMPTE_ST_428_1)) {
-                            videoTrack.transferCharacteristics = 17;
-                        }
-                        else if (CFEqual(transferFunctions, CFSTR("ITU_R_2100_HLG"))) { // kCMFormatDescriptionTransferFunction_ITU_R_2100_HLG
-                            videoTrack.transferCharacteristics = 18;
-                        }
-                    }
-
-                    CFStringRef YCbCrMatrix = CMFormatDescriptionGetExtension(formatDescription, kCMFormatDescriptionExtension_YCbCrMatrix);
-
-                    if (YCbCrMatrix) {
-                        if (CFEqual(YCbCrMatrix, kCMFormatDescriptionYCbCrMatrix_ITU_R_709_2)) {
-                            videoTrack.matrixCoefficients = 1;
-                        }
-                        else if (CFEqual(YCbCrMatrix, kCMFormatDescriptionYCbCrMatrix_ITU_R_601_4)) {
-                            videoTrack.matrixCoefficients = 6;
-                        }
-                        else if (CFEqual(YCbCrMatrix, kCMFormatDescriptionYCbCrMatrix_SMPTE_240M_1995)) {
-                            videoTrack.matrixCoefficients = 7;
-                        }
-                        else if (CFEqual(YCbCrMatrix, kCMFormatDescriptionYCbCrMatrix_ITU_R_2020)) {
-                            videoTrack.matrixCoefficients = 9;
-                        }
-                    }
+                    code = CMFormatDescriptionGetMediaSubType(formatDescription);
                 }
-                newTrack = videoTrack;
+
+                if (code == 'SSA ') {
+                    newTrack = [[MP42SubtitleTrack alloc] init];
+                } else {
+                    // Video type, do the usual video things
+                    MP42VideoTrack *videoTrack = [[MP42VideoTrack alloc] init];
+                    CGSize naturalSize = track.naturalSize;
+
+                    videoTrack.trackWidth = naturalSize.width;
+                    videoTrack.trackHeight = naturalSize.height;
+
+                    videoTrack.width = naturalSize.width;
+                    videoTrack.height = naturalSize.height;
+
+                    videoTrack.transform = track.preferredTransform;
+
+                    if (formatDescription) {
+
+                        CMVideoDimensions dimensions = CMVideoFormatDescriptionGetDimensions(formatDescription);
+                        videoTrack.width = dimensions.width;
+                        videoTrack.height = dimensions.height;
+
+                        // Reads the pixel aspect ratio information
+                        CFDictionaryRef pixelAspectRatioFromCMFormatDescription = CMFormatDescriptionGetExtension(formatDescription, kCMFormatDescriptionExtension_PixelAspectRatio);
+
+                        if (pixelAspectRatioFromCMFormatDescription) {
+                            int hSpacing, vSpacing;
+                            CFNumberGetValue(CFDictionaryGetValue(pixelAspectRatioFromCMFormatDescription, kCMFormatDescriptionKey_PixelAspectRatioHorizontalSpacing), kCFNumberIntType, &hSpacing);
+                            CFNumberGetValue(CFDictionaryGetValue(pixelAspectRatioFromCMFormatDescription, kCMFormatDescriptionKey_PixelAspectRatioVerticalSpacing), kCFNumberIntType, &vSpacing);
+                            videoTrack.hSpacing = hSpacing;
+                            videoTrack.vSpacing = vSpacing;
+                        }
+                        else {
+                            videoTrack.hSpacing = 1;
+                            videoTrack.vSpacing = 1;
+                        }
+
+                        // Reads the clean aperture information
+                        CFDictionaryRef cleanApertureFromCMFormatDescription = CMFormatDescriptionGetExtension(formatDescription, kCMFormatDescriptionExtension_CleanAperture);
+
+                        if (cleanApertureFromCMFormatDescription) {
+                            double cleanApertureWidth, cleanApertureHeight;
+                            double cleanApertureHorizontalOffset, cleanApertureVerticalOffset;
+                            CFNumberGetValue(CFDictionaryGetValue(cleanApertureFromCMFormatDescription, kCMFormatDescriptionKey_CleanApertureWidth),
+                                             kCFNumberDoubleType, &cleanApertureWidth);
+                            CFNumberGetValue(CFDictionaryGetValue(cleanApertureFromCMFormatDescription, kCMFormatDescriptionKey_CleanApertureHeight),
+                                             kCFNumberDoubleType, &cleanApertureHeight);
+                            CFNumberGetValue(CFDictionaryGetValue(cleanApertureFromCMFormatDescription, kCMFormatDescriptionKey_CleanApertureHorizontalOffset),
+                                             kCFNumberDoubleType, &cleanApertureHorizontalOffset);
+                            CFNumberGetValue(CFDictionaryGetValue(cleanApertureFromCMFormatDescription, kCMFormatDescriptionKey_CleanApertureVerticalOffset),
+                                             kCFNumberDoubleType, &cleanApertureVerticalOffset);
+
+                            videoTrack.cleanApertureWidthN = cleanApertureWidth;
+                            videoTrack.cleanApertureWidthD = 1;
+                            videoTrack.cleanApertureHeightN = cleanApertureHeight;
+                            videoTrack.cleanApertureHeightD = 1;
+                            videoTrack.horizOffN = cleanApertureHorizontalOffset;
+                            videoTrack.horizOffD = 1;
+                            videoTrack.vertOffN = cleanApertureVerticalOffset;
+                            videoTrack.vertOffD = 1;
+                        }
+
+                        // Color
+                        CFStringRef colorPrimaries = CMFormatDescriptionGetExtension(formatDescription, kCMFormatDescriptionExtension_ColorPrimaries);
+
+                        if (colorPrimaries) {
+                            if (CFEqual(colorPrimaries, kCMFormatDescriptionColorPrimaries_ITU_R_709_2)) {
+                                videoTrack.colorPrimaries = 1;
+                            }
+                            else if (CFEqual(colorPrimaries, kCMFormatDescriptionColorPrimaries_EBU_3213)) {
+                                videoTrack.colorPrimaries = 5;
+                            }
+                            else if (CFEqual(colorPrimaries, kCMFormatDescriptionColorPrimaries_SMPTE_C)) {
+                                videoTrack.colorPrimaries = 6;
+                            }
+                            else if (CFEqual(colorPrimaries, kCMFormatDescriptionColorPrimaries_ITU_R_2020)) {
+                                videoTrack.colorPrimaries = 9;
+                            }
+                            else if (CFEqual(colorPrimaries, kCMFormatDescriptionColorPrimaries_DCI_P3)) {
+                                videoTrack.colorPrimaries = 11;
+                            }
+                            else if (CFEqual(colorPrimaries, kCMFormatDescriptionColorPrimaries_P3_D65)) {
+                                videoTrack.colorPrimaries = 12;
+                            }
+                            else if (CFEqual(colorPrimaries, kCMFormatDescriptionColorPrimaries_P22)) {
+                                // ???
+                                videoTrack.colorPrimaries = 1;
+                            }
+                        }
+
+                        CFStringRef transferFunctions = CMFormatDescriptionGetExtension(formatDescription, kCMFormatDescriptionExtension_TransferFunction);
+
+                        if (transferFunctions) {
+                            if (CFEqual(transferFunctions, kCMFormatDescriptionTransferFunction_ITU_R_709_2) ||
+                                CFEqual(transferFunctions, kCMFormatDescriptionTransferFunction_ITU_R_2020)) {
+                                videoTrack.transferCharacteristics = 1;
+                            }
+                            else if (CFEqual(transferFunctions, kCMFormatDescriptionTransferFunction_SMPTE_240M_1995)) {
+                                videoTrack.transferCharacteristics = 7;
+                            }
+                            else if (CFEqual(transferFunctions, CFSTR("SMPTE_ST_2084_PQ"))) { // kCMFormatDescriptionTransferFunction_SMPTE_ST_2084_PQ
+                                videoTrack.transferCharacteristics = 16;
+                            }
+                            else if (CFEqual(transferFunctions, kCMFormatDescriptionTransferFunction_SMPTE_ST_428_1)) {
+                                videoTrack.transferCharacteristics = 17;
+                            }
+                            else if (CFEqual(transferFunctions, CFSTR("ITU_R_2100_HLG"))) { // kCMFormatDescriptionTransferFunction_ITU_R_2100_HLG
+                                videoTrack.transferCharacteristics = 18;
+                            }
+                        }
+
+                        CFStringRef YCbCrMatrix = CMFormatDescriptionGetExtension(formatDescription, kCMFormatDescriptionExtension_YCbCrMatrix);
+
+                        if (YCbCrMatrix) {
+                            if (CFEqual(YCbCrMatrix, kCMFormatDescriptionYCbCrMatrix_ITU_R_709_2)) {
+                                videoTrack.matrixCoefficients = 1;
+                            }
+                            else if (CFEqual(YCbCrMatrix, kCMFormatDescriptionYCbCrMatrix_ITU_R_601_4)) {
+                                videoTrack.matrixCoefficients = 6;
+                            }
+                            else if (CFEqual(YCbCrMatrix, kCMFormatDescriptionYCbCrMatrix_SMPTE_240M_1995)) {
+                                videoTrack.matrixCoefficients = 7;
+                            }
+                            else if (CFEqual(YCbCrMatrix, kCMFormatDescriptionYCbCrMatrix_ITU_R_2020)) {
+                                videoTrack.matrixCoefficients = 9;
+                            }
+                        }
+                    }
+
+                    newTrack = videoTrack;
+                }
 
             }
             else if ([track.mediaType isEqualToString:AVMediaTypeAudio]) {

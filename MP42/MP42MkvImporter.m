@@ -574,6 +574,7 @@ static const struct {
     { "S_TEXT/WEBVTT",      kMP42SubtitleCodecType_WebVTT },
     { "S_TEXT/ASS",         kMP42SubtitleCodecType_SSA },
     { "S_TEXT/SSA",         kMP42SubtitleCodecType_SSA },
+    { "S_SSA",              kMP42SubtitleCodecType_SSA },
     { "S_VOBSUB",           kMP42SubtitleCodecType_VobSub },
     { "S_HDMV/PGS",         kMP42SubtitleCodecType_PGS },
 
