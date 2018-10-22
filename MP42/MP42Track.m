@@ -322,6 +322,11 @@
     return localizedDisplayName(_mediaType, self.targetFormat);
 }
 
+- (BOOL)canExport
+{
+    return NO;
+}
+
 - (BOOL)exportToURL:(NSURL *)url error:(NSError * __autoreleasing *)error
 {
     return YES;

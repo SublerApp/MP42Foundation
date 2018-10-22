@@ -48,6 +48,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly) NSString *timeString;
 @property (nonatomic, readonly) NSString *formatSummary;
 
+@property (nonatomic, readonly) BOOL canExport;
 - (BOOL)exportToURL:(NSURL *)url error:(NSError * __autoreleasing *)error;
 
 @end

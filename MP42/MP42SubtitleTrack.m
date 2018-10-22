@@ -131,6 +131,11 @@
     self.updatedProperty[@"forcedSubtitles"] = @YES;
 }
 
+- (BOOL)canExport
+{
+    return YES;
+}
+
 typedef struct style_record {
     uint16_t startChar;
     uint16_t endChar;
