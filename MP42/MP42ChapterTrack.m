@@ -274,6 +274,11 @@
   return _chapters.count;
 }
 
+- (BOOL)canExport
+{
+    return YES;
+}
+
 - (BOOL)exportToURL:(NSURL *)url error:(NSError * __autoreleasing *)error
 {
 	NSMutableString* file = [[NSMutableString alloc] init];
