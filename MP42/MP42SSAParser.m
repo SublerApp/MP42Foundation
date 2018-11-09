@@ -168,6 +168,8 @@
 
         if (!_text) {
             return nil;
+        } else {
+            _text = [_text stringByReplacingOccurrencesOfString:@"\\h" withString:@" "];
         }
     }
 
