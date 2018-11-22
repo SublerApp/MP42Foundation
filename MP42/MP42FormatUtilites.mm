@@ -349,10 +349,12 @@ int readEAC3Config(const uint8_t *cookie, uint32_t cookieLen, UInt32 *channelsCo
         }
 
         *channelsCount = AudioChannelLayoutTag_GetNumberOfChannels(*channelLayoutTag);
-		if (bsid >= 16 && cookieLen >= 7 && !num_dep_sub) {
-			uint8_t atmos_version = b.GetBits(8);
-			if (atmos_version > 0)
+		if (bsid >= 16 && cookieLen >= 7) {
+            b.SkipBits(7); //reserved
+			bool flag_ec3_extension_type_a = b.GetBits(1);
+            if (flag_ec3_extension_type_a) {
 				*numAtmosObjects = b.GetBits(8);
+            }
 		}
     }
 
@@ -1479,16 +1481,21 @@ CFDataRef createCookie_EAC3(void *context)
 		//end byte #2
         cookie.PutBits(0, 3); // reserved
 
-        cookie.PutBits((info->num_objects_oamd ? 0 : info->substream[i].num_dep_sub), 4); // num_dep_sub seems to be 0 for Atmos
+        cookie.PutBits(info->substream[i].num_dep_sub, 4);
 
-        if (!info->substream[i].num_dep_sub || (info->num_objects_oamd && info->num_objects_joc)) {
+        if (!info->substream[i].num_dep_sub) {
             cookie.PutBits(0, 1); // reserved
         } else {
             cookie.PutBits(info->substream[i].chan_loc, 9); // chan_loc
         }
+
+        // Atmos extension
 		if (info->num_objects_oamd && info->num_objects_joc) {
-			cookie.PutBits(1, 8); 						// Atmos version?
-			cookie.PutBits(info->num_objects_oamd, 8); 	// numAtmosObjects
+
+            cookie.PutBits(0, 7); // reserved
+
+			cookie.PutBits(1, 1); // flag_ec3_extension_type_a
+			cookie.PutBits(info->num_objects_oamd, 8); 	// complexity_index_type_a
 		}
     }
 
