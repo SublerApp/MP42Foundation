@@ -269,7 +269,7 @@ static const int eac3_layout_lfe[8] = {
 
 #pragma mark - EAC3
 
-int          readEAC3Config(const uint8_t *cookie, uint32_t cookieLen, UInt32 *channelsCount, UInt32 *channelLayoutTag, UInt8 *numAtmosObjects)
+int readEAC3Config(const uint8_t *cookie, uint32_t cookieLen, UInt32 *channelsCount, UInt32 *channelLayoutTag, UInt8 *numAtmosObjects)
 {
     if (cookieLen < 5) {
         return 0;
@@ -897,7 +897,7 @@ int analyze_EAC3(void **context, uint8_t *frame, uint32_t size)
             while (cumul_size != size) {
                 int i;
                 CMemoryBitstream gbc;
-                gbc.SetBytes(frame + cumul_size, (size - cumul_size) * 8);
+                gbc.SetBytes(frame + cumul_size, (size - cumul_size));
                 if (ac3_parse_header(gbc, &hdr) < 0) {
                     free(hdr);
                     return -1;
@@ -1283,7 +1283,9 @@ bool parse_ac3_emdf(CMemoryBitstream &b, AC3HeaderInfo *hdr)
 	//Could use CMemoryBitstream.PutBytes() to create a copy of CMBS	
 	uint16_t	emdf_sync = b.GetBits(16); 					//syncword 0x5838
     if (emdf_sync != 0x5838) {
+#ifdef DEBUG_PARSER
         printf("WTF");
+#endif
     }
 	uint32_t	emdf_container_length = b.GetBits(16) * 8;	//emdf_container_length
 	//bool		have_oamd = false, have_joc = false;		//for the lack of better, lets expect only sequence OAMD-JOC-END
@@ -1385,20 +1387,24 @@ bool parse_ac3_emdf(CMemoryBitstream &b, AC3HeaderInfo *hdr)
 //Atmos in E-AC-3 is detected by looking for OAMD payload (see ETSI TS 103 420)
 // in EMDF container in skipfld inside audblk() of E-AC-3 frame (see ETSI TS 102 366)
 void analyze_ac3_skipfld(CMemoryBitstream &b, AC3HeaderInfo *hdr)
-{	//Let's take a look at frame's auxdata()
-	uint16_t	emdf_syncword;
+{
+    //Let's take a look at frame's auxdata()
+	uint16_t emdf_syncword;
 
-	if(hdr->bitstream_id != 16)
+    if (hdr->bitstream_id != 16) {
 		return;
-	while(b.GetRemainingBits() > 16) {
+    }
+
+	while (b.GetRemainingBits() > 16) {
 		emdf_syncword = b.PeakBits(16);
-		if(emdf_syncword == 0x5838) {					//NB! b.head still points to emdf syncword because we peeked and did not get the bits!
+		if (emdf_syncword == 0x5838) {					//NB! b.head still points to emdf syncword because we peeked and did not get the bits!
 #ifdef DEBUG_PARSER
 			printf("parsing bitstream_id: 0x%X frame_type: 0x%0X substreamid: 0x%0X\n", hdr->bitstream_id, hdr->frame_type, hdr->substreamid);
 			printf("SKIPFLD: found EMDF syncword 0x%x at bit pos: 0x%0x (%d)\n", emdf_syncword, b.GetBitPosition(), b.GetBitPosition());
 #endif
-			if(parse_ac3_emdf(b, hdr))
+            if (parse_ac3_emdf(b, hdr)) {
 				break;
+            }
 //			else										//false positive
 //				b.SkipBits(1);
 		} else {
@@ -1414,14 +1420,14 @@ void analyze_ac3_auxdata(CMemoryBitstream &b, AC3HeaderInfo *hdr)
 	
 	if(hdr->bitstream_id != 16)
 		return;
-	b.SetBitPosition((hdr->frame_size * 8) - 18);
+    b.SetBitPosition((hdr->frame_size * 8) - 18);
 	/*4.4.4 auxdata - Auxiliary data field
 	 Thus the aux data decoder (which may not decode any audio) may
 	 simply look to the end of the AC-3 syncframe to find auxdatal, backup auxdatal bits (from the beginning of auxdatal)
 	 in the data stream, and then unpack auxdatal bits moving forward in the data stream.
 	 */
-	 if(b.GetBits(1)) { 								//auxdatae
-		b.SkipBits(-14); 								//back up to beginning of auxdatal field
+    if (b.GetBits(1)) { 								//auxdatae
+        b.SkipBits(-14); 								//back up to beginning of auxdatal field
 		auxdatal = b.GetBits(14);						//auxdatal
 		b.SkipBits(-auxdatal); 							//back up to beginning of auxdatal payload
 		while(b.GetRemainingBits() > 16) {
