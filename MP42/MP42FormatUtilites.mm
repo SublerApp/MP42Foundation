@@ -269,7 +269,7 @@ static const int eac3_layout_lfe[8] = {
 
 #pragma mark - EAC3
 
-int readEAC3Config(const uint8_t *cookie, uint32_t cookieLen, UInt32 *channelsCount, UInt32 *channelLayoutTag, UInt8 *numAtmosObjects)
+int          readEAC3Config(const uint8_t *cookie, uint32_t cookieLen, UInt32 *channelsCount, UInt32 *channelLayoutTag, UInt8 *numAtmosObjects)
 {
     if (cookieLen < 5) {
         return 0;
@@ -349,13 +349,14 @@ int readEAC3Config(const uint8_t *cookie, uint32_t cookieLen, UInt32 *channelsCo
         }
 
         *channelsCount = AudioChannelLayoutTag_GetNumberOfChannels(*channelLayoutTag);
-		if (bsid >= 16 && cookieLen >= 7) {
-            b.SkipBits(7); //reserved
-			bool flag_ec3_extension_type_a = b.GetBits(1);
-            if (flag_ec3_extension_type_a) {
-				*numAtmosObjects = b.GetBits(8);
-            }
-		}
+    }
+
+    if (cookieLen >= 7) {
+        b.SkipBits(7); //reserved
+        bool flag_ec3_extension_type_a = b.GetBits(1);
+        if (flag_ec3_extension_type_a) {
+            *numAtmosObjects = b.GetBits(8);
+        }
     }
 
     return 1;
@@ -896,7 +897,7 @@ int analyze_EAC3(void **context, uint8_t *frame, uint32_t size)
             while (cumul_size != size) {
                 int i;
                 CMemoryBitstream gbc;
-                gbc.SetBytes(frame + cumul_size, (size - cumul_size)/* * 8*/);
+                gbc.SetBytes(frame + cumul_size, (size - cumul_size) * 8);
                 if (ac3_parse_header(gbc, &hdr) < 0) {
                     free(hdr);
                     return -1;
@@ -1468,8 +1469,7 @@ CFDataRef createCookie_EAC3(void *context)
 
     for (int i = 0; i <= info->num_ind_sub; i++) {
         cookie.PutBits(info->substream[i].fscod, 2);
-        // this is required to enforce Atmos for AC-3-embedded E-AC-3 substream
-        cookie.PutBits((info->num_objects_oamd ? 16 : info->substream[i].bsid), 5); //Atmos requires BSID 16!
+        cookie.PutBits(16, 5); // eac3 should be always 16.
 
         cookie.PutBits(0, 1); // reserved
 		//end byte #1
@@ -1488,15 +1488,15 @@ CFDataRef createCookie_EAC3(void *context)
         } else {
             cookie.PutBits(info->substream[i].chan_loc, 9); // chan_loc
         }
+    }
 
-        // Atmos extension
-		if (info->num_objects_oamd && info->num_objects_joc) {
+    // Atmos extension
+    if (info->num_objects_oamd && info->num_objects_joc) {
 
-            cookie.PutBits(0, 7); // reserved
+        cookie.PutBits(0, 7); // reserved
 
-			cookie.PutBits(1, 1); // flag_ec3_extension_type_a
-			cookie.PutBits(info->num_objects_oamd, 8); 	// complexity_index_type_a
-		}
+        cookie.PutBits(1, 1); // flag_ec3_extension_type_a
+        cookie.PutBits(info->num_objects_oamd, 8); // complexity_index_type_a
     }
 
     free(info->frame);
