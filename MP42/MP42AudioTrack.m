@@ -24,6 +24,7 @@
     if (self) {
         MP4GetTrackFloatProperty(fileHandle, self.trackId, "tkhd.volume", &_volume);
         const char *dataName = MP4GetTrackMediaDataName(fileHandle, self.trackId);
+		_extensionType = kMP42AudioEmbeddedExtension_None;
 
         if (dataName && !strcmp(dataName, "mp4a")) {
             u_int8_t audioType = MP4GetTrackEsdsObjectTypeId(fileHandle, self.trackId);
@@ -77,11 +78,11 @@
         else if (MP4HaveTrackAtom(fileHandle, self.trackId, "mdia.minf.stbl.stsd.ec-3.dec3")) {
             uint8_t    *ppValue;
             uint32_t    pValueSize;
-            UInt8       numObjects = 0;
+            UInt8       complexityIndex, extensionType;
 			MP4GetTrackBytesProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.ec-3.dec3.content", &ppValue, &pValueSize);
-			readEAC3Config(ppValue, pValueSize, &_channels, &_channelLayoutTag, &numObjects);
-            if (numObjects > 0) {
-                _embeddedAudioFormat = kMP42EmbeddedAudioCodecType_Atmos;
+			readEAC3Config(ppValue, pValueSize, &_channels, &_channelLayoutTag, &extensionType, &complexityIndex);
+            if (extensionType == EC3Extension_JOC) {
+                _extensionType = kMP42AudioEmbeddedExtension_JOC;
             }
             free(ppValue);
         }
@@ -132,6 +133,8 @@
         copy->_volume = _volume;
         copy->_channels = _channels;
         copy->_channelLayoutTag = _channelLayoutTag;
+
+        copy->_extensionType = _extensionType;
 
         copy->_fallbackTrackId = _fallbackTrackId;
         copy->_followsTrackId = _followsTrackId;
@@ -249,13 +252,13 @@
     }
     else {
         if (_channels > 0) {
-			if (_embeddedAudioFormat) {
-				return [NSString stringWithFormat:@"%@+%@, %u ch", localizedDisplayName(self.mediaType, self.format),
-                        localizedDisplayName(self.mediaType, self.embeddedAudioFormat),
+            if (_extensionType) {
+                return [NSString stringWithFormat:@"%@+%@, %u ch", localizedDisplayName(self.mediaType, self.format),
+                        localizedDisplayName(self.mediaType, self.extensionType),
                         (unsigned int)_channels];
-			} else {
+            } else {
 				return [NSString stringWithFormat:@"%@, %u ch", localizedDisplayName(self.mediaType, self.format), (unsigned int)_channels];
-			}
+            }
         }
         else {
             return [NSString stringWithFormat:@"%@", localizedDisplayName(self.mediaType, self.format)];
@@ -285,7 +288,7 @@
     [coder encodeInt64:_channels forKey:@"channels"];
     [coder encodeInt64:_channelLayoutTag forKey:@"channelLayoutTag"];
 
-    [coder encodeInteger:_embeddedAudioFormat forKey:@"embeddedAudioFormat"];
+    [coder encodeInteger:_extensionType forKey:@"extensionType"];
 
     [coder encodeInt64:_fallbackTrackId forKey:@"fallbackTrackId"];
 }
@@ -300,7 +303,7 @@
         _channels = [decoder decodeInt64ForKey:@"channels"];
         _channelLayoutTag = [decoder decodeInt64ForKey:@"channelLayoutTag"];
 
-        _embeddedAudioFormat = [decoder decodeIntegerForKey:@"embeddedAudioFormat"];
+        _extensionType = [decoder decodeIntegerForKey:@"extensionType"];
 
         _fallbackTrackId = [decoder decodeInt64ForKey:@"fallbackTrackId"];
     }

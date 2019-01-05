@@ -161,11 +161,13 @@ enum : MP42AudioCodecType
     kMP42AudioCodecType_FairPlay_AC3            = 'pac3'
 };
 
-// Audio Format
-typedef FourCharCode MP42EmbeddedAudioCodecType;
-enum : MP42EmbeddedAudioCodecType
+// Audio Stream Extension
+typedef FourCharCode MP42AudioEmbeddedExtension;
+enum : MP42AudioEmbeddedExtension
 {
-    kMP42EmbeddedAudioCodecType_Atmos                   = 'atmo',
+    // EC3
+    kMP42AudioEmbeddedExtension_JOC        = 'joc ',
+    kMP42AudioEmbeddedExtension_None       = 0
 };
 
 // Subtitle Format

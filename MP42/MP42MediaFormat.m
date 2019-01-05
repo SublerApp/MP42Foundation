@@ -286,7 +286,7 @@ NSString *localizedAudioDisplayName(FourCharCode mediaSubtype)
             result = NSLocalizedString(@"PCM", nil);
             break;
 
-        case kMP42EmbeddedAudioCodecType_Atmos:
+        case kMP42AudioEmbeddedExtension_JOC:
             result = NSLocalizedString(@"Atmos", nil);
             break;
 

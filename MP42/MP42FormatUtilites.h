@@ -9,6 +9,8 @@
 #ifndef MP42FormatUtilites_h
 #define MP42FormatUtilites_h
 
+#import "MP42MediaFormat.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -18,7 +20,7 @@ extern "C" {
     UInt32 getDefaultChannelLayout(UInt32 channelsCount);
 
     int readAC3Config(uint64_t acmod, uint64_t lfeon, UInt32 *channelsCount, UInt32 *channelLayoutTag);
-    int readEAC3Config(const uint8_t *cookie, uint32_t cookieLen, UInt32 *channelsCount, UInt32 *channelLayoutTag, UInt8 *numAtmosObjects);
+	int readEAC3Config(const uint8_t *cookie, uint32_t cookieLen, UInt32 *channelsCount, UInt32 *channelLayoutTag, UInt8 *ec3ExtensionType, UInt8 *complexityIndex);
 
     int analyze_EAC3(void **context ,uint8_t *frame, uint32_t size);
     CFDataRef createCookie_EAC3(void *context);
@@ -72,6 +74,9 @@ extern "C" {
         int ps;  ///< -1 implicit, 1 presence
         int frame_length_short;
     } MPEG4AudioConfig;
+
+#define EC3Extension_JOC  1
+#define EC3Extension_None 0
 	
 	typedef struct eac3_info {
 		uint8_t *frame;
@@ -85,8 +90,18 @@ extern "C" {
 		uint16_t data_rate;
 		/* number of independent substreams */
 		uint8_t  num_ind_sub;
-		uint8_t  num_objects_oamd;				//OAMD>0 && JOC>0 indicates Atmos
-		uint8_t  num_objects_joc;				//OAMD>0 && JOC>0 indicates Atmos
+		/*
+		 See ETSI TS 103 420 V1.2.1 (2018-10)
+		 8.3.2 Semantics
+		 8.3.2.1 flag_ec3_extension_type_a
+		 The element flag_ec3_extension_type_a is a flag that, if set to true, indicates the enhanced AC-3 extension as defined in the present document.
+		 8.3.2.2 complexity_index_type_a
+		 The element complexity_index_type_a is an unsigned integer that indicates the decoding complexity of the enhanced AC-3 extension defined in the present document.
+		 The value of this field shall be equal to the total number of bed objects, ISF objects and dynamic objects indicated by the parameters in the program_assignment section of the object audio metadata payload.
+		 The maximum value of this field shall be 16.
+		 */
+		uint8_t  ec3_extension_type;			// 0x01 -> E-AC3 JOC extension
+		uint8_t  complexity_index;				// 0 <= complexity_index <= 16
 		struct {
 			/* sample rate code (see ff_ac3_sample_rate_tab) 2 bits */
 			uint8_t fscod;

@@ -269,7 +269,7 @@ static const int eac3_layout_lfe[8] = {
 
 #pragma mark - EAC3
 
-int readEAC3Config(const uint8_t *cookie, uint32_t cookieLen, UInt32 *channelsCount, UInt32 *channelLayoutTag, UInt8 *numAtmosObjects)
+int readEAC3Config(const uint8_t *cookie, uint32_t cookieLen, UInt32 *channelsCount, UInt32 *channelLayoutTag, UInt8 *ec3ExtensionType, UInt8 *complexityIndex)
 {
     if (cookieLen < 5) {
         return 0;
@@ -280,7 +280,7 @@ int readEAC3Config(const uint8_t *cookie, uint32_t cookieLen, UInt32 *channelsCo
 
     b.GetBits(13); // data_rate
     b.GetBits(3);  // num_ind_sub
-
+	// end bytes #0 and #1
     // we support only one independent substream
     for (int i = 0; i < 1; i++)
     {
@@ -290,12 +290,13 @@ int readEAC3Config(const uint8_t *cookie, uint32_t cookieLen, UInt32 *channelsCo
         b.GetBits(2); // fscod
         bsid = b.GetBits(5); // bsid
         b.SkipBits(1); // reserved
+		// end byte #2
         b.GetBits(1); // asvc
         b.GetBits(3); // bsmod
 
         acmod = b.GetBits(3);
         lfeon = b.GetBits(1);
-
+		// end byte #3
         b.SkipBits(3); // reserved
 
         uint8_t num_dep_sub = 0;
@@ -304,11 +305,23 @@ int readEAC3Config(const uint8_t *cookie, uint32_t cookieLen, UInt32 *channelsCo
         num_dep_sub = b.GetBits(4);
 
         if (num_dep_sub > 0 && cookieLen > 5) {
-            chan_loc = b.GetBits(9);
+            chan_loc = b.GetBits(9);	//chan_loc
+			// end byts #4 and #5
 		} else {
 			b.GetBits(1); //reserved
+			// end byte #4
 		}
 
+		// E-AC3 JOC extension. See ETSI TS 103 420 V1.2.1 (2018-10) - C.3.1 EC3SpecifcBox for details.
+		*ec3ExtensionType = EC3Extension_None;
+		*complexityIndex = 0;
+		if (bsid >= 16 && cookieLen >= 7) {
+			b.SkipBits(7); 						// reserved
+			*ec3ExtensionType = b.GetBits(1);	//MP42EC3Extension_JOC
+			if (*ec3ExtensionType)
+				*complexityIndex = b.GetBits(8);
+		}
+		
         if (acmod == 7 && lfeon && chan_loc != 0) {
             // TODO: complete the list
             if (chan_loc & 0x1) {
@@ -349,14 +362,6 @@ int readEAC3Config(const uint8_t *cookie, uint32_t cookieLen, UInt32 *channelsCo
         }
 
         *channelsCount = AudioChannelLayoutTag_GetNumberOfChannels(*channelLayoutTag);
-    }
-
-    if (cookieLen >= 7) {
-        b.SkipBits(7); //reserved
-        bool flag_ec3_extension_type_a = b.GetBits(1);
-        if (flag_ec3_extension_type_a) {
-            *numAtmosObjects = b.GetBits(8);
-        }
     }
 
     return 1;
@@ -645,47 +650,42 @@ const uint16_t avpriv_ac3_channel_layout_tab[8] = {
  * Coded AC-3 header values up to the lfeon element, plus derived values.
  */
 typedef struct AC3HeaderInfo {
-    /** @name Coded elements
-     * @{
-     */
-    uint16_t sync_word;
-    uint16_t crc1;
-    uint8_t sr_code;
-    uint8_t bitstream_id;
-    uint8_t bitstream_mode;
-    uint8_t channel_mode;
-    uint8_t lfe_on;
-    uint8_t frame_type;
-    int substreamid;                        ///< substream identification
-    int center_mix_level;                   ///< Center mix level index
-    int surround_mix_level;                 ///< Surround mix level index
-    uint16_t channel_map;
-    int num_blocks;                         ///< number of audio blocks
-    int dolby_surround_mode;
-	uint8_t	skipflde;						//If true, full skip field syntax is present in each audio block
-	uint16_t skipl;							//indicates the number of dummy bytes to skip (ignore) before unpacking the mantissas of the current audio block
-	uint8_t blkswe;							//If true, full block switch syntax shall be present in each audio block
-	uint8_t dithflage;						//If true, full dither flag syntax shall be present in each audio block
-	uint8_t  num_objects_oamd;				//OAMD>0 && JOC>0 indicates Atmos
-	uint8_t  num_objects_joc;				//OAMD>0 && JOC>0 indicates Atmos
-    /** @} */
-
-    /** @name Derived values
-     * @{
-     */
-    uint8_t sr_shift;
-    uint16_t sample_rate;
-    uint32_t bit_rate;
-    uint8_t channels;
-    uint16_t frame_size;
-    uint64_t channel_layout;
-    /** @} */
+	/** @name Coded elements
+	 * @{
+	 */
+	uint16_t	sync_word;
+	uint16_t	crc1;
+	uint8_t		sr_code;
+	uint8_t		bitstream_id;
+	uint8_t		bitstream_mode;
+	uint8_t		channel_mode;
+	uint8_t		lfe_on;
+	uint8_t		frame_type;
+	int			substreamid;                        ///< substream identification
+	int			center_mix_level;                   ///< Center mix level index
+	int			surround_mix_level;                 ///< Surround mix level index
+	uint16_t	channel_map;
+	int			num_blocks;                         ///< number of audio blocks
+	int			dolby_surround_mode;
+	uint8_t		blkswe;							//If true, full block switch syntax shall be present in each audio block
+	uint8_t		dithflage;						//If true, full dither flag syntax shall be present in each audio block
+	uint8_t		ec3_extension_type;				//E-AC3 Extension as per ETSI TS 103 420
+	uint8_t		complexity_index;				//Decoding complexity of E-AC3 Extension as per ETSI TS 103 420
+	/** @} */
+	
+	/** @name Derived values
+	 * @{
+	 */
+	uint8_t		sr_shift;
+	uint16_t	sample_rate;
+	uint32_t	bit_rate;
+	uint8_t		channels;
+	uint16_t	frame_size;
+	uint64_t	channel_layout;
+	/** @} */
 } AC3HeaderInfo;
 
-void analyze_eac3_atmos(CMemoryBitstream &b, AC3HeaderInfo *phdr);
-void analyze_ac3_skipfld(CMemoryBitstream &b, AC3HeaderInfo *phdr);
-void analyze_ac3_auxdata(CMemoryBitstream &b, AC3HeaderInfo *phdr);
-void parse_eac3_bsi(CMemoryBitstream &b, AC3HeaderInfo *hdr);
+void analyze_eac3_addbsi(CMemoryBitstream &b, AC3HeaderInfo *phdr);
 
 static int ac3_parse_header(CMemoryBitstream &b, AC3HeaderInfo **phdr)
 {
@@ -709,8 +709,8 @@ static int ac3_parse_header(CMemoryBitstream &b, AC3HeaderInfo **phdr)
 
     /* read ahead to bsid to distinguish between AC-3 and E-AC-3 */
     b.SkipBits(24);
-    hdr->bitstream_id = b.GetBits(5);
-    b.SetBitPosition(b.GetBitPosition() - 29);
+	hdr->bitstream_id = b.GetBits(5);			// bsid
+	b.SetBitPosition(b.GetBitPosition() - 29);	// back to start of bsi
     if (hdr->bitstream_id > 16) {
         return AAC_AC3_PARSE_ERROR_BSID;
     }
@@ -805,30 +805,211 @@ static int ac3_parse_header(CMemoryBitstream &b, AC3HeaderInfo **phdr)
     if (hdr->lfe_on) {
         hdr->channel_layout |= AV_CH_LOW_FREQUENCY;
     }
-	//location in stream - bsi().dialnorm(5)
+	//location in stream - bsi().dialnorm(5), bitpos = 45
     try {
-        analyze_eac3_atmos(b, hdr);
-    }  catch (int e) {
+		analyze_eac3_addbsi(b, hdr);
+	}  catch (int e) {
         return 1;
     }
 
 	return 0;
 }
 
-void analyze_eac3_atmos(CMemoryBitstream &b, AC3HeaderInfo *phdr)
+/**
+ *  General approach and part of code from MediaInfoLib ac3 parser.
+ *  https://github.com/MediaArea/MediaInfoLib/blob/master/Source/MediaInfo/Audio/File_Ac3.cpp
+ */
+//---------------------------------------------------------------------------
+//E.1.2.2 bsi - Bit stream information
+void analyze_eac3_addbsi(CMemoryBitstream &b, AC3HeaderInfo *hdr)
 {
-    if (phdr->bitstream_id != 16) {
+	if(hdr->bitstream_id != 16)
 		return;
-    }
-
+	
+	//location in stream - bsi().dialnorm(5), savedbitpos = 63
 	uint32_t savedbitpos = b.GetBitPosition();	//calling routines assume bit pos in b after this fn returns!
-	parse_eac3_bsi(b, phdr);					//resets bit_pos to frame start + 2
-	//parse_eac3_audfrm(b, phdr);					//starts from bit_pos where bsi left off
-	//for (int blk = 0; blk < hdr->num_blocks; blk++)
-	//	parse_eac3_audblk(b, phdr, 0 /*blk*/);	//starts from bit_pos where audfrm left off
-	analyze_ac3_skipfld(b, phdr);				//shall start from the skipfield
-	analyze_ac3_auxdata(b, phdr);				//shall start from the frame end
+	
+	uint8_t addbsi[64] = {0};
+	
+#ifdef DEBUG_PARSER
+	printf("***parse_eac3_bsi start bit pos: %d remaining bits: %d\n", b.GetBitPosition(), b.GetRemainingBits());
+#endif
+	b.SetBitPosition(16);				//skip syncword
+	b.SkipBits(2+3+11+2+2+3+1+5+5);		//strmtyp,substreamid,frmsiz,fscod,numblkscod,acmod,lfeon,bsid,dialnorm
+	if(b.GetBits(1))					//compre ..................................................................................... 1
+		b.SkipBits(8);					//{compr} ......................................................................... 8
+	if(hdr->channel_mode == 0x0) 		/* if 1+1 mode (dual mono, so some items need a second value) */
+	{
+		b.SkipBits(5);					//dialnorm2 ............................................................................... 5
+		if(b.GetBits(1))				//compr2e ................................................................................. 1
+			b.SkipBits(8);				//{compr2} .................................................................... 8
+	}
+	if(hdr->frame_type == 0x1) 			/* if dependent stream */
+	{
+		if(b.GetBits(1))				//chanmape ................................................................................ 1
+			b.SkipBits(16);				//{chanmap} ................................................................. 16
+	}
+	/* mixing metadata */
+	if(b.GetBits(1))					//mixmdate ................................................................................... 1
+	{
+		if(hdr->channel_mode > 0x2) 	/* if more than 2 channels */
+			b.SkipBits(2);				//{dmixmod} ................................. 2
+		if((hdr->channel_mode & 0x1) && (hdr->channel_mode > 0x2)) /* if three front channels exist */
+			b.SkipBits(3+3);			//ltrtcmixlev,lorocmixlev .......................................................................... 3
+		if(hdr->channel_mode & 0x4) 	/* if a surround channel exists */
+			b.SkipBits(3+3);			//ltrtsurmixlev,lorosurmixlev
+		if(hdr->lfe_on) 				/* if the LFE channel exists */
+		{
+			if(b.GetBits(1)) 			//lfemixlevcode
+				b.SkipBits(5);			//lfemixlevcod
+		}
+		if(hdr->frame_type == 0x0) 		/* if independent stream */
+		{
+			if(b.GetBits(1)) 			//pgmscle
+				b.SkipBits(6);			//pgmscl
+			if(hdr->channel_mode == 0x0) /* if 1+1 mode (dual mono, so some items need a second value) */
+			{
+				if(b.GetBits(1)) 		//pgmscl2e
+					b.SkipBits(6);		//pgmscl2
+			}
+			if(b.GetBits(1)) 			//extpgmscle
+				b.SkipBits(6);			//extpgmscl
+			uint8_t mixdef = b.GetBits(2);
+			if(mixdef == 0x1) 			/* mixing option 2 */
+				b.SkipBits(1+1+3);		//premixcmpsel, drcsrc, premixcmpscl
+			else if(mixdef == 0x2) 		/* mixing option 3 */ {
+				b.SkipBits(12);
+			}
+			else if(mixdef == 0x3) 		/* mixing option 4 */
+			{
+				uint8_t mixdeflen = b.GetBits(5);	//mixdeflen
+				if (b.GetBits(1))		//mixdata2e
+				{
+					b.SkipBits(1+1+3);	//premixcmpsel,drcsrc,premixcmpscl
+					if(b.GetBits(1)) 	//extpgmlscle
+						b.SkipBits(4);	//extpgmlscl
+					if(b.GetBits(1)) 	//extpgmcscle
+						b.SkipBits(4);	//extpgmcscl
+					if(b.GetBits(1)) 	//extpgmrscle
+						b.SkipBits(4);	//extpgmrscl
+					if(b.GetBits(1)) 	//extpgmlsscle
+						b.SkipBits(4);	//extpgmlsscl
+					if(b.GetBits(1)) 	//extpgmrsscle
+						b.SkipBits(4);	//extpgmrsscl
+					if(b.GetBits(1)) 	//extpgmlfescle
+						b.SkipBits(4);	//extpgmlfescl
+					if(b.GetBits(1)) 	//dmixscle
+						b.SkipBits(4);	//dmixscl
+					if (b.GetBits(1))	//addche
+					{
+						if(b.GetBits(1))	//extpgmaux1scle
+							b.SkipBits(4);	//extpgmaux1scl
+						if(b.GetBits(1))	//extpgmaux2scle
+							b.SkipBits(4);	//extpgmaux2scl
+					}
+				}
+				if(b.GetBits(1))			//mixdata3e
+				{
+					b.SkipBits(5);			//spchdat
+					if(b.GetBits(1))		//addspchdate
+					{
+						b.SkipBits(5+2);	//spchdat1,spchan1att
+						if(b.GetBits(1))	//addspchdat1e
+							b.SkipBits(5+3);//spchdat2,spchan2att
+					}
+				}
+				//mixdata ........................................ (8*(mixdeflen+2)) - no. mixdata bits
+				b.SkipBytes(mixdeflen + 2);
+				if(b.GetBitPosition() & 0x7)
+					//mixdatafill ................................................................... 0 - 7
+					//used to round up the size of the mixdata field to the nearest byte
+					b.SkipBits(8 - (b.GetBitPosition() & 0x7));
+			}
+			if(hdr->channel_mode < 0x2) 	/* if mono or dual mono source */
+			{
+				if(b.GetBits(1))			//paninfoe
+					b.SkipBits(8+6);		//panmean,paninfo
+				if(hdr->channel_mode == 0x0) /* if 1+1 mode (dual mono - some items need a second value) */
+				{
+					if(b.GetBits(1))		//paninfo2e
+						b.SkipBits(8+6);	//panmean2,paninfo2
+				}
+			}
+			/* mixing configuration information */
+			if(b.GetBits(1))				//frmmixcfginfoe
+			{
+				if(hdr->num_blocks == 1) {	//if(numblkscod == 0x0)
+					b.SkipBits(5);			//blkmixcfginfo[0]
+				}
+				else
+				{
+					for(int blk = 0; blk < hdr->num_blocks; blk++)
+					{
+						if(b.GetBits(1))	//blkmixcfginfoe[blk]
+							b.SkipBits(5);	//blkmixcfginfo[blk]
+					}
+				}
+			}
+		}
+	}
+	/* informational metadata */
+	if(b.GetBits(1))						//infomdate
+	{
+		b.SkipBits(3+1+1);					//bsmod,copyrightb,origbs
+		if(hdr->channel_mode == 0x2) 		/* if in 2/0 mode */
+			b.SkipBits(2+2);				//dsurmod,dheadphonmod
+		if(hdr->channel_mode >= 0x6) 		/* if both surround channels exist */
+			b.SkipBits(2);					//dsurexmod
+		if(b.GetBits(1))					//audprodie
+			b.SkipBits(5+2+1);				//mixlevel,roomtyp,adconvtyp
+		if(hdr->channel_mode == 0x0)		/* if 1+1 mode (dual mono, so some items need a second value) */
+		{
+			if(b.GetBits(1))				//audprodi2e
+				b.SkipBits(5+2+1);			//mixlevel2,roomtyp2,adconvtyp2
+		}
+		if(hdr->sr_code < 0x3) 				/* if not half sample rate */
+			b.SkipBits(1);					//sourcefscod
+	}
+	if(hdr->frame_type == 0x0 && hdr->num_blocks != 6)	//(numblkscod != 0x3)
+		b.SkipBits(1);						//convsync
+	if(hdr->frame_type == 0x2) 				/* if bit stream converted from AC-3 */
+	{
+		uint8_t blkid = 0;
+		if(hdr->num_blocks == 6) 			/* 6 blocks per syncframe */
+			blkid = 1;
+		else
+			blkid = b.GetBits(1);
+		if(blkid)
+			b.SkipBits(6);					//frmsizecod
+	}
+	// JOC extension can be read in addbsi field. Everything prior was only necessary to get here.
+	if(b.GetBits(1))						//addbsie
+	{
+#ifdef DEBUG_PARSER
+		printf("***parse_eac3_bsi ADDBSIExists at bit pos: %d\n", b.GetBitPosition());
+#endif
+		uint8_t addbsil = b.GetBits(6) + 1;	//addbsil
+#ifdef DEBUG_PARSER
+		printf("***parse_eac3_bsi ADDBSILength: %d bytes\n", addbsil);
+#endif
+		for(int i = 0; i < addbsil; i++) {
+			addbsi[i] = b.GetBits(8);		//addbsi
+#ifdef DEBUG_PARSER
+			printf("***parse_eac3_bsi ADDBSI byte #%d: 0x%X (%d)\n", i, addbsi[i], addbsi[i]);
+#endif
+		}
+	}
+#ifdef DEBUG_PARSER
+	printf("***parse_eac3_bsi end bit pos: %d remaining bits: %d\n", b.GetBitPosition(), b.GetRemainingBits());
+#endif
 	b.SetBitPosition(savedbitpos);				//so that analyze_EAC3() does not raise exception
+
+	// Defined in 8.3 of ETSI TS 103 420
+	if(addbsi[0] & EC3Extension_JOC)
+	{
+		hdr->ec3_extension_type = EC3Extension_JOC;
+		hdr->complexity_index   = addbsi[1];
+	}
 }
 
 int analyze_EAC3(void **context, uint8_t *frame, uint32_t size)
@@ -888,7 +1069,8 @@ int analyze_EAC3(void **context, uint8_t *frame, uint32_t size)
         info->substream[hdr->substreamid].bsmod = hdr->bitstream_mode;
         info->substream[hdr->substreamid].acmod = hdr->channel_mode;
         info->substream[hdr->substreamid].lfeon = hdr->lfe_on;
-
+		info->substream[hdr->substreamid].num_dep_sub = 0;		// to count num_dep_sub's only in this frame! Otherwise, if instantiated context passed in, num_dep_sub gets incremented cumulatively.
+		
         /* Parse dependent substream(s), if any */
         if (size != hdr->frame_size) {
             int cumul_size = hdr->frame_size;
@@ -911,7 +1093,7 @@ int analyze_EAC3(void **context, uint8_t *frame, uint32_t size)
 
                 /* header is parsed up to lfeon, but custom channel map may be needed */
                 /* skip bsid */
-                gbc.SkipBits(5);
+				//gbc.SkipBits(5); // PV: ac3_parse_header() parses up to dialnorm!
 
                 /* skip volume control params */
                 for (i = 0; i < (hdr->channel_mode ? 1 : 2); i++) {
@@ -933,9 +1115,9 @@ int analyze_EAC3(void **context, uint8_t *frame, uint32_t size)
     }
 
 concatenate:
-	//hdr->num_objects_xxx freshly updated from stream in ac3_parse_header()
-	info->num_objects_oamd = hdr->num_objects_oamd > info->num_objects_oamd ? hdr->num_objects_oamd : info->num_objects_oamd;
-	info->num_objects_joc  = hdr->num_objects_joc  > info->num_objects_joc  ? hdr->num_objects_joc  : info->num_objects_joc;
+
+	info->ec3_extension_type |= hdr->ec3_extension_type;
+	info->complexity_index    = MAX(hdr->complexity_index, info->complexity_index);
 
     free(hdr);
 
@@ -977,492 +1159,6 @@ concatenate:
     return 0;
 }
 
-/**
- *  General approach and part of code from MediaInfoLib ac3 parser.
- *  https://github.com/MediaArea/MediaInfoLib/blob/master/Source/MediaInfo/Audio/File_Ac3.cpp
- */
-//---------------------------------------------------------------------------
-//E.1.2.2 bsi - Bit stream information
-void parse_eac3_bsi(CMemoryBitstream &b, AC3HeaderInfo *hdr)
-{
-#ifdef DEBUG_PARSER
-	printf("***parse_eac3_bsi start bit pos: %d remaining bits: %d\n", b.GetBitPosition(), b.GetRemainingBits());
-#endif
-	b.SetBitPosition(16);					//skip syncword
-	b.SkipBits(2+3+11+2+2+3+1);			//strmtyp,substreamid,frmsiz,fscod,numblkscod,acmod,lfeon
-	if(b.GetBits(1))						//compre ..................................................................................... 1
-		b.SkipBits(8);					//{compr} ......................................................................... 8
-	if(hdr->channel_mode == 0x0) 			/* if 1+1 mode (dual mono, so some items need a second value) */
-	{
-		b.SkipBits(5);					//dialnorm2 ............................................................................... 5
-		if(b.GetBits(1))					//compr2e ................................................................................. 1
-			b.SkipBits(8);				//{compr2} .................................................................... 8
-	}
-	if(hdr->frame_type == 0x1) 				/* if dependent stream */
-	{
-		if(b.GetBits(1))					//chanmape ................................................................................ 1
-			b.SkipBits(16);				// {chanmap} ................................................................. 16
-	}
-	/* mixing metadata */
-	if(b.GetBits(1))						//mixmdate ................................................................................... 1
-	{
-		if(hdr->channel_mode > 0x2) 		/* if more than 2 channels */
-			b.SkipBits(2);				//{dmixmod} ................................. 2
-		if((hdr->channel_mode & 0x1) && (hdr->channel_mode > 0x2)) /* if three front channels exist */
-			b.SkipBits(6);				//ltrtcmixlev,lorocmixlev .......................................................................... 3
-		if(hdr->channel_mode & 0x4) 		/* if a surround channel exists */
-			b.SkipBits(6+3);				//ltrtsurmixlev,lorosurmixlev
-		if(hdr->lfe_on) 					/* if the LFE channel exists */
-		{
-			if(b.GetBits(1)) 				//lfemixlevcode
-				b.SkipBits(5);			//lfemixlevcod
-		}
-		if(hdr->frame_type == 0x0) 			/* if independent stream */
-		{
-			if(b.GetBits(1)) 				//pgmscle
-				b.SkipBits(6);			//pgmscl
-			if(hdr->channel_mode == 0x0) 	/* if 1+1 mode (dual mono, so some items need a second value) */
-			{
-				if(b.GetBits(1)) 			//pgmscl2e
-					b.SkipBits(6);		//pgmscl2
-			}
-			if(b.GetBits(1)) 				//extpgmscle
-				b.SkipBits(6);			//extpgmscl
-			uint8_t mixdef = b.GetBits(2);
-			if(mixdef == 0x1) 				/* mixing option 2 */
-				b.SkipBits(1+1+3);		//premixcmpsel, drcsrc, premixcmpscl
-			else if(mixdef == 0x2) 			/* mixing option 3 */ {
-				b.SkipBits(12);
-			}
-			else if(mixdef == 0x3) 			/* mixing option 4 */
-			{
-				uint8_t mixdeflen = b.GetBits(5);	//mixdeflen
-				if (b.GetBits(1))			//mixdata2e
-				{
-					b.SkipBits(1+1+3);	//premixcmpsel,drcsrc,premixcmpscl
-					if(b.GetBits(1)) 		//extpgmlscle
-						b.SkipBits(4);	//extpgmlscl
-					if(b.GetBits(1)) 		//extpgmcscle
-						b.SkipBits(4);	//extpgmcscl
-					if(b.GetBits(1)) 		//extpgmrscle
-						b.SkipBits(4);	//extpgmrscl
-					if(b.GetBits(1)) 		//extpgmlsscle
-						b.SkipBits(4);	//extpgmlsscl
-					if(b.GetBits(1)) 		//extpgmrsscle
-						b.SkipBits(4);	//extpgmrsscl
-					if(b.GetBits(1)) 		//extpgmlfescle
-						b.SkipBits(4);	//extpgmlfescl
-					if(b.GetBits(1)) 		//dmixscle
-						b.SkipBits(4);	//dmixscl
-					if (b.GetBits(1))		//addche
-					{
-						if(b.GetBits(1))	//extpgmaux1scle
-							b.SkipBits(4);//extpgmaux1scl
-						if(b.GetBits(1))	//extpgmaux2scle
-							b.SkipBits(4);//extpgmaux2scl
-					}
-				}
-				if(b.GetBits(1))			//mixdata3e
-				{
-					b.SkipBits(5);		//spchdat
-					if(b.GetBits(1))		//addspchdate
-					{
-						b.SkipBits(5+2);	//spchdat1,spchan1att
-						if(b.GetBits(1))	//addspchdat1e
-							b.SkipBits(5+3);	//spchdat2,spchan2att
-					}
-				}
-				//mixdata ........................................ (8*(mixdeflen+2)) - no. mixdata bits
-				b.SkipBytes(mixdeflen + 2);
-				if(b.GetBitPosition() & 0x7)
-					//mixdatafill ................................................................... 0 - 7
-					//used to round up the size of the mixdata field to the nearest byte
-					b.SkipBits(8 - (b.GetBitPosition() & 0x7));
-			}
-			if(hdr->channel_mode < 0x2) /* if mono or dual mono source */
-			{
-				if(b.GetBits(1))			//paninfoe
-					b.SkipBits(8+6);		//panmean,paninfo
-				if(hdr->channel_mode == 0x0) /* if 1+1 mode (dual mono - some items need a second value) */
-				{
-					if(b.GetBits(1))		//paninfo2e
-						b.SkipBits(8+6);	//panmean2,paninfo2
-				}
-			}
-			/* mixing configuration information */
-			if(b.GetBits(1))				//frmmixcfginfoe
-			{
-				if(hdr->num_blocks == 1) {	//if(numblkscod == 0x0)
-					b.SkipBits(5);		//blkmixcfginfo[0]
-				}
-				else
-				{
-					for(int blk = 0; blk < hdr->num_blocks; blk++)
-					{
-						if(b.GetBits(1))	//blkmixcfginfoe[blk]
-							b.SkipBits(5);//blkmixcfginfo[blk]
-					}
-				}
-			}
-		}
-	}
-	/* informational metadata */
-	if(b.GetBits(1))						//infomdate
-	{
-		b.SkipBits(3+1+1);				//bsmod,copyrightb,origbs
-		if(hdr->channel_mode == 0x2) 		/* if in 2/0 mode */
-			b.SkipBits(2+2);				//dsurmod,dheadphonmod
-		if(hdr->channel_mode >= 0x6) 		/* if both surround channels exist */
-			b.SkipBits(2);				//dsurexmod
-		if(b.GetBits(1))					//audprodie
-			b.SkipBits(5+2+1);			//mixlevel,roomtyp,adconvtyp
-		if(hdr->channel_mode == 0x0)		/* if 1+1 mode (dual mono, so some items need a second value) */
-		{
-			if(b.GetBits(1))				//audprodi2e
-				b.SkipBits(5+2+1);		//mixlevel2,roomtyp2,adconvtyp2
-		}
-		if(hdr->sr_code < 0x3) 				/* if not half sample rate */
-			b.SkipBits(1);				//sourcefscod
-	}
-	if(hdr->frame_type == 0x0 && hdr->num_blocks != 6)	//(numblkscod != 0x3)
-		b.SkipBits(1);					//convsync
-	if(hdr->frame_type == 0x2) 				/* if bit stream converted from AC-3 */
-	{
-		uint8_t blkid = 0;
-		if(hdr->num_blocks == 6) 			/* 6 blocks per syncframe */
-			blkid = 1;
-		else
-			blkid = b.GetBits(1);
-		if(blkid)
-			b.SkipBits(6);				//frmsizecod
-	}
-	if(b.GetBits(1))						//addbsie
-	{
-		uint8_t addbsil = b.GetBits(6) + 1;//addbsil
-		b.SkipBytes(addbsil);				//addbsi
-	}
-#ifdef DEBUG_PARSER
-	printf("***parse_eac3_bsi end bit pos: %d remaining bits: %d\n", b.GetBitPosition(), b.GetRemainingBits());
-#endif
-} 											/* end of bsi */
-
-/** Compute ceil(log2(x)).
- * @param x value used to compute ceil(log2(x))
- * @return computed ceiling of log2(x)
- */
-static int ff_log2_c(unsigned int v);
-static int av_ceil_log2_c(int x);
-
-static int av_ceil_log2_c(int x)
-{
-	return ff_log2_c((x - 1) << 1);
-}
-
-const uint8_t ff_log2_tab[256] = {
-	0,0,1,1,2,2,2,2,3,3,3,3,3,3,3,3,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,
-	5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,
-	6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,
-	6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,
-	7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
-	7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
-	7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
-	7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7
-};
-
-static int ff_log2_c(unsigned int v)
-{
-	int n = 0;
-	if (v & 0xffff0000) {
-		v >>= 16;
-		n += 16;
-	}
-	if (v & 0xff00) {
-		v >>= 8;
-		n += 8;
-	}
-	n += ff_log2_tab[v];
-	
-	return n;
-}
-
-uint8_t cplinu[AC3MaxBlkPerFrame] = {0,0,0,0,0,0};
-uint8_t cplstre[AC3MaxBlkPerFrame] = {0,0,0,0,0,0};
-uint8_t chexpstr[AC3MaxBlkPerFrame][AC3MaxChan] = {{0,0,0,0,0},{0,0,0,0,0},{0,0,0,0,0},{0,0,0,0,0},{0,0,0,0,0},{0,0,0,0,0}};
-uint8_t cplexpstr[AC3MaxBlkPerFrame] = {0,0,0,0,0,0};
-uint8_t lfeexpstr[AC3MaxBlkPerFrame] = {0,0,0,0,0,0};
-uint8_t bamode = 0;
-uint8_t snroffststr = 0;
-uint8_t frmfgaincode = 0;
-uint8_t dbaflde = 0;
-
-uint32_t variable_bits(CMemoryBitstream &b, uint8_t n_bits)
-{
-	uint32_t value = 0;
-	uint8_t  read_more = 0;
-	
-	do {
-		value += b.GetBits(n_bits);		//value += read ...................................................................... n_bits
-		read_more = b.GetBits(1);		//read_more ............................................................................... 1
-		if (read_more) {
-			value <<= n_bits;
-			value += (1 << n_bits);
-		}
-	} while(read_more);
-	return value;
-}
-
-bool parse_ac3_oamd(CMemoryBitstream &b, uint32_t emdf_payload_size, uint8_t *num_objects_oamd)
-{
-	uint8_t object_count = 0;
-	uint32_t start_bitPos = b.GetBitPosition();
-	
-	uint8_t oa_md_version_bits = b.GetBits(2);	//oa_md_version_bits; ........................................................................ 2
-	if (oa_md_version_bits == 0x3) {
-        b.SkipBits(3); //oa_md_version_bits += b.GetBits(3);		//oa_md_version_bits_ext; .................................................................... 3
-	}
-	object_count = b.GetBits(5);				//object_count_bits; ......................................................................... 5
-	if (object_count == 0x1F) {
-		object_count += b.GetBits(7);			//object_count_bits_ext; ..................................................................... 7
-	}
-	object_count++; 							//object_count = object_count_bits + 1 - object_count indicates the total number of objects in the bitstream
-	object_count = MIN(object_count, 16);		//ugly hack, but tvOS 12 public beta only seems to accept 0x10(16) as maximum
-	if (object_count > *num_objects_oamd) {
-		*num_objects_oamd = object_count;		//update only if more objects discovered than the previous value (unclear, if object count can fluctuate in given stream?)
-	}
-#ifdef DEBUG_PARSER
-	printf("found oamd_object_count: 0x%0x\n", object_count);
-#endif
-	emdf_payload_size -= b.GetBitPosition() - start_bitPos;
-	b.SkipBits(emdf_payload_size);				//rest of payload not interesting
-	return object_count ? true : false;
-}
-
-bool parse_ac3_joc(CMemoryBitstream &b, uint32_t emdf_payload_size, uint8_t *num_objects_joc)
-{
-	uint8_t object_count = 0;
-	uint32_t start_bitPos = b.GetBitPosition();
-
-	//joc_dmx_config_idx; .......................................................................... 3
-	b.SkipBits(3);
-	//joc_num_objects_bits; ........................................................................ 6
-	object_count = b.GetBits(3) + 1; 			//joc_num_objects = joc_num_objects_bits+ 1
-	if(object_count > *num_objects_joc) {
-		*num_objects_joc = object_count;		//update only if more objects discovered than the previous value (unclear, if object count can fluctuate in given stream?)
-	}
-#ifdef DEBUG_PARSER
-	printf("found joc_object_count: 0x%0x\n", object_count);
-#endif
-	emdf_payload_size -= b.GetBitPosition() - start_bitPos;
-	b.SkipBits(emdf_payload_size);				//rest of payload not interesting
-	return object_count ? true : false;
-}
-
-const char* Ac3_emdf_payload_id[32]=
-{
-	"Container End",
-	"Programme loudness data",
-	"Programme information",
-	"E-AC-3 substream structure",
-	"Dynamic range compression data for portable devices",
-	"Programme Language",
-	"External Data",
-	"Headphone rendering data",
-	"-",
-	"-",
-	"-",
-	"OAMD",
-	"-",
-	"-",
-	"JOC",
-	"-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"
-};
-
-bool parse_ac3_emdf(CMemoryBitstream &b, AC3HeaderInfo *hdr)
-{
-	//NB! b.head still points to emdf syncword because we peeked and did not get the bits!
-	//Could use CMemoryBitstream.PutBytes() to create a copy of CMBS	
-	uint16_t	emdf_sync = b.GetBits(16); 					//syncword 0x5838
-    if (emdf_sync != 0x5838) {
-#ifdef DEBUG_PARSER
-        printf("WTF");
-#endif
-    }
-	uint32_t	emdf_container_length = b.GetBits(16) * 8;	//emdf_container_length
-	//bool		have_oamd = false, have_joc = false;		//for the lack of better, lets expect only sequence OAMD-JOC-END
-#ifdef DEBUG_PARSER
-	printf("found EMDF container length: 0x%0x (%u)\n", emdf_container_length, emdf_container_length);
-#endif
-	if(emdf_container_length > b.GetRemainingBits())
-		return false;
-	if(b.GetBits(2))					//the emdf_version field shall be set to '0'
-		return false;
-	if(b.GetBits(3) == 0x7)				//key_id irrelevant but may have extended bits
-		variable_bits(b, 3);
-	for(;;)								//work until payload id 0x00 (Container End) is detected
-	{
-		uint8_t emdf_payload_id = b.GetBits(5);
-#ifdef DEBUG_PARSER
-		printf("found EMDF Payload 0x%x (%s) at bit pos: 0x%0x (%d)\n", emdf_payload_id, Ac3_emdf_payload_id[emdf_payload_id & 0x1F], b.GetBitPosition(), b.GetBitPosition());
-#endif
-		if (!emdf_payload_id)			//0x00 = Container End -> loop exit condition!
-			break;
-		//For now, lets consider only triplets OAMD-JOC-END
-        if (emdf_payload_id > 7 && emdf_payload_id != 11 && emdf_payload_id != 14) {
-			return false;
-        }
-        if (emdf_payload_id == 0x1F) {
-			emdf_payload_id += variable_bits(b, 5);
-        }
-		//emdf_payload_config()
-		bool smploffste = b.GetBits(1);
-        if (smploffste) {
-			b.SkipBits(12);
-        }
-        if (b.GetBits(1)) {				//duratione
-			variable_bits(b, 11);		//duration
-        }
-		//ETSI TS 103 420 V1.1.1 (2016-07), 8.2 Requirements on EMDF container requires codecdatae = 1 and groupid equal for OAMD payload and JOC payload !!
-        if (b.GetBits(1)) { 				//groupide
-			/*uint32_t groupid =*/ variable_bits(b, 2);		//groupid
-        }
-		b.SkipBits(1); 					//codecdatae
-		if(!b.GetBits(1)) 				//discard_unknown_payload
-		{
-			bool payload_frame_aligned = false;
-			if(!smploffste)
-			{
-				payload_frame_aligned = b.GetBits(1);
-				if(payload_frame_aligned)
-					b.SkipBits(2);		//create_duplicate, remove_duplicate
-			}
-			if (smploffste || payload_frame_aligned)
-				b.SkipBits(7);			//priority, proc_allowed
-		}
-		//end emdf_payload_config()
-		uint32_t emdf_payload_size = variable_bits(b, 8) * 8;
-#ifdef DEBUG_PARSER
-		printf("EMDF Payload size: 0x%x (%d)\n", emdf_payload_size, emdf_payload_size);
-#endif
-        if (emdf_payload_size > emdf_container_length) {
-			return false;
-        }
-		//for (i = 0; i < emdf_payload_size; i++)
-		//{
-		//	emdf_payload_byte .................................................................... 8
-		//}
-		if (emdf_payload_id == 11) {
-			parse_ac3_oamd(b, emdf_payload_size, &hdr->num_objects_oamd);
-			// have_oamd = true;
-		} else if (emdf_payload_id == 14) {
-			parse_ac3_joc(b, emdf_payload_size, &hdr->num_objects_joc);
-			// have_joc = true;
-		} else {
-			b.SkipBits(emdf_payload_size);
-		}
-	}
-	//emdf_protection()
-	uint8_t protection_length_primary = b.GetBits(2);
-	switch(protection_length_primary)
-	{
-		case 0: return false;
-		case 1: protection_length_primary =   8; break;
-		case 2: protection_length_primary =  32; break;
-		case 3: protection_length_primary = 128; break;
-		default: ;
-	}
-	uint8_t protection_bits_secondary = b.GetBits(2);
-	switch(protection_bits_secondary)
-	{
-		case 0: protection_bits_secondary =   0; break;
-		case 1: protection_bits_secondary =   8; break;
-		case 2: protection_bits_secondary =  32; break;
-		case 3: protection_bits_secondary = 128; break;
-		default: ;
-	}
-	b.SkipBits(protection_length_primary);
-	b.SkipBits(protection_bits_secondary);
-	return hdr->num_objects_oamd && hdr->num_objects_joc ? true : false;
-}
-
-//Atmos in E-AC-3 is detected by looking for OAMD payload (see ETSI TS 103 420)
-// in EMDF container in skipfld inside audblk() of E-AC-3 frame (see ETSI TS 102 366)
-void analyze_ac3_skipfld(CMemoryBitstream &b, AC3HeaderInfo *hdr)
-{
-    //Let's take a look at frame's auxdata()
-	uint16_t emdf_syncword;
-
-    if (hdr->bitstream_id != 16) {
-		return;
-    }
-
-	while (b.GetRemainingBits() > 16) {
-		emdf_syncword = b.PeakBits(16);
-		if (emdf_syncword == 0x5838) {					//NB! b.head still points to emdf syncword because we peeked and did not get the bits!
-#ifdef DEBUG_PARSER
-			printf("parsing bitstream_id: 0x%X frame_type: 0x%0X substreamid: 0x%0X\n", hdr->bitstream_id, hdr->frame_type, hdr->substreamid);
-			printf("SKIPFLD: found EMDF syncword 0x%x at bit pos: 0x%0x (%d)\n", emdf_syncword, b.GetBitPosition(), b.GetBitPosition());
-#endif
-            if (parse_ac3_emdf(b, hdr)) {
-				break;
-            }
-//			else										//false positive
-//				b.SkipBits(1);
-		} else {
-			b.SkipBits(1);								//NB! EMDF syncword may start anywhere in stream, also mid-byte!
-		}
-	}
-}
-//---------------------------------------------------------------------------
-//Atmos in E-AC-3 is detected by looking for OAMD payload (see ETSI TS 103 420) in EMDF container in auxdata() of E-AC-3 frame (see ETSI TS 102 366)
-void analyze_ac3_auxdata(CMemoryBitstream &b, AC3HeaderInfo *hdr)
-{	//Let's take a look at frame's auxdata()
-	uint16_t	auxdatal, emdf_syncword;
-	
-	if(hdr->bitstream_id != 16)
-		return;
-    b.SetBitPosition((hdr->frame_size * 8) - 18);
-	/*4.4.4 auxdata - Auxiliary data field
-	 Thus the aux data decoder (which may not decode any audio) may
-	 simply look to the end of the AC-3 syncframe to find auxdatal, backup auxdatal bits (from the beginning of auxdatal)
-	 in the data stream, and then unpack auxdatal bits moving forward in the data stream.
-	 */
-    if (b.GetBits(1)) { 								//auxdatae
-        b.SkipBits(-14); 								//back up to beginning of auxdatal field
-		auxdatal = b.GetBits(14);						//auxdatal
-		b.SkipBits(-auxdatal); 							//back up to beginning of auxdatal payload
-		while(b.GetRemainingBits() > 16) {
-		//while(b.GetBitPosition() + 16 < hdr->frame_size * 8) {
-			emdf_syncword = b.PeakBits(16);
-			if(emdf_syncword == 0x5838)
-			{					//NB! b.head still points to emdf syncword because we peeked and did not get the bits!
-				uint16_t emdf_container_length = b.PeakBits(32) & 0xFFFF;
-				if(emdf_container_length > hdr->frame_size - ((b.GetBitPosition() + 7) >> 3))
-				{
-					b.SkipBits(1);
-					continue;
-				}
-#ifdef DEBUG_PARSER
-				printf("parsing bitstream_id: 0x%X frame_type: 0x%0X substreamid: 0x%0X\n", hdr->bitstream_id, hdr->frame_type, hdr->substreamid);
-				printf("AUXDATA: found EMDF syncword 0x%x at bit pos: 0x%0x (%d)\n", emdf_syncword, b.GetBitPosition(), b.GetBitPosition());
-#endif
-				if(parse_ac3_emdf(b, hdr))
-					break;
-//				else										//false positive
-//					b.SkipBits(1);
-			} else
-				b.SkipBits(1);								//NB! EMDF syncword may start anywhere in stream, also mid-byte!
-		}
-	}
-}
-
-uint8_t get_num_objects_EAC3(void *context)
-{
-	struct eac3_info *info = (struct eac3_info *) context;
-	uint8_t nrobjects = info->num_objects_oamd && info->num_objects_joc ? info->num_objects_oamd : 0;
-	
-	return nrobjects;
-}
-
 CFDataRef createCookie_EAC3(void *context)
 {
     struct eac3_info *info = (struct eac3_info *) context;
@@ -1472,37 +1168,37 @@ CFDataRef createCookie_EAC3(void *context)
     cookie.AllocBytes(32);
     cookie.PutBits(info->data_rate, 13);    // data_rate
     cookie.PutBits(info->num_ind_sub, 3);   // num_ind_sub
-
+	//end byte #0 & #1
     for (int i = 0; i <= info->num_ind_sub; i++) {
         cookie.PutBits(info->substream[i].fscod, 2);
         cookie.PutBits(16, 5); // eac3 should be always 16.
 
         cookie.PutBits(0, 1); // reserved
-		//end byte #1
+		//end byte #2
         cookie.PutBits(0, 1); // asvc
 
         cookie.PutBits(info->substream[i].bsmod, 3);
         cookie.PutBits(info->substream[i].acmod, 3);
         cookie.PutBits(info->substream[i].lfeon, 1);
-		//end byte #2
+		//end byte #3
         cookie.PutBits(0, 3); // reserved
 
         cookie.PutBits(info->substream[i].num_dep_sub, 4);
 
         if (!info->substream[i].num_dep_sub) {
             cookie.PutBits(0, 1); // reserved
+			//end byte #4
         } else {
             cookie.PutBits(info->substream[i].chan_loc, 9); // chan_loc
+			//end byte #4 & #5
         }
-    }
-
-    // Atmos extension
-    if (info->num_objects_oamd && info->num_objects_joc) {
-
-        cookie.PutBits(0, 7); // reserved
-
-        cookie.PutBits(1, 1); // flag_ec3_extension_type_a
-        cookie.PutBits(info->num_objects_oamd, 8); // complexity_index_type_a
+		if (info->ec3_extension_type) {						// See ETSI TS 103 420 V1.2.1 (2018-10) - C.3 EX3SpecificBox for details
+			cookie.PutBits(0, 7); 							// reserved
+			cookie.PutBits(info->ec3_extension_type, 1); 	// E-AC3 Extension type
+			//end byte #5 or #6 (if num_dep_sub > 0)
+			cookie.PutBits(info->complexity_index, 8);		// Stream complexity Index
+			//end byte #6 or #7 (if num_dep_sub > 0)
+		}
     }
 
     free(info->frame);

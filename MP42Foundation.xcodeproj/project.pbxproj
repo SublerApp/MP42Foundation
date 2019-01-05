@@ -1354,6 +1354,7 @@
 				FRAMEWORK_VERSION = A;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "MP42/MP42Foundation-Prefix.pch";
+				"GCC_PREPROCESSOR_DEFINITIONS[arch=*]" = "$(inherited)";
 				INFOPLIST_FILE = "MP42/MP42Foundation-Info.plist";
 				INSTALL_PATH = "@loader_path/../Frameworks";
 				LIBRARY_SEARCH_PATHS = (

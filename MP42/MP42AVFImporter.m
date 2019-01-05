@@ -15,6 +15,7 @@
 #import "MP42PrivateUtilities.h"
 #import "MP42FormatUtilites.h"
 #import "MP42Track+Private.h"
+#import "MP42AudioTrack.h"
 
 #import "MP42EditListsReconstructor.h"
 
@@ -263,7 +264,8 @@
 
                 // Audio type, check the channel layout and channels number
                 MP42AudioTrack *audioTrack = [[MP42AudioTrack alloc] init];
-                UInt32 objectsCount = 0;
+
+				audioTrack.extensionType = kMP42AudioEmbeddedExtension_None;
 
                 if (formatDescription) {
                     size_t layoutSize = 0;
@@ -281,10 +283,10 @@
                     }
 					FourCharCode audioFormat = CMFormatDescriptionGetMediaSubType(formatDescription);
 					if (audioFormat == kAudioFormatAC3 || audioFormat == kAudioFormatEnhancedAC3) {
-						objectsCount = [self numObjectsForAudioTrack:audioTrack];
+						//ec3ExtensionType & complexityIndex will be populated here
+						[self streamExtensionTypeForAudioTrack:audioTrack];
 					}
                 }
-				audioTrack.embeddedAudioFormat = objectsCount > 0 ? kMP42EmbeddedAudioCodecType_Atmos : 0;
                 newTrack = audioTrack;
             }
             else if ([track.mediaType isEqualToString:AVMediaTypeSubtitle]) {
@@ -328,6 +330,7 @@
 
             // Set the usual track properties
             newTrack.format = [self formatForTrack:track];
+			[self fourCCoverrideForAtmos:newTrack];
             newTrack.trackId = track.trackID;
             newTrack.URL = self.fileURL;
 
@@ -748,11 +751,13 @@
         } else if ([assetTrack.mediaType isEqualToString:AVMediaTypeAudio]) {
 
             size_t cookieSizeOut;
-            const void *cookieBuffer = CMAudioFormatDescriptionGetMagicCookie(formatDescription, &cookieSizeOut);
+            const void *cookieBuffer = CMAudioFormatDescriptionGetMagicCookie(formatDescription, &cookieSizeOut);	// Returns proper Atmos dec3 atom (in macOS 10.14.2), if proper E-AC3 stream, not AC-3-embedded!
 
             if (cookieBuffer == NULL || cookieSizeOut == 0) {
                 return nil;
             }
+
+			code = [self fourCCoverrideForAtmos:track];
 
             if (code == kAudioFormatMPEG4AAC || code == kAudioFormatMPEG4AAC_HE || code == kAudioFormatMPEG4AAC_HE_V2) {
 
@@ -796,15 +801,25 @@
 
 				NSMutableData *ac3Info = [NSMutableData dataWithBytes:cookieBuffer length:cookieSizeOut];
 				MP42AudioTrack *audiotrack = (MP42AudioTrack *)track;
-				
-				if (audiotrack.embeddedAudioFormat == kMP42EmbeddedAudioCodecType_Atmos)
+				// besides fourCC also the bsid in cookie created by CMAudioFormatDescriptionGetMagicCookie needs to be fixed
+				NSRange cookieBsidRange = NSMakeRange(2, 1);
+				uint8_t cookieBsidByte[1];
+				[ac3Info getBytes:cookieBsidByte range:cookieBsidRange];
+				cookieBsidByte[0] = (cookieBsidByte[0] & 0xC0) | (0x10 << 1);	// keep fscod, replace bsid with 0x10. This can happen, if bsid=0x10 frames are embedded as substream inside bsid=0x06 frames.
+				[ac3Info replaceBytesInRange:cookieBsidRange withBytes:cookieBsidByte length:1];
+				// dec3 atom may be already delivered as ETSI TS 103 420 V1.2.1 compliant by CMAudioFormatDescriptionGetMagicCookie(), see above.
+				UInt8 ec3ExtensionType = EC3Extension_None;
+				UInt8 complexityIndex = 0;
+				UInt32 dummy;
+				readEAC3Config(cookieBuffer, cookieSizeOut, &dummy, &dummy, &ec3ExtensionType, &complexityIndex);
+				// do not add duplicate ec3ExtensionType & complexityIndex, if already present
+				if (!ec3ExtensionType && !complexityIndex && (audiotrack.extensionType == kMP42AudioEmbeddedExtension_JOC))
 				{
-//                    uint8_t atmosversion = 1;
-//                    uint8_t numobjects = (uint8_t)(audiotrack.objects & 0xFF);
-//                    [ac3Info appendBytes:&atmosversion length:sizeof(uint8_t)];
-//                    [ac3Info appendBytes:&numobjects   length:sizeof(uint8_t)];
+					ec3ExtensionType = audiotrack.extensionType;
+					[ac3Info appendBytes:&ec3ExtensionType	length:sizeof(MP42AudioEmbeddedExtension)];
+					[ac3Info appendBytes:&complexityIndex	length:sizeof(UInt8)];
 				}
-				
+
 				return ac3Info;
 			}
 
@@ -1309,7 +1324,7 @@
     return @"AVFoundation demuxer";
 }
 
-- (UInt32)numObjectsForAudioTrack:(MP42AudioTrack *)track
+- (UInt8)streamExtensionTypeForAudioTrack:(MP42AudioTrack *)track
 {
 	AudioFileID audioFile;
 	uint8_t *syncframe;
@@ -1317,7 +1332,6 @@
 	UInt32 ioNumBytes = 2 * 4096;							//E-AC-3 max syncframe is 4096 bytes. If embedded as substream inside AC-3 frame, tandem will occupy 2560+4096 bytes
 	AudioStreamPacketDescription outPacketDescriptions;
 	SInt64 inStartingPacket = 0;
-    UInt32 objectsCount = 0;
 	EAC3Info *eac3Info = NULL;
 
 	syncframe = (uint8_t *)malloc(ioNumBytes);
@@ -1329,7 +1343,7 @@
 				result = AudioFileReadPacketData(audioFile, false, &ioNumBytes, &outPacketDescriptions, inStartingPacket, &ioNumPackets, syncframe);
 				if(result == noErr) {
 #ifdef DEBUG_PARSER
-					printf("\n\nMP42AVFimporter analyzing %s packet number %lld with size 0x%X (%u) bits\n", [self.fileURL.resourceSpecifier UTF8String], inStartingPacket, outPacketDescriptions.mDataByteSize, outPacketDescriptions.mDataByteSize);
+					printf("\n\nMP42AVFimporter.streamExtensionTypeForAudioTrack analyzing %s packet number %lld with size 0x%X (%u) bits\n", [self.fileURL.resourceSpecifier UTF8String], inStartingPacket, outPacketDescriptions.mDataByteSize, outPacketDescriptions.mDataByteSize);
 #endif
 					analyze_EAC3((void *)&eac3Info, syncframe, ioNumBytes);		//NB! This routine allocates buffer for eac3Info, because we're passing NULL as input!
 				}
@@ -1341,11 +1355,25 @@
 	}
 
 	if (eac3Info) {
-        objectsCount = get_num_objects_EAC3(eac3Info);
+		track.extensionType = eac3Info->ec3_extension_type;
 		free(eac3Info);
 	}
 	
-	return objectsCount;
+	return track.extensionType;
+}
+
+- (FourCharCode)fourCCoverrideForAtmos:(MP42Track *)track {
+	// ugly hack to support AC-3 embedded E-AC-3 substreams that may carry JOC (Atmos)
+	// otherwise magicCookieForTrack will create a wrong cookie as for AC-3
+	if ([track isMemberOfClass:[MP42AudioTrack class]]) {
+		if (track.format == kMP42AudioCodecType_AC3) {
+			MP42AudioTrack *audioTrack = (MP42AudioTrack *)track;
+			if (audioTrack.extensionType ==  kMP42AudioEmbeddedExtension_JOC) {
+				track.format = kMP42AudioCodecType_EnhancedAC3;
+			}
+		}
+	}
+	return track.format;
 }
 
 @end

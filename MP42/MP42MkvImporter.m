@@ -287,9 +287,8 @@ static int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, ui
                 audioTrack.channelLayoutTag = channelLayout(mkvTrack);
                 audioTrack.alternateGroup = 1;
 				audioTrack.sourceId = i;
-                audioTrack.embeddedAudioFormat = [self numObjectsForAudioTrack:audioTrack mkvTrack:mkvTrack] > 0
-                                                 ? kMP42EmbeddedAudioCodecType_Atmos : 0;
- 
+				[self streamExtensionTypeForAudioTrack:audioTrack mkvTrack:mkvTrack];		//ec3ExtensionType & complexityIndex will be populated here!
+
                 for (MP42Track *track in self.tracks) {
                     if ([track isMemberOfClass:[MP42AudioTrack class]]) {
                         newTrack.enabled = NO;
@@ -730,16 +729,16 @@ static NSString * TrackNameToString(TrackInfo *track)
 #ifdef DEBUG_PARSER
 			uint16_t mkvpktnum = 0;
 #endif
-            void *context = NULL;
+			struct eac3_info *context = NULL;
             SegmentInfo *segInfo = mkv_GetFileInfo(_matroskaFile);
 
 			while (!mkv_ReadFrame(_matroskaFile, 0, &rt, &StartTime, &EndTime, &FilePos, &FrameSize, &FrameFlags) && StartTime < (segInfo->Duration / 64))
 			{
                 if (readMkvPacket(_ioStream, trackInfo, FilePos, &frame, &FrameSize)) {
 #ifdef DEBUG_PARSER
-					printf("\n\nAnalyzing MKV EAC3 packet number %d at filepos 0x%llX (%llu) with size 0x%X (%u) bits\n", mkvpktnum++, FilePos, FilePos, FrameSize * 8, FrameSize * 8);
+					printf("\n\nMP42MkvImporter.magicCookieForTrack Analyzing MKV EAC3 packet number %d at filepos 0x%llX (%llu) with size 0x%X (%u) bits\n", mkvpktnum++, FilePos, FilePos, FrameSize * 8, FrameSize * 8);
 #endif
-                    analyze_EAC3(&context, frame, FrameSize); //PV take atmos tracks from mp42track already!!
+					analyze_EAC3((void *)&context, frame, FrameSize);
                     free(frame);
                 }
             }
@@ -777,11 +776,10 @@ static NSString * TrackNameToString(TrackInfo *track)
     return nil;
 }
 
-- (UInt32)numObjectsForAudioTrack:(MP42AudioTrack *)track mkvTrack:(TrackInfo *)trackInfo
+- (UInt8)streamExtensionTypeForAudioTrack:(MP42AudioTrack *)track mkvTrack:(TrackInfo *)trackInfo
 {
 	struct eac3_info *context = NULL;
 	uint8_t mkvpktnum = 0;
-    UInt32 num_objects = 0;
 
 	if (!strcmp(trackInfo->CodecID, "A_EAC3")) {
 		mkv_SetTrackMask(_matroskaFile, ~(1l << track.sourceId));
@@ -794,19 +792,20 @@ static NSString * TrackNameToString(TrackInfo *track)
 			if (readMkvPacket(_ioStream, trackInfo, FilePos, &frame, &FrameSize))
 			{
 #ifdef DEBUG_PARSER
-				printf("\nMP42MkvImporter.numObjectsForAudioTrack analyzing MKV EAC3 packet number %d at filepos 0x%llX (%llu) with size 0x%X (%u) bits\n", mkvpktnum++, FilePos, FilePos, FrameSize * 8, FrameSize * 8);
+				printf("\nMP42MkvImporter.streamExtensionTypeForAudioTrack analyzing MKV EAC3 packet number %d at filepos 0x%llX (%llu) with size 0x%X (%u) bits\n", mkvpktnum++, FilePos, FilePos, FrameSize * 8, FrameSize * 8);
 #endif
 				analyze_EAC3((void *)&context, frame, FrameSize);		//NB! This routine allocates buffer for context, because we're passing NULL as input!
 			}
 		}
 	}
 
-	if (context) {
-        num_objects = get_num_objects_EAC3(context);
+	if (context && context->ec3_extension_type == EC3Extension_JOC)
+	{
+		track.extensionType = kMP42AudioEmbeddedExtension_JOC;
 		free(context);
 	}
-
-    return num_objects;
+	
+	return track.extensionType;
 }
 
 - (AudioStreamBasicDescription)audioDescriptionForTrack:(MP42AudioTrack *)track
