@@ -662,7 +662,7 @@ static void h264_compute_poc( h264_decode_t *dec ) {
         H264_PICTURE_FIELD_BOTTOM,
     } pic_type;
     
-    /* FIXME FIXME it doesn't handle the case where there is a MMCO == 5
+    /* FIXME it doesn't handle the case where there is a MMCO == 5
      * (MMCO 5 "emulates" an idr) */
     
     /* picture type */
