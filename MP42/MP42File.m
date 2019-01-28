@@ -515,10 +515,27 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
     id track = [self.itracks objectAtIndex:index];
 
     [self.itracks removeObjectAtIndex:index];
-    if (newIndex > [self.itracks count] || newIndex > index) {
+    if (newIndex > self.itracks.count || newIndex > index) {
         newIndex--;
     }
     [self.itracks insertObject:track atIndex:newIndex];
+}
+
+- (void)moveTracks:(NSArray<MP42Track *> *)tracks toIndex:(NSUInteger)index {
+    NSAssert(self.status != MP42StatusWriting, @"Unsupported operation: trying to move tracks while the file is open for writing");
+
+    for (id track in tracks.reverseObjectEnumerator)
+    {
+        NSUInteger sourceIndex = [self.itracks indexOfObject:track];
+        [self.itracks removeObjectAtIndex:sourceIndex];
+
+        if (sourceIndex < index)
+        {
+            index--;
+        }
+
+        [self.itracks insertObject:track atIndex:index];
+    }
 }
 
 - (void)organizeAlternateGroupsForMediaTypes:(NSArray *)mediaTypes withGroupID:(NSUInteger)groupID {

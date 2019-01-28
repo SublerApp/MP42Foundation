@@ -127,6 +127,8 @@ typedef void (^MP42FileProgressHandler)(double progress);
 
 - (void)moveTrackAtIndex:(NSUInteger)index toIndex:(NSUInteger)newIndex;
 
+- (void)moveTracks:(NSArray<MP42Track *> *)tracks toIndex:(NSUInteger)newIndex;
+
 /**
  *  Provides an instance of MP42ChapterTrack that represents the file chapters.
  *
