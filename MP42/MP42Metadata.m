@@ -1100,7 +1100,7 @@
 
                 if (representations.count) {
                     NSData *bitmapData = [NSBitmapImageRep representationOfImageRepsInArray:representations
-                                                                                  usingType:NSPNGFileType properties:@{}];
+                                                                                  usingType:NSBitmapImageFileTypePNG properties:@{}];
 
                     if (bitmapData) {
                         newArtwork.data = (void *)bitmapData.bytes;

@@ -58,7 +58,7 @@
 
 - (CIContext *)imgContext {
     if (!_imgContext) {
-        _imgContext = [CIContext contextWithCGContext:[[NSGraphicsContext currentContext] graphicsPort]
+        _imgContext = [CIContext contextWithCGContext:[[NSGraphicsContext currentContext] CGContext]
                                                options:nil];
     }
     return _imgContext;

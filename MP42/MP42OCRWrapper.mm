@@ -19,16 +19,15 @@ public:
     OCRWrapper(const char *lang, const char *base_path) {
         @autoreleasepool {
             NSString *path = nil;
-            if (base_path)
+            if (base_path) {
                 path = [[NSString stringWithUTF8String:base_path] stringByAppendingString:@"/"];
-            else
+            } else {
                 path = [[[NSBundle bundleForClass:[MP42OCRWrapper class]] bundlePath] stringByAppendingString:@"/Versions/A/Resources/"];
-
-            setenv("TESSDATA_PREFIX", [path UTF8String], 1);
+            }
 
             path = [path stringByAppendingString:@"tessdata/"];
 
-            tess_base_api.Init([path UTF8String], lang, OEM_DEFAULT);
+            tess_base_api.Init(path.UTF8String, lang, OEM_DEFAULT);
         }
     }
 

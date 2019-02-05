@@ -1109,7 +1109,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
                                                                                  hasAlpha:YES
                                                                                  isPlanar:NO
                                                                            colorSpaceName:NSCalibratedRGBColorSpace
-                                                                             bitmapFormat:NSAlphaFirstBitmapFormat
+                                                                             bitmapFormat:NSBitmapFormatAlphaFirst
                                                                               bytesPerRow:0
                                                                              bitsPerPixel:32];
             [NSGraphicsContext saveGraphicsState];
@@ -1122,7 +1122,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 
             [NSGraphicsContext restoreGraphicsState];
 
-            imageData = [bitmap representationUsingType:NSJPEGFileType properties:@{}];
+            imageData = [bitmap representationUsingType:NSBitmapImageFileTypeJPEG properties:@{}];
         }
 
         MP4WriteSample(self.fileHandle,
