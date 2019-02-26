@@ -83,6 +83,7 @@ enum : MP42VideoCodecType
     kMP42VideoCodecType_Theora              = 'XiTh',
     kMP42VideoCodecType_VP8                 = 'VP8 ',
     kMP42VideoCodecType_VP9                 = 'VP9 ',
+    kMP42VideoCodecType_AV1                 = 'av01',
 
     kMP42VideoCodecType_AppleProRes4444     = 'ap4h',
     kMP42VideoCodecType_AppleProRes422HQ    = 'apch',
