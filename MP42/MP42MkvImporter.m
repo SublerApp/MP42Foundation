@@ -723,6 +723,8 @@ static NSString * TrackNameToString(TrackInfo *track)
 
                 free(frame);
             }
+
+            mkv_Seek(_matroskaFile, 0, 0);
         }
 
         else if (!strcmp(trackInfo->CodecID, "A_EAC3")) {
@@ -798,6 +800,8 @@ static NSString * TrackNameToString(TrackInfo *track)
 			}
 		}
 	}
+
+    mkv_Seek(_matroskaFile, 0, 0);
 
 	if (context && context->ec3_extension_type == EC3Extension_JOC)
 	{
