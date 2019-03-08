@@ -927,7 +927,7 @@
 			};
 			buildConfigurationList = A9B9C1E7182391DF00416A4E /* Build configuration list for PBXProject "MP42Foundation" */;
 			compatibilityVersion = "Xcode 3.2";
-			developmentRegion = English;
+			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
