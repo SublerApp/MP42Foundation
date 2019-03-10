@@ -14,6 +14,7 @@
 #import "MP42Track+Private.h"
 #import "MP42PreviewGenerator.h"
 #import "MP42Metadata+Private.h"
+#import "MP42RelatedItem.h"
 
 #import "mp4v2.h"
 
@@ -731,56 +732,47 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 
 #pragma mark - Saving
 
-- (NSURL *)tempURL {
-    NSURL *tempURL = nil;
-    #ifdef SB_SANDBOX
-        NSURL *folderURL = [self.URL URLByDeletingLastPathComponent];
-        tempURL = [NSFileManager.defaultManager URLForDirectory:NSItemReplacementDirectory inDomain:NSUserDomainMask appropriateForURL:folderURL create:YES error:nil];
-    #else
-        tempURL = [self.URL URLByDeletingLastPathComponent];
-    #endif
-
-    if (tempURL) {
-        tempURL = [tempURL URLByAppendingPathComponent:[NSString stringWithFormat:@"%@.tmp", self.URL.lastPathComponent]];
-    }
-
-    return tempURL;
-}
-
 - (BOOL)optimize {
     __block BOOL noErr = NO;
     __block _Atomic int32_t done = 0;
 
     @autoreleasepool {
-        NSError *error = nil;
-        NSURL *tempURL = [self tempURL];
         NSFileManager *fileManager = [[NSFileManager alloc] init];
         dispatch_semaphore_t sem = dispatch_semaphore_create(0);
 
-        if (tempURL) {
+        MP42RelatedItem *item = [[MP42RelatedItem alloc] initWithURL:self.URL extension:@"sublertemp"];
+
+#ifdef SB_SANDBOX
+        [NSFileCoordinator addFilePresenter:item];
+        NSFileCoordinator *coordinator = [[NSFileCoordinator alloc] initWithFilePresenter:item];
+#endif
+
+        if (item && coordinator) {
             unsigned long long originalFileSize = [[[fileManager attributesOfItemAtPath:self.URL.path error:nil] valueForKey:NSFileSize] unsignedLongLongValue];
 
             dispatch_async(dispatch_get_global_queue(0, 0), ^{
-                noErr = MP4Optimize(self.URL.fileSystemRepresentation, tempURL.fileSystemRepresentation);
+                noErr = MP4Optimize(self.URL.fileSystemRepresentation, item.presentedItemURL.fileSystemRepresentation);
                 done = 1;
                 dispatch_semaphore_signal(sem);
             });
 
             // Loop to check the progress
             while (!done) {
-                unsigned long long fileSize = [[[fileManager attributesOfItemAtPath:tempURL.path error:nil] valueForKey:NSFileSize] unsignedLongLongValue];
+                unsigned long long fileSize = [[[fileManager attributesOfItemAtPath:item.presentedItemURL.path error:nil] valueForKey:NSFileSize] unsignedLongLongValue];
                 [self progressStatus:((double)fileSize / originalFileSize) * 100];
                 usleep(450000);
             }
 
             dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);
 
+            NSError *error;
+
             // Additional check to see if we can open the optimized file
-            if (noErr && [[MP42File alloc] initWithURL:tempURL error:NULL]) {
+            if (noErr && [[MP42File alloc] initWithURL:item.presentedItemURL error:NULL]) {
                 // Replace the original file
                 NSURL *result = nil;
                 noErr = [fileManager replaceItemAtURL:self.URL
-                                        withItemAtURL:tempURL
+                                        withItemAtURL:item.presentedItemURL
                                        backupItemName:nil
                                               options:NSFileManagerItemReplacementWithoutDeletingBackupItem
                                      resultingItemURL:&result error:&error];
@@ -795,8 +787,12 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 
             if (!noErr) {
                 // Remove the temp file if the optimization didn't complete
-                [fileManager removeItemAtURL:tempURL error:NULL];
+                [fileManager removeItemAtURL:item.presentedItemURL error:NULL];
             }
+
+#ifdef SB_SANDBOX
+            [NSFileCoordinator removeFilePresenter:item];
+#endif
         }
     }
 
@@ -1296,8 +1292,8 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 
         [coder encodeObject:bookmarkData forKey:@"bookmark"];
 #else
-    if ([self.URL isFileReferenceURL]) {
-        [coder encodeObject:[self.URL filePathURL] forKey:@"fileUrl"];
+    if (self.URL.isFileReferenceURL) {
+        [coder encodeObject:self.URL.filePathURL forKey:@"fileUrl"];
     } else {
         [coder encodeObject:self.URL forKey:@"fileUrl"];
     }
