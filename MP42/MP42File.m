@@ -852,6 +852,10 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 
             dispatch_async(dispatch_get_global_queue(0, 0), ^{
                 NSError *localError;
+                noErr = [fileManager removeItemAtURL:url error:&localError];
+                if (!noErr && localError) {
+                    [_logger writeErrorToLog:localError];
+                }
                 noErr = [fileManager copyItemAtURL:self.URL toURL:url error:&localError];
                 if (!noErr && localError) {
                     [_logger writeErrorToLog:localError];
