@@ -749,9 +749,12 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 #ifdef SB_SANDBOX
         [NSFileCoordinator addFilePresenter:item];
         NSFileCoordinator *coordinator = [[NSFileCoordinator alloc] initWithFilePresenter:item];
-#endif
 
         if (item && coordinator) {
+#else
+        if (item) {
+#endif
+
             unsigned long long originalFileSize = [[[fileManager attributesOfItemAtPath:self.URL.path error:nil] valueForKey:NSFileSize] unsignedLongLongValue];
 
             dispatch_async(dispatch_get_global_queue(0, 0), ^{
