@@ -77,7 +77,7 @@
     return copy;
 }
 
-- (NSImage *)imageFromData:(NSData *)data
+- (nullable NSImage *)imageFromData:(NSData *)data
 {
     NSImage *image = nil;
     NSBitmapImageRep *imageRep = [NSBitmapImageRep imageRepWithData:data];

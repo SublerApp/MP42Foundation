@@ -8,6 +8,8 @@
 
 #import <Foundation/Foundation.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 @class NSImage;
 
 typedef enum MP42TagArtworkType_e {
@@ -25,9 +27,11 @@ typedef enum MP42TagArtworkType_e {
 - (instancetype)initWithData:(NSData *)data type:(MP42TagArtworkType)type;
 - (instancetype)initWithBytes:(const void *)bytes length:(NSUInteger)length type:(MP42TagArtworkType)type;
 
-@property(atomic, readonly) NSImage *image;
-@property(atomic, readonly) NSURL *url;
-@property(atomic, readonly) NSData *data;
+@property(atomic, readonly, nullable) NSImage *image;
+@property(atomic, readonly, nullable) NSURL *url;
+@property(atomic, readonly, nullable) NSData *data;
 @property(atomic, readonly) MP42TagArtworkType type;
 
 @end
+
+NS_ASSUME_NONNULL_END
