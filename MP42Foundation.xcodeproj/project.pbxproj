@@ -82,7 +82,7 @@
 		A91711E9187D547D00459495 /* MP42PreviewGenerator.m in Sources */ = {isa = PBXBuildFile; fileRef = A91711E5187D547D00459495 /* MP42PreviewGenerator.m */; };
 		A917286619FD2BCE00348DF8 /* MP42Logging.h in Headers */ = {isa = PBXBuildFile; fileRef = A917286519FD2BCE00348DF8 /* MP42Logging.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A917286719FD2BCE00348DF8 /* MP42Logging.h in Headers */ = {isa = PBXBuildFile; fileRef = A917286519FD2BCE00348DF8 /* MP42Logging.h */; };
-		A9195F362233DD38005C4D01 /* MP42RelatedItem.h in Headers */ = {isa = PBXBuildFile; fileRef = A9195F342233DD38005C4D01 /* MP42RelatedItem.h */; };
+		A9195F362233DD38005C4D01 /* MP42RelatedItem.h in Headers */ = {isa = PBXBuildFile; fileRef = A9195F342233DD38005C4D01 /* MP42RelatedItem.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A9195F372233DD38005C4D01 /* MP42RelatedItem.h in Headers */ = {isa = PBXBuildFile; fileRef = A9195F342233DD38005C4D01 /* MP42RelatedItem.h */; };
 		A9195F382233DD38005C4D01 /* MP42RelatedItem.m in Sources */ = {isa = PBXBuildFile; fileRef = A9195F352233DD38005C4D01 /* MP42RelatedItem.m */; };
 		A9195F392233DD38005C4D01 /* MP42RelatedItem.m in Sources */ = {isa = PBXBuildFile; fileRef = A9195F352233DD38005C4D01 /* MP42RelatedItem.m */; };
@@ -92,6 +92,10 @@
 		A91C3AD11BF20CF1008BCF87 /* MP42FormatUtilites.h in Headers */ = {isa = PBXBuildFile; fileRef = A91C3ACD1BF20CF1008BCF87 /* MP42FormatUtilites.h */; };
 		A925AAAF18379AF800BE84D4 /* MP42Utilities.h in Headers */ = {isa = PBXBuildFile; fileRef = A925AAAD18379AF800BE84D4 /* MP42Utilities.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A925AAB018379AF800BE84D4 /* MP42Utilities.m in Sources */ = {isa = PBXBuildFile; fileRef = A925AAAE18379AF800BE84D4 /* MP42Utilities.m */; };
+		A930D8E822351E2F0061CF37 /* MP42SecurityAccessToken.h in Headers */ = {isa = PBXBuildFile; fileRef = A930D8E622351E2F0061CF37 /* MP42SecurityAccessToken.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		A930D8E922351E2F0061CF37 /* MP42SecurityAccessToken.h in Headers */ = {isa = PBXBuildFile; fileRef = A930D8E622351E2F0061CF37 /* MP42SecurityAccessToken.h */; };
+		A930D8EA22351E2F0061CF37 /* MP42SecurityAccessToken.m in Sources */ = {isa = PBXBuildFile; fileRef = A930D8E722351E2F0061CF37 /* MP42SecurityAccessToken.m */; };
+		A930D8EB22351E2F0061CF37 /* MP42SecurityAccessToken.m in Sources */ = {isa = PBXBuildFile; fileRef = A930D8E722351E2F0061CF37 /* MP42SecurityAccessToken.m */; };
 		A93EE6EA1D48A01A003E3B56 /* libswresample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A9D599BA1D4885E0001C22BD /* libswresample.a */; };
 		A941A7B41DA7B08600FB2A7C /* MP42MetadataFormat.h in Headers */ = {isa = PBXBuildFile; fileRef = A941A7B21DA7B08600FB2A7C /* MP42MetadataFormat.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A941A7B51DA7B08600FB2A7C /* MP42MetadataFormat.h in Headers */ = {isa = PBXBuildFile; fileRef = A941A7B21DA7B08600FB2A7C /* MP42MetadataFormat.h */; };
@@ -296,6 +300,8 @@
 		A91C3ACD1BF20CF1008BCF87 /* MP42FormatUtilites.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MP42FormatUtilites.h; sourceTree = "<group>"; };
 		A925AAAD18379AF800BE84D4 /* MP42Utilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MP42Utilities.h; sourceTree = "<group>"; };
 		A925AAAE18379AF800BE84D4 /* MP42Utilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MP42Utilities.m; sourceTree = "<group>"; };
+		A930D8E622351E2F0061CF37 /* MP42SecurityAccessToken.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MP42SecurityAccessToken.h; sourceTree = "<group>"; };
+		A930D8E722351E2F0061CF37 /* MP42SecurityAccessToken.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MP42SecurityAccessToken.m; sourceTree = "<group>"; };
 		A941A7B21DA7B08600FB2A7C /* MP42MetadataFormat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MP42MetadataFormat.h; sourceTree = "<group>"; };
 		A941A7B31DA7B08600FB2A7C /* MP42MetadataFormat.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MP42MetadataFormat.m; sourceTree = "<group>"; };
 		A941C9541F82996600FC5E8D /* MP42TextSubConverter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MP42TextSubConverter.h; sourceTree = "<group>"; };
@@ -705,6 +711,8 @@
 			children = (
 				A9195F342233DD38005C4D01 /* MP42RelatedItem.h */,
 				A9195F352233DD38005C4D01 /* MP42RelatedItem.m */,
+				A930D8E622351E2F0061CF37 /* MP42SecurityAccessToken.h */,
+				A930D8E722351E2F0061CF37 /* MP42SecurityAccessToken.m */,
 				A91711E4187D547D00459495 /* MP42PreviewGenerator.h */,
 				A91711E5187D547D00459495 /* MP42PreviewGenerator.m */,
 				A989F10D1823B3B40070AD8C /* MP42TextSample.h */,
@@ -773,6 +781,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A941A7B51DA7B08600FB2A7C /* MP42MetadataFormat.h in Headers */,
+				A930D8E922351E2F0061CF37 /* MP42SecurityAccessToken.h in Headers */,
 				A97EA7C81D4B8A2D00257CEA /* FFmpegUtils.h in Headers */,
 				A90801121D4B83A3002B6950 /* MP42AudioDecoder.h in Headers */,
 				A91C3AD11BF20CF1008BCF87 /* MP42FormatUtilites.h in Headers */,
@@ -818,6 +827,8 @@
 				A9B9C2831823923200416A4E /* MP42Image.h in Headers */,
 				A9B9C2C41823957800416A4E /* MP42Languages.h in Headers */,
 				A96523451BAC315900E994E0 /* NSString+MP42Additions.h in Headers */,
+				A930D8E822351E2F0061CF37 /* MP42SecurityAccessToken.h in Headers */,
+				A9195F362233DD38005C4D01 /* MP42RelatedItem.h in Headers */,
 				A941A7B41DA7B08600FB2A7C /* MP42MetadataFormat.h in Headers */,
 				A9B9C2CF182396A100416A4E /* MP42Ratings.h in Headers */,
 				A99FCBC41BAD65EF0058E27A /* MP42Track+Private.h in Headers */,
@@ -832,7 +843,6 @@
 				A9B9C2A31823923200416A4E /* MP42XMLReader.h in Headers */,
 				A90801151D4B83A3002B6950 /* MP42AudioEncoder.h in Headers */,
 				A9B9C28D1823923200416A4E /* MP42Muxer.h in Headers */,
-				A9195F362233DD38005C4D01 /* MP42RelatedItem.h in Headers */,
 				A9B9C2AD1823923200416A4E /* mpeg4ip_bitstream.h in Headers */,
 				A9B9C2A81823923200416A4E /* MatroskaFile.h in Headers */,
 				A9B9C2991823923200416A4E /* MP42SubUtilities.h in Headers */,
@@ -1012,6 +1022,7 @@
 				A910B5E018394EB20064028F /* MP42PrivateUtilities.m in Sources */,
 				A910B5E218394EB20064028F /* MP42Utilities.m in Sources */,
 				A910B5E418394EB20064028F /* MP42SubUtilities.m in Sources */,
+				A930D8EB22351E2F0061CF37 /* MP42SecurityAccessToken.m in Sources */,
 				A910B5E618394EB20064028F /* MP42XMLReader.m in Sources */,
 				A941C9611F82A9B900FC5E8D /* MP42SSAConverter.m in Sources */,
 				A910B5E818394EB20064028F /* MP42HtmlParser.m in Sources */,
@@ -1058,6 +1069,7 @@
 				A9B9C27C1823923200416A4E /* MP42File.m in Sources */,
 				A9B9C29C1823923200416A4E /* MP42Track.m in Sources */,
 				A9B9C2A01823923200416A4E /* MP42VideoTrack.m in Sources */,
+				A930D8EA22351E2F0061CF37 /* MP42SecurityAccessToken.m in Sources */,
 				A90801171D4B83A3002B6950 /* MP42AudioEncoder.m in Sources */,
 				FFE849971EBCAFDF000AA078 /* MP42AC3AudioEncoder.m in Sources */,
 				A9B9C2981823923200416A4E /* MP42SubtitleTrack.m in Sources */,

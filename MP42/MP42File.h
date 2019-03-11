@@ -19,6 +19,8 @@
 #import "MP42MediaFormat.h"
 #import "MP42Logging.h"
 
+#import "MP42SecurityAccessToken.h"
+
 NS_ASSUME_NONNULL_BEGIN
 
 extern NSString * const MP4264BitData;
@@ -32,7 +34,7 @@ typedef void (^MP42FileProgressHandler)(double progress);
 /**
  *  A MP42File object is an object that represents a mp4 file.
  */
-@interface MP42File : NSObject <NSSecureCoding>
+@interface MP42File : NSObject <NSSecureCoding, MP42SecurityScope>
 
 + (void)setGlobalLogger:(id <MP42Logging>)logger;
 

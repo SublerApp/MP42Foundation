@@ -19,6 +19,7 @@
 @property(nonatomic, readwrite) MP42TrackId sourceId;
 
 @property(nonatomic, readwrite, copy, nullable) NSURL *URL;
+@property(nonatomic, readwrite, copy, nullable) NSData *URLBookmark;
 
 @property(nonatomic, readwrite) MP42CodecType format;
 @property(nonatomic, readwrite) MP42MediaType mediaType;
@@ -349,17 +350,15 @@
     [coder encodeInt64:_sourceId forKey:@"sourceId"];
 
 #ifdef SB_SANDBOX
-    NSData *bookmarkData = nil;
     NSError *error = nil;
-    bookmarkData = [self.URL bookmarkDataWithOptions:NSURLBookmarkCreationWithSecurityScope
-                      includingResourceValuesForKeys:nil
-                                       relativeToURL:nil // Make it app-scoped
-                                               error:&error];
-    if (error) {
-        NSLog(@"Error creating bookmark for URL (%@): %@", self.URL, error);
+    if (_URLBookmark == nil) {
+        _URLBookmark = [MP42SecurityAccessToken bookmarkFromURL:_URL error:&error];
+        if (error) {
+            NSLog(@"Error creating bookmark for URL (%@): %@", self.URL, error);
+            //[_logger writeErrorToLog:error];
+        }
     }
-
-    [coder encodeObject:bookmarkData forKey:@"bookmark"];
+    [coder encodeObject:_URLBookmark forKey:@"bookmark"];
 
 #else
     [coder encodeObject:_URL forKey:@"sourceURL"];
@@ -402,16 +401,19 @@
     _trackId = (MP4TrackId)[decoder decodeInt64ForKey:@"Id"];
     _sourceId = (MP4TrackId)[decoder decodeInt64ForKey:@"sourceId"];
 
-    NSData *bookmarkData = [decoder decodeObjectOfClass:[NSData class] forKey:@"bookmark"];
-    if (bookmarkData) {
+    _URLBookmark = [decoder decodeObjectOfClass:[NSData class] forKey:@"bookmark"];
+    if (_URLBookmark) {
         BOOL bookmarkDataIsStale;
         NSError *error;
-        _URL = [NSURL
-                    URLByResolvingBookmarkData:bookmarkData
-                    options:NSURLBookmarkResolutionWithSecurityScope
-                    relativeToURL:nil
-                    bookmarkDataIsStale:&bookmarkDataIsStale
-                    error:&error];
+        _URL = [MP42SecurityAccessToken URLFromBookmark:_URLBookmark bookmarkDataIsStale:&bookmarkDataIsStale error:&error];
+
+        if (error) {
+//            [_logger writeErrorToLog:error];
+        }
+
+        if (bookmarkDataIsStale) {
+            _URLBookmark = [MP42SecurityAccessToken bookmarkFromURL:_URL error:&error];
+        }
     } else {
         _URL = [decoder decodeObjectOfClass:[NSURL class] forKey:@"sourceURL"];
     }
@@ -440,6 +442,14 @@
     _mediaCharacteristicTags = [decoder decodeObjectOfClass:[NSSet class] forKey:@"mediaCharacteristicTags"];
 
     return self;
+}
+
+- (BOOL)startAccessingSecurityScopedResource {
+    return [self.URL startAccessingSecurityScopedResource];
+}
+
+- (void)stopAccessingSecurityScopedResource {
+    [self.URL stopAccessingSecurityScopedResource];
 }
 
 @end

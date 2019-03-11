@@ -79,14 +79,18 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
     NSMutableArray<MP42Track *>  *_tracksToBeDeleted;
 }
 
-@property(nonatomic, readwrite)  MP42FileHandle fileHandle;
+@property(nonatomic, readwrite) MP42FileHandle fileHandle;
 @property(nonatomic, readwrite) NSURL *URL;
+@property(nonatomic, readwrite) NSData *fileURLBookmark;
+
+@property(nonatomic, readwrite) NSMutableArray<NSURL *> *importersURL;
+@property(nonatomic, readwrite) NSMutableArray<NSData *> *importersBookmarks;
 
 @property(nonatomic, readonly) NSMutableArray<__kindof MP42Track *> *itracks;
 @property(nonatomic, readonly) NSMutableDictionary<NSString *, MP42FileImporter *> *importers;
 
 @property(nonatomic, readwrite) MP42Status status;
-@property(nonatomic) MP42Muxer *muxer;
+@property(nonatomic, readwrite) MP42Muxer *muxer;
 
 @end
 
@@ -952,6 +956,10 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 
     // Init the muxer and prepare the work
     NSMutableArray<MP42Track *> *unsupportedTracks = [[NSMutableArray alloc] init];
+#ifdef SB_SANDBOX
+    NSMutableArray<MP42SecurityAccessToken *> *importersTokens = [[NSMutableArray alloc] init];
+#endif
+
     self.muxer = [[MP42Muxer alloc] initWithFileHandle:self.fileHandle delegate:self logger:_logger];
 
     for (MP42Track *track in self.itracks) {
@@ -963,6 +971,9 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
                     MP42FileImporter *fileImporter = self.importers[track.URL.path];
 
                     if (!fileImporter) {
+#ifdef SB_SANDBOX
+                        [importersTokens addObject:[MP42SecurityAccessToken tokenWithObject:track]];
+#endif
                         fileImporter = [[MP42FileImporter alloc] initWithURL:track.URL error:outError];
                         if (fileImporter) {
                             self.importers[track.URL.path] = fileImporter;
@@ -996,7 +1007,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 
                         [_logger writeErrorToLog:error];
                         if (outError) { *outError = error; }
-                        
+
                         [unsupportedTracks addObject:track];
                     }
                 }
@@ -1017,6 +1028,9 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
     for (MP42Track *track in self.itracks) {
         track.importer = nil;
     }
+#ifdef SB_SANDBOX
+    [importersTokens removeAllObjects];
+#endif
     [self.importers removeAllObjects];
 
     // Update modified tracks properties
@@ -1269,7 +1283,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 
 #pragma mark - NSSecureCoding
 
-#define MP42FILE_VERSION 5
+#define MP42FILE_VERSION 6
 
 + (BOOL)supportsSecureCoding
 {
@@ -1280,17 +1294,17 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
     [coder encodeInt:MP42FILE_VERSION forKey:@"MP42FileVersion"];
 
 #ifdef SB_SANDBOX
-    NSData *bookmarkData = nil;
     NSError *error = nil;
-    bookmarkData = [self.URL bookmarkDataWithOptions:NSURLBookmarkCreationWithSecurityScope
-                      includingResourceValuesForKeys:nil
-                                       relativeToURL:nil // Make it app-scoped
-                                               error:&error];
+    if (self.URL && self.fileURLBookmark == nil) {
+        self.fileURLBookmark = [MP42SecurityAccessToken bookmarkFromURL:self.URL error:&error];
         if (error) {
-            NSLog(@"Error creating bookmark for URL (%@): %@", self.URL, error);
+            [_logger writeErrorToLog:error];
         }
+    } else {
+        self.fileURLBookmark = nil;
+    }
 
-        [coder encodeObject:bookmarkData forKey:@"bookmark"];
+    [coder encodeObject:self.fileURLBookmark forKey:@"bookmark"];
 #else
     if (self.URL.isFileReferenceURL) {
         [coder encodeObject:self.URL.filePathURL forKey:@"fileUrl"];
@@ -1315,16 +1329,19 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
         return nil;
     }
 
-    NSData *bookmarkData = [decoder decodeObjectOfClass:[NSData class] forKey:@"bookmark"];
-    if (bookmarkData) {
+    _fileURLBookmark = [decoder decodeObjectOfClass:[NSData class] forKey:@"bookmark"];
+    if (_fileURLBookmark) {
         BOOL bookmarkDataIsStale;
         NSError *error;
-        _URL = [NSURL
-                    URLByResolvingBookmarkData:bookmarkData
-                    options:NSURLBookmarkResolutionWithSecurityScope
-                    relativeToURL:nil
-                    bookmarkDataIsStale:&bookmarkDataIsStale
-                    error:&error];
+        _URL = [MP42SecurityAccessToken URLFromBookmark:_fileURLBookmark bookmarkDataIsStale:&bookmarkDataIsStale error:&error];
+
+        if (error) {
+            [_logger writeErrorToLog:error];
+        }
+
+        if (bookmarkDataIsStale) {
+            _fileURLBookmark = [MP42SecurityAccessToken bookmarkFromURL:_URL error:&error];
+        }
     } else {
         _URL = [decoder decodeObjectOfClass:[NSURL class] forKey:@"fileUrl"];
     }
@@ -1339,6 +1356,14 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
     _metadata = [decoder decodeObjectOfClass:[MP42Metadata class] forKey:@"metadata"];
 
     return self;
+}
+
+- (BOOL)startAccessingSecurityScopedResource {
+    return [self.URL startAccessingSecurityScopedResource];
+}
+
+- (void)stopAccessingSecurityScopedResource {
+    [self.URL stopAccessingSecurityScopedResource];
 }
 
 @end

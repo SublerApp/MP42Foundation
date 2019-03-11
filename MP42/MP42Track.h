@@ -9,13 +9,14 @@
 #import <Foundation/Foundation.h>
 #import "MP42MediaFormat.h"
 #import "MP42ConversionSettings.h"
+#import "MP42SecurityAccessToken.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 /**
  *  MP42Track
  */
-@interface MP42Track : NSObject <NSSecureCoding, NSCopying> {
+@interface MP42Track : NSObject <NSSecureCoding, NSCopying, MP42SecurityScope> {
 @protected
     void *_helper;
 }

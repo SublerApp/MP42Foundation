@@ -29,4 +29,7 @@
 #import <MP42Foundation/MP42Languages.h>
 #import <MP42Foundation/MP42Ratings.h>
 
+#import <MP42Foundation/MP42RelatedItem.h>
+#import <MP42Foundation/MP42SecurityAccessToken.h>
+
 #endif /* MP42Foundation_h */
