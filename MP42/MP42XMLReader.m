@@ -11,10 +11,10 @@
 
 @implementation MP42XMLReader
 
-- (instancetype)initWithURL:(NSURL *)url error:(NSError * __autoreleasing *)error
+- (nullable instancetype)initWithURL:(NSURL *)url error:(NSError * __autoreleasing *)error
 {
     if (self = [super init]) {
-        NSXMLDocument *xml = [[NSXMLDocument alloc] initWithContentsOfURL:url options:0 error:NULL];
+        NSXMLDocument *xml = [[NSXMLDocument alloc] initWithContentsOfURL:url options:0 error:error];
         if (xml) {
             NSError *err;
             _mMetadata = [[MP42Metadata alloc] init];
@@ -25,6 +25,8 @@
             nodes = [xml nodesForXPath:@"./video" error:&err];
             if ([nodes count] == 1)
                 [self metadata2ForNode:[nodes objectAtIndex:0]];
+        } else {
+            return nil;
         }
     }
     return self;

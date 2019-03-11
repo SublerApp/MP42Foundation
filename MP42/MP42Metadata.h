@@ -20,7 +20,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  *  @return The receiver, initialized with the resource specified by URL.
  */
-- (instancetype)initWithURL:(NSURL *)URL;
+- (nullable instancetype)initWithURL:(NSURL *)URL;
 
 /**
  *  Returns the complete list of available metadata.

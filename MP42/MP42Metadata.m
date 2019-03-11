@@ -52,12 +52,16 @@
     return self;
 }
 
-- (instancetype)initWithURL:(NSURL *)URL;
+- (nullable instancetype)initWithURL:(NSURL *)URL;
 {
     self = [self init];
     if (self) {
         MP42XMLReader *xmlReader = [[MP42XMLReader alloc] initWithURL:URL error:NULL];
-        [self mergeMetadata:[xmlReader mMetadata]];
+        if (xmlReader) {
+            [self mergeMetadata:[xmlReader mMetadata]];
+        } else {
+            return nil;
+        }
 	}
     
     return self;
