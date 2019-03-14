@@ -103,8 +103,8 @@
     return [NSArray arrayWithArray:iTunesCodes];
 }
 
-- (NSUInteger)ratingIndexForiTunesCode:(NSString *)aiTunesCode {
-    NSUInteger i = 0;
+- (NSInteger)ratingIndexForiTunesCode:(NSString *)aiTunesCode {
+    NSInteger i = 0;
 
     for (NSString *code in iTunesCodes) {
         if ([code isEqualToString:aiTunesCode]) {
@@ -116,11 +116,11 @@
 	return -1;
 }
 
-- (NSUInteger)ratingIndexForiTunesCountry:(NSString *)aCountry media:(NSString *)aMedia ratingString:(NSString *)aRatingString {
+- (NSInteger)ratingIndexForiTunesCountry:(NSString *)aCountry media:(NSString *)aMedia ratingString:(NSString *)aRatingString {
 	NSString *target1 = [[NSString stringWithFormat:@"%@ %@: %@", aCountry, aMedia, aRatingString] lowercaseString];
 	NSString *target2 = [[NSString stringWithFormat:@"%@ %@: %@", aCountry, @"movie & TV", aRatingString] lowercaseString];
 
-    NSUInteger i = 0;
+    NSInteger i = 0;
     for (NSString *iTunesRating in ratings) {
         NSString *lowerCaseRating = iTunesRating.lowercaseString;
 
