@@ -281,12 +281,13 @@
                         audioTrack.channels = asbd->mChannelsPerFrame;
                         audioTrack.channelLayoutTag = getDefaultChannelLayout(asbd->mChannelsPerFrame);
                     }
+
 					FourCharCode audioFormat = CMFormatDescriptionGetMediaSubType(formatDescription);
 					if (audioFormat == kAudioFormatAC3 || audioFormat == kAudioFormatEnhancedAC3) {
-						//ec3ExtensionType & complexityIndex will be populated here
-						[self streamExtensionTypeForAudioTrack:audioTrack];
+						audioTrack.extensionType = [self streamExtensionTypeForAudioTrack:track.trackID];
 					}
                 }
+
                 newTrack = audioTrack;
             }
             else if ([track.mediaType isEqualToString:AVMediaTypeSubtitle]) {
@@ -352,7 +353,8 @@
 
             NSArray<AVMetadataItem *> *trackMetadata = [track metadataForFormat:AVMetadataFormatQuickTimeUserData];
 
-            // "name" is undefined in AVMetadataFormat.h, so read the official track name "tnam", and then "name". On 10.7, "name" is returned as an NSData
+            // "name" is undefined in AVMetadataFormat.h, so read the official track name "tnam", and then "name".
+            //  On 10.7, "name" is returned as an NSData
             NSString *trackName = [[[AVMetadataItem metadataItemsFromArray:trackMetadata
                                                             withKey:AVMetadataQuickTimeUserDataKeyTrackName
                                                                   keySpace:nil] firstObject] stringValue];
@@ -394,6 +396,37 @@
             }
 
             [self addTrack:newTrack];
+        }
+
+        // Reconnect references
+        for (AVAssetTrack *track in tracks) {
+
+            NSArray<AVAssetTrack *> *fallbacks = [track associatedTracksOfType:AVTrackAssociationTypeAudioFallback];
+            if (fallbacks.count) {
+                MP42AudioTrack *audioTrack = [self trackWithSourceTrackID:track.trackID];
+                MP42Track *fallbackTrack = [self trackWithSourceTrackID:fallbacks.firstObject.trackID];
+                if (fallbackTrack && audioTrack && [audioTrack isKindOfClass:[MP42AudioTrack class]]) {
+                    audioTrack.fallbackTrack = fallbackTrack;
+                }
+            }
+
+            NSArray<AVAssetTrack *> *followers = [track associatedTracksOfType:AVTrackAssociationTypeSelectionFollower];
+            if (followers.count) {
+                MP42AudioTrack *audioTrack = [self trackWithSourceTrackID:track.trackID];
+                MP42Track *followerTrack = [self trackWithSourceTrackID:followers.firstObject.trackID];
+                if (followerTrack && audioTrack && [audioTrack isKindOfClass:[MP42AudioTrack class]]) {
+                    audioTrack.followsTrack = followerTrack;
+                }
+            }
+
+            NSArray<AVAssetTrack *> *forced = [track associatedTracksOfType:AVTrackAssociationTypeForcedSubtitlesOnly];
+            if (forced.count) {
+                MP42SubtitleTrack *subTrack = [self trackWithSourceTrackID:track.trackID];
+                MP42Track *forcedTrack = [self trackWithSourceTrackID:forced.firstObject.trackID];
+                if (forcedTrack && subTrack && [subTrack isKindOfClass:[MP42SubtitleTrack class]]) {
+                    subTrack.forcedTrack = forcedTrack;
+                }
+            }
         }
 
         [self convertMetadata];
@@ -697,6 +730,8 @@
     }
 }
 
+#pragma mark - Overrides
+
 - (NSUInteger)timescaleForTrack:(MP42Track *)track {
     AVAssetTrack *assetTrack = [_localAsset trackWithTrackID:track.sourceId];
 
@@ -881,16 +916,6 @@
                 [ac3Info appendBytes:&acmod length:sizeof(uint64_t)];
                 [ac3Info appendBytes:&lfeon length:sizeof(uint64_t)];
                 [ac3Info appendBytes:&bit_rate_code length:sizeof(uint64_t)];
-
-//				MP42AudioTrack *audiotrack = (MP42AudioTrack *)track;
-//
-//				if (audiotrack.embeddedAudioFormat == kMP42EmbeddedAudioCodecType_Atmos)
-//				{
-//					uint8_t atmosversion = 1;
-//					uint8_t numobjects = (uint8_t)(audiotrack.objects & 0xFF);
-//					[ac3Info appendBytes:&atmosversion length:sizeof(uint8_t)];
-//					[ac3Info appendBytes:&numobjects   length:sizeof(uint8_t)];
-//				}
 
 				return ac3Info;
 
@@ -1266,11 +1291,22 @@
     }
 }
 
-- (AVFDemuxHelper *)helperWithTrackID:(MP4TrackId)trackID
+- (nullable AVFDemuxHelper *)helperWithTrackID:(MP4TrackId)trackID
 {
     for (AVFDemuxHelper *helper in _helpers) {
         if (helper->sourceID == trackID) {
             return helper;
+        }
+    }
+
+    return nil;
+}
+
+- (nullable __kindof MP42Track *)trackWithSourceTrackID:(MP42TrackId)trackID
+{
+    for (MP42Track *track in self.tracks) {
+        if (track.trackId == trackID) {
+            return track;
         }
     }
 
@@ -1324,42 +1360,111 @@
     return @"AVFoundation demuxer";
 }
 
-- (UInt8)streamExtensionTypeForAudioTrack:(MP42AudioTrack *)track
+#pragma mark - Atmos
+
+- (MP42AudioEmbeddedExtension)streamExtensionTypeForAudioTrack:(CMPersistentTrackID)trackID
 {
-	AudioFileID audioFile;
-	uint8_t *syncframe;
-	UInt32 ioNumPackets = 1;
-	UInt32 ioNumBytes = 2 * 4096;							//E-AC-3 max syncframe is 4096 bytes. If embedded as substream inside AC-3 frame, tandem will occupy 2560+4096 bytes
-	AudioStreamPacketDescription outPacketDescriptions;
-	SInt64 inStartingPacket = 0;
-	EAC3Info *eac3Info = NULL;
+    EAC3Info *eac3Info = NULL;
+    SInt64 count = 0;
 
-	syncframe = (uint8_t *)malloc(ioNumBytes);
-	if (syncframe) {
-		memset(syncframe, 0, ioNumBytes);
-		OSStatus result = AudioFileOpenURL((__bridge CFURLRef _Nonnull)(self.fileURL), kAudioFileReadPermission, 0, &audioFile); //kAudioFileAC3Type
-		if (result == noErr) {
-			while(inStartingPacket < 10 && result == noErr) {
-				result = AudioFileReadPacketData(audioFile, false, &ioNumBytes, &outPacketDescriptions, inStartingPacket, &ioNumPackets, syncframe);
-				if(result == noErr) {
-#ifdef DEBUG_PARSER
-					printf("\n\nMP42AVFimporter.streamExtensionTypeForAudioTrack analyzing %s packet number %lld with size 0x%X (%u) bits\n", [self.fileURL.resourceSpecifier UTF8String], inStartingPacket, outPacketDescriptions.mDataByteSize, outPacketDescriptions.mDataByteSize);
-#endif
-					analyze_EAC3((void *)&eac3Info, syncframe, ioNumBytes);		//NB! This routine allocates buffer for eac3Info, because we're passing NULL as input!
-				}
-				inStartingPacket++;
-			}
-			AudioFileClose(audioFile);
-		}
-		free(syncframe);
-	}
+    @autoreleasepool {
 
-	if (eac3Info) {
-		track.extensionType = eac3Info->ec3_extension_type;
+        AVAssetReader *reader = [[AVAssetReader alloc] initWithAsset:_localAsset error:NULL];
+        AVAssetReaderOutput *readerOutput = [AVAssetReaderTrackOutput assetReaderTrackOutputWithTrack:[_localAsset trackWithTrackID:trackID]
+                                                                                       outputSettings:nil];
+        readerOutput.alwaysCopiesSampleData = NO;
+
+        if ([reader canAddOutput:readerOutput]) {
+            [reader addOutput:readerOutput];
+
+            if ([reader startReading]) {
+
+                while (count <= 10) {
+
+                    CMSampleBufferRef sampleBuffer = [readerOutput copyNextSampleBuffer];
+                    if (sampleBuffer) {
+
+                        // Get CMBlockBufferRef to extract the actual data later
+                        CMBlockBufferRef buffer = CMSampleBufferGetDataBuffer(sampleBuffer);
+                        size_t bufferSize = CMBlockBufferGetDataLength(buffer);
+
+                        CMItemCount samplesNum = CMSampleBufferGetNumSamples(sampleBuffer);
+
+                        if (samplesNum == 1) {
+                            void *sampleData = malloc(bufferSize);
+                            CMBlockBufferCopyDataBytes(buffer, 0, bufferSize, sampleData);
+
+                            analyze_EAC3((void *)&eac3Info, sampleData, bufferSize);
+
+                            free(sampleData);
+                            count++;
+                        } else {
+                            OSStatus err = noErr;
+
+                            // Then the array with the size of each sample
+                            CMItemCount sizeArrayEntries = 0;
+                            CMItemCount sizeArrayEntriesNeededOut = 0;
+                            err = CMSampleBufferGetSampleSizeArray(sampleBuffer, sizeArrayEntries, NULL, &sizeArrayEntriesNeededOut);
+                            if (err) {
+                                CFRelease(sampleBuffer);
+                                continue;
+                            }
+
+                            size_t *sizeArrayOut = malloc(sizeof(size_t) * sizeArrayEntriesNeededOut);
+                            sizeArrayEntries = sizeArrayEntriesNeededOut;
+                            err = CMSampleBufferGetSampleSizeArray(sampleBuffer, sizeArrayEntries, sizeArrayOut, &sizeArrayEntriesNeededOut);
+                            if (err) {
+                                free(sizeArrayOut);
+                                CFRelease(sampleBuffer);
+                                continue;
+                            }
+
+                            for (uint64_t i = 0, pos = 0; i < samplesNum; i++) {
+
+                                size_t sampleSize;
+
+                                // If the size of sample size array is equal to 1, it means every sample has got the same size
+                                if (sizeArrayEntries ==  1) {
+                                    sampleSize = sizeArrayOut[0];
+                                } else {
+                                    sampleSize = sizeArrayOut[i];
+                                }
+
+                                if (!sampleSize) {
+                                    continue;
+                                }
+
+                                void *sampleData = malloc(sampleSize);
+
+                                if (pos < bufferSize) {
+                                    CMBlockBufferCopyDataBytes(buffer, pos, sampleSize, sampleData);
+                                    pos += sampleSize;
+                                }
+
+                                analyze_EAC3((void *)&eac3Info, sampleData, sampleSize);
+
+                                free(sampleData);
+                                count++;
+                            }
+                            free(sizeArrayOut);
+                        }
+                        CFRelease(sampleBuffer);
+                    }
+                }
+            }
+
+            [reader cancelReading];
+        }
+    }
+
+    MP42AudioEmbeddedExtension result = kMP42AudioEmbeddedExtension_None;
+
+	if (eac3Info && eac3Info->ec3_extension_type == EC3Extension_JOC) {
+		result = kMP42AudioEmbeddedExtension_JOC;
 		free(eac3Info);
 	}
-	
-	return track.extensionType;
+
+	return result;
 }
 
 - (FourCharCode)fourCCoverrideForAtmos:(MP42Track *)track {

@@ -1026,6 +1026,11 @@ int analyze_EAC3(void **context, uint8_t *frame, uint32_t size)
     if (!*context) {
         return 1;
     }
+
+    if (size == 0) {
+        return 0;
+    }
+
     info = (struct eac3_info *)*context;
 
     b.SetBytes(frame, size);
