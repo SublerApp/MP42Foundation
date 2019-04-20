@@ -61,7 +61,7 @@ protected:
                                                             YES);
     if ([allPaths count]) {
         NSString *path = [[allPaths lastObject] stringByAppendingPathComponent:@"Subler"];
-        URL = [NSURL fileURLWithPath:path];
+        URL = [NSURL fileURLWithPath:path isDirectory:YES];
 
         if (URL) {
             return URL;
@@ -77,7 +77,7 @@ protected:
 
     if (URL) {
         NSString *path = [[[URL path] stringByAppendingPathComponent:@"tessdata"] stringByAppendingFormat:@"/%@.traineddata", language];
-        URL = [NSURL fileURLWithPath:path];
+        URL = [NSURL fileURLWithPath:path isDirectory:NO];
 
         if ([[NSFileManager defaultManager] fileExistsAtPath:[URL path]]) {
             return YES;
