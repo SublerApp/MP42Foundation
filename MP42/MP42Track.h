@@ -44,7 +44,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property(nonatomic, readwrite) uint64_t alternateGroup;
 @property(nonatomic, readwrite) NSTimeInterval startOffset;
 
-@property(nonatomic, readwrite, copy) MP42ConversionSettings *conversionSettings;
+@property(nonatomic, readwrite, copy, nullable) MP42ConversionSettings *conversionSettings;
 
 @property (nonatomic, readonly) NSString *timeString;
 @property (nonatomic, readonly) NSString *formatSummary;
