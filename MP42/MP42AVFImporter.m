@@ -789,6 +789,38 @@
             const void *cookieBuffer = CMAudioFormatDescriptionGetMagicCookie(formatDescription, &cookieSizeOut);	// Returns proper Atmos dec3 atom (in macOS 10.14.2), if proper E-AC3 stream, not AC-3-embedded!
 
             if (cookieBuffer == NULL || cookieSizeOut == 0) {
+
+                if (code == kAudioFormatMPEG4AAC) {
+
+                    // Try to find the ESDS manually
+                    CFDictionaryRef extensions = CMFormatDescriptionGetExtensions(formatDescription);
+                    if (extensions != NULL) {
+                        CFDataRef verbatimSampleDescription = CFDictionaryGetValue(extensions, kCMFormatDescriptionExtension_VerbatimSampleDescription);
+
+                        if (verbatimSampleDescription != NULL) {
+                            CFIndex length = CFDataGetLength(verbatimSampleDescription);
+                            if (length >= 103) {
+                                UInt8 *cookieBuffer = malloc(sizeof(UInt8) * length - 60);
+                                CFRange range = CFRangeMake(60, length - 60);
+                                CFDataGetBytes(verbatimSampleDescription, range, cookieBuffer);
+
+                                UInt8 *buffer;
+                                int size;
+                                ReadESDSDescExt((void *)cookieBuffer, &buffer, &size, 1);
+
+                                NSData *magicCookie = nil;
+                                if (size) {
+                                    magicCookie = [NSData dataWithBytes:buffer length:size];
+                                    free(buffer);
+                                }
+                                free(cookieBuffer);
+
+                                return magicCookie;
+                            }
+                        }
+                    }
+                }
+
                 return nil;
             }
 
