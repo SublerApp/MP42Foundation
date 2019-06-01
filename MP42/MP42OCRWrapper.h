@@ -8,9 +8,13 @@
 
 #import <Foundation/Foundation.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface MP42OCRWrapper : NSObject
 
 - (instancetype)initWithLanguage:(NSString *)language;
-- (NSString *)performOCROnCGImage:(CGImageRef)image;
+- (nullable NSString *)performOCROnCGImage:(CGImageRef)image;
 
 @end
+
+NS_ASSUME_NONNULL_END

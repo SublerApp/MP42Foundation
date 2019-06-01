@@ -16,18 +16,16 @@ using namespace tesseract;
 
 class OCRWrapper {
 public:
-    OCRWrapper(const char *lang, const char *base_path) {
+    OCRWrapper(NSString *lang, NSURL *base_path, OcrEngineMode mode) {
         @autoreleasepool {
-            NSString *path = nil;
+            const char *path = nil;
             if (base_path) {
-                path = [[NSString stringWithUTF8String:base_path] stringByAppendingString:@"/"];
+                path = base_path.fileSystemRepresentation;
             } else {
-                path = [[[NSBundle bundleForClass:[MP42OCRWrapper class]] bundlePath] stringByAppendingString:@"/Versions/A/Resources/"];
+                path = [[[NSBundle bundleForClass:[MP42OCRWrapper class]] bundlePath] stringByAppendingString:@"/Versions/A/Resources/tessdata/"].fileSystemRepresentation;
             }
 
-            path = [path stringByAppendingString:@"tessdata/"];
-
-            tess_base_api.Init(path.UTF8String, lang, OEM_DEFAULT);
+            tess_base_api.Init(path, lang.UTF8String, mode);
         }
     }
 
@@ -49,22 +47,22 @@ protected:
 };
 
 @implementation MP42OCRWrapper {
-    void *tess_base;
+    OCRWrapper *tess_base;
 }
 
-- (NSURL *)appSupportUrl
+- (NSURL *)appSupporTessdatatUrl
 {
     NSURL *URL = nil;
 
     NSArray *allPaths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory,
                                                             NSUserDomainMask,
                                                             YES);
-    if ([allPaths count]) {
+    if (allPaths.count) {
         NSString *path = [[allPaths lastObject] stringByAppendingPathComponent:@"Subler"];
         URL = [NSURL fileURLWithPath:path isDirectory:YES];
 
         if (URL) {
-            return URL;
+            return [[URL URLByAppendingPathComponent:@"tessdata" isDirectory:YES] URLByAppendingPathComponent:@"v4" isDirectory:YES];
         }
     }
 
@@ -73,13 +71,13 @@ protected:
 
 - (BOOL)tessdataAvailableForLanguage:(NSString *)language
 {
-    NSURL *URL = [self appSupportUrl];
+    NSURL *URL = [self appSupporTessdatatUrl];
 
     if (URL) {
-        NSString *path = [[[URL path] stringByAppendingPathComponent:@"tessdata"] stringByAppendingFormat:@"/%@.traineddata", language];
-        URL = [NSURL fileURLWithPath:path isDirectory:NO];
+        NSString *fileName =  [NSString stringWithFormat:@"%@.traineddata", language];
+        URL =  [URL URLByAppendingPathComponent:fileName];
 
-        if ([[NSFileManager defaultManager] fileExistsAtPath:[URL path]]) {
+        if ([NSFileManager.defaultManager fileExistsAtPath:URL.path]) {
             return YES;
         }
     }
@@ -103,13 +101,15 @@ protected:
             lang = [MP42Languages.defaultManager ISO_639_2CodeForExtendedTag:language];
         }
 
-        NSURL *dataURL = [self appSupportUrl];
+        NSURL *dataURL = [self appSupporTessdatatUrl];
+        OcrEngineMode mode = OEM_TESSERACT_ONLY;
         if (![self tessdataAvailableForLanguage:lang]) {
             lang = @"eng";
+            mode = OEM_LSTM_ONLY;
             dataURL = nil;
         }
 
-        tess_base = (void *)new OCRWrapper([lang UTF8String], [[dataURL path] UTF8String]);
+        tess_base = new OCRWrapper(lang, dataURL, mode);
     }
     return self;
 }
@@ -117,7 +117,7 @@ protected:
 - (NSString *)performOCROnCGImage:(CGImageRef)cgImage {
     NSMutableString *text = nil;
 
-    OCRWrapper *ocr = (OCRWrapper *)tess_base;
+    OCRWrapper *ocr = tess_base;
     size_t bytes_per_line   = CGImageGetBytesPerRow(cgImage);
     size_t bytes_per_pixel  = CGImageGetBitsPerPixel(cgImage) / 8.0;
     size_t width = CGImageGetWidth(cgImage);
@@ -135,8 +135,9 @@ protected:
 
     if (string && strlen(string)) {
         text = [NSMutableString stringWithUTF8String:string];
-        if (text && [text characterAtIndex:[text length] -1] == '\n')
-            [text replaceOccurrencesOfString:@"\n\n" withString:@"" options:NSLiteralSearch range:NSMakeRange(0,[text length])];
+        if (text && [text characterAtIndex:[text length] -1] == '\n') {
+            [text replaceOccurrencesOfString:@"\n\n" withString:@"" options:NSLiteralSearch range:NSMakeRange(0, text.length)];
+        }
     }
 
     delete[]string;
@@ -145,7 +146,7 @@ protected:
 }
 
 - (void)dealloc {
-    OCRWrapper *ocr = (OCRWrapper *)tess_base;
+    OCRWrapper *ocr = tess_base;
     ocr->End();
     delete ocr;
 }
