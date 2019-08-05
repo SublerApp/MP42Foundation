@@ -1664,6 +1664,8 @@ int analyze_AVC(const uint8_t *cookie, uint32_t cookieLen)
         result = 1;
     }
 
+    free(info);
+
 
     return result;
 }
