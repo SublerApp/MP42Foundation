@@ -38,7 +38,7 @@ typedef struct muxer_helper {
     self.muxer_helper->importer = importer;
 }
 
-- (id <MP42ConverterProtocol>)converter
+- (nullable id <MP42ConverterProtocol>)converter
 {
     muxer_helper *helper = (muxer_helper *)_helper;
     return helper->converter;
@@ -89,7 +89,7 @@ typedef struct muxer_helper {
     }
 }
 
-- (MP42SampleBuffer *)copyNextSample {
+- (nullable MP42SampleBuffer *)copyNextSample {
     muxer_helper *helper = (muxer_helper *)_helper;
 
     if (helper->converter) {

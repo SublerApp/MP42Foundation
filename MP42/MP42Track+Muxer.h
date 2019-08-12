@@ -14,13 +14,13 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MP42Track (MP42TrackMuxerExtentions)
 
-- (id <MP42ConverterProtocol>)converter;
+- (nullable id <MP42ConverterProtocol>)converter;
 - (void)setConverter:(id <MP42ConverterProtocol>)converter;
 
 - (void)startReading;
 
 - (void)enqueue:(MP42SampleBuffer *)sample;
-- (MP42SampleBuffer *)copyNextSample;
+- (nullable MP42SampleBuffer *)copyNextSample;
 
 - (void *)copy_muxer_helper;
 - (void *)create_muxer_helper;

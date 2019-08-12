@@ -361,7 +361,7 @@ static NSDateFormatter *_partialFormatter;
         case MP42MetadataItemDataTypeString:
         {
             NSDate *date = [_formatter dateFromString:(NSString *)_value];
-            if (!_value) {
+            if (!date) {
                 date = [_partialFormatter dateFromString:(NSString *)_value];
             }
             return date;

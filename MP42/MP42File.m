@@ -475,7 +475,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 
     if ([track isMemberOfClass:[MP42AudioTrack class]]) {
         MP42AudioTrack *audioTrack = (MP42AudioTrack *)track;
-        if (![self.itracks containsObject:audioTrack.fallbackTrack]) {
+        if (audioTrack.fallbackTrack && ![self.itracks containsObject:audioTrack.fallbackTrack]) {
             audioTrack.fallbackTrack = nil;
         }
     }

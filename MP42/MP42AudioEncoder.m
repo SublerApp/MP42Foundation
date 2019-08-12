@@ -104,7 +104,7 @@ typedef struct AudioFileIO
     _outputFormat = outputFormat;
 
     err = AudioConverterNew(&_inputFormat, &_outputFormat, &_encoder);
-    if (err) {
+    if (err || _encoder == NULL) {
         NSLog(@"err: encoder converter init failed");
         _encoder = NULL;
         return NO;
