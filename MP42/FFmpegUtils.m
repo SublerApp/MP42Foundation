@@ -195,12 +195,12 @@ static int get_channel_id(AudioChannelLabel label)
         return -1;
 }
 
-static int compare_channel_descriptions(const void* a, const void* b)
+/*static int compare_channel_descriptions(const void* a, const void* b)
 {
     const AudioChannelDescription* da = a;
     const AudioChannelDescription* db = b;
     return get_channel_id(da->mChannelLabel) - get_channel_id(db->mChannelLabel);
-}
+}*/
 
 static AudioChannelLayout *convert_layout(AudioChannelLayout *layout, UInt32* size)
 {

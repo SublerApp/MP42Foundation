@@ -52,23 +52,23 @@
 		A910B5E418394EB20064028F /* MP42SubUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C24F1823923100416A4E /* MP42SubUtilities.m */; };
 		A910B5E618394EB20064028F /* MP42XMLReader.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2591823923200416A4E /* MP42XMLReader.m */; };
 		A910B5E818394EB20064028F /* MP42HtmlParser.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2371823923100416A4E /* MP42HtmlParser.m */; };
-		A910B5F118394EB20064028F /* MP42Muxer.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2431823923100416A4E /* MP42Muxer.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		A910B5F118394EB20064028F /* MP42Muxer.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2431823923100416A4E /* MP42Muxer.m */; };
 		A910B5F418394EB20064028F /* MP42Sample.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2491823923100416A4E /* MP42Sample.m */; };
 		A910B5F718394EB20064028F /* MP42Fifo.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C22F1823923100416A4E /* MP42Fifo.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		A910B5F918394EB20064028F /* MP42FileImporter.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2331823923100416A4E /* MP42FileImporter.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		A910B5F918394EB20064028F /* MP42FileImporter.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2331823923100416A4E /* MP42FileImporter.m */; };
 		A910B5FA18394EB20064028F /* sfifo.c in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2641823923200416A4E /* sfifo.c */; };
 		A910B5FD18394EB20064028F /* MP42OCRWrapper.mm in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2451823923100416A4E /* MP42OCRWrapper.mm */; };
-		A910B5FF18394EB20064028F /* MP42BitmapSubConverter.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2261823923100416A4E /* MP42BitmapSubConverter.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		A910B60118394EB20064028F /* MP42AudioConverter.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2201823923100416A4E /* MP42AudioConverter.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		A910B60318394EB20064028F /* MP42H264Importer.mm in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2351823923100416A4E /* MP42H264Importer.mm */; settings = {COMPILER_FLAGS = "-w -Xanalyzer -analyzer-disable-checker -fno-objc-arc"; }; };
-		A910B60518394EB20064028F /* MP42VobSubImporter.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2571823923200416A4E /* MP42VobSubImporter.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		A910B60718394EB20064028F /* MP42MkvImporter.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C23F1823923100416A4E /* MP42MkvImporter.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		A910B60918394EB20064028F /* MP42Mp4Importer.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2411823923100416A4E /* MP42Mp4Importer.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		A910B60D18394EB20064028F /* MP42SrtImporter.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C24B1823923100416A4E /* MP42SrtImporter.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		A910B60F18394EB20064028F /* MP42AVFImporter.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2241823923100416A4E /* MP42AVFImporter.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		A910B61118394EB20064028F /* MP42CCImporter.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2281823923100416A4E /* MP42CCImporter.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		A910B61318394EB20064028F /* MP42AACImporter.mm in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C21C1823923100416A4E /* MP42AACImporter.mm */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		A910B61518394EB20064028F /* MP42AC3Importer.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C21E1823923100416A4E /* MP42AC3Importer.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		A910B5FF18394EB20064028F /* MP42BitmapSubConverter.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2261823923100416A4E /* MP42BitmapSubConverter.m */; };
+		A910B60118394EB20064028F /* MP42AudioConverter.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2201823923100416A4E /* MP42AudioConverter.m */; };
+		A910B60318394EB20064028F /* MP42H264Importer.mm in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2351823923100416A4E /* MP42H264Importer.mm */; settings = {COMPILER_FLAGS = "-w -Xanalyzer -analyzer-disable-checker"; }; };
+		A910B60518394EB20064028F /* MP42VobSubImporter.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2571823923200416A4E /* MP42VobSubImporter.m */; };
+		A910B60718394EB20064028F /* MP42MkvImporter.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C23F1823923100416A4E /* MP42MkvImporter.m */; };
+		A910B60918394EB20064028F /* MP42Mp4Importer.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2411823923100416A4E /* MP42Mp4Importer.m */; };
+		A910B60D18394EB20064028F /* MP42SrtImporter.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C24B1823923100416A4E /* MP42SrtImporter.m */; };
+		A910B60F18394EB20064028F /* MP42AVFImporter.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2241823923100416A4E /* MP42AVFImporter.m */; };
+		A910B61118394EB20064028F /* MP42CCImporter.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2281823923100416A4E /* MP42CCImporter.m */; };
+		A910B61318394EB20064028F /* MP42AACImporter.mm in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C21C1823923100416A4E /* MP42AACImporter.mm */; };
+		A910B61518394EB20064028F /* MP42AC3Importer.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C21E1823923100416A4E /* MP42AC3Importer.m */; };
 		A910B61818394EB20064028F /* MatroskaFile.c in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C25D1823923200416A4E /* MatroskaFile.c */; };
 		A910B61A18394EB20064028F /* MatroskaParser.c in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C25F1823923200416A4E /* MatroskaParser.c */; settings = {COMPILER_FLAGS = "-w -Xanalyzer -analyzer-disable-checker"; }; };
 		A910B61C18394EB20064028F /* mbs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2611823923200416A4E /* mbs.cpp */; };
@@ -113,6 +113,14 @@
 		A9422FC71D4917AF000DB435 /* audio_resample.h in Headers */ = {isa = PBXBuildFile; fileRef = A9422FC41D4917AF000DB435 /* audio_resample.h */; };
 		A9422FC81D4917AF000DB435 /* audio_resample.h in Headers */ = {isa = PBXBuildFile; fileRef = A9422FC41D4917AF000DB435 /* audio_resample.h */; };
 		A947BA9B1824F0B3004C734B /* Ratings.json in Resources */ = {isa = PBXBuildFile; fileRef = A947BA9A1824F0B3004C734B /* Ratings.json */; };
+		A951C183233F4B8F00D63AF8 /* libpng16.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A9B0F2B322A2A36D0012E099 /* libpng16.a */; };
+		A951C184233F4B8F00D63AF8 /* libtiff.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A9E42D3D22A2835500A94E9C /* libtiff.a */; };
+		A951C185233F4B9F00D63AF8 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = A9E8FB861D4664F70071A5F1 /* libz.tbd */; };
+		A951C186233F4BB100D63AF8 /* libbz2.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = A9E8FB841D4664E80071A5F1 /* libbz2.tbd */; };
+		A951C187233F4BB700D63AF8 /* liblzma.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = A9B0F28822A29E9C0012E099 /* liblzma.tbd */; };
+		A951C188233F4BC100D63AF8 /* libiconv.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = A99DB6B21D46497B00C6E56C /* libiconv.tbd */; };
+		A951C18B233F4C5A00D63AF8 /* VideoToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9D6CD651F9E3A8500CCEE3E /* VideoToolbox.framework */; };
+		A951C190233F4CA300D63AF8 /* MP42AC3AudioEncoder.m in Sources */ = {isa = PBXBuildFile; fileRef = FFE849951EBCAFDF000AA078 /* MP42AC3AudioEncoder.m */; };
 		A96523451BAC315900E994E0 /* NSString+MP42Additions.h in Headers */ = {isa = PBXBuildFile; fileRef = A96523431BAC315900E994E0 /* NSString+MP42Additions.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A96523461BAC315900E994E0 /* NSString+MP42Additions.h in Headers */ = {isa = PBXBuildFile; fileRef = A96523431BAC315900E994E0 /* NSString+MP42Additions.h */; };
 		A96523471BAC315900E994E0 /* NSString+MP42Additions.m in Sources */ = {isa = PBXBuildFile; fileRef = A96523441BAC315900E994E0 /* NSString+MP42Additions.m */; };
@@ -455,6 +463,11 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A951C18B233F4C5A00D63AF8 /* VideoToolbox.framework in Frameworks */,
+				A951C188233F4BC100D63AF8 /* libiconv.tbd in Frameworks */,
+				A951C187233F4BB700D63AF8 /* liblzma.tbd in Frameworks */,
+				A951C186233F4BB100D63AF8 /* libbz2.tbd in Frameworks */,
+				A951C185233F4B9F00D63AF8 /* libz.tbd in Frameworks */,
 				A90801071D4B830A002B6950 /* libavfilter.a in Frameworks */,
 				A90801081D4B830A002B6950 /* libavformat.a in Frameworks */,
 				A90801011D4B830A002B6950 /* libavcodec.a in Frameworks */,
@@ -463,6 +476,8 @@
 				A90800FF1D4B82FB002B6950 /* liblept.a in Frameworks */,
 				A90801001D4B82FB002B6950 /* libtesseract.a in Frameworks */,
 				A90800FD1D4B82E8002B6950 /* libmp4v2.a in Frameworks */,
+				A951C183233F4B8F00D63AF8 /* libpng16.a in Frameworks */,
+				A951C184233F4B8F00D63AF8 /* libtiff.a in Frameworks */,
 				A910B6331839511A0064028F /* AudioToolbox.framework in Frameworks */,
 				A910B6321839510B0064028F /* Quartz.framework in Frameworks */,
 				A910B630183950F80064028F /* AVFoundation.framework in Frameworks */,
@@ -1008,6 +1023,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A951C190233F4CA300D63AF8 /* MP42AC3AudioEncoder.m in Sources */,
 				A9A268E2196D6367003AFF57 /* MP42EditListsReconstructor.m in Sources */,
 				A91711E9187D547D00459495 /* MP42PreviewGenerator.m in Sources */,
 				A90801181D4B83A3002B6950 /* MP42AudioEncoder.m in Sources */,
