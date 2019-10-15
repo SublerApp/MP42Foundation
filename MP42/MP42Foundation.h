@@ -26,6 +26,7 @@
 #import <MP42Foundation/MP42Utilities.h>
 #import <MP42Foundation/NSString+MP42Additions.h>
 
+#import <MP42Foundation/MP42MediaFormat.h>
 #import <MP42Foundation/MP42Languages.h>
 #import <MP42Foundation/MP42Ratings.h>
 
