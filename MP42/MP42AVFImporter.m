@@ -893,16 +893,28 @@
             else if (code == kAudioFormatAC3 ||
                      code == 'ms \0') {
 
+                AudioChannelLayoutTag channelLayoutTag = kAudioChannelLabel_Unknown;
+
                 OSStatus err = noErr;
                 size_t channelLayoutSize = 0;
                 const AudioStreamBasicDescription *asbd = CMAudioFormatDescriptionGetStreamBasicDescription(formatDescription);
                 const AudioChannelLayout *channelLayout = CMAudioFormatDescriptionGetChannelLayout(formatDescription, &channelLayoutSize);
 
+                if (channelLayout) {
+                    channelLayoutTag = channelLayout->mChannelLayoutTag;
+                } else {
+                    size_t formatListSize = 0;
+                    const AudioFormatListItem *formatList = CMAudioFormatDescriptionGetFormatList(formatDescription, &formatListSize);
+                    if (formatListSize) {
+                        channelLayoutTag = formatList->mChannelLayoutTag;
+                    }
+                }
+
                 UInt32 bitmapSize = sizeof(UInt32);
                 UInt32 channelBitmap;
                 err = AudioFormatGetProperty(kAudioFormatProperty_BitmapForLayoutTag,
-                                               sizeof(AudioChannelLayoutTag), &channelLayout->mChannelLayoutTag,
-                                               &bitmapSize, &channelBitmap);
+                                             sizeof(AudioChannelLayoutTag), &channelLayoutTag,
+                                             &bitmapSize, &channelBitmap);
                 if (err && AudioChannelLayoutTag_GetNumberOfChannels(channelLayout->mChannelLayoutTag) == 6) {
                     channelBitmap = 0x3F;
                 }
@@ -914,7 +926,7 @@
                 uint64_t lfeon = (channelBitmap & kAudioChannelBit_LFEScreen) ? 1 : 0;
                 uint64_t bit_rate_code = 15;
 
-                switch (AudioChannelLayoutTag_GetNumberOfChannels(channelLayout->mChannelLayoutTag) - lfeon) {
+                switch (AudioChannelLayoutTag_GetNumberOfChannels(channelLayoutTag) - lfeon) {
                     case 1:
                         acmod = 1;
                         break;
