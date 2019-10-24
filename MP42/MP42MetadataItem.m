@@ -17,6 +17,7 @@
 static NSDictionary<NSString *, NSNumber *> *_defaultTypes;
 static NSDateFormatter *_formatter;
 static NSDateFormatter *_partialFormatter;
+static NSCalendar *_calendar;
 
 + (void)initialize
 {
@@ -52,14 +53,20 @@ static NSDateFormatter *_partialFormatter;
                            MP42MetadataKeyShowWorkAndMovement: @(MP42MetadataItemDataTypeBool)};
     }
 
+    NSTimeZone *gmt =  [NSTimeZone timeZoneForSecondsFromGMT:0];
+
     _formatter = [[NSDateFormatter alloc] init];
     _formatter.locale = [NSLocale localeWithLocaleIdentifier:@"en_US_POSIX"];
     _formatter.dateFormat = @"yyyy-MM-dd'T'HH:mm:ssZZZZZ";
-    _formatter.timeZone = [NSTimeZone timeZoneForSecondsFromGMT:0];
+    _formatter.timeZone = gmt;
 
     _partialFormatter = [[NSDateFormatter alloc] init];
     _partialFormatter.dateFormat = @"yyyy-MM-dd";
-    _partialFormatter.timeZone = [NSTimeZone timeZoneForSecondsFromGMT:0];
+    _partialFormatter.timeZone = gmt;
+
+    _calendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSCalendarIdentifierGregorian];
+    _calendar.timeZone = gmt;
+
 }
 
 - (instancetype)initWithIdentifier:(NSString *)identifier
@@ -128,6 +135,11 @@ static NSDateFormatter *_partialFormatter;
             _value = [_formatter dateFromString:stringValue];
             if (!_value) {
                 _value = [_partialFormatter dateFromString:stringValue];
+                if (_value) {
+                    NSDateComponents *components = [_calendar components:NSUIntegerMax fromDate:(NSDate *)_value];
+                    components.hour = 12;
+                    _value = [_calendar dateFromComponents:components];
+                }
             }
             if (!_value) {
                 _value = stringValue;
