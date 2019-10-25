@@ -32,7 +32,6 @@
     self = [super init];
 	if (self)
 	{
-        _presetName = NSLocalizedString(@"Unnamed Set", nil);
         _itemsArray = [[NSMutableArray alloc] init];
         _itemsMap = [[NSMutableDictionary alloc] init];
         _edited = NO;
@@ -145,6 +144,7 @@
             MP42MetadataKeyMovementName,
             MP42MetadataKeyMovementNumber,
             MP42MetadataKeyMovementCount,
+            MP42MetadataKeyShowWorkAndMovement,
             MP42MetadataKeySortName,
             MP42MetadataKeySortArtist,
             MP42MetadataKeySortAlbumArtist,
@@ -229,6 +229,7 @@
             MP42MetadataKeyMovementName,
             MP42MetadataKeyMovementNumber,
             MP42MetadataKeyMovementCount,
+            MP42MetadataKeyShowWorkAndMovement,
             MP42MetadataKeySortName,
             MP42MetadataKeySortArtist,
             MP42MetadataKeySortAlbumArtist,
@@ -906,8 +907,8 @@
     MP4TagsSetExecutiveProducer(tags, self.itemsMap[MP42MetadataKeyExecProducer].stringValue.UTF8String);
 
     // Movements keys
-    if (self.itemsMap[MP42MetadataKeyMovementName].stringValue.length) {
-        const uint8_t value = 1;
+    if (self.itemsMap[MP42MetadataKeyShowWorkAndMovement]) {
+        const uint8_t value = self.itemsMap[MP42MetadataKeyShowWorkAndMovement].numberValue.intValue ? 1 : 0;
         MP4TagsSetShowWorkAndMovement(tags, &value);
     }
     else {
@@ -1304,96 +1305,10 @@
     {
         return nil;
     }
-    // Subler 1.1.8 and previous sets
-    if (version < 4) {
-        NSDictionary<NSString *, id> *tagsDict = [decoder decodeObjectOfClasses:[NSSet setWithObjects:[NSMutableDictionary class],
-                                                                                 [NSMutableString class], nil]
-                                                                                               forKey:@"MP42TagsDict"];
 
-        [tagsDict enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
-            MP42MetadataItem *item = [MP42MetadataItem metadataItemWithIdentifier:key
-                                                                            value:obj
-                                                                         dataType:MP42MetadataItemDataTypeUnspecified
-                                                              extendedLanguageTag:nil];
-            [self addMetadataItem:item];
-        }];
-
-        // Subler 0.19 and previous sets
-        if (version < 2) {
-            NSImage *image = [decoder decodeObjectOfClass:[NSImage class] forKey:@"MP42Artwork"];
-            if (image) {
-                MP42Image *artwork = [[MP42Image alloc] initWithImage:image];
-                MP42MetadataItem *coverArtItem = [MP42MetadataItem metadataItemWithIdentifier:MP42MetadataKeyCoverArt value:artwork
-                                                                                          dataType:MP42MetadataItemDataTypeImage extendedLanguageTag:nil];
-                [self addMetadataItem:coverArtItem];
-            }
-        }
-        else {
-            NSArray *artworks = [decoder decodeObjectOfClasses:[NSSet setWithObjects:[NSArray class], [MP42Image class], nil]
-                                                        forKey:@"MP42Artwork"];
-            for (MP42Image *artwork in artworks) {
-                MP42MetadataItem *coverArtItem = [MP42MetadataItem metadataItemWithIdentifier:MP42MetadataKeyCoverArt value:artwork
-                                                                                     dataType:MP42MetadataItemDataTypeImage extendedLanguageTag:nil];
-                [self addMetadataItem:coverArtItem];
-            }
-        }
-
-        int mediaKind = [decoder decodeIntForKey:@"MP42MediaKind"];
-        MP42MetadataItem *mediaKindItem = [MP42MetadataItem metadataItemWithIdentifier:MP42MetadataKeyMediaKind value:@(mediaKind)
-                                                                              dataType:MP42MetadataItemDataTypeInteger extendedLanguageTag:nil];
-        [self addMetadataItem:mediaKindItem];
-
-        int contentRating = [decoder decodeIntForKey:@"MP42ContentRating"];
-        if (contentRating) {
-            MP42MetadataItem *contentRatingItem = [MP42MetadataItem metadataItemWithIdentifier:MP42MetadataKeyContentRating value:@(contentRating)
-                                                                                      dataType:MP42MetadataItemDataTypeInteger extendedLanguageTag:nil];
-            [self addMetadataItem:contentRatingItem];
-        }
-
-        int hdVideo = [decoder decodeIntForKey:@"MP42HDVideo"];
-        if (hdVideo) {
-            MP42MetadataItem *hdVideoItem = [MP42MetadataItem metadataItemWithIdentifier:MP42MetadataKeyHDVideo value:@(hdVideo)
-                                                                                    dataType:MP42MetadataItemDataTypeInteger extendedLanguageTag:nil];
-            [self addMetadataItem:hdVideoItem];
-        }
-
-        BOOL gapless = [decoder decodeIntForKey:@"MP42Gapless"];
-        if (gapless) {
-            MP42MetadataItem *gaplessItem = [MP42MetadataItem metadataItemWithIdentifier:MP42MetadataKeyGapless value:@(gapless)
-                                                                                dataType:MP42MetadataItemDataTypeBool extendedLanguageTag:nil];
-            [self addMetadataItem:gaplessItem];
-        }
-
-        BOOL podcast = [decoder decodeIntForKey:@"MP42Podcast"];
-        if (podcast) {
-            MP42MetadataItem *podcastItem = [MP42MetadataItem metadataItemWithIdentifier:MP42MetadataKeyPodcast value:@(podcast)
-                                                                            dataType:MP42MetadataItemDataTypeBool extendedLanguageTag:nil];
-            [self addMetadataItem:podcastItem];
-        }
-    }
-    else {
-        _itemsArray = [decoder decodeObjectOfClasses:[NSSet setWithObjects:[NSMutableArray class], [MP42MetadataItem class], nil]
+    _itemsArray = [decoder decodeObjectOfClasses:[NSSet setWithObjects:[NSMutableArray class], [MP42MetadataItem class], nil]
                                               forKey:@"MP42Items"];
-    }
-    if (version < 5) {
-        // Try to fix broken ratings from old sets that used an integer
-        NSArray<MP42MetadataItem *> *ratings = [self metadataItemsFilteredByIdentifier:MP42MetadataKeyRating];
-        for (MP42MetadataItem *rating in ratings) {
-            if ([rating.value isKindOfClass:[NSNumber class]]) {
-                [self removeMetadataItem:rating];
 
-                NSUInteger index = ((NSNumber *)rating.value).unsignedIntegerValue;
-                NSArray<NSString *> *ratings = MP42Ratings.defaultManager.ratings;
-                if (index < ratings.count) {
-                    MP42MetadataItem *correctRating = [MP42MetadataItem metadataItemWithIdentifier:MP42MetadataKeyRating value:ratings[index]
-                                                                                          dataType:MP42MetadataItemDataTypeString extendedLanguageTag:nil];
-                    [self addMetadataItem:correctRating];
-                }
-            }
-        }
-    }
-
-    _presetName = [decoder decodeObjectOfClass:[NSString class] forKey:@"MP42SetName"];
     _artworkEdited = [decoder decodeBoolForKey:@"MP42ArtworkEdited"];
     _edited = [decoder decodeBoolForKey:@"MP42Edited"];
 
