@@ -915,7 +915,8 @@
                 err = AudioFormatGetProperty(kAudioFormatProperty_BitmapForLayoutTag,
                                              sizeof(AudioChannelLayoutTag), &channelLayoutTag,
                                              &bitmapSize, &channelBitmap);
-                if (err && AudioChannelLayoutTag_GetNumberOfChannels(channelLayout->mChannelLayoutTag) == 6) {
+
+                if (err && AudioChannelLayoutTag_GetNumberOfChannels(channelLayoutTag) == 6) {
                     channelBitmap = 0x3F;
                 }
 
