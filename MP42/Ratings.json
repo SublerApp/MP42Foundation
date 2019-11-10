@@ -251,6 +251,20 @@
     ]
 },
 {
+    "country" : "India",
+    "ratings" : [
+        { "media" : "movie",      "prefix" : "in-movies", "itunes-code" : "U",          "itunes-value" : "000", "description" : "U" },
+        { "media" : "movie",      "prefix" : "in-movies", "itunes-code" : "UA",         "itunes-value" : "200", "description" : "UA" },
+        { "media" : "movie",      "prefix" : "in-movies", "itunes-code" : "A",          "itunes-value" : "500", "description" : "A" },
+        { "media" : "movie",      "prefix" : "in-movies", "itunes-code" : "S",          "itunes-value" : "600", "description" : "S" },
+        { "media" : "TV",         "prefix" : "in-tv",     "itunes-code" : "U",          "itunes-value" : "100", "description" : "U" },
+        { "media" : "TV",         "prefix" : "in-tv",     "itunes-code" : "UA",         "itunes-value" : "200", "description" : "UA" },
+        { "media" : "TV",         "prefix" : "in-tv",     "itunes-code" : "A",          "itunes-value" : "600", "description" : "A" },
+        { "media" : "TV",         "prefix" : "in-tv",     "itunes-code" : "S",          "itunes-value" : "800", "description" : "S" },
+        { "media" : "movie & TV", "prefix" : "in-movies", "itunes-code" : "रेट नहीं की गई", "itunes-value" : "???", "description" : "रेट नहीं की गई" }
+    ]
+},
+{
 	"country" : "Unknown",
 	"ratings" : [
         { "media" : "movie & TV", 	"prefix" : "mpaa", 	"itunes-code" : "Unrated", 	"itunes-value" : "???", "description" : "Unknown" }
