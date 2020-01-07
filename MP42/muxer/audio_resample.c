@@ -239,7 +239,7 @@ int hb_audio_resample(hb_audio_resample_t *resample,
     }
     if (resample->resample_needed && resample->avresample == NULL)
     {
-        //hb_error("hb_audio_resample: resample needed but libavresample context "
+        //hb_error("hb_audio_resample: resample needed but libswresample context "
         //         "is NULL");
         return 1;
     }

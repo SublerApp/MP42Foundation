@@ -7,11 +7,11 @@
  * For full terms see the file COPYING file or visit http://www.gnu.org/licenses/gpl-2.0.html
  */
 
-/* Implements a libavresample wrapper for convenience.
+/* Implements a libswresample wrapper for convenience.
  *
  * Supports sample_fmt and channel_layout conversion.
  *
- * sample_rate conversion will come later (libavresample doesn't support
+ * sample_rate conversion will come later (libswresample doesn't support
  * sample_rate conversion with float samples yet). */
 
 #ifndef AUDIO_RESAMPLE_H
