@@ -217,7 +217,7 @@ FourCharCode getTrackMediaSubType(MP4FileHandle fileHandle, MP4TrackId Id)
             uint8_t audiotype = MP4GetTrackEsdsObjectTypeId(fileHandle, Id);
             if (audiotype == MP4_MPEG4_AUDIO_TYPE)
                 return kMP42AudioCodecType_MPEG4AAC;
-            else if (audiotype == MP4_MPEG2_AUDIO_TYPE)
+            else if (audiotype == MP4_MPEG2_AUDIO_TYPE || audiotype == MP4_MPEG1_AUDIO_TYPE)
                 return kMP42AudioCodecType_MPEGLayer3;
             else if (audiotype == 0xA9)
                 return kMP42AudioCodecType_DTS;
