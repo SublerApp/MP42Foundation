@@ -12,7 +12,6 @@
 #import "MP42Image.h"
 
 #import "NSString+MP42Additions.h"
-#import "MP42Ratings.h"
 #import "MP42MetadataUtilities.h"
 
 @interface MP42Metadata ()
