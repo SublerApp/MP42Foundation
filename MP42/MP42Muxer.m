@@ -12,7 +12,7 @@
 #import "MP42FileImporter.h"
 #import "MP42FileImporter+Private.h"
 
-#import "MP42Sample.h"
+#import "MP42SampleBuffer.h"
 #import "MP42AudioConverter.h"
 #import "MP42BitmapSubConverter.h"
 #import "MP42TextSubConverter.h"
@@ -21,7 +21,6 @@
 #import "MP42FormatUtilites.h"
 #import "MP42PrivateUtilities.h"
 #import "MP42Track+Private.h"
-#import "MP42Track+Muxer.h"
 
 #include <stdatomic.h>
 

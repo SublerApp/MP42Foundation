@@ -22,7 +22,7 @@
 #import "MP42VideoTrack.h"
 #import "MP42AudioTrack.h"
 #import "MP42Track+Private.h"
-#import "MP42Track+Muxer.h"
+#import "MP42SampleBuffer.h"
 
 #import "mp4v2.h"
 

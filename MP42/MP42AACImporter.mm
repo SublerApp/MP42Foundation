@@ -12,7 +12,7 @@
 #import "MP42Languages.h"
 #import "MP42File.h"
 #import "MP42PrivateUtilities.h"
-#import "MP42Sample.h"
+#import "MP42SampleBuffer.h"
 #import "MP42Track+Private.h"
 
 @implementation MP42AACImporter {

@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
 
-#import "MP42Sample.h"
+#import "MP42SampleBuffer.h"
 
 /**
  *  Analyzes the sample buffers of a track and tries to recreate an array of edits lists

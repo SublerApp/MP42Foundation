@@ -8,7 +8,7 @@
 
 #import "MP42H264Importer.h"
 #import "MP42FileImporter+Private.h"
-#import "MP42Sample.h"
+#import "MP42SampleBuffer.h"
 
 #import "MP42Languages.h"
 #import "MP42File.h"

@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "MP42Sample.h"
+#import "MP42SampleBuffer.h"
 
 NS_ASSUME_NONNULL_BEGIN
 

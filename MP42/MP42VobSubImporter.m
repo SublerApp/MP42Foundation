@@ -16,7 +16,7 @@
 #import "mp4v2.h"
 #import "MP42PrivateUtilities.h"
 #import "MP42Track+Private.h"
-#import "MP42Sample.h"
+#import "MP42SampleBuffer.h"
 
 @interface SBVobSubSample : NSObject
 {

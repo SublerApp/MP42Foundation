@@ -10,7 +10,7 @@
 #import "MP42FileImporter+Private.h"
 #import "MP42File.h"
 
-#import "MP42Sample.h"
+#import "MP42SampleBuffer.h"
 
 #import "mp4v2.h"
 #import "MP42PrivateUtilities.h"

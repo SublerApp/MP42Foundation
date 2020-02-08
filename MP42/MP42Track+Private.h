@@ -9,6 +9,8 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @class MP42FileImporter;
+@class MP42SampleBuffer;
+@protocol MP42ConverterProtocol;
 
 @interface MP42Track (Private)
 
@@ -34,6 +36,12 @@ NS_ASSUME_NONNULL_BEGIN
 @property(nonatomic, readonly) NSMutableDictionary<NSString *, NSNumber *> *updatedProperty;
 
 @property (nonatomic, readwrite, nullable) MP42FileImporter *importer;
+@property (nonatomic, readwrite, nullable) id <MP42ConverterProtocol> converter;
+
+- (void)startReading;
+
+- (void)enqueue:(MP42SampleBuffer *)sample;
+- (nullable MP42SampleBuffer *)copyNextSample;
 
 @end
 

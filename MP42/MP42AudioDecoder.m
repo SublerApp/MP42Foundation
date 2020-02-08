@@ -9,7 +9,7 @@
 #import "MP42AudioDecoder.h"
 
 #import "MP42AudioTrack.h"
-#import "MP42Sample.h"
+#import "MP42SampleBuffer.h"
 #import "MP42Fifo.h"
 
 #include "FFmpegUtils.h"

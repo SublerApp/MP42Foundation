@@ -15,7 +15,7 @@
 #import "MP42Track+Private.h"
 
 #import "MP42Fifo.h"
-#import "MP42Sample.h"
+#import "MP42SampleBuffer.h"
 
 #import "MP42PrivateUtilities.h"
 #import "MP42SubtitleTrack.h"

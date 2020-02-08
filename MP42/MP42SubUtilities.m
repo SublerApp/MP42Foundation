@@ -7,7 +7,7 @@
 //
 
 #import "MP42SubUtilities.h"
-#import "MP42Sample.h"
+#import "MP42SampleBuffer.h"
 #import "MP42HtmlParser.h"
 
 @implementation MP42SubSerializer

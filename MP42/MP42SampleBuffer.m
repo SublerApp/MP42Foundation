@@ -6,7 +6,7 @@
 //  Copyright 2010 Damiano Galassi. All rights reserved.
 //
 
-#import "MP42Sample.h"
+#import "MP42SampleBuffer.h"
 
 @implementation MP42SampleBuffer
 

@@ -12,7 +12,7 @@
 #import "MP42SubUtilities.h"
 #import "MP42Languages.h"
 #import "MP42File.h"
-#import "MP42Sample.h"
+#import "MP42SampleBuffer.h"
 #import "NSString+MP42Additions.h"
 #import "MP42Track+Private.h"
 
