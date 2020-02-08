@@ -33,6 +33,7 @@
     id <MP42Logging>        _logger;
 
     NSMutableArray<MP42Track *> *_activeTracks;
+    NSDictionary<NSString *, id> *_options;
 
     dispatch_semaphore_t _setupDone;
     int32_t              _cancelled;
@@ -47,13 +48,14 @@
     return self;
 }
 
-- (instancetype)initWithFileHandle:(MP4FileHandle)fileHandle delegate:(id <MP42MuxerDelegate>)del logger:(id <MP42Logging>)logger
+- (instancetype)initWithFileHandle:(MP4FileHandle)fileHandle delegate:(id <MP42MuxerDelegate>)del logger:(id <MP42Logging>)logger options:(nullable NSDictionary<NSString *, id> *)options
 {
     if ((self = [self init])) {
         NSParameterAssert(fileHandle);
         _fileHandle = fileHandle;
         _delegate = del;
         _logger = logger;
+        _options = [options copy];
         _setupDone = dispatch_semaphore_create(0);
     }
 
@@ -212,8 +214,8 @@
                  (format == kMP42VideoCodecType_HEVC || format == kMP42VideoCodecType_HEVC_PSinBitstream)) {
 
             uint8_t *hvcCAtom = (uint8_t *)magicCookie.bytes;
-            
-            if ([NSUserDefaults.standardUserDefaults boolForKey:@"SBForceHvc1"]) {
+
+            if ([_options[MP42ForceHvc1] boolValue]) {
                 force_HEVC_completeness(hvcCAtom, magicCookie.length);
             }
 

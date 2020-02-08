@@ -7,24 +7,18 @@
 //
 
 #import "MP42Track.h"
-#import "MP42FileImporter.h"
 #import "MP42ConverterProtocol.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface MP42Track (MP42TrackMuxerExtentions)
 
-- (nullable id <MP42ConverterProtocol>)converter;
-- (void)setConverter:(id <MP42ConverterProtocol>)converter;
+@property (nonatomic, readwrite, nullable) id <MP42ConverterProtocol> converter;
 
 - (void)startReading;
 
 - (void)enqueue:(MP42SampleBuffer *)sample;
 - (nullable MP42SampleBuffer *)copyNextSample;
-
-- (void *)copy_muxer_helper;
-- (void *)create_muxer_helper;
-- (void)free_muxer_helper;
 
 @end
 

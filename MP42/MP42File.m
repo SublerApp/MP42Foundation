@@ -23,6 +23,7 @@ NSString * const MP4264BitTime = @"MP4264BitTime";
 NSString * const MP42GenerateChaptersPreviewTrack = @"MP42ChaptersPreview";
 NSString * const MP42ChaptersPreviewPosition = @"MP42ChaptersPreviewPosition";
 NSString * const MP42CustomChaptersPreviewTrack = @"MP42CustomChaptersPreview";
+NSString * const MP42ForceHvc1 = @"MP42ForceHvc1";
 
 /**
  *  MP42Status
@@ -967,7 +968,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
     NSMutableArray<MP42SecurityAccessToken *> *importersTokens = [[NSMutableArray alloc] init];
 #endif
 
-    self.muxer = [[MP42Muxer alloc] initWithFileHandle:self.fileHandle delegate:self logger:_logger];
+    self.muxer = [[MP42Muxer alloc] initWithFileHandle:self.fileHandle delegate:self logger:_logger options:options];
 
     for (MP42Track *track in self.itracks) {
         if (!track.muxed) {

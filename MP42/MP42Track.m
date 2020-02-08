@@ -12,6 +12,18 @@
 #import "MP42Languages.h"
 
 #import "MP42Track+Muxer.h"
+#import "MP42Fifo.h"
+#import "MP42FileImporter.h"
+
+typedef struct muxer_helper {
+    // Input helpers
+    MP42FileImporter *importer;
+
+    // Output helpers
+    id <MP42ConverterProtocol> converter;
+    MP42Fifo<MP42SampleBuffer *> *fifo;
+} muxer_helper;
+
 
 @interface MP42Track ()
 
@@ -32,6 +44,8 @@
 
 @property(nonatomic, readwrite, getter=isEdited) BOOL edited;
 @property(nonatomic, readonly) NSMutableDictionary<NSString *, NSNumber *> *updatedProperty;
+
+@property(nonatomic, readonly) muxer_helper *helper;
 
 @end
 
@@ -230,7 +244,9 @@
     return YES;
 }
 
-- (void *)muxer_helper
+@synthesize helper = _helper;
+
+- (muxer_helper *)helper
 {
     if (_helper == NULL) {
         _helper = [self create_muxer_helper];
@@ -450,6 +466,75 @@
 
 - (void)stopAccessingSecurityScopedResource {
     [self.URL stopAccessingSecurityScopedResource];
+}
+
+#pragma mark - Muxer helper
+
+- (MP42FileImporter *)importer
+{
+    return _helper ? _helper->importer : nil;
+}
+
+- (void)setImporter:(MP42FileImporter *)importer
+{
+    self.helper->importer = importer;
+}
+
+- (nullable id <MP42ConverterProtocol>)converter
+{
+    return _helper ? _helper->converter : nil;
+}
+
+- (void)setConverter:(id <MP42ConverterProtocol>)converter
+{
+    self.helper->converter = converter;
+}
+
+- (void *)copy_muxer_helper
+{
+    muxer_helper *copy = calloc(1, sizeof(muxer_helper));
+    copy->importer = _helper->importer;
+
+    return copy;
+}
+
+- (void *)create_muxer_helper
+{
+    muxer_helper *helper = calloc(1, sizeof(muxer_helper));
+    return helper;
+}
+
+- (void)free_muxer_helper
+{
+    if (_helper) {
+        _helper->fifo = nil;
+        _helper->converter = nil;
+        free(_helper);
+        _helper = NULL;
+    }
+}
+
+- (void)startReading
+{
+    self.helper->fifo = [[MP42Fifo alloc] init];
+}
+
+- (void)enqueue:(MP42SampleBuffer *)sample
+{
+    if (_helper->converter) {
+        [_helper->converter addSample:sample];
+    } else {
+        [_helper->fifo enqueue:sample];
+    }
+}
+
+- (nullable MP42SampleBuffer *)copyNextSample {
+    if (_helper->converter) {
+        return [_helper->converter copyEncodedSample];
+    }
+    else {
+        return [_helper->fifo dequeue];
+    }
 }
 
 @end

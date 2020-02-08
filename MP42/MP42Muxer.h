@@ -20,7 +20,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MP42Muxer : NSObject
 
-- (instancetype)initWithFileHandle:(MP4FileHandle)fileHandle delegate:(id <MP42MuxerDelegate>)del logger:(id <MP42Logging>)logger;
+- (instancetype)initWithFileHandle:(MP4FileHandle)fileHandle delegate:(id <MP42MuxerDelegate>)del logger:(id <MP42Logging>)logger options:(nullable NSDictionary<NSString *, id> *)options;
 
 - (BOOL)canAddTrack:(MP42Track *)track;
 - (void)addTrack:(MP42Track *)track;

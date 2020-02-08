@@ -133,9 +133,6 @@
 		A989F1001823AB2E0070AD8C /* MP42Track+Muxer.h in Headers */ = {isa = PBXBuildFile; fileRef = A989F0FF1823AB2E0070AD8C /* MP42Track+Muxer.h */; };
 		A989F10F1823B3B40070AD8C /* MP42TextSample.h in Headers */ = {isa = PBXBuildFile; fileRef = A989F10D1823B3B40070AD8C /* MP42TextSample.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A989F1101823B3B40070AD8C /* MP42TextSample.m in Sources */ = {isa = PBXBuildFile; fileRef = A989F10E1823B3B40070AD8C /* MP42TextSample.m */; };
-		A991714C195AAAEF005AD68E /* MP42Track+Muxer.m in Sources */ = {isa = PBXBuildFile; fileRef = A991714B195AAAEF005AD68E /* MP42Track+Muxer.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		A991714D195AAAEF005AD68E /* MP42Track+Muxer.m in Sources */ = {isa = PBXBuildFile; fileRef = A991714B195AAAEF005AD68E /* MP42Track+Muxer.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		A991714E195AAAEF005AD68E /* MP42Track+Muxer.m in Sources */ = {isa = PBXBuildFile; fileRef = A991714B195AAAEF005AD68E /* MP42Track+Muxer.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		A99DB6A51D4648A800C6E56C /* libmp4v2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A99DB6A41D4648A800C6E56C /* libmp4v2.a */; };
 		A99DB6AA1D4648B700C6E56C /* liblept.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A99DB6A71D4648B700C6E56C /* liblept.a */; };
 		A99DB6AB1D4648B700C6E56C /* libtesseract.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A99DB6A81D4648B700C6E56C /* libtesseract.a */; };
@@ -324,7 +321,6 @@
 		A989F0FF1823AB2E0070AD8C /* MP42Track+Muxer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "MP42Track+Muxer.h"; sourceTree = "<group>"; };
 		A989F10D1823B3B40070AD8C /* MP42TextSample.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MP42TextSample.h; sourceTree = "<group>"; };
 		A989F10E1823B3B40070AD8C /* MP42TextSample.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MP42TextSample.m; sourceTree = "<group>"; };
-		A991714B195AAAEF005AD68E /* MP42Track+Muxer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "MP42Track+Muxer.m"; sourceTree = "<group>"; };
 		A99DB6A41D4648A800C6E56C /* libmp4v2.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libmp4v2.a; path = contrib/mp42v2/libmp4v2.a; sourceTree = "<group>"; };
 		A99DB6A71D4648B700C6E56C /* liblept.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = liblept.a; path = contrib/Tesseract/lib/liblept.a; sourceTree = "<group>"; };
 		A99DB6A81D4648B700C6E56C /* libtesseract.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libtesseract.a; path = contrib/Tesseract/lib/libtesseract.a; sourceTree = "<group>"; };
@@ -674,7 +670,6 @@
 				A9B9C2421823923100416A4E /* MP42Muxer.h */,
 				A9B9C2431823923100416A4E /* MP42Muxer.m */,
 				A989F0FF1823AB2E0070AD8C /* MP42Track+Muxer.h */,
-				A991714B195AAAEF005AD68E /* MP42Track+Muxer.m */,
 				A9B9C2481823923100416A4E /* MP42Sample.h */,
 				A9B9C2491823923100416A4E /* MP42Sample.m */,
 				A9B9C22D1823923100416A4E /* MP42ConverterProtocol.h */,
@@ -1068,7 +1063,6 @@
 				A9ED5B101F824A9B00E0E4FA /* MP42SSAParser.m in Sources */,
 				A910B61A18394EB20064028F /* MatroskaParser.c in Sources */,
 				A910B61C18394EB20064028F /* mbs.cpp in Sources */,
-				A991714E195AAAEF005AD68E /* MP42Track+Muxer.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1099,7 +1093,6 @@
 				A9B9C2711823923200416A4E /* MP42BitmapSubConverter.m in Sources */,
 				A9B9C28E1823923200416A4E /* MP42Muxer.m in Sources */,
 				A9ED5B0F1F824A9B00E0E4FA /* MP42SSAParser.m in Sources */,
-				A991714C195AAAEF005AD68E /* MP42Track+Muxer.m in Sources */,
 				A9B9C2A21823923200416A4E /* MP42VobSubImporter.m in Sources */,
 				A9B9C2961823923200416A4E /* MP42SrtImporter.m in Sources */,
 				A9B9C2691823923200416A4E /* MP42AC3Importer.m in Sources */,
@@ -1143,7 +1136,6 @@
 			files = (
 				A96523481BAC315900E994E0 /* NSString+MP42Additions.m in Sources */,
 				A9DFBDA4195FF5BA00410060 /* MP42Heap.m in Sources */,
-				A991714D195AAAEF005AD68E /* MP42Track+Muxer.m in Sources */,
 				A9B9C212182391DF00416A4E /* MP42Tests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
