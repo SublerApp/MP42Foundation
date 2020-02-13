@@ -276,7 +276,7 @@ static NSCalendar *_calendar;
     self = [super init];
 
     _identifier = [decoder decodeObjectOfClass:[NSString class] forKey:@"MP42Identifier"];
-    _value = [decoder decodeObjectOfClass:[NSObject class] forKey:@"MP42Value"];
+    _value = [decoder decodeObjectOfClasses:[NSSet setWithObjects:[NSString class], [NSDate class], [NSNumber class], [NSArray class], [MP42Image class], nil] forKey:@"MP42Value"];
     _dataType = [decoder decodeIntForKey:@"MP42DataType"];
     _extendedLanguageTag = [decoder decodeObjectOfClass:[NSString class] forKey:@"MP42LanguageTag"];
 
