@@ -828,8 +828,9 @@ NSString* removeNewLines(NSString* string) {
 	[mutableString replaceOccurrencesOfString:@"\r\n" withString:@"\n" options:0 range:NSMakeRange(0,[mutableString length])];
 	[mutableString replaceOccurrencesOfString:@"\r" withString:@"\n" options:0 range:NSMakeRange(0,[mutableString length])];
 
-    while ([mutableString length] && [mutableString characterAtIndex:[mutableString length] - 1] == '\n')
+    while ([mutableString length] && [mutableString characterAtIndex:[mutableString length] - 1] == '\n') {
         [mutableString deleteCharactersInRange:NSMakeRange([mutableString length] -1, 1)];
+    }
 
     return mutableString;
 }
@@ -905,10 +906,11 @@ MP42SampleBuffer * copySubtitleSample(MP4TrackId subtitleTrackId, NSString *stri
     // Add a tbox atom with offset from top
     if (verticalPlacement) {
         u_int8_t tboxAtom[16];
-        if (top == 0)
+        if (top == 0) {
             createTboxAtom(tboxAtom, top, 0, trackSize.height * 0.12, trackSize.width);
-        else
+        } else {
             createTboxAtom(tboxAtom, trackSize.height * 0.88, 0, trackSize.height, trackSize.width);
+        }
 
         memcpy(sampleData + pos, tboxAtom, 16);
     }
@@ -993,10 +995,10 @@ int ExtractVobSubPacket(UInt8 *dest, UInt8 *framedSrc, int srcSize, int *usedSrc
 				
 				int header_data_length = currentPacket[8];
 				int packetIndex = currentPacket[header_data_length + 9] & 0x1f;
-				if(index == -1)
+                if (index == -1) {
 					index = packetIndex;
-				if(index == packetIndex)
-				{
+                }
+				if (index == packetIndex) {
 					int blockSize = packet_length - 1 - (header_data_length + 3);
 					memcpy(&dest[copiedBytes],
 						   // header's 9 bytes + extension, we don't want 1st byte of packet
@@ -1005,8 +1007,7 @@ int ExtractVobSubPacket(UInt8 *dest, UInt8 *framedSrc, int srcSize, int *usedSrc
 						   blockSize);
 					copiedBytes += blockSize;
                     
-					if(packetSize == INT_MAX)
-					{
+					if (packetSize == INT_MAX) {
 						packetSize = dest[0] << 8 | dest[1];
 					}
 				}
@@ -1019,9 +1020,10 @@ int ExtractVobSubPacket(UInt8 *dest, UInt8 *framedSrc, int srcSize, int *usedSrc
 				return copiedBytes;
 		} // switch (currentPacket[3])
 	} // while (currentPacket - framedSrc < srcSize)
-	if(usedSrcBytes != NULL)
+    if (usedSrcBytes != NULL) {
 		*usedSrcBytes = currentPacket - framedSrc;
-	
+    }
+
 	return copiedBytes;
 }
 
@@ -1032,9 +1034,9 @@ ComponentResult ReadPacketControls(UInt8 *packet, UInt32 palette[16], PacketCont
 	Boolean loop = TRUE;
 	int controlOffset = (packet[2] << 8) + packet[3] + 4;
 	uint8_t *controlSeq = packet + controlOffset;
-	
+
 	memset(controlDataOut, 0, sizeof(PacketControlData));
-	
+
 	while (loop) {
 		switch (controlSeq[i]) {
 			case 0x00:
@@ -1100,12 +1102,14 @@ ComponentResult ReadPacketControls(UInt8 *packet, UInt32 palette[16], PacketCont
 	
 	// force fully transparent to transparent black; needed? for graphicsModePreBlackAlpha
 	for (i = 0; i < 4; i++) {
-		if ((controlDataOut->pixelColor[i] & 0xff000000) == 0)
+        if ((controlDataOut->pixelColor[i] & 0xff000000) == 0) {
 			controlDataOut->pixelColor[i] = 0;
+        }
 	}
 	
-	if (controlSeqSeen != 0xff)
+    if (controlSeqSeen != 0xff) {
 		return -1;
+    }
 	return noErr;
 }
 
