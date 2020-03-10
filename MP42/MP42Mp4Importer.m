@@ -363,6 +363,7 @@ typedef struct MP4DemuxHelper {
                     MP42SampleBuffer *sample = [[MP42SampleBuffer alloc] init];
                     sample->data = pBytes;
                     sample->size = numBytes;
+                    sample->timescale = demuxHelper->timeScale;
                     sample->duration = duration;
                     sample->offset = renderingOffset;
                     sample->decodeTimestamp = pStartTime;

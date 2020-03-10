@@ -350,6 +350,7 @@ static NSArray<SBVobSubTrack *> * LoadVobSubSubtitles(NSURL *theDirectory, NSStr
                     MP42SampleBuffer *sample = [[MP42SampleBuffer alloc] init];
                     sample->size = 2;
                     sample->data = calloc(1, 2);
+                    sample->timescale = 1000;
                     sample->duration = startTime - lastTime;
                     sample->offset = 0;
                     sample->presentationTimestamp = startTime;

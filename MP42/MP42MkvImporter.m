@@ -43,9 +43,10 @@
 
     NSMutableArray<MatroskaSample *> *queue;
 
-    uint64_t        currentTime;
-    uint64_t        startTime;
-    int64_t         minDisplayOffset;
+    uint64_t    timescale;
+    uint64_t    currentTime;
+    uint64_t    startTime;
+    int64_t     minDisplayOffset;
     unsigned int buffer, samplesWritten, bufferFlush;
 
     MP42SampleBuffer *previousSample;
@@ -629,16 +630,16 @@ static NSString * TrackNameToString(TrackInfo *track)
     return (((double)StartTime) - codecDelay) / SCALE_FACTOR;
 }
 
-- (NSUInteger)timescaleForTrack:(MP42Track *)track
+static uint64_t timescale(TrackInfo *trackInfo)
 {
-    TrackInfo *trackInfo = mkv_GetTrackInfo(_matroskaFile, track.sourceId);
     if (trackInfo->Type == TT_VIDEO) {
         return 100000;
     } else if (trackInfo->Type == TT_AUDIO) {
         NSUInteger sampleRate = mkv_TruncFloat(trackInfo->AV.Audio.SamplingFreq);
         if (!strcmp(trackInfo->CodecID, "A_AC3")) {
-            if (sampleRate < 24000)
+            if (sampleRate < 24000) {
                 return 48000;
+            }
         }
         // Sample rate is not set, so just guess one.
         if (sampleRate == 0) {
@@ -649,6 +650,12 @@ static NSString * TrackNameToString(TrackInfo *track)
     }
 
     return 1000;
+}
+
+- (NSUInteger)timescaleForTrack:(MP42Track *)track
+{
+    TrackInfo *trackInfo = mkv_GetTrackInfo(_matroskaFile, track.sourceId);
+    return timescale(trackInfo);
 }
 
 - (NSSize)sizeForTrack:(MP42VideoTrack *)track
@@ -890,6 +897,7 @@ static NSString * TrackNameToString(TrackInfo *track)
             MatroskaDemuxHelper *demuxHelper = [[MatroskaDemuxHelper alloc] init];
             demuxHelper->sourceID = track.sourceId;
             demuxHelper->trackInfo = mkv_GetTrackInfo(_matroskaFile, track.sourceId);
+            demuxHelper->timescale = timescale(demuxHelper->trackInfo);
 
             helpers[track.sourceId] = demuxHelper;
             [_helpers addObject:demuxHelper];
@@ -977,6 +985,7 @@ static NSString * TrackNameToString(TrackInfo *track)
                         MP42SampleBuffer *sample = [[MP42SampleBuffer alloc] init];
                         sample->data = frame;
                         sample->size = FrameSize;
+                        sample->timescale = demuxHelper->timescale;
                         sample->duration = EndTime / SCALE_FACTOR - StartTime / SCALE_FACTOR;
                         sample->offset = 0;
                         sample->decodeTimestamp = StartTime / SCALE_FACTOR;
@@ -988,7 +997,7 @@ static NSString * TrackNameToString(TrackInfo *track)
                         demuxHelper->samplesWritten++;
                     } else {
                         MP42SampleBuffer *nextSample = [[MP42SampleBuffer alloc] init];
-
+                        nextSample->timescale = demuxHelper->timescale;
                         nextSample->duration = 0;
                         nextSample->offset = 0;
                         nextSample->decodeTimestamp = StartTime;
@@ -1001,6 +1010,7 @@ static NSString * TrackNameToString(TrackInfo *track)
                         if (!strcmp(trackInfo->CodecID, "S_HDMV/PGS")) {
                             if (!demuxHelper->previousSample) {
                                 demuxHelper->previousSample = [[MP42SampleBuffer alloc] init];
+                                demuxHelper->previousSample->timescale = demuxHelper->timescale;
                                 demuxHelper->previousSample->duration = StartTime / SCALE_FACTOR;
                                 demuxHelper->previousSample->offset = 0;
                                 demuxHelper->previousSample->decodeTimestamp = StartTime;
@@ -1025,6 +1035,7 @@ static NSString * TrackNameToString(TrackInfo *track)
                             // VobSub seems to have an end duration, and no blank samples, so create a new one each time to fill the gaps
                             if (StartTime > demuxHelper->currentTime) {
                                 MP42SampleBuffer *sample = [[MP42SampleBuffer alloc] init];
+                                sample->timescale = demuxHelper->timescale;
                                 sample->duration = (StartTime - demuxHelper->currentTime) / SCALE_FACTOR;
                                 sample->size = 2;
                                 sample->data = calloc(1, 2);
@@ -1086,6 +1097,7 @@ static NSString * TrackNameToString(TrackInfo *track)
                         MP42SampleBuffer *sample = [[MP42SampleBuffer alloc] init];
                         sample->data = frame;
                         sample->size = currentSample->frameSize;
+                        sample->timescale = demuxHelper->timescale;
                         sample->duration = duration / 10000.0f;
                         sample->offset = offset / 10000.0f;
                         sample->decodeTimestamp = StartTime;
@@ -1125,8 +1137,9 @@ static NSString * TrackNameToString(TrackInfo *track)
                         // add a last sample to get the duration for the last frame
                         MatroskaSample *lastSample = [demuxHelper->queue lastObject];
                         for (MatroskaSample *sample in demuxHelper->queue) {
-                            if (sample->startTime > lastSample->startTime)
+                            if (sample->startTime > lastSample->startTime) {
                                 lastSample = sample;
+                            }
                         }
                         frameSample = [[MatroskaSample alloc] init];
                         frameSample->startTime = lastSample->endTime;
@@ -1156,6 +1169,7 @@ static NSString * TrackNameToString(TrackInfo *track)
                         MP42SampleBuffer *sample = [[MP42SampleBuffer alloc] init];
                         sample->data = frame;
                         sample->size = currentSample->frameSize;
+                        sample->timescale = demuxHelper->timescale;
                         sample->duration = duration / 10000.0f;
                         sample->offset = offset / 10000.0f;
                         sample->decodeTimestamp = StartTime;
@@ -1188,6 +1202,7 @@ static NSString * TrackNameToString(TrackInfo *track)
 
             if (demuxHelper->previousSample) {
                 if (trackInfo->Type == TT_SUB) {
+                    demuxHelper->previousSample->timescale = demuxHelper->timescale;
                     demuxHelper->previousSample->duration = 100;
                 }
 
