@@ -65,11 +65,11 @@ private struct Edit {
 
         self.currentTime = 0
 
-        self.currentEdit = 0
+        self.currentEdit = -1
         self.currentEditDuration = 0
         self.currentTrimStart = 0
 
-        self.currentSampleId = 1
+        self.currentSampleId = 0
         self.currentSampleDuration = 0
 
         self.presentationTimeStamp = 0
@@ -132,6 +132,7 @@ private struct Edit {
         let edit = edits[currentEdit]
         currentSampleId = MP4GetSampleIdFromTime(fileHandle, trackId, edit.mediaStart, false)
         let time = MP4GetSampleTime(fileHandle, trackId, currentSampleId)
+        currentSampleId -= 1
 
         if edit.isEmpty == false {
             currentTrimStart = edit.mediaStart - time
@@ -151,7 +152,7 @@ private struct Edit {
     private func reset() {
         currentTime = 0
 
-        currentEdit = 0
+        currentEdit = -1
         currentEditDuration = 0
         currentTrimStart = 0
 
@@ -161,7 +162,7 @@ private struct Edit {
         presentationTimeStamp = 0
         decodeTimeStamp = 0
 
-        skipEmptyEdits()
+        nextEdit()
 
         _ = stepInDecodeOrder(byCount: 1)
     }
@@ -186,8 +187,11 @@ private struct Edit {
             if (edit.dwell) {
                 currentSampleDuration = edit.duration
                 nextEdit()
-            } else if (currentEditDuration + duration >= edit.duration || currentSampleId == numOfSamples) {
-                currentSampleDuration = edit.duration - currentEditDuration - currentTrimStart
+            } else if (currentSampleId >= numOfSamples || currentEditDuration + duration >= edit.duration) {
+                currentSampleDuration = edit.duration - currentEditDuration
+                if (currentSampleDuration > currentTrimStart) {
+                    currentSampleDuration -= currentTrimStart
+                }
                 nextEdit()
             } else {
                 currentSampleDuration = duration - currentTrimStart
