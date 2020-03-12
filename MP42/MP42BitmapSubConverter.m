@@ -162,7 +162,7 @@
                 OSErr err = noErr;
                 PacketControlData controlData;
 
-                memcpy(paletteG, [srcMagicCookie bytes], sizeof(UInt32)*16);
+                memcpy(paletteG, srcMagicCookie.bytes, sizeof(UInt32)*16);
 
                 for (int ii = 0; ii <16; ii++ ) {
                     paletteG[ii] = EndianU32_LtoN(paletteG[ii]);
@@ -229,15 +229,27 @@
                     CGImageRef filteredCGImage = [self createfilteredCGImage:cgImage];
                     NSString *text = [_ocr performOCROnCGImage:filteredCGImage ? filteredCGImage : cgImage];
 
-                    MP42SampleBuffer *subSample = nil;
+                    uint64_t sampleDuration = sampleBuffer->duration;
+                    uint64_t subDuration = sampleBuffer->timescale && subtitle.end_display_time ?
+                                                subtitle.end_display_time * (sampleBuffer->timescale / 1000) :
+                                                sampleBuffer->duration;
+
+                    if (subDuration > sampleDuration) {
+                        subDuration = sampleDuration;
+                    }
+
                     if (text) {
-                        subSample = copySubtitleSample(sampleBuffer->trackId, text, sampleBuffer->duration, forced, NO, NO, CGSizeMake(0,0), 0);
+                        MP42SampleBuffer *subSample = copySubtitleSample(sampleBuffer->trackId, text, subDuration, forced, NO, NO, CGSizeMake(0,0), 0);
+                        [_outputSamplesBuffer enqueue:subSample];
+
+                        if (subDuration < sampleDuration) {
+                            MP42SampleBuffer *emptySample = copyEmptySubtitleSample(sampleBuffer->trackId, sampleDuration - subDuration, forced);
+                            [_outputSamplesBuffer enqueue:emptySample];
+                        }
+                    } else {
+                        MP42SampleBuffer *emptySample = copyEmptySubtitleSample(sampleBuffer->trackId, sampleDuration, forced);
+                        [_outputSamplesBuffer enqueue:emptySample];
                     }
-                    else {
-                        subSample = copyEmptySubtitleSample(sampleBuffer->trackId, sampleBuffer->duration, forced);
-                    }
-                    
-                    [_outputSamplesBuffer enqueue:subSample];
 
                     CGImageRelease(cgImage);
                     if (filteredCGImage) {
