@@ -12,6 +12,8 @@
 #import "MP42MediaFormat.h"
 #import "MP42HtmlParser.h"
 
+#import <MP42Foundation/MP42Foundation-Swift.h>
+
 @implementation MP42SubtitleTrack
 
 - (instancetype)initWithSourceURL:(NSURL *)URL trackID:(NSInteger)trackID fileHandle:(MP4FileHandle)fileHandle
@@ -208,20 +210,16 @@ static void insertTagsFromStyleRecord(style_record record, NSMutableString *samp
 - (BOOL)exportToURL:(NSURL *)url error:(NSError * __autoreleasing *)error
 {
     MP4FileHandle fileHandle = MP4Read(self.URL.fileSystemRepresentation);
-    if (!fileHandle)
+    if (!fileHandle) {
         return NO;
+    }
 
     MP4TrackId srcTrackId = self.trackId;
-
-    MP4SampleId sampleId = 1;
     NSUInteger srtSampleNumber = 1;
-
-    MP4Timestamp time = 0;
     uint32_t timeScale = MP4GetTrackTimeScale(fileHandle, srcTrackId);
-    uint64_t samples = MP4GetTrackNumberOfSamples(fileHandle, srcTrackId);
 
     NSMutableString *srtFile = [[NSMutableString alloc] init];
-    
+
     uint64_t r, g, b, a;
     MP4GetTrackIntegerProperty(fileHandle, srcTrackId, "mdia.minf.stbl.stsd.tx3g.fontColorRed", &r);
     MP4GetTrackIntegerProperty(fileHandle, srcTrackId, "mdia.minf.stbl.stsd.tx3g.fontColorGreen", &g);
@@ -229,7 +227,13 @@ static void insertTagsFromStyleRecord(style_record record, NSMutableString *samp
     MP4GetTrackIntegerProperty(fileHandle, srcTrackId, "mdia.minf.stbl.stsd.tx3g.fontColorAlpha", &a);
     rgba_color dcolor = {r, g, b, a};
 
-    for (sampleId = 1; sampleId <= samples; sampleId++) {
+    MP42SampleCursor *cursor = [[MP42SampleCursor alloc] initWithFileHandle:fileHandle trackId:srcTrackId];
+    if (cursor == nil) {
+        goto fail;
+    }
+
+    do {
+
         uint8_t *pBytes = NULL;
         uint64_t pos = 0;
         uint32_t numBytes = 0;
@@ -242,14 +246,14 @@ static void insertTagsFromStyleRecord(style_record record, NSMutableString *samp
 
         if (!MP4ReadSample(fileHandle,
                            srcTrackId,
-                           sampleId,
+                           cursor.currentSampleId,
                            &pBytes, &numBytes,
                            &pStartTime, &sampleDuration, &renderingOffset,
                            &isSyncSample)) {
             break;
         }
 
-        NSMutableString * sampleText = nil;
+        NSMutableString *sampleText = nil;
         NSUInteger textSampleLength = ((pBytes[0] << 8) & 0xff00) + pBytes[1];
 
         if (textSampleLength) {
@@ -261,13 +265,13 @@ static void insertTagsFromStyleRecord(style_record record, NSMutableString *samp
         // Let's see if there is an atom after the text sample
         pos = textSampleLength + 2;
 
-		while (pos + 8 < numBytes && sampleText) {
-			uint8_t *styleAtoms = pBytes + pos;
-			size_t atomLength = ((styleAtoms[0] << 24) & 0xff000000) + ((styleAtoms[1] << 16) & 0xff0000) + ((styleAtoms[2] << 8) & 0xff00) + styleAtoms[3];
+        while (pos + 8 < numBytes && sampleText) {
+            uint8_t *styleAtoms = pBytes + pos;
+            size_t atomLength = ((styleAtoms[0] << 24) & 0xff000000) + ((styleAtoms[1] << 16) & 0xff0000) + ((styleAtoms[2] << 8) & 0xff00) + styleAtoms[3];
 
             pos += atomLength;
 
-			if (pos <= numBytes) {
+            if (pos <= numBytes) {
                 // If we found a style atom, read it and insert html-like tags in the new file
                 if (styleAtoms[4] == 's' && styleAtoms[5] == 't' && styleAtoms[6] == 'y' && styleAtoms[7] == 'l') {
                     uint16_t styleCount = ((styleAtoms[8] << 8) & 0xff00) + styleAtoms[9];
@@ -287,7 +291,7 @@ static void insertTagsFromStyleRecord(style_record record, NSMutableString *samp
                         record.endChar      += style_sample[3];
                         record.fontID       = (style_sample[4] << 8) & 0xff00;
                         record.fontID       += style_sample[5];
-                        record.fontStyles	= style_sample[6];
+                        record.fontStyles    = style_sample[6];
                         record.fontSize     = style_sample[7];
                         record.color.r = style_sample[8];
                         record.color.g = style_sample[9];
@@ -295,8 +299,9 @@ static void insertTagsFromStyleRecord(style_record record, NSMutableString *samp
                         record.color.a = style_sample[11];
 
                         // Is the color different?
-                        if (compare_color(record.color, dcolor))
+                        if (compare_color(record.color, dcolor)) {
                             record.fontStyles |= kStyleColor;
+                        }
 
                         // Create a record to close the gap between two non-adiacent records
                         if (record.startChar > previousRecord.endChar + 1) {
@@ -335,34 +340,42 @@ static void insertTagsFromStyleRecord(style_record record, NSMutableString *samp
                     record.right = (tbox_atom[6] << 8) & 0xff00;
                     record.right += tbox_atom[7];
 
-                    if (record.top == 0)
+                    if (record.top == 0) {
                         tbox = YES;
+                    }
                 }
             }
         }
 
         if (textSampleLength) {
-            if ([sampleText characterAtIndex:[sampleText length] - 1] == '\n')
+            if ([sampleText characterAtIndex:[sampleText length] - 1] == '\n') {
                 [sampleText deleteCharactersInRange:NSMakeRange([sampleText length] - 1, 1)];
+            }
 
             if (sampleText) {
+                MP4Timestamp time = cursor.presentationTimeStamp;
+
                 [srtFile appendFormat:@"%lu\n%@ --> %@", (unsigned long)srtSampleNumber++,
-                                                      SRTStringFromTime(time, timeScale, ','), SRTStringFromTime(time + sampleDuration, timeScale, ',')];
-                if (tbox)
+                                                         SRTStringFromTime(time, timeScale, ','),
+                                                         SRTStringFromTime(time + cursor.currentSampleDuration, timeScale, ',')];
+                if (tbox) {
                     [srtFile appendString:@" X1:0"];
-                if (forced)
+                }
+                if (forced) {
                     [srtFile appendString:@" !!!"];
+                }
                 [srtFile appendString:@"\n"];
 
                 [srtFile appendString:sampleText];
                 [srtFile appendString:@"\n\n"];
             }
-		}
+        }
 
-        time += sampleDuration;
         free(pBytes);
-    }
 
+    } while ([cursor stepInDecodeOrderByCount:1] > 0);
+
+fail:
     MP4Close(fileHandle, 0);
 
     return [srtFile writeToURL:url atomically:YES encoding:NSUTF8StringEncoding error:error];
