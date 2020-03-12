@@ -122,7 +122,6 @@
 		A96523451BAC315900E994E0 /* NSString+MP42Additions.h in Headers */ = {isa = PBXBuildFile; fileRef = A96523431BAC315900E994E0 /* NSString+MP42Additions.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A96523461BAC315900E994E0 /* NSString+MP42Additions.h in Headers */ = {isa = PBXBuildFile; fileRef = A96523431BAC315900E994E0 /* NSString+MP42Additions.h */; };
 		A96523471BAC315900E994E0 /* NSString+MP42Additions.m in Sources */ = {isa = PBXBuildFile; fileRef = A96523441BAC315900E994E0 /* NSString+MP42Additions.m */; };
-		A96523481BAC315900E994E0 /* NSString+MP42Additions.m in Sources */ = {isa = PBXBuildFile; fileRef = A96523441BAC315900E994E0 /* NSString+MP42Additions.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		A96523491BAC315900E994E0 /* NSString+MP42Additions.m in Sources */ = {isa = PBXBuildFile; fileRef = A96523441BAC315900E994E0 /* NSString+MP42Additions.m */; };
 		A96D28931BAD390400403327 /* MP42Metadata+Private.h in Headers */ = {isa = PBXBuildFile; fileRef = A96D28921BAD390400403327 /* MP42Metadata+Private.h */; };
 		A96D28941BAD390400403327 /* MP42Metadata+Private.h in Headers */ = {isa = PBXBuildFile; fileRef = A96D28921BAD390400403327 /* MP42Metadata+Private.h */; };
@@ -150,12 +149,10 @@
 		A9B0F28922A29E9C0012E099 /* liblzma.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = A9B0F28822A29E9C0012E099 /* liblzma.tbd */; };
 		A9B0F2B422A2A36D0012E099 /* libpng16.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A9B0F2B322A2A36D0012E099 /* libpng16.a */; };
 		A9B0F2D622A2A5270012E099 /* tessdata in CopyFiles */ = {isa = PBXBuildFile; fileRef = A9B0F2D522A2A5270012E099 /* tessdata */; };
+		A9B5C955241A302E000ACD15 /* SampleCursor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9B5C954241A302E000ACD15 /* SampleCursor.swift */; };
+		A9B5C956241A302E000ACD15 /* SampleCursor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9B5C954241A302E000ACD15 /* SampleCursor.swift */; };
 		A9B9C1F1182391DF00416A4E /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9B9C1F0182391DF00416A4E /* Cocoa.framework */; };
 		A9B9C1FB182391DF00416A4E /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = A9B9C1F9182391DF00416A4E /* InfoPlist.strings */; };
-		A9B9C207182391DF00416A4E /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9B9C1F0182391DF00416A4E /* Cocoa.framework */; };
-		A9B9C20A182391DF00416A4E /* MP42Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9B9C1ED182391DF00416A4E /* MP42Foundation.framework */; };
-		A9B9C210182391DF00416A4E /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = A9B9C20E182391DF00416A4E /* InfoPlist.strings */; };
-		A9B9C212182391DF00416A4E /* MP42Tests.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C211182391DF00416A4E /* MP42Tests.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		A9B9C2661823923200416A4E /* MP42AACImporter.h in Headers */ = {isa = PBXBuildFile; fileRef = A9B9C21B1823923100416A4E /* MP42AACImporter.h */; };
 		A9B9C2671823923200416A4E /* MP42AACImporter.mm in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C21C1823923100416A4E /* MP42AACImporter.mm */; };
 		A9B9C2681823923200416A4E /* MP42AC3Importer.h in Headers */ = {isa = PBXBuildFile; fileRef = A9B9C21D1823923100416A4E /* MP42AC3Importer.h */; };
@@ -237,7 +234,6 @@
 		A9D764321E278B8100ED2F78 /* MP42MetadataUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = A9D764301E278B8100ED2F78 /* MP42MetadataUtilities.m */; };
 		A9DFBDA1195FF5BA00410060 /* MP42Heap.h in Headers */ = {isa = PBXBuildFile; fileRef = A9DFBD9F195FF5BA00410060 /* MP42Heap.h */; };
 		A9DFBDA3195FF5BA00410060 /* MP42Heap.m in Sources */ = {isa = PBXBuildFile; fileRef = A9DFBDA0195FF5BA00410060 /* MP42Heap.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		A9DFBDA4195FF5BA00410060 /* MP42Heap.m in Sources */ = {isa = PBXBuildFile; fileRef = A9DFBDA0195FF5BA00410060 /* MP42Heap.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		A9DFBDA5195FF5BA00410060 /* MP42Heap.m in Sources */ = {isa = PBXBuildFile; fileRef = A9DFBDA0195FF5BA00410060 /* MP42Heap.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		A9DFBDCB1960174500410060 /* MP42EditListsReconstructor.h in Headers */ = {isa = PBXBuildFile; fileRef = A9DFBDC91960174500410060 /* MP42EditListsReconstructor.h */; };
 		A9DFBDCC1960174500410060 /* MP42EditListsReconstructor.m in Sources */ = {isa = PBXBuildFile; fileRef = A9DFBDCA1960174500410060 /* MP42EditListsReconstructor.m */; };
@@ -254,16 +250,6 @@
 		FFE849961EBCAFDF000AA078 /* MP42AC3AudioEncoder.h in Headers */ = {isa = PBXBuildFile; fileRef = FFE849941EBCAFDF000AA078 /* MP42AC3AudioEncoder.h */; };
 		FFE849971EBCAFDF000AA078 /* MP42AC3AudioEncoder.m in Sources */ = {isa = PBXBuildFile; fileRef = FFE849951EBCAFDF000AA078 /* MP42AC3AudioEncoder.m */; };
 /* End PBXBuildFile section */
-
-/* Begin PBXContainerItemProxy section */
-		A9B9C208182391DF00416A4E /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = A9B9C1E4182391DF00416A4E /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = A9B9C1EC182391DF00416A4E;
-			remoteInfo = MP42;
-		};
-/* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
 		A94BFB2F184C864900810224 /* CopyFiles */ = {
@@ -334,6 +320,7 @@
 		A9B0F28822A29E9C0012E099 /* liblzma.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = liblzma.tbd; path = usr/lib/liblzma.tbd; sourceTree = SDKROOT; };
 		A9B0F2B322A2A36D0012E099 /* libpng16.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libpng16.a; path = contrib/Tesseract/lib/libpng16.a; sourceTree = "<group>"; };
 		A9B0F2D522A2A5270012E099 /* tessdata */ = {isa = PBXFileReference; lastKnownFileType = folder; name = tessdata; path = contrib/Tesseract/share/tessdata; sourceTree = "<group>"; };
+		A9B5C954241A302E000ACD15 /* SampleCursor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleCursor.swift; sourceTree = "<group>"; };
 		A9B9C1ED182391DF00416A4E /* MP42Foundation.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = MP42Foundation.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		A9B9C1F0182391DF00416A4E /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		A9B9C1F3182391DF00416A4E /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -342,10 +329,6 @@
 		A9B9C1F8182391DF00416A4E /* MP42Foundation-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "MP42Foundation-Info.plist"; sourceTree = "<group>"; };
 		A9B9C1FA182391DF00416A4E /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		A9B9C1FC182391DF00416A4E /* MP42Foundation-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MP42Foundation-Prefix.pch"; sourceTree = "<group>"; };
-		A9B9C204182391DF00416A4E /* MP42FoundationFoundationTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MP42FoundationFoundationTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		A9B9C20D182391DF00416A4E /* MP42FoundationTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "MP42FoundationTests-Info.plist"; sourceTree = "<group>"; };
-		A9B9C20F182391DF00416A4E /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		A9B9C211182391DF00416A4E /* MP42Tests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MP42Tests.m; sourceTree = "<group>"; };
 		A9B9C21B1823923100416A4E /* MP42AACImporter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MP42AACImporter.h; sourceTree = "<group>"; };
 		A9B9C21C1823923100416A4E /* MP42AACImporter.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MP42AACImporter.mm; sourceTree = "<group>"; };
 		A9B9C21D1823923100416A4E /* MP42AC3Importer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MP42AC3Importer.h; sourceTree = "<group>"; };
@@ -423,7 +406,6 @@
 		A9B9C2DD1823973200416A4E /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
 		A9B9C4921823986200416A4E /* Quartz.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Quartz.framework; path = System/Library/Frameworks/Quartz.framework; sourceTree = SDKROOT; };
 		A9BA1ACC1DBF76FD00FD0B38 /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = it.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		A9BA1ACD1DBF76FD00FD0B38 /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = it.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		A9BA1AEA1DBF7DBE00FD0B38 /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = it.lproj/Localizable.strings; sourceTree = "<group>"; };
 		A9D599BA1D4885E0001C22BD /* libswresample.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libswresample.a; path = contrib/ffmpeg/lib/libswresample.a; sourceTree = "<group>"; };
 		A9D6CD611F9E3A7F00CCEE3E /* MediaToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MediaToolbox.framework; path = System/Library/Frameworks/MediaToolbox.framework; sourceTree = SDKROOT; };
@@ -501,27 +483,17 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		A9B9C201182391DF00416A4E /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				A9B9C207182391DF00416A4E /* Cocoa.framework in Frameworks */,
-				A9B9C20A182391DF00416A4E /* MP42Foundation.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		A9B9C1E3182391DF00416A4E = {
 			isa = PBXGroup;
 			children = (
-				A9B0F2D522A2A5270012E099 /* tessdata */,
 				A9AA2B841DBF954000C9D897 /* Localizable.strings */,
 				A9B9C1F6182391DF00416A4E /* MP42 */,
-				A9B9C20B182391DF00416A4E /* MP42Tests */,
 				A9B9C1EF182391DF00416A4E /* Frameworks */,
 				A9B9C1EE182391DF00416A4E /* Products */,
+				A9B0F2D522A2A5270012E099 /* tessdata */,
 			);
 			sourceTree = "<group>";
 		};
@@ -529,7 +501,6 @@
 			isa = PBXGroup;
 			children = (
 				A9B9C1ED182391DF00416A4E /* MP42Foundation.framework */,
-				A9B9C204182391DF00416A4E /* MP42FoundationFoundationTests.xctest */,
 				A910B5A318394E900064028F /* libmp42.a */,
 			);
 			name = Products;
@@ -623,24 +594,6 @@
 				A9B9C1F8182391DF00416A4E /* MP42Foundation-Info.plist */,
 				A9B9C1F9182391DF00416A4E /* InfoPlist.strings */,
 				A9B9C1FC182391DF00416A4E /* MP42Foundation-Prefix.pch */,
-			);
-			name = "Supporting Files";
-			sourceTree = "<group>";
-		};
-		A9B9C20B182391DF00416A4E /* MP42Tests */ = {
-			isa = PBXGroup;
-			children = (
-				A9B9C211182391DF00416A4E /* MP42Tests.m */,
-				A9B9C20C182391DF00416A4E /* Supporting Files */,
-			);
-			path = MP42Tests;
-			sourceTree = "<group>";
-		};
-		A9B9C20C182391DF00416A4E /* Supporting Files */ = {
-			isa = PBXGroup;
-			children = (
-				A9B9C20D182391DF00416A4E /* MP42FoundationTests-Info.plist */,
-				A9B9C20E182391DF00416A4E /* InfoPlist.strings */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -748,6 +701,7 @@
 				A941C95D1F82A9B800FC5E8D /* MP42SSAConverter.m */,
 				A96523431BAC315900E994E0 /* NSString+MP42Additions.h */,
 				A96523441BAC315900E994E0 /* NSString+MP42Additions.m */,
+				A9B5C954241A302E000ACD15 /* SampleCursor.swift */,
 			);
 			name = Utility;
 			sourceTree = "<group>";
@@ -916,24 +870,6 @@
 			productReference = A9B9C1ED182391DF00416A4E /* MP42Foundation.framework */;
 			productType = "com.apple.product-type.framework";
 		};
-		A9B9C203182391DF00416A4E /* MP42FoundationTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = A9B9C218182391DF00416A4E /* Build configuration list for PBXNativeTarget "MP42FoundationTests" */;
-			buildPhases = (
-				A9B9C200182391DF00416A4E /* Sources */,
-				A9B9C201182391DF00416A4E /* Frameworks */,
-				A9B9C202182391DF00416A4E /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				A9B9C209182391DF00416A4E /* PBXTargetDependency */,
-			);
-			name = MP42FoundationTests;
-			productName = MP42Tests;
-			productReference = A9B9C204182391DF00416A4E /* MP42FoundationFoundationTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -943,8 +879,11 @@
 				LastUpgradeCheck = 0930;
 				ORGANIZATIONNAME = "Damiano Galassi";
 				TargetAttributes = {
-					A9B9C203182391DF00416A4E = {
-						TestTargetID = A9B9C1EC182391DF00416A4E;
+					A910B5A218394E900064028F = {
+						LastSwiftMigration = 1140;
+					};
+					A9B9C1EC182391DF00416A4E = {
+						LastSwiftMigration = 1140;
 					};
 				};
 			};
@@ -963,7 +902,6 @@
 			projectRoot = "";
 			targets = (
 				A9B9C1EC182391DF00416A4E /* MP42Foundation */,
-				A9B9C203182391DF00416A4E /* MP42FoundationTests */,
 				A910B5A218394E900064028F /* mp42 */,
 			);
 		};
@@ -984,14 +922,6 @@
 			files = (
 				A9BA1AE91DBF7DBE00FD0B38 /* Localizable.strings in Resources */,
 				A9B9C1FB182391DF00416A4E /* InfoPlist.strings in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		A9B9C202182391DF00416A4E /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				A9B9C210182391DF00416A4E /* InfoPlist.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1031,6 +961,7 @@
 				A910B5F118394EB20064028F /* MP42Muxer.m in Sources */,
 				A910B5F418394EB20064028F /* MP42SampleBuffer.m in Sources */,
 				A910B5F718394EB20064028F /* MP42Fifo.m in Sources */,
+				A9B5C956241A302E000ACD15 /* SampleCursor.swift in Sources */,
 				A96523491BAC315900E994E0 /* NSString+MP42Additions.m in Sources */,
 				A910B5F918394EB20064028F /* MP42FileImporter.m in Sources */,
 				A910B5FA18394EB20064028F /* sfifo.c in Sources */,
@@ -1095,6 +1026,7 @@
 				A9B9C26F1823923200416A4E /* MP42AVFImporter.m in Sources */,
 				A9B9C2671823923200416A4E /* MP42AACImporter.mm in Sources */,
 				A9ED5B131F824BC100E0E4FA /* MP42SSAImporter.m in Sources */,
+				A9B5C955241A302E000ACD15 /* SampleCursor.swift in Sources */,
 				A9B9C28C1823923200416A4E /* MP42Mp4Importer.m in Sources */,
 				A9B9C28A1823923200416A4E /* MP42MkvImporter.m in Sources */,
 				A9B9C2731823923200416A4E /* MP42CCImporter.m in Sources */,
@@ -1126,25 +1058,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		A9B9C200182391DF00416A4E /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				A96523481BAC315900E994E0 /* NSString+MP42Additions.m in Sources */,
-				A9DFBDA4195FF5BA00410060 /* MP42Heap.m in Sources */,
-				A9B9C212182391DF00416A4E /* MP42Tests.m in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXTargetDependency section */
-		A9B9C209182391DF00416A4E /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = A9B9C1EC182391DF00416A4E /* MP42Foundation */;
-			targetProxy = A9B9C208182391DF00416A4E /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		A9AA2B841DBF954000C9D897 /* Localizable.strings */ = {
@@ -1164,15 +1078,6 @@
 			name = InfoPlist.strings;
 			sourceTree = "<group>";
 		};
-		A9B9C20E182391DF00416A4E /* InfoPlist.strings */ = {
-			isa = PBXVariantGroup;
-			children = (
-				A9B9C20F182391DF00416A4E /* en */,
-				A9BA1ACD1DBF76FD00FD0B38 /* it */,
-			);
-			name = InfoPlist.strings;
-			sourceTree = "<group>";
-		};
 		A9BA1AEB1DBF7DBE00FD0B38 /* Localizable.strings */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -1187,6 +1092,7 @@
 		A910B5BD18394E900064028F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -1197,6 +1103,11 @@
 				);
 				GCC_WARN_64_TO_32_BIT_CONVERSION = NO;
 				GCC_WARN_UNUSED_FUNCTION = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/contrib/mp42v2",
@@ -1208,19 +1119,27 @@
 					suppress,
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = macosx;
+				SWIFT_OBJC_BRIDGING_HEADER = "MP42/mp42-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
 		A910B5BE18394E900064028F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "MP42/MP42Foundation-Prefix.pch";
 				GCC_WARN_64_TO_32_BIT_CONVERSION = NO;
 				GCC_WARN_UNUSED_FUNCTION = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/contrib/mp42v2",
@@ -1232,7 +1151,8 @@
 					suppress,
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = macosx;
+				SWIFT_OBJC_BRIDGING_HEADER = "MP42/mp42-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
 		};
@@ -1299,7 +1219,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "-w";
-				SDKROOT = macosx;
+				SWIFT_INCLUDE_PATHS = "$(SRCROOT)/contrib/**";
 				USER_HEADER_SEARCH_PATHS = "";
 			};
 			name = Debug;
@@ -1364,7 +1284,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "-w";
-				SDKROOT = macosx;
+				SWIFT_INCLUDE_PATHS = "$(SRCROOT)/contrib/**";
 				USER_HEADER_SEARCH_PATHS = "";
 			};
 			name = Release;
@@ -1372,6 +1292,7 @@
 		A9B9C216182391DF00416A4E /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEFINES_MODULE = YES;
@@ -1383,6 +1304,11 @@
 				"GCC_PREPROCESSOR_DEFINITIONS[arch=*]" = "$(inherited)";
 				INFOPLIST_FILE = "MP42/MP42Foundation-Info.plist";
 				INSTALL_PATH = "@loader_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/Frameworks",
+				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/contrib/mp42v2",
@@ -1392,6 +1318,9 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "com.galad.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = MP42Foundation;
 				SKIP_INSTALL = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
 				WRAPPER_EXTENSION = framework;
 			};
 			name = Debug;
@@ -1399,6 +1328,7 @@
 		A9B9C217182391DF00416A4E /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEFINES_MODULE = YES;
@@ -1409,6 +1339,11 @@
 				GCC_PREFIX_HEADER = "MP42/MP42Foundation-Prefix.pch";
 				INFOPLIST_FILE = "MP42/MP42Foundation-Info.plist";
 				INSTALL_PATH = "@loader_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/Frameworks",
+				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/contrib/mp42v2",
@@ -1418,51 +1353,9 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "com.galad.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = MP42Foundation;
 				SKIP_INSTALL = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "";
+				SWIFT_VERSION = 5.0;
 				WRAPPER_EXTENSION = framework;
-			};
-			name = Release;
-		};
-		A9B9C219182391DF00416A4E /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/MP42Foundation.framework/Versions/A/MP42Foundation";
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				COMBINE_HIDPI_IMAGES = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(DEVELOPER_FRAMEWORKS_DIR)",
-					"$(inherited)",
-				);
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "MP42/MP42Foundation-Prefix.pch";
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"DEBUG=1",
-					"$(inherited)",
-				);
-				INFOPLIST_FILE = "MP42Tests/MP42FoundationTests-Info.plist";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.galad.${PRODUCT_NAME:rfc1034identifier}";
-				PRODUCT_NAME = MP42FoundationFoundationTests;
-				TEST_HOST = "$(BUNDLE_LOADER)";
-				WRAPPER_EXTENSION = xctest;
-			};
-			name = Debug;
-		};
-		A9B9C21A182391DF00416A4E /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/MP42Foundation.framework/Versions/A/MP42Foundation";
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				COMBINE_HIDPI_IMAGES = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(DEVELOPER_FRAMEWORKS_DIR)",
-					"$(inherited)",
-				);
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "MP42/MP42Foundation-Prefix.pch";
-				INFOPLIST_FILE = "MP42Tests/MP42FoundationTests-Info.plist";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.galad.${PRODUCT_NAME:rfc1034identifier}";
-				PRODUCT_NAME = MP42FoundationFoundationTests;
-				TEST_HOST = "$(BUNDLE_LOADER)";
-				WRAPPER_EXTENSION = xctest;
 			};
 			name = Release;
 		};
@@ -1492,15 +1385,6 @@
 			buildConfigurations = (
 				A9B9C216182391DF00416A4E /* Debug */,
 				A9B9C217182391DF00416A4E /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		A9B9C218182391DF00416A4E /* Build configuration list for PBXNativeTarget "MP42FoundationTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				A9B9C219182391DF00416A4E /* Debug */,
-				A9B9C21A182391DF00416A4E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
