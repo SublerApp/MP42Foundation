@@ -876,7 +876,7 @@
 		A9B9C1E4182391DF00416A4E /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0930;
+				LastUpgradeCheck = 1140;
 				ORGANIZATIONNAME = "Damiano Galassi";
 				TargetAttributes = {
 					A910B5A218394E900064028F = {
@@ -1284,6 +1284,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "-w";
+				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_INCLUDE_PATHS = "$(SRCROOT)/contrib/**";
 				USER_HEADER_SEARCH_PATHS = "";
 			};
