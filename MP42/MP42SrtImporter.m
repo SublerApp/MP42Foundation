@@ -17,6 +17,7 @@
 #import "MP42PrivateUtilities.h"
 #import "MP42Track+Private.h"
 
+MP42_OBJC_DIRECT_MEMBERS
 @implementation MP42SrtImporter {
 @private
     MP42SubSerializer *_ss;

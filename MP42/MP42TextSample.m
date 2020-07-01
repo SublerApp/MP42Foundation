@@ -7,7 +7,9 @@
 //
 
 #import "MP42TextSample.h"
+#import "MP42Utilities.h"
 
+MP42_OBJC_DIRECT_MEMBERS
 @implementation MP42TextSample
 
 - (NSComparisonResult)compare:(MP42TextSample *)otherObject

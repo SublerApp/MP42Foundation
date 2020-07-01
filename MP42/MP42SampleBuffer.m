@@ -8,6 +8,7 @@
 
 #import "MP42SampleBuffer.h"
 
+MP42_OBJC_DIRECT_MEMBERS
 @implementation MP42SampleBuffer
 
 - (void)dealloc {

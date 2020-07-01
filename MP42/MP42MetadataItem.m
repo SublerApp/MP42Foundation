@@ -11,7 +11,9 @@
 #import "MP42Image.h"
 #import "NSString+MP42Additions.h"
 #import "MP42MetadataUtilities.h"
+#import "MP42Utilities.h"
 
+MP42_OBJC_DIRECT_MEMBERS
 @implementation MP42MetadataItem
 
 static NSDictionary<NSString *, NSNumber *> *_defaultTypes;
@@ -97,7 +99,7 @@ static NSCalendar *_calendar;
                                    dataType:(MP42MetadataItemDataType)dataType
                        extendedLanguageTag:(NSString *)extendedLanguageTag
 {
-    return [[self alloc] initWithIdentifier:identifier value:value dataType:dataType extendedLanguageTag:extendedLanguageTag];
+    return [[MP42MetadataItem alloc] initWithIdentifier:identifier value:value dataType:dataType extendedLanguageTag:extendedLanguageTag];
 }
 
 + (MP42MetadataItemDataType)defaultDataTypeForIdentifier:(NSString *)identifier

@@ -18,6 +18,7 @@
 #import "MP42Track+Private.h"
 #import "MP42SampleBuffer.h"
 
+MP42_OBJC_DIRECT_MEMBERS
 @interface SBVobSubSample : NSObject
 {
 @public
@@ -28,6 +29,7 @@
 - (id)initWithTime:(long)time offset:(long)offset;
 @end
 
+MP42_OBJC_DIRECT_MEMBERS
 @interface SBVobSubTrack : NSObject
 {
 @public
@@ -44,6 +46,7 @@
 
 @end
 
+MP42_OBJC_DIRECT_MEMBERS
 @implementation SBVobSubSample
 
 - (id)initWithTime:(long)time offset:(long)offset
@@ -60,6 +63,7 @@
 
 @end
 
+MP42_OBJC_DIRECT_MEMBERS
 @implementation SBVobSubTrack
 
 - (id)initWithPrivateData:(NSArray *)idxPrivateData language:(NSString *)lang andIndex:(int)trackIndex
@@ -209,6 +213,7 @@ static NSArray<SBVobSubTrack *> * LoadVobSubSubtitles(NSURL *theDirectory, NSStr
     }
 }
 
+MP42_OBJC_DIRECT_MEMBERS
 @implementation MP42VobSubImporter {
 @private
     NSArray *_VobSubTracks;

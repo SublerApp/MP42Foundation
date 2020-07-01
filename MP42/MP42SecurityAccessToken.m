@@ -7,12 +7,15 @@
 //
 
 #import "MP42SecurityAccessToken.h"
+#import <MP42Foundation/MP42Utilities.h>
 
+MP42_OBJC_DIRECT_MEMBERS
 @interface MP42SecurityAccessToken ()
 @property (nonatomic, readonly) id<MP42SecurityScope> object;
 @property (nonatomic, readonly) BOOL accessed;
 @end
 
+MP42_OBJC_DIRECT_MEMBERS
 @implementation MP42SecurityAccessToken
 
 - (instancetype)initWithObject:(id<MP42SecurityScope>)object;
@@ -27,7 +30,7 @@
 
 + (instancetype)tokenWithObject:(id<MP42SecurityScope>)object
 {
-    return [[self alloc] initWithObject:object];
+    return [[MP42SecurityAccessToken alloc] initWithObject:object];
 }
 
 - (void)dealloc

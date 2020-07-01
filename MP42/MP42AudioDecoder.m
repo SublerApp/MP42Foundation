@@ -43,6 +43,7 @@ struct MP42DecodeContext {
 
 typedef struct MP42DecodeContext MP42DecodeContext;
 
+MP42_OBJC_DIRECT_MEMBERS
 @interface MP42AudioDecoder ()
 {
     __unsafe_unretained id<MP42AudioUnit> _outputUnit;

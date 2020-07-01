@@ -7,9 +7,11 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "MP42Utilities.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
+MP42_OBJC_DIRECT_MEMBERS
 @interface MP42Fifo<__covariant ObjectType> : NSObject
 
 - (instancetype)initWithCapacity:(NSUInteger)capacity NS_DESIGNATED_INITIALIZER;

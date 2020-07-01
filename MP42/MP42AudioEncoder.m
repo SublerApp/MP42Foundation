@@ -37,6 +37,7 @@ typedef struct AudioFileIO
     AudioStreamPacketDescription * _Nullable pktDescs;
 } AudioFileIO;
 
+MP42_OBJC_DIRECT_MEMBERS
 @interface MP42AudioEncoder ()
 {
     __unsafe_unretained id<MP42AudioUnit> _outputUnit;

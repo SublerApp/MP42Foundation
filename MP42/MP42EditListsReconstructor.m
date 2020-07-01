@@ -10,6 +10,7 @@
 #import "MP42MediaFormat.h"
 #import "MP42Heap.h"
 
+MP42_OBJC_DIRECT_MEMBERS
 @implementation MP42EditListsReconstructor
 {
 @private

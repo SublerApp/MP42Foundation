@@ -26,6 +26,8 @@ int compare_color(rgba_color c1, rgba_color c2) {
     else
         return 1;
 }
+
+MP42_OBJC_DIRECT_MEMBERS
 @implementation MP42Style
 {
     NSInteger _style;
@@ -81,6 +83,7 @@ int compare_color(rgba_color c1, rgba_color c2) {
 
 @end
 
+MP42_OBJC_DIRECT_MEMBERS
 @implementation MP42HtmlParser
 {
     NSUInteger _location;

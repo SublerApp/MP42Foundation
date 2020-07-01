@@ -27,6 +27,7 @@
 
 @end
 
+MP42_OBJC_DIRECT_MEMBERS
 @implementation MP42SSAImporter
 
 + (NSArray<NSString *> *)supportedFileFormats {

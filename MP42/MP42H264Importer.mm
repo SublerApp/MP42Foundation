@@ -1370,6 +1370,7 @@ NSData* H264Info(const char *filePath, uint32_t *pic_width, uint32_t *pic_height
     return avcCData;
 }
 
+MP42_OBJC_DIRECT_MEMBERS
 @implementation MP42H264Importer {
     FILE *inFile;
     int64_t _size;

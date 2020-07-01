@@ -40,9 +40,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)startReading;
 
-- (void)enqueue:(MP42SampleBuffer *)sample;
-- (nullable MP42SampleBuffer *)copyNextSample;
-
 @end
 
 NS_ASSUME_NONNULL_END

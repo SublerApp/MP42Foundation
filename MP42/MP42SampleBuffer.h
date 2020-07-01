@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <MP42Foundation/MP42Utilities.h>
 
 typedef NS_OPTIONS(uint16_t, MP42SampleBufferFlag) {
     MP42SampleBufferFlagEndOfFile    = 1 << 0,
@@ -27,6 +28,7 @@ typedef NS_OPTIONS(uint32_t, MP42SampleDepType) {
     MP42SampleDepTypeReserved                     = 0x80  /**< reserved */
 };
 
+MP42_OBJC_DIRECT_MEMBERS
 @interface MP42SampleBuffer : NSObject {
     @public
 	void        *data;

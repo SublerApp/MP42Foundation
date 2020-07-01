@@ -16,6 +16,7 @@
  *  by analyzing the doNotDisplay and trimAtStart/End flags
  *  TO-DO: doesn't work in all cases yet.
  */
+MP42_OBJC_DIRECT_MEMBERS
 @interface MP42EditListsReconstructor : NSObject
 
 - (void)addSample:(MP42SampleBuffer *)sample;

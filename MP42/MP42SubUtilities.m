@@ -10,6 +10,7 @@
 #import "MP42SampleBuffer.h"
 #import "MP42HtmlParser.h"
 
+MP42_OBJC_DIRECT_MEMBERS
 @implementation MP42SubSerializer
 {
     // input lines, sorted by 1. beginning time 2. original insertion order
@@ -165,6 +166,7 @@ canOutput:
 
 @end
 
+MP42_OBJC_DIRECT_MEMBERS
 @implementation MP42SubLine
 
 -(instancetype)initWithLine:(NSString *)l start:(unsigned)s end:(unsigned)e

@@ -14,6 +14,7 @@
 
 #import <MP42Foundation/MP42Foundation-Swift.h>
 
+MP42_OBJC_DIRECT_MEMBERS
 @implementation MP42SubtitleTrack
 
 - (instancetype)initWithSourceURL:(NSURL *)URL trackID:(NSInteger)trackID fileHandle:(MP4FileHandle)fileHandle

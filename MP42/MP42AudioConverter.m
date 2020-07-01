@@ -27,6 +27,7 @@
 
 @end
 
+MP42_OBJC_DIRECT_MEMBERS
 @implementation MP42AudioConverter
 
 #pragma mark - Init

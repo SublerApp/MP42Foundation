@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "MP42Utilities.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -14,6 +15,7 @@ NS_ASSUME_NONNULL_BEGIN
  *  A simple heap/priority queue implementations with a static size.
  *  It takes a NSComparator in input.
  */
+MP42_OBJC_DIRECT_MEMBERS
 @interface MP42Heap<ObjectType> : NSObject
 
 - (instancetype)initWithCapacity:(NSUInteger)numItems comparator:(NSComparator)cmptr;

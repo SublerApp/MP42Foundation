@@ -26,6 +26,7 @@ uint64 right(uint64 i) {
     return i * 2 + 2;
 }
 
+MP42_OBJC_DIRECT_MEMBERS
 @implementation MP42Heap {
 @private
     id *_array;

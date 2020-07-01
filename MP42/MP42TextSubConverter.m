@@ -22,6 +22,7 @@
 #import "MP42SSAParser.h"
 #import "MP42SSAConverter.h"
 
+MP42_OBJC_DIRECT_MEMBERS
 @interface MP42TextSubConverter ()
 
 @property (nonatomic, readonly) NSThread *decoderThread;

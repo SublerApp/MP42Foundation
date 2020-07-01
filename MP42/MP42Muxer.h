@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "mp4v2.h"
 #import "MP42Logging.h"
+#import "MP42Utilities.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -18,6 +19,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)progressStatus:(double)progress;
 @end
 
+MP42_OBJC_DIRECT_MEMBERS
 @interface MP42Muxer : NSObject
 
 - (instancetype)initWithFileHandle:(MP4FileHandle)fileHandle delegate:(id <MP42MuxerDelegate>)del logger:(id <MP42Logging>)logger options:(nullable NSDictionary<NSString *, id> *)options;

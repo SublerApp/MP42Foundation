@@ -7,6 +7,7 @@
 //
 
 #import "MP42FileImporter.h"
+#import "MP42FileImporter+Private.h"
 #import "MP42MkvImporter.h"
 #import "MP42Mp4Importer.h"
 #import "MP42SrtImporter.h"
@@ -23,6 +24,7 @@
 #import "MP42AudioTrack.h"
 #import "MP42Track+Private.h"
 #import "MP42SampleBuffer.h"
+#import "MP42Metadata.h"
 
 #import "mp4v2.h"
 
@@ -108,6 +110,7 @@ static NSArray<NSString *> *_supportedFileFormats;
         _fileURL = fileURL;
         _tracksArray = [[NSMutableArray alloc] init];
         _doneSem = dispatch_semaphore_create(0);
+        _metadata = [[MP42Metadata alloc] init];
     }
     return self;
 }
@@ -138,56 +141,6 @@ static NSArray<NSString *> *_supportedFileFormats;
 }
 
 @synthesize tracks = _tracksArray;
-
-- (NSUInteger)timescaleForTrack:(MP42Track *)track
-{
-    @throw [NSException exceptionWithName:NSInternalInconsistencyException
-                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
-                                 userInfo:nil];
-}
-
-- (NSSize)sizeForTrack:(MP42VideoTrack *)track
-{
-    @throw [NSException exceptionWithName:NSInternalInconsistencyException
-                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
-                                 userInfo:nil];
-}
-
-- (nullable NSData *)magicCookieForTrack:(MP42Track *)track
-{
-    @throw [NSException exceptionWithName:NSInternalInconsistencyException
-                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
-                                 userInfo:nil];
-}
-
-- (AudioStreamBasicDescription)audioDescriptionForTrack:(MP42AudioTrack *)track
-{
-    @throw [NSException exceptionWithName:NSInternalInconsistencyException
-                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
-                                 userInfo:nil];
-}
-
-- (void)demux
-{
-    @throw [NSException exceptionWithName:NSInternalInconsistencyException
-                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
-                                 userInfo:nil];
-}
-
-- (BOOL)audioTrackUsesExplicitEncoderDelay:(MP42Track *)track;
-{
-    return NO;
-}
-
-- (BOOL)supportsPreciseTimestamps
-{
-    return NO;
-}
-
-- (BOOL)cleanUp:(MP42Track *)track fileHandle:(MP4FileHandle)fileHandle
-{
-    return YES;
-}
 
 - (void)setActiveTrack:(MP42Track *)track {
     if (!_inputTracks) {
@@ -273,6 +226,58 @@ static NSArray<NSString *> *_supportedFileFormats;
 - (BOOL)isCancelled
 {
     return _cancelled;
+}
+
+#pragma mark - Override
+
+- (NSUInteger)timescaleForTrack:(MP42Track *)track
+{
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+- (NSSize)sizeForTrack:(MP42VideoTrack *)track
+{
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+- (nullable NSData *)magicCookieForTrack:(MP42Track *)track
+{
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+- (AudioStreamBasicDescription)audioDescriptionForTrack:(MP42AudioTrack *)track
+{
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+- (void)demux
+{
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+- (BOOL)audioTrackUsesExplicitEncoderDelay:(MP42Track *)track;
+{
+    return NO;
+}
+
+- (BOOL)supportsPreciseTimestamps
+{
+    return NO;
+}
+
+- (BOOL)cleanUp:(MP42Track *)track fileHandle:(MP4FileHandle)fileHandle
+{
+    return YES;
 }
 
 @end

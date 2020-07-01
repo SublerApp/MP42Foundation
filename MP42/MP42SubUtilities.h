@@ -8,10 +8,12 @@
 
 #import <Foundation/Foundation.h>
 #import "MP42TextSample.h"
+#import "MP42Utilities.h"
 #import "mp4v2.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
+MP42_OBJC_DIRECT_MEMBERS
 @interface MP42SubLine : NSObject
 {
 @public
@@ -25,6 +27,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithLine:(NSString *)l start:(unsigned)s end:(unsigned)e top_pos:(unsigned)p forced:(unsigned)f;
 @end
 
+MP42_OBJC_DIRECT_MEMBERS
 @interface MP42SubSerializer : NSObject
 
 - (void)addLine:(MP42SubLine *)sline;

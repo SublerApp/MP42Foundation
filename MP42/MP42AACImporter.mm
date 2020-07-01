@@ -15,6 +15,7 @@
 #import "MP42SampleBuffer.h"
 #import "MP42Track+Private.h"
 
+MP42_OBJC_DIRECT_MEMBERS
 @implementation MP42AACImporter {
 @private
     FILE *inFile;
@@ -885,7 +886,7 @@ static bool GetFirstHeader(FILE* inFile)
     return @"AAC demuxer";
 }
 
-- (void) dealloc
+- (void)dealloc
 {
     fclose(inFile);
 }

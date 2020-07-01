@@ -7,6 +7,7 @@
 //
 
 #import "MP42Languages.h"
+#import "MP42Utilities.h"
 
 #include <string.h>
 #include <ctype.h>
@@ -632,6 +633,7 @@ iso639_lang_t * lang_for_english( const char * english )
     return (iso639_lang_t *)languages;
 }
 
+MP42_OBJC_DIRECT_MEMBERS
 @implementation MP42Languages
 {
     NSArray<NSString *> *_iso6391languagesArray;

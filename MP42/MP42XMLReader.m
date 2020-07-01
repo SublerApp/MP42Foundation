@@ -8,7 +8,9 @@
 
 #import "MP42XMLReader.h"
 #import "MP42Metadata.h"
+#import "MP42Utilities.h"
 
+MP42_OBJC_DIRECT_MEMBERS
 @implementation MP42XMLReader
 
 - (nullable instancetype)initWithURL:(NSURL *)url error:(NSError * __autoreleasing *)error

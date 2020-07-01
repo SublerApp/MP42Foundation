@@ -27,6 +27,7 @@
 
 #import <QuartzCore/QuartzCore.h>
 
+MP42_OBJC_DIRECT_MEMBERS
 @interface MP42BitmapSubConverter ()
 {
     NSThread *decoderThread;

@@ -8,6 +8,7 @@
 
 #import "MP42Image.h"
 #import <Quartz/Quartz.h>
+#import "MP42Utilities.h"
 
 @interface MP42Image ()
 
@@ -15,6 +16,7 @@
 
 @end
 
+MP42_OBJC_DIRECT_MEMBERS
 @implementation MP42Image {
     NSImage *_image;
 }

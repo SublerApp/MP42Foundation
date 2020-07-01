@@ -46,6 +46,7 @@ protected:
     TessBaseAPI tess_base_api;
 };
 
+MP42_OBJC_DIRECT_MEMBERS
 @implementation MP42OCRWrapper {
     OCRWrapper *tess_base;
 }

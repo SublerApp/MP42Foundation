@@ -22,7 +22,7 @@
 #define NUM_AC3_SAMPLING_RATES 4
 #define NUM_AC3_FRAMECODE_SIZES 19 * 2
 
-
+MP42_OBJC_DIRECT_MEMBERS
 @implementation MP42AC3Importer {
 @private
     FILE *inFile;

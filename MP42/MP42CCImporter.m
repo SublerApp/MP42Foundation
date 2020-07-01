@@ -16,6 +16,7 @@
 #import "NSString+MP42Additions.h"
 #import "MP42Track+Private.h"
 
+MP42_OBJC_DIRECT_MEMBERS
 @implementation MP42CCImporter
 
 + (NSArray<NSString *> *)supportedFileFormats {

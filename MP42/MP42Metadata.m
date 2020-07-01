@@ -16,8 +16,8 @@
 
 @interface MP42Metadata ()
 
-@property (nonatomic, readonly) NSMutableArray<MP42MetadataItem *> *itemsArray;
-@property (nonatomic, readonly) NSMutableDictionary<NSString *, MP42MetadataItem *> *itemsMap;
+@property (nonatomic, readonly MP42_DIRECT) NSMutableArray<MP42MetadataItem *> *itemsArray;
+@property (nonatomic, readonly MP42_DIRECT) NSMutableDictionary<NSString *, MP42MetadataItem *> *itemsMap;
 
 @property (nonatomic, readwrite, getter=isArtworkEdited) BOOL artworkEdited;
 @property (nonatomic, readwrite, getter=isEdited) BOOL edited;
@@ -423,7 +423,7 @@
 
 #pragma mark - MP42Foundation/mp4v2 read/write mapping
 
-- (void)addMetadataItemWithUTF8String:(const char *)value identifier:(NSString *)idenfitier
+- (void)addMetadataItemWithUTF8String:(const char *)value identifier:(NSString *)idenfitier MP42_OBJC_DIRECT
 {
     NSString *string = [NSString stringWithCString:value encoding:NSUTF8StringEncoding];
 
@@ -440,7 +440,7 @@
     [self addMetadataItemWithString:string identifier:idenfitier];
 }
 
-- (void)addMetadataItemWithDateString:(const char *)value identifier:(NSString *)idenfitier
+- (void)addMetadataItemWithDateString:(const char *)value identifier:(NSString *)idenfitier MP42_OBJC_DIRECT
 {
     NSString *string = [NSString stringWithCString:value encoding:NSUTF8StringEncoding];
 
@@ -452,7 +452,7 @@
     [self.itemsMap setObject:item forKey:idenfitier];
 }
 
-- (void)addMetadataItemWithString:(NSString *)value identifier:(NSString *)idenfitier
+- (void)addMetadataItemWithString:(NSString *)value identifier:(NSString *)idenfitier MP42_OBJC_DIRECT
 {
     MP42MetadataItem *item = [MP42MetadataItem metadataItemWithIdentifier:idenfitier
                                                                     value:value
@@ -462,7 +462,7 @@
     [self.itemsMap setObject:item forKey:idenfitier];
 }
 
-- (void)addMetadataItemWithStringArray:(NSArray<NSString *> *)value identifier:(NSString *)idenfitier
+- (void)addMetadataItemWithStringArray:(NSArray<NSString *> *)value identifier:(NSString *)idenfitier MP42_OBJC_DIRECT
 {
     MP42MetadataItem *item = [MP42MetadataItem metadataItemWithIdentifier:idenfitier
                                                                     value:value
@@ -472,7 +472,7 @@
     [self.itemsMap setObject:item forKey:idenfitier];
 }
 
-- (void)addMetadataItemWithBool:(BOOL)value identifier:(NSString *)idenfitier
+- (void)addMetadataItemWithBool:(BOOL)value identifier:(NSString *)idenfitier MP42_OBJC_DIRECT
 {
     MP42MetadataItem *item = [MP42MetadataItem metadataItemWithIdentifier:idenfitier
                                                                     value:@(value)
@@ -482,7 +482,7 @@
     [self.itemsMap setObject:item forKey:idenfitier];
 }
 
-- (void)addMetadataItemWithInteger:(NSInteger)value identifier:(NSString *)idenfitier
+- (void)addMetadataItemWithInteger:(NSInteger)value identifier:(NSString *)idenfitier MP42_OBJC_DIRECT
 {
     MP42MetadataItem *item = [MP42MetadataItem metadataItemWithIdentifier:idenfitier
                                                                     value:@(value)
@@ -491,7 +491,7 @@
     [self.itemsArray addObject:item];
     [self.itemsMap setObject:item forKey:idenfitier];
 }
-- (void)addMetadataItemWithIntegerArray:(NSArray<NSNumber *> *)value identifier:(NSString *)idenfitier
+- (void)addMetadataItemWithIntegerArray:(NSArray<NSNumber *> *)value identifier:(NSString *)idenfitier MP42_OBJC_DIRECT
 {
     MP42MetadataItem *item = [MP42MetadataItem metadataItemWithIdentifier:idenfitier
                                                                     value:value
@@ -501,7 +501,7 @@
     [self.itemsMap setObject:item forKey:idenfitier];
 }
 
-- (void)addMetadataItemWithImage:(MP42Image *)value identifier:(NSString *)idenfitier
+- (void)addMetadataItemWithImage:(MP42Image *)value identifier:(NSString *)idenfitier MP42_OBJC_DIRECT
 {
     MP42MetadataItem *item = [MP42MetadataItem metadataItemWithIdentifier:idenfitier
                                                                     value:value
@@ -510,7 +510,8 @@
     [self.itemsArray addObject:item];
 }
 
-- (void)readMetaDataFromFileHandle:(MP4FileHandle)sourceHandle {
+- (void)readMetaDataFromFileHandle:(MP4FileHandle)sourceHandle MP42_OBJC_DIRECT
+{
     const MP4Tags *tags = MP4TagsAlloc();
     MP4TagsFetch (tags, sourceHandle);
 

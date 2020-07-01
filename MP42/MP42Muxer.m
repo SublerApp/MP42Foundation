@@ -24,6 +24,7 @@
 
 #include <stdatomic.h>
 
+MP42_OBJC_DIRECT_MEMBERS
 @implementation MP42Muxer
 {
     MP4FileHandle    _fileHandle;

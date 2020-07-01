@@ -95,6 +95,7 @@ static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
 
 @end
 
+MP42_OBJC_DIRECT_MEMBERS
 @implementation MP42File
 
 @synthesize itracks = _tracks;

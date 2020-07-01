@@ -24,6 +24,7 @@
 #import <VideoToolbox/VideoToolbox.h>
 #import <MediaToolbox/MediaToolbox.h>
 
+MP42_OBJC_DIRECT_MEMBERS
 @interface AVFDemuxHelper : NSObject {
 @public
     MP42TrackId sourceID;
@@ -42,6 +43,7 @@
 @implementation AVFDemuxHelper
 @end
 
+MP42_OBJC_DIRECT_MEMBERS
 @implementation MP42AVFImporter {
     AVAsset *_localAsset;
     NSMutableArray<AVFDemuxHelper *> *_helpers;
@@ -510,8 +512,6 @@
                                      //nil,                         AVMetadataCommonKeyModel,
                                      MP42MetadataKeyEncodingTool,   AVMetadataCommonKeySoftware,
                                      nil];
-
-    self.metadata = [[MP42Metadata alloc] init];
 
     for (NSString *commonKey in commonItemsDict.allKeys) {
         NSArray<AVMetadataItem *> *items = [AVMetadataItem metadataItemsFromArray:_localAsset.commonMetadata

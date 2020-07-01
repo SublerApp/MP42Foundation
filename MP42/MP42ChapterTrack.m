@@ -12,6 +12,7 @@
 #import "MP42PrivateUtilities.h"
 #import "MP42MediaFormat.h"
 
+MP42_OBJC_DIRECT_MEMBERS
 @implementation MP42ChapterTrack {
 @private
     NSMutableArray<MP42TextSample *> *_chapters;

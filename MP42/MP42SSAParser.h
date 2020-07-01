@@ -7,9 +7,11 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "MP42Utilities.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
+MP42_OBJC_DIRECT_MEMBERS
 @interface MP42SSAStyle : NSObject
 
 @property (nonatomic, readonly) NSString *name;
@@ -39,6 +41,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
+MP42_OBJC_DIRECT_MEMBERS
 @interface MP42SSALine : NSObject
 
 @property (nonatomic, readonly) int layer;
@@ -54,6 +57,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
+MP42_OBJC_DIRECT_MEMBERS
 @interface MP42SSAParser : NSObject
 
 - (instancetype)initWithString:(NSString *)string;

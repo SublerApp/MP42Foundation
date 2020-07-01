@@ -7,9 +7,11 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "MP42Utilities.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
+MP42_OBJC_DIRECT_MEMBERS
 @interface MP42OCRWrapper : NSObject
 
 - (instancetype)initWithLanguage:(NSString *)language;

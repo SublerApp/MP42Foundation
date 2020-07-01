@@ -23,6 +23,7 @@
 
 #define SCALE_FACTOR 1000000.f
 
+MP42_OBJC_DIRECT_MEMBERS
 @interface MatroskaSample : NSObject {
 @public
     unsigned long long startTime;
@@ -36,6 +37,7 @@
 @implementation MatroskaSample
 @end
 
+MP42_OBJC_DIRECT_MEMBERS
 @interface MatroskaDemuxHelper : NSObject {
     @public
     MP42TrackId sourceID;
@@ -182,6 +184,7 @@ static int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, ui
     return 1;
 }
 
+MP42_OBJC_DIRECT_MEMBERS
 @implementation MP42MkvImporter
 {
     struct MatroskaFile	*_matroskaFile;
@@ -382,7 +385,7 @@ static int readMkvPacket(struct StdIoStream  *ioStream, TrackInfo *trackInfo, ui
             [self addTrack:newTrack];
         }
 
-        self.metadata = [self readMatroskaMetadata];
+        [self.metadata mergeMetadata: [self readMatroskaMetadata]];
     }
 
     return self;

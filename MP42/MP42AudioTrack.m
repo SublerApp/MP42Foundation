@@ -15,6 +15,7 @@
 
 #define FFmpegMaximumSupportedChannels  6
 
+MP42_OBJC_DIRECT_MEMBERS
 @implementation MP42AudioTrack
 
 - (instancetype)initWithSourceURL:(NSURL *)URL trackID:(NSInteger)trackID fileHandle:(MP4FileHandle)fileHandle
