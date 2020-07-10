@@ -103,6 +103,20 @@ MP42_OBJC_DIRECT_MEMBERS
     return self;
 }
 
+static uint32_t convertToFixedPoint(CGFloat value) {
+    uint32_t fixedValue = 0;
+#ifdef __arm64
+    if (value < 0) {
+        fixedValue = UINT32_MAX - UINT16_MAX * (value * -1);
+    } else {
+#endif
+        fixedValue = value * 0x10000;
+#ifdef __arm64
+    }
+#endif
+    return CFSwapInt32HostToBig(fixedValue);
+}
+
 - (BOOL)writeToFile:(MP4FileHandle)fileHandle error:(NSError * __autoreleasing *)outError __attribute__((no_sanitize("float-cast-overflow")))
 {
     if (!fileHandle || !self.trackId || ![super writeToFile:fileHandle error:outError]) {
@@ -125,12 +139,12 @@ MP42_OBJC_DIRECT_MEMBERS
 
         MP4GetTrackBytesProperty(fileHandle ,self.trackId, "tkhd.matrix", &val, &size);
         memcpy(nval, val, size);
-        ptr32[0] = CFSwapInt32HostToBig(_transform.a * 0x10000);
-        ptr32[1] = CFSwapInt32HostToBig(_transform.b * 0x10000);
-        ptr32[3] = CFSwapInt32HostToBig(_transform.c * 0x10000);
-        ptr32[4] = CFSwapInt32HostToBig(_transform.d * 0x10000);
-        ptr32[6] = CFSwapInt32HostToBig(_transform.tx * 0x10000);
-        ptr32[7] = CFSwapInt32HostToBig(_transform.ty * 0x10000);
+        ptr32[0] = convertToFixedPoint(_transform.a);
+        ptr32[1] = convertToFixedPoint(_transform.b);
+        ptr32[3] = convertToFixedPoint(_transform.c);
+        ptr32[4] = convertToFixedPoint(_transform.d);
+        ptr32[6] = convertToFixedPoint(_transform.tx);
+        ptr32[7] = convertToFixedPoint(_transform.ty);
         MP4SetTrackBytesProperty(fileHandle, self.trackId, "tkhd.matrix", nval, size);
 
         free(val);

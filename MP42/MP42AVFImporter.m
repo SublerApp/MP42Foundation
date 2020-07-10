@@ -1129,7 +1129,7 @@ MP42_OBJC_DIRECT_MEMBERS
 
                         // Get CMBlockBufferRef to extract the actual data later
                         CMBlockBufferRef buffer = CMSampleBufferGetDataBuffer(sampleBuffer);
-                        size_t bufferSize = CMBlockBufferGetDataLength(buffer);
+                        size_t bufferSize = buffer ? CMBlockBufferGetDataLength(buffer) : 0;
 
                         // We have only a sample
                         // or the format is PCM, if so send only a single buffer to improve performance
