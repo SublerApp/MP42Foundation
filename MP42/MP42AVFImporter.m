@@ -1133,7 +1133,7 @@ MP42_OBJC_DIRECT_MEMBERS
 
                         // We have only a sample
                         // or the format is PCM, if so send only a single buffer to improve performance
-                        if (samplesNum == 1 || (samplesNum > 1 && demuxHelper->format == kMP42AudioCodecType_LinearPCM)) {
+                        if (buffer && (samplesNum == 1 || (samplesNum > 1 && demuxHelper->format == kMP42AudioCodecType_LinearPCM))) {
 
                             void *sampleData = malloc(bufferSize);
                             CMBlockBufferCopyDataBytes(buffer, 0, bufferSize, sampleData);
@@ -1161,7 +1161,7 @@ MP42_OBJC_DIRECT_MEMBERS
                             demuxHelper->currentTime = currentOutputTimeStamp.value;
                         }
                         // The CMSampleBufferRef contains more than one sample
-                        else if (samplesNum > 1) {
+                        else if (buffer && samplesNum > 1) {
                             if (!CMSampleBufferDataIsReady(sampleBuffer)) {
                                 CMSampleBufferMakeDataReady(sampleBuffer);
                             }
@@ -1228,7 +1228,7 @@ MP42_OBJC_DIRECT_MEMBERS
                                     presentationTimeStamp.value = presentationTimeStamp.value + ( sampleTimingInfo.duration.value * i);
                                 } else {
                                     sampleTimingInfo = timingArrayOut[i];
-                                    decodeTimeStamp = sampleTimingInfo.decodeTimeStamp;
+                                    //decodeTimeStamp = sampleTimingInfo.decodeTimeStamp;
                                     presentationTimeStamp = sampleTimingInfo.presentationTimeStamp;
                                 }
 
