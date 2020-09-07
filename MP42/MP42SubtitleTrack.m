@@ -11,8 +11,8 @@
 #import "MP42PrivateUtilities.h"
 #import "MP42MediaFormat.h"
 #import "MP42HtmlParser.h"
+#import "MP42-Shared-Swift.h"
 
-#import <MP42Foundation/MP42Foundation-Swift.h>
 
 MP42_OBJC_DIRECT_MEMBERS
 @implementation MP42SubtitleTrack
