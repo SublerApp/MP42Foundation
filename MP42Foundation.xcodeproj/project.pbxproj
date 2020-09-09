@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		6661A2EE20890B4400B1A669 /* MP42Foundation.h in Headers */ = {isa = PBXBuildFile; fileRef = 6661A2ED20890B4400B1A669 /* MP42Foundation.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		7538B2052505AB1800898792 /* SampleCursor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9B5C954241A302E000ACD15 /* SampleCursor.swift */; };
 		A9022A941D6F3FD9005F0920 /* MP42MetadataItem.h in Headers */ = {isa = PBXBuildFile; fileRef = A9022A921D6F3FD9005F0920 /* MP42MetadataItem.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A9022A951D6F3FD9005F0920 /* MP42MetadataItem.h in Headers */ = {isa = PBXBuildFile; fileRef = A9022A921D6F3FD9005F0920 /* MP42MetadataItem.h */; };
 		A9022A961D6F3FD9005F0920 /* MP42MetadataItem.m in Sources */ = {isa = PBXBuildFile; fileRef = A9022A931D6F3FD9005F0920 /* MP42MetadataItem.m */; };
@@ -149,7 +150,6 @@
 		A9B0F28922A29E9C0012E099 /* liblzma.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = A9B0F28822A29E9C0012E099 /* liblzma.tbd */; };
 		A9B0F2B422A2A36D0012E099 /* libpng16.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A9B0F2B322A2A36D0012E099 /* libpng16.a */; };
 		A9B0F2D622A2A5270012E099 /* tessdata in CopyFiles */ = {isa = PBXBuildFile; fileRef = A9B0F2D522A2A5270012E099 /* tessdata */; };
-		A9B5C955241A302E000ACD15 /* SampleCursor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9B5C954241A302E000ACD15 /* SampleCursor.swift */; };
 		A9B5C956241A302E000ACD15 /* SampleCursor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9B5C954241A302E000ACD15 /* SampleCursor.swift */; };
 		A9B9C1F1182391DF00416A4E /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9B9C1F0182391DF00416A4E /* Cocoa.framework */; };
 		A9B9C1FB182391DF00416A4E /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = A9B9C1F9182391DF00416A4E /* InfoPlist.strings */; };
@@ -266,6 +266,8 @@
 
 /* Begin PBXFileReference section */
 		6661A2ED20890B4400B1A669 /* MP42Foundation.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MP42Foundation.h; sourceTree = "<group>"; };
+		7538B2042505A99700898792 /* mp42-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "mp42-Bridging-Header.h"; sourceTree = "<group>"; };
+		7538B2062506B29D00898792 /* MP42-Shared-Swift.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MP42-Shared-Swift.h"; sourceTree = "<group>"; };
 		A9022A921D6F3FD9005F0920 /* MP42MetadataItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MP42MetadataItem.h; sourceTree = "<group>"; };
 		A9022A931D6F3FD9005F0920 /* MP42MetadataItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MP42MetadataItem.m; sourceTree = "<group>"; };
 		A9059DC91D870B9C000D1B9A /* MP42ConversionSettings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MP42ConversionSettings.h; sourceTree = "<group>"; };
@@ -594,6 +596,8 @@
 				A9B9C1F8182391DF00416A4E /* MP42Foundation-Info.plist */,
 				A9B9C1F9182391DF00416A4E /* InfoPlist.strings */,
 				A9B9C1FC182391DF00416A4E /* MP42Foundation-Prefix.pch */,
+				7538B2042505A99700898792 /* mp42-Bridging-Header.h */,
+				7538B2062506B29D00898792 /* MP42-Shared-Swift.h */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -1026,7 +1030,7 @@
 				A9B9C26F1823923200416A4E /* MP42AVFImporter.m in Sources */,
 				A9B9C2671823923200416A4E /* MP42AACImporter.mm in Sources */,
 				A9ED5B131F824BC100E0E4FA /* MP42SSAImporter.m in Sources */,
-				A9B5C955241A302E000ACD15 /* SampleCursor.swift in Sources */,
+				7538B2052505AB1800898792 /* SampleCursor.swift in Sources */,
 				A9B9C28C1823923200416A4E /* MP42Mp4Importer.m in Sources */,
 				A9B9C28A1823923200416A4E /* MP42MkvImporter.m in Sources */,
 				A9B9C2731823923200416A4E /* MP42CCImporter.m in Sources */,
@@ -1097,10 +1101,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "MP42/MP42Foundation-Prefix.pch";
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"DEBUG=1",
-					"$(inherited)",
-				);
+				GCC_PREPROCESSOR_DEFINITIONS = "$(inherited)";
 				GCC_WARN_64_TO_32_BIT_CONVERSION = NO;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1120,7 +1121,9 @@
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "MP42/mp42-Bridging-Header.h";
+				SWIFT_OBJC_INTERFACE_HEADER_NAME = "MP42-Swift.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_PRECOMPILE_BRIDGING_HEADER = NO;
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -1133,6 +1136,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "MP42/MP42Foundation-Prefix.pch";
+				GCC_PREPROCESSOR_DEFINITIONS = "$(inherited)";
 				GCC_WARN_64_TO_32_BIT_CONVERSION = NO;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1152,6 +1156,8 @@
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "MP42/mp42-Bridging-Header.h";
+				SWIFT_OBJC_INTERFACE_HEADER_NAME = "MP42-Swift.h";
+				SWIFT_PRECOMPILE_BRIDGING_HEADER = NO;
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
@@ -1196,10 +1202,7 @@
 				GCC_C_LANGUAGE_STANDARD = c11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"DEBUG=1",
-					"$(inherited)",
-				);
+				GCC_PREPROCESSOR_DEFINITIONS = "DEBUG=1";
 				GCC_TREAT_IMPLICIT_FUNCTION_DECLARATIONS_AS_ERRORS = YES;
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
@@ -1220,6 +1223,8 @@
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "-w";
 				SWIFT_INCLUDE_PATHS = "$(SRCROOT)/contrib/**";
+				SWIFT_OBJC_INTERFACE_HEADER_NAME = "MP42-Swift.h";
+				SWIFT_PRECOMPILE_BRIDGING_HEADER = NO;
 				USER_HEADER_SEARCH_PATHS = "";
 			};
 			name = Debug;
@@ -1286,6 +1291,8 @@
 				OTHER_LDFLAGS = "-w";
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_INCLUDE_PATHS = "$(SRCROOT)/contrib/**";
+				SWIFT_OBJC_INTERFACE_HEADER_NAME = "MP42-Swift.h";
+				SWIFT_PRECOMPILE_BRIDGING_HEADER = NO;
 				USER_HEADER_SEARCH_PATHS = "";
 			};
 			name = Release;
@@ -1302,7 +1309,10 @@
 				FRAMEWORK_VERSION = A;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "MP42/MP42Foundation-Prefix.pch";
-				"GCC_PREPROCESSOR_DEFINITIONS[arch=*]" = "$(inherited)";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"MODULE=1",
+				);
 				INFOPLIST_FILE = "MP42/MP42Foundation-Info.plist";
 				INSTALL_PATH = "@loader_path/../Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1320,7 +1330,9 @@
 				PRODUCT_NAME = MP42Foundation;
 				SKIP_INSTALL = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "";
+				SWIFT_OBJC_INTERFACE_HEADER_NAME = "MP42-Swift.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_PRECOMPILE_BRIDGING_HEADER = NO;
 				SWIFT_VERSION = 5.0;
 				WRAPPER_EXTENSION = framework;
 			};
@@ -1338,6 +1350,7 @@
 				FRAMEWORK_VERSION = A;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "MP42/MP42Foundation-Prefix.pch";
+				GCC_PREPROCESSOR_DEFINITIONS = "MODULE=1";
 				INFOPLIST_FILE = "MP42/MP42Foundation-Info.plist";
 				INSTALL_PATH = "@loader_path/../Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1355,6 +1368,8 @@
 				PRODUCT_NAME = MP42Foundation;
 				SKIP_INSTALL = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "";
+				SWIFT_OBJC_INTERFACE_HEADER_NAME = "MP42-Swift.h";
+				SWIFT_PRECOMPILE_BRIDGING_HEADER = NO;
 				SWIFT_VERSION = 5.0;
 				WRAPPER_EXTENSION = framework;
 			};
