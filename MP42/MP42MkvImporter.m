@@ -1135,7 +1135,7 @@ static uint64_t timescale(TrackInfo *trackInfo)
 
             if (demuxHelper->queue) {
 
-                while ([demuxHelper->queue count]) {
+                while (demuxHelper->queue.count) {
                     if (demuxHelper->bufferFlush == 1) {
                         // add a last sample to get the duration for the last frame
                         MatroskaSample *lastSample = [demuxHelper->queue lastObject];
@@ -1198,7 +1198,7 @@ static uint64_t timescale(TrackInfo *trackInfo)
                         }
                     }
                     else {
-                        continue;
+                        break;
                     }
                 }
             }
