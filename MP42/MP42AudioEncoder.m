@@ -47,7 +47,7 @@ MP42_OBJC_DIRECT_MEMBERS
 }
 
 @property (nonatomic, readonly) AudioConverterRef encoder;
-@property (nonatomic, readonly) NSUInteger bitrate;
+@property (nonatomic, readonly) UInt32 bitrate;
 
 @property (nonatomic, readonly) NSThread *thread;
 @property (nonatomic, readonly) MP42Fifo<MP42SampleBuffer *> *inputSamplesBuffer;
@@ -67,7 +67,7 @@ MP42_OBJC_DIRECT_MEMBERS
 
 @synthesize magicCookie = _magicCookie;
 
-- (instancetype)initWithInputUnit:(id<MP42AudioUnit>)unit bitRate:(NSUInteger)bitRate error:(NSError * __autoreleasing *)error
+- (instancetype)initWithInputUnit:(id<MP42AudioUnit>)unit bitRate:(UInt32)bitRate error:(NSError * __autoreleasing *)error
 {
     self = [super init];
     if (self) {
@@ -92,7 +92,7 @@ MP42_OBJC_DIRECT_MEMBERS
 
 #pragma mark - Encoder Init
 
-- (BOOL)initConverterWithBitRate:(NSUInteger)bitrate
+- (BOOL)initConverterWithBitRate:(UInt32)bitrate
 {
     OSStatus err;
     AudioStreamBasicDescription outputFormat;
@@ -317,7 +317,7 @@ MP42_OBJC_DIRECT_MEMBERS
     }
 }
 
-- (NSData *)magicCookie
+- (nullable NSData *)magicCookie
 {
     return _magicCookie;
 }

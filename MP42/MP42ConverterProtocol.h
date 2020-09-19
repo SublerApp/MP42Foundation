@@ -14,7 +14,7 @@ NS_ASSUME_NONNULL_BEGIN
 @protocol MP42ConverterProtocol <NSObject>
 
 @optional
-- (NSData *)magicCookie;
+- (nullable NSData *)magicCookie;
 
 @required
 - (void)addSample:(MP42SampleBuffer *)sample;

@@ -161,7 +161,7 @@ MP42_OBJC_DIRECT_MEMBERS
     return self;
 }
 
-- (instancetype)initWithURL:(NSURL *)URL error:(NSError * _Nullable *)error {
+- (instancetype)initWithURL:(NSURL *)URL error:(NSError * _Nullable __autoreleasing *)error {
     self = [super init];
     if (self) {
         _URL = [URL fileReferenceURL];
@@ -214,7 +214,7 @@ MP42_OBJC_DIRECT_MEMBERS
         MP4TrackId chapterId = findChapterTrackId(_fileHandle);
         MP4TrackId previewsId = findChapterPreviewTrackId(_fileHandle);
 
-        for (int i = 0; i< tracksCount; i++) {
+        for (uint32_t i = 0; i < tracksCount; i++) {
             id track;
             MP4TrackId trackId = MP4FindTrackId(_fileHandle, i, 0, 0);
             const char *type = MP4GetTrackType(_fileHandle, trackId);
@@ -477,7 +477,8 @@ MP42_OBJC_DIRECT_MEMBERS
 
     if ([track isMemberOfClass:[MP42AudioTrack class]]) {
         MP42AudioTrack *audioTrack = (MP42AudioTrack *)track;
-        if (audioTrack.fallbackTrack && ![self.itracks containsObject:audioTrack.fallbackTrack]) {
+        MP42Track *fallbackTrack = audioTrack.fallbackTrack;
+        if (fallbackTrack && ![self.itracks containsObject:fallbackTrack]) {
             audioTrack.fallbackTrack = nil;
         }
     }
@@ -611,15 +612,17 @@ MP42_OBJC_DIRECT_MEMBERS
     NSMutableArray *tracks = [NSMutableArray array];
     if ([track isKindOfClass:[MP42AudioTrack class]]) {
         MP42AudioTrack *audioTrack = (MP42AudioTrack *)track;
-        if (audioTrack.fallbackTrack) {
-            [tracks addObject:audioTrack.fallbackTrack];
+        MP42Track *fallbackTrack = audioTrack.fallbackTrack;
+        if (fallbackTrack) {
+            [tracks addObject:fallbackTrack];
         }
     }
 
     if ([track isKindOfClass:[MP42SubtitleTrack class]]) {
         MP42SubtitleTrack *subTrack = (MP42SubtitleTrack *)track;
-        if (subTrack.forcedTrack) {
-            [tracks addObject:subTrack.forcedTrack];
+        MP42Track *forcedTrack = subTrack.forcedTrack;
+        if (forcedTrack) {
+            [tracks addObject:forcedTrack];
         }
     }
     return tracks;
@@ -709,9 +712,9 @@ MP42_OBJC_DIRECT_MEMBERS
 
         for (MP42Track *track in subGroup) {
             if ([track.mediaCharacteristicTags containsObject:@"public.main-program-content"] == NO) {
-                NSMutableSet<NSString *> *tags = [track.mediaCharacteristicTags mutableCopy];
-                [tags addObject:@"public.auxiliary-content"];
-                [self setTrack:track mediaCharacteristics:tags];
+                NSMutableSet<NSString *> *subGroupTags = [track.mediaCharacteristicTags mutableCopy];
+                [subGroupTags addObject:@"public.auxiliary-content"];
+                [self setTrack:track mediaCharacteristics:subGroupTags];
             }
         }
     }
@@ -1107,7 +1110,7 @@ MP42_OBJC_DIRECT_MEMBERS
     MP4SetTrackDisabled(self.fileHandle, jpegTrack);
 
     MP4SampleId samplesCount = MP4GetTrackNumberOfSamples(self.fileHandle, chapterTrack.trackId);
-    NSUInteger idx = 1;
+    uint32_t idx = 1;
 
     for (MP42TextSample *chapterT in chapterTrack.chapters) {
         if (idx > samplesCount) {
@@ -1144,13 +1147,15 @@ MP42_OBJC_DIRECT_MEMBERS
             imageData = [bitmap representationUsingType:NSBitmapImageFileTypeJPEG properties:@{}];
         }
 
-        MP4WriteSample(self.fileHandle,
-                       jpegTrack,
-                       imageData.bytes,
-                       imageData.length,
-                       duration,
-                       0,
-                       true);
+        if (imageData.length < UINT32_MAX) {
+            MP4WriteSample(self.fileHandle,
+                           jpegTrack,
+                           imageData.bytes,
+                           (uint32_t)imageData.length,
+                           duration,
+                           0,
+                           true);
+        }
     }
 
     MP4RemoveAllTrackReferences(self.fileHandle, "tref.chap", videoTrack.trackId);

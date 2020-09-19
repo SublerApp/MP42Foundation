@@ -254,7 +254,7 @@ int hb_audio_resample(hb_audio_resample_t *resample,
         av_samples_get_buffer_size(&in_linesize,
                                    resample->resample.channels, nsamples,
                                    resample->resample.sample_fmt, 0);
-        int expected_out_samples = av_rescale_rnd(swr_get_delay(resample->avresample, resample->in.sample_rate) +
+        int expected_out_samples = (int)av_rescale_rnd(swr_get_delay(resample->avresample, resample->in.sample_rate) +
                                                 nsamples, resample->out.sample_rate, resample->in.sample_rate, AV_ROUND_UP);
 
         out_size = av_samples_get_buffer_size(&out_linesize,

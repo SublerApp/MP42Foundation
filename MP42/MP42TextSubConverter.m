@@ -126,7 +126,8 @@ MP42_OBJC_DIRECT_MEMBERS
 {
     if (_finished) {
         if (!_ss.isEmpty) {
-            CGSize trackSize = CGSizeMake(_track.trackWidth, _track.trackHeight);
+            MP42SubtitleTrack *track = _track;
+            CGSize trackSize = CGSizeMake(track.trackWidth, track.trackHeight);
             MP42SubLine *sl = [_ss getSerializedPacket];
             MP42SampleBuffer *sample;
 

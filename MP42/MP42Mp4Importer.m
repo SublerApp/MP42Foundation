@@ -22,7 +22,7 @@ typedef struct MP4DemuxHelper {
     MP4SampleId     currentSampleId;
     uint64_t        totalSampleNumber;
     MP4Timestamp    currentTime;
-    uint64_t        timeScale;
+    uint32_t        timeScale;
 
     uint32_t        done;
 } MP4DemuxHelper;
@@ -36,7 +36,7 @@ typedef struct MP4DemuxHelper {
     return @[@"mp4", @"m4v", @"m4a", @"m4r"];
 }
 
-- (instancetype)initWithURL:(NSURL *)fileURL error:(NSError * __autoreleasing *)outError;
+- (instancetype)initWithURL:(NSURL *)fileURL error:(NSError * __autoreleasing *)outError
 {
     if ((self = [super initWithURL:fileURL])) {
         MP42File *sourceFile = [[MP42File alloc] initWithURL:self.fileURL error:outError];
@@ -52,7 +52,7 @@ typedef struct MP4DemuxHelper {
     return self;
 }
 
-- (NSUInteger)timescaleForTrack:(MP42Track *)track
+- (UInt32)timescaleForTrack:(MP42Track *)track
 {
     return MP4GetTrackTimeScale(_fileHandle, track.sourceId);
 }
@@ -279,14 +279,14 @@ typedef struct MP4DemuxHelper {
         result.mSampleRate = (sample_rate >> 16) + (sample_rate & 0xffff) / 65536.0;
         result.mFormatID = kAudioFormatLinearPCM;
         result.mFormatFlags +=  kLinearPCMFormatFlagIsSignedInteger | kLinearPCMFormatFlagIsPacked | kAudioFormatFlagIsBigEndian;
-        result.mBitsPerChannel = bit_depth;
-        result.mChannelsPerFrame = channels_count;
+        result.mBitsPerChannel = (UInt32)bit_depth;
+        result.mChannelsPerFrame = (UInt32)channels_count;
     }
 
     return result;
 }
 
-- (BOOL)audioTrackUsesExplicitEncoderDelay:(MP42Track *)track;
+- (BOOL)audioTrackUsesExplicitEncoderDelay:(MP42Track *)track
 {
     return MP4HaveTrackAtom(_fileHandle, track.sourceId, "mdia.minf.stbl.sgpd");
 }
@@ -300,8 +300,8 @@ typedef struct MP4DemuxHelper {
         }
 
         NSArray<MP42Track *> *inputTracks = self.inputTracks;
-        NSInteger tracksNumber = inputTracks.count;
-        NSInteger tracksDone = 0;
+        NSUInteger tracksNumber = inputTracks.count;
+        NSUInteger tracksDone = 0;
 
         MP4DemuxHelper * helpers[tracksNumber];
 
@@ -413,7 +413,7 @@ typedef struct MP4DemuxHelper {
         MP4SetTrackIntegerProperty(dstFileHandle, dstTrackId, "tkhd.duration", trackDuration);
     }
     else if (MP4GetSampleRenderingOffset(dstFileHandle, dstTrackId, 1)) {
-        uint32_t firstFrameOffset = MP4GetSampleRenderingOffset(dstFileHandle, dstTrackId, 1);
+        MP4Duration firstFrameOffset = MP4GetSampleRenderingOffset(dstFileHandle, dstTrackId, 1);
         
         MP4Duration editDuration = MP4ConvertFromTrackDuration(_fileHandle,
                                                                srcTrackId,

@@ -13,7 +13,7 @@
 #import <CoreAudio/CoreAudio.h>
 
 /* write the data to the target adress & then return a pointer which points after the written data */
-uint8_t *write_data(uint8_t *target, uint8_t* data, int32_t data_size)
+uint8_t *write_data(uint8_t *target, uint8_t* data, size_t data_size)
 {
     if(data_size > 0)
         memcpy(target, data, data_size);
@@ -96,16 +96,16 @@ ComponentResult ReadESDSDescExt(void* descExt, UInt8 **buffer, int *size, int ve
 }
 
 // the esds atom creation is based off of the routines for it in ffmpeg's movenc.c
-static unsigned int descrLength(unsigned int len)
+static size_t descrLength(size_t len)
 {
     int i;
     for(i=1; len>>(7*i); i++);
     return len + 1 + i;
 }
 
-static uint8_t* putDescr(uint8_t *buffer, int tag, unsigned int size)
+static uint8_t* putDescr(uint8_t *buffer, int tag, size_t size)
 {
-    int i= descrLength(size) - size - 2;
+    size_t i= descrLength(size) - size - 2;
     *buffer++ = tag;
     for(; i>0; i--)
         *buffer++ = (size>>(7*i)) | 0x80;
@@ -131,7 +131,7 @@ static uint8_t* putDescr(uint8_t *buffer, int tag, unsigned int size)
 
 uint8_t *CreateEsdsFromSetupData(uint8_t *codecPrivate, size_t vosLen, size_t *esdsLen, int trackID, bool audio, bool write_version)
 {
-    int decoderSpecificInfoLen = vosLen ? descrLength(vosLen) : 0;
+    size_t decoderSpecificInfoLen = vosLen ? descrLength(vosLen) : 0;
     int versionLen = write_version ? 4 : 0;
 
     *esdsLen = versionLen + descrLength(3 + descrLength(13 + decoderSpecificInfoLen) + descrLength(1));
@@ -458,9 +458,9 @@ typedef enum {
 } DEC3ChanLoc;
 
 const uint16_t ff_ac3_dec3_chap_map[16][2] = {
-    {AC3_CUSTOM_CHANNEL_MAP_LFE             , NULL},
+    {AC3_CUSTOM_CHANNEL_MAP_LFE             , 0},
     {AC3_CUSTOM_CHANNEL_MAP_LFE2            , DEC3_CUSTOM_CHANNEL_MAP_LFE2},
-    {AC3_CUSTOM_CHANNEL_MAP_LTS_RTS_PAIR    , NULL},
+    {AC3_CUSTOM_CHANNEL_MAP_LTS_RTS_PAIR    , 0},
     {AC3_CUSTOM_CHANNEL_MAP_VHC             , DEC3_CUSTOM_CHANNEL_MAP_VHC},
     {AC3_CUSTOM_CHANNEL_MAP_VHL_VHR_PAIR    , DEC3_CUSTOM_CHANNEL_MAP_VHL_VHR_PAIR},
     {AC3_CUSTOM_CHANNEL_MAP_LW_RW_PAIR      , DEC3_CUSTOM_CHANNEL_MAP_LW_RW_PAIR},
@@ -469,11 +469,11 @@ const uint16_t ff_ac3_dec3_chap_map[16][2] = {
     {AC3_CUSTOM_CHANNEL_MAP_CS              , DEC3_CUSTOM_CHANNEL_MAP_CS},
     {AC3_CUSTOM_CHANNEL_MAP_LRS_RRS_PAIR    , DEC3_CUSTOM_CHANNEL_MAP_LRS_RRS_PAIR},
     {AC3_CUSTOM_CHANNEL_MAP_LC_RC_PAIR      , DEC3_CUSTOM_CHANNEL_MAP_LC_RC_PAIR},
-    {AC3_CUSTOM_CHANNEL_MAP_RIGHT_SURROUND  , NULL},
-    {AC3_CUSTOM_CHANNEL_MAP_LEFT_SURROUND   , NULL},
-    {AC3_CUSTOM_CHANNEL_MAP_RIGHT           , NULL},
-    {AC3_CUSTOM_CHANNEL_MAP_CENTRE          , NULL},
-    {AC3_CUSTOM_CHANNEL_MAP_LEFT            , NULL},
+    {AC3_CUSTOM_CHANNEL_MAP_RIGHT_SURROUND  , 0},
+    {AC3_CUSTOM_CHANNEL_MAP_LEFT_SURROUND   , 0},
+    {AC3_CUSTOM_CHANNEL_MAP_RIGHT           , 0},
+    {AC3_CUSTOM_CHANNEL_MAP_CENTRE          , 0},
+    {AC3_CUSTOM_CHANNEL_MAP_LEFT            , 0},
 };
 
 uint16_t ac3_to_dec3_chan_map(uint16_t ac3_chan_loc) {

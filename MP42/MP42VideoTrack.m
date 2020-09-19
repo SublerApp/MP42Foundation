@@ -15,7 +15,7 @@
 MP42_OBJC_DIRECT_MEMBERS
 @implementation MP42VideoTrack
 
-- (instancetype)initWithSourceURL:(NSURL *)URL trackID:(NSInteger)trackID fileHandle:(MP42FileHandle)fileHandle
+- (instancetype)initWithSourceURL:(NSURL *)URL trackID:(MP42TrackId)trackID fileHandle:(MP42FileHandle)fileHandle
 {
     self = [super initWithSourceURL:URL trackID:trackID fileHandle:fileHandle];
 
@@ -65,9 +65,9 @@ MP42_OBJC_DIRECT_MEMBERS
                     MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.colr.transferFunctionIndex", &transferCharacteristics);
                     MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.colr.matrixIndex", &matrixCoefficients);
 
-                    _colorPrimaries = colorPrimaries;
-                    _transferCharacteristics = transferCharacteristics;
-                    _matrixCoefficients = matrixCoefficients;
+                    _colorPrimaries = (uint16_t)colorPrimaries;
+                    _transferCharacteristics = (uint16_t)transferCharacteristics;
+                    _matrixCoefficients = (uint16_t)matrixCoefficients;
                 }
             }
         }
@@ -200,8 +200,10 @@ static uint32_t convertToFixedPoint(CGFloat value) {
                 MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.clap.vertOffD", _vertOffD);
             }
             else
-                MP4AddCleanAperture(fileHandle, self.trackId, _cleanApertureWidthN, _cleanApertureWidthD, _cleanApertureHeightN, _cleanApertureHeightD,
-                                    _horizOffN, _horizOffD, _vertOffN, _vertOffD);
+                MP4AddCleanAperture(fileHandle, self.trackId,
+                                    (uint32_t)_cleanApertureWidthN, (uint32_t)_cleanApertureWidthD,
+                                    (uint32_t)_cleanApertureHeightN, (uint32_t)_cleanApertureHeightD,
+                                    (uint32_t)_horizOffN, (uint32_t)_horizOffD, (uint32_t)_vertOffN, (uint32_t)_vertOffD);
         }
 
         if (self.format == kMP42VideoCodecType_H264) {
@@ -388,9 +390,9 @@ static uint32_t convertToFixedPoint(CGFloat value) {
         _trackWidth = [decoder decodeFloatForKey:@"trackWidth"];
         _trackHeight = [decoder decodeFloatForKey:@"trackHeight"];
 
-        _colorPrimaries = [decoder decodeInt32ForKey:@"colorPrimaries"];
-        _transferCharacteristics = [decoder decodeInt32ForKey:@"transferCharacteristics"];
-        _matrixCoefficients = [decoder decodeInt32ForKey:@"matrixCoefficients"];
+        _colorPrimaries = (uint16_t)[decoder decodeInt32ForKey:@"colorPrimaries"];
+        _transferCharacteristics = (uint16_t)[decoder decodeInt32ForKey:@"transferCharacteristics"];
+        _matrixCoefficients = (uint16_t)[decoder decodeInt32ForKey:@"matrixCoefficients"];
 
         _hSpacing = [decoder decodeInt64ForKey:@"hSpacing"];
         _vSpacing = [decoder decodeInt64ForKey:@"vSpacing"];
@@ -402,11 +404,11 @@ static uint32_t convertToFixedPoint(CGFloat value) {
         _transform.tx = [decoder decodeDoubleForKey:@"offsetX"];
         _transform.ty = [decoder decodeDoubleForKey:@"offsetY"];
 
-        _origProfile = [decoder decodeIntForKey:@"origProfile"];
-        _origLevel = [decoder decodeIntForKey:@"origLevel"];
+        _origProfile = (uint8_t)[decoder decodeIntForKey:@"origProfile"];
+        _origLevel = (uint8_t)[decoder decodeIntForKey:@"origLevel"];
 
-        _newProfile = [decoder decodeIntForKey:@"newProfile"];
-        _newLevel = [decoder decodeIntForKey:@"newLevel"];
+        _newProfile = (uint8_t)[decoder decodeIntForKey:@"newProfile"];
+        _newLevel = (uint8_t)[decoder decodeIntForKey:@"newLevel"];
     }
 
     return self;

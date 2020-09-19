@@ -269,7 +269,7 @@ static NSCalendar *_calendar;
 
     [coder encodeObject:_identifier forKey:@"MP42Identifier"];
     [coder encodeObject:_value forKey:@"MP42Value"];
-    [coder encodeInt:_dataType forKey:@"MP42DataType"];
+    [coder encodeInt64:_dataType forKey:@"MP42DataType"];
     [coder encodeObject:_extendedLanguageTag forKey:@"MP42LanguageTag"];
 }
 
@@ -279,7 +279,7 @@ static NSCalendar *_calendar;
 
     _identifier = [decoder decodeObjectOfClass:[NSString class] forKey:@"MP42Identifier"];
     _value = [decoder decodeObjectOfClasses:[NSSet setWithObjects:[NSString class], [NSDate class], [NSNumber class], [NSArray class], [MP42Image class], nil] forKey:@"MP42Value"];
-    _dataType = [decoder decodeIntForKey:@"MP42DataType"];
+    _dataType = [decoder decodeInt64ForKey:@"MP42DataType"];
     _extendedLanguageTag = [decoder decodeObjectOfClass:[NSString class] forKey:@"MP42LanguageTag"];
 
     return self;

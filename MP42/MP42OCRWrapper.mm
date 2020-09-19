@@ -22,7 +22,7 @@ public:
             if (base_path) {
                 path = base_path.fileSystemRepresentation;
             } else {
-                path = [[[NSBundle bundleForClass:[MP42OCRWrapper class]] bundlePath] stringByAppendingString:@"/Versions/A/Resources/tessdata/"].fileSystemRepresentation;
+                path = [[NSBundle bundleForClass:[MP42OCRWrapper class]].bundlePath stringByAppendingString:@"/Versions/A/Resources/tessdata/"].fileSystemRepresentation;
             }
 
             tess_base_api.Init(path, lang.UTF8String, mode);
@@ -30,11 +30,15 @@ public:
     }
 
     char * OCRFrame(const unsigned char *image, size_t bytes_per_pixel, size_t bytes_per_line, size_t width, size_t height) {
-        char *text = tess_base_api.TesseractRect(image,
+        tess_base_api.SetImage(image, (int)width, (int)height, (int)bytes_per_pixel, (int)bytes_per_line);
+        tess_base_api.SetSourceResolution(70);
+        tess_base_api.SetRectangle(0, 0, (int)width, (int)height);
+        char *text = tess_base_api.GetUTF8Text();
+        /*char *text = tess_base_api.TesseractRect(image,
                                                  (int)bytes_per_pixel,
                                                  (int)bytes_per_line,
                                                  0, 0,
-                                                 (int)width, (int)height);
+                                                 (int)width, (int)height);*/
         return text;
     }
 
@@ -86,7 +90,7 @@ MP42_OBJC_DIRECT_MEMBERS
     return NO;
 }
 
-- (instancetype)initWithLanguage:(NSString *)language;
+- (instancetype)initWithLanguage:(NSString *)language
 {
     if ((self = [super init])) {
         NSString *lang = language;
@@ -141,7 +145,7 @@ MP42_OBJC_DIRECT_MEMBERS
         }
     }
 
-    delete[]string;
+    delete[] string;
 
     return text;
 }

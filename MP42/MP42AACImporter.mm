@@ -824,7 +824,7 @@ static bool GetFirstHeader(FILE* inFile)
     return self;
 }
 
-- (NSUInteger)timescaleForTrack:(MP42Track *)track
+- (UInt32)timescaleForTrack:(MP42Track *)track
 {
     return samplesPerSecond;
 }

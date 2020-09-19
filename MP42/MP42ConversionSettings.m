@@ -48,14 +48,14 @@
 - (void)encodeWithCoder:(NSCoder *)coder
 {
     [coder encodeInt:1 forKey:@"MP42ConversionSettingsVersion"];
-    [coder encodeInteger:_format forKey:@"format"];
+    [coder encodeInt32:_format forKey:@"format"];
 }
 
 - (id)initWithCoder:(NSCoder *)decoder
 {
     self = [super init];
 
-    _format = [decoder decodeIntegerForKey:@"format"];
+    _format = [decoder decodeInt32ForKey:@"format"];
 
     return self;
 }
@@ -64,12 +64,12 @@
 
 @implementation MP42AudioConversionSettings
 
-+ (instancetype)audioConversionWithBitRate:(NSUInteger)bitRate mixDown:(MP42AudioMixdown)mixDown drc:(float)drc
++ (instancetype)audioConversionWithBitRate:(UInt32)bitRate mixDown:(MP42AudioMixdown)mixDown drc:(float)drc
 {
     return [[MP42AudioConversionSettings alloc] initWithFormat:kMP42AudioCodecType_MPEG4AAC bitRate:bitRate mixDown:mixDown drc:drc];
 }
 
-- (instancetype)initWithFormat:(FourCharCode)format bitRate:(NSUInteger)bitRate mixDown:(MP42AudioMixdown)mixDown drc:(float)drc
+- (instancetype)initWithFormat:(FourCharCode)format bitRate:(UInt32)bitRate mixDown:(MP42AudioMixdown)mixDown drc:(float)drc
 {
     self = [super initWitFormat:format];
     if (self) {
@@ -104,8 +104,8 @@
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
-    [coder encodeInteger:_bitRate forKey:@"bitRate"];
-    [coder encodeInteger:_mixDown forKey:@"mixDownType"];
+    [coder encodeInt32:_bitRate forKey:@"bitRate"];
+    [coder encodeInt32:_mixDown forKey:@"mixDownType"];
     [coder encodeFloat:_drc forKey:@"drc"];
 }
 
@@ -113,8 +113,8 @@
 {
     self = [super initWithCoder:decoder];
 
-    _bitRate = [decoder decodeIntegerForKey:@"bitRate"];
-    _mixDown = [decoder decodeIntegerForKey:@"mixDownType"];
+    _bitRate = [decoder decodeInt32ForKey:@"bitRate"];
+    _mixDown = [decoder decodeInt32ForKey:@"mixDownType"];
     _drc = [decoder decodeFloatForKey:@"drc"];
 
     return self;

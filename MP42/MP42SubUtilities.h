@@ -18,13 +18,13 @@ MP42_OBJC_DIRECT_MEMBERS
 {
 @public
 	NSString *line;
-	unsigned begin_time, end_time;
-	unsigned no; // line number, used only by SBSubSerializer
+    uint64_t begin_time, end_time;
+    uint64_t no; // line number, used only by SBSubSerializer
     unsigned top;
     unsigned forced;
 }
-- (instancetype)initWithLine:(NSString *)l start:(unsigned)s end:(unsigned)e;
-- (instancetype)initWithLine:(NSString *)l start:(unsigned)s end:(unsigned)e top_pos:(unsigned)p forced:(unsigned)f;
+- (instancetype)initWithLine:(NSString *)l start:(uint64_t)s end:(uint64_t)e;
+- (instancetype)initWithLine:(NSString *)l start:(uint64_t)s end:(uint64_t)e top_pos:(unsigned)p forced:(unsigned)f;
 @end
 
 MP42_OBJC_DIRECT_MEMBERS
@@ -64,7 +64,7 @@ typedef struct {
 	UInt32  duration;
 } PacketControlData;
 
-int ExtractVobSubPacket(UInt8 *dest, UInt8 *framedSrc, int srcSize, int * _Nullable usedSrcBytes, int index);
+int ExtractVobSubPacket(UInt8 *dest, UInt8 *framedSrc, long srcSize, int * _Nullable usedSrcBytes, int index);
 ComponentResult ReadPacketControls(UInt8 *packet, UInt32 palette[_Nonnull 16], PacketControlData *controlDataOut, BOOL *forced);
 Boolean ReadPacketTimes(uint8_t *packet, uint32_t length, uint16_t *startTime, uint16_t *endTime, uint8_t *forced);
 

@@ -108,7 +108,8 @@ MP42_OBJC_DIRECT_MEMBERS
                 for (AVTimedMetadataGroup *chapterData in chapterList) {
                     for (AVMetadataItem *item in chapterData.items) {
                         CMTime time = item.time;
-                        [chapters addChapter:[item stringValue] duration:time.value * time.timescale / 1000];
+                        NSString *title = item.stringValue ? item.stringValue : @"";
+                        [chapters addChapter:title duration:time.value * time.timescale / 1000];
                     }
                 }
             }
@@ -732,7 +733,7 @@ MP42_OBJC_DIRECT_MEMBERS
 
 #pragma mark - Overrides
 
-- (NSUInteger)timescaleForTrack:(MP42Track *)track {
+- (UInt32)timescaleForTrack:(MP42Track *)track {
     AVAssetTrack *assetTrack = [_localAsset trackWithTrackID:track.sourceId];
 
     // Prefer the asbd sample rate, naturalTimeScale might not be
@@ -786,9 +787,9 @@ MP42_OBJC_DIRECT_MEMBERS
         } else if ([assetTrack.mediaType isEqualToString:AVMediaTypeAudio]) {
 
             size_t cookieSizeOut;
-            const void *cookieBuffer = CMAudioFormatDescriptionGetMagicCookie(formatDescription, &cookieSizeOut);	// Returns proper Atmos dec3 atom (in macOS 10.14.2), if proper E-AC3 stream, not AC-3-embedded!
+            const uint8_t *cookie = CMAudioFormatDescriptionGetMagicCookie(formatDescription, &cookieSizeOut);	// Returns proper Atmos dec3 atom (in macOS 10.14.2), if proper E-AC3 stream, not AC-3-embedded!
 
-            if (cookieBuffer == NULL || cookieSizeOut == 0) {
+            if (cookie == NULL || cookieSizeOut == 0) {
 
                 if (code == kAudioFormatMPEG4AAC) {
 
@@ -831,7 +832,7 @@ MP42_OBJC_DIRECT_MEMBERS
                 // Extract DecoderSpecific info
                 UInt8 *buffer;
                 int size;
-                ReadESDSDescExt((void *)cookieBuffer, &buffer, &size, 0);
+                ReadESDSDescExt((void *)cookie, &buffer, &size, 0);
 
                 NSData *magicCookie = [NSData dataWithBytes:buffer length:size];
                 free(buffer);
@@ -843,51 +844,54 @@ MP42_OBJC_DIRECT_MEMBERS
 
                 if (cookieSizeOut > 48) {
                     // Remove unneeded parts of the cookie, as described in ALACMagicCookieDescription.txt
-                    cookieBuffer += 24;
+                    cookie += 24;
                     cookieSizeOut = cookieSizeOut - 24 - 8;
                 }
 
-                return [NSData dataWithBytes:cookieBuffer length:cookieSizeOut];
+                return [NSData dataWithBytes:cookie length:cookieSizeOut];
             }
 
             else if (code == kAudioFormatOpus) {
                 // TODO
-                return [NSData dataWithBytes:cookieBuffer length:cookieSizeOut];
+                return [NSData dataWithBytes:cookie length:cookieSizeOut];
             }
 
             else if (code == kAudioFormatFLAC) {
                 // TODO
-                return [NSData dataWithBytes:cookieBuffer length:cookieSizeOut];
+                return [NSData dataWithBytes:cookie length:cookieSizeOut];
             }
 
             else if (code == kAudioFormatEnhancedAC3) {
                 // dec3 atom
                 // remove the atom header
-                cookieBuffer += 8;
+                cookie += 8;
                 cookieSizeOut = cookieSizeOut - 8;
 
-				NSMutableData *ac3Info = [NSMutableData dataWithBytes:cookieBuffer length:cookieSizeOut];
-				MP42AudioTrack *audiotrack = (MP42AudioTrack *)track;
-				// besides fourCC also the bsid in cookie created by CMAudioFormatDescriptionGetMagicCookie needs to be fixed
-				NSRange cookieBsidRange = NSMakeRange(2, 1);
-				uint8_t cookieBsidByte[1];
-				[ac3Info getBytes:cookieBsidByte range:cookieBsidRange];
-				cookieBsidByte[0] = (cookieBsidByte[0] & 0xC0) | (0x10 << 1);	// keep fscod, replace bsid with 0x10. This can happen, if bsid=0x10 frames are embedded as substream inside bsid=0x06 frames.
-				[ac3Info replaceBytesInRange:cookieBsidRange withBytes:cookieBsidByte length:1];
-				// dec3 atom may be already delivered as ETSI TS 103 420 V1.2.1 compliant by CMAudioFormatDescriptionGetMagicCookie(), see above.
-				UInt8 ec3ExtensionType = EC3Extension_None;
-				UInt8 complexityIndex = 0;
-				UInt32 dummy;
-				readEAC3Config(cookieBuffer, cookieSizeOut, &dummy, &dummy, &ec3ExtensionType, &complexityIndex);
-				// do not add duplicate ec3ExtensionType & complexityIndex, if already present
-				if (!ec3ExtensionType && !complexityIndex && (audiotrack.extensionType == kMP42AudioEmbeddedExtension_JOC))
-				{
-					ec3ExtensionType = audiotrack.extensionType;
-					[ac3Info appendBytes:&ec3ExtensionType	length:sizeof(MP42AudioEmbeddedExtension)];
-					[ac3Info appendBytes:&complexityIndex	length:sizeof(UInt8)];
-				}
-
-				return ac3Info;
+                if (cookieSizeOut < UINT32_MAX) {
+                    NSMutableData *ac3Info = [NSMutableData dataWithBytes:cookie length:cookieSizeOut];
+                    MP42AudioTrack *audiotrack = (MP42AudioTrack *)track;
+                    // besides fourCC also the bsid in cookie created by CMAudioFormatDescriptionGetMagicCookie needs to be fixed
+                    NSRange cookieBsidRange = NSMakeRange(2, 1);
+                    uint8_t cookieBsidByte[1];
+                    [ac3Info getBytes:cookieBsidByte range:cookieBsidRange];
+                    cookieBsidByte[0] = (cookieBsidByte[0] & 0xC0) | (0x10 << 1);	// keep fscod, replace bsid with 0x10. This can happen, if bsid=0x10 frames are embedded as substream inside bsid=0x06 frames.
+                    [ac3Info replaceBytesInRange:cookieBsidRange withBytes:cookieBsidByte length:1];
+                    // dec3 atom may be already delivered as ETSI TS 103 420 V1.2.1 compliant by CMAudioFormatDescriptionGetMagicCookie(), see above.
+                    UInt8 ec3ExtensionType = EC3Extension_None;
+                    UInt8 complexityIndex = 0;
+                    UInt32 dummy;
+                    readEAC3Config(cookie, (uint32_t)cookieSizeOut, &dummy, &dummy, &ec3ExtensionType, &complexityIndex);
+                    // do not add duplicate ec3ExtensionType & complexityIndex, if already present
+                    if (!ec3ExtensionType && !complexityIndex && (audiotrack.extensionType == kMP42AudioEmbeddedExtension_JOC))
+                    {
+                        ec3ExtensionType = audiotrack.extensionType;
+                        [ac3Info appendBytes:&ec3ExtensionType	length:sizeof(MP42AudioEmbeddedExtension)];
+                        [ac3Info appendBytes:&complexityIndex	length:sizeof(UInt8)];
+                    }
+                    return ac3Info;
+                } else {
+                    return nil;
+                }
 			}
 
             else if (code == kAudioFormatAC3 ||
@@ -965,7 +969,7 @@ MP42_OBJC_DIRECT_MEMBERS
 				return ac3Info;
 
             } else if (cookieSizeOut) {
-                return [NSData dataWithBytes:cookieBuffer length:cookieSizeOut];
+                return [NSData dataWithBytes:cookie length:cookieSizeOut];
             }
         }
 
@@ -1001,7 +1005,7 @@ MP42_OBJC_DIRECT_MEMBERS
     return result;
 }
 
-- (BOOL)audioTrackUsesExplicitEncoderDelay:(MP42Track *)track;
+- (BOOL)audioTrackUsesExplicitEncoderDelay:(MP42Track *)track
 {
     return YES;
 }
@@ -1013,8 +1017,8 @@ MP42_OBJC_DIRECT_MEMBERS
         uint64_t currentDataLength = 0;
         uint64_t totalDataLength = 0;
 
-        NSInteger tracksDone = 0;
-        NSInteger tracksNumber = self.inputTracks.count;
+        NSUInteger tracksDone = 0;
+        NSUInteger tracksNumber = self.inputTracks.count;
 
         AVAssetReader *assetReader = [[AVAssetReader alloc] initWithAsset:_localAsset error:NULL];
         AVFDemuxHelper * helpers[tracksNumber];
@@ -1141,7 +1145,7 @@ MP42_OBJC_DIRECT_MEMBERS
                             // Enqueues the new sample
                             MP42SampleBuffer *sample = [[MP42SampleBuffer alloc] init];
                             sample->data = sampleData;
-                            sample->size = bufferSize;
+                            sample->size = (uint32_t)bufferSize;
                             sample->duration = duration.value;
                             sample->offset = -decodeTimeStamp.value + presentationTimeStamp.value;
                             sample->decodeTimestamp = decodeTimeStamp.value;
@@ -1213,23 +1217,23 @@ MP42_OBJC_DIRECT_MEMBERS
 
                             for (uint64_t i = 0, pos = 0; i < samplesNum; i++) {
                                 CMSampleTimingInfo sampleTimingInfo;
-                                CMTime decodeTimeStamp;
-                                CMTime presentationTimeStamp;
+                                CMTime sampleDecodeTimeStamp;
+                                CMTime samplePresentationTimeStamp;
 
                                 size_t sampleSize;
 
                                 // If the size of sample timing array is equal to 1, it means every sample has got the same timing
                                 if (timingArrayEntries == 1) {
                                     sampleTimingInfo = timingArrayOut[0];
-                                    decodeTimeStamp = sampleTimingInfo.decodeTimeStamp;
-                                    decodeTimeStamp.value = decodeTimeStamp.value + ( sampleTimingInfo.duration.value * i);
+                                    sampleDecodeTimeStamp = sampleTimingInfo.decodeTimeStamp;
+                                    sampleDecodeTimeStamp.value = sampleDecodeTimeStamp.value + (sampleTimingInfo.duration.value * i);
 
-                                    presentationTimeStamp = sampleTimingInfo.presentationTimeStamp;
-                                    presentationTimeStamp.value = presentationTimeStamp.value + ( sampleTimingInfo.duration.value * i);
+                                    samplePresentationTimeStamp = sampleTimingInfo.presentationTimeStamp;
+                                    samplePresentationTimeStamp.value = samplePresentationTimeStamp.value + (sampleTimingInfo.duration.value * i);
                                 } else {
                                     sampleTimingInfo = timingArrayOut[i];
                                     //decodeTimeStamp = sampleTimingInfo.decodeTimeStamp;
-                                    presentationTimeStamp = sampleTimingInfo.presentationTimeStamp;
+                                    samplePresentationTimeStamp = sampleTimingInfo.presentationTimeStamp;
                                 }
 
                                 // If the size of sample size array is equal to 1, it means every sample has got the same size
@@ -1259,16 +1263,15 @@ MP42_OBJC_DIRECT_MEMBERS
                                     sample->attachments = (void *)copy;
                                     CFDictionaryRef trimStart = CFDictionaryGetValue(sample->attachments, kCMSampleBufferAttachmentKey_TrimDurationAtStart);
                                     CMTime trimStartTime = CMTimeMakeFromDictionary(trimStart);
-                                    trimStartTime = CMTimeConvertScale(trimStartTime, sampleTimingInfo.duration.value, kCMTimeRoundingMethod_Default);
+                                    trimStartTime = CMTimeConvertScale(trimStartTime, currentOutputTimeStamp.timescale, kCMTimeRoundingMethod_Default);
                                     currentOutputTimeStamp.value -= trimStartTime.value;
-
                                 }
 
                                 sample->data = sampleData;
-                                sample->size = sampleSize;
+                                sample->size = (uint32_t)sampleSize;
                                 sample->duration = sampleTimingInfo.duration.value;
                                 //sample->offset = -decodeTimeStamp.value + presentationTimeStamp.value;
-                                sample->presentationTimestamp = presentationTimeStamp.value;
+                                sample->presentationTimestamp = samplePresentationTimeStamp.value;
                                 sample->presentationOutputTimestamp = currentOutputTimeStamp.value;
                                 sample->timescale = demuxHelper->timescale;
                                 sample->flags |= sync ? MP42SampleBufferFlagIsSync : 0;
@@ -1281,7 +1284,7 @@ MP42_OBJC_DIRECT_MEMBERS
                                     sample->attachments = (void *)copy;
                                     CFDictionaryRef trimEnd = CFDictionaryGetValue(sample->attachments, kCMSampleBufferAttachmentKey_TrimDurationAtEnd);
                                     CMTime trimEndTime = CMTimeMakeFromDictionary(trimEnd);
-                                    trimEndTime = CMTimeConvertScale(trimEndTime, sampleTimingInfo.duration.value, kCMTimeRoundingMethod_Default);
+                                    trimEndTime = CMTimeConvertScale(trimEndTime, currentOutputTimeStamp.timescale, kCMTimeRoundingMethod_Default);
                                     currentOutputTimeStamp.value -= trimEndTime.value;
                                 }
 
@@ -1301,14 +1304,14 @@ MP42_OBJC_DIRECT_MEMBERS
                             free(sizeArrayOut);
                         }
                         else {
-                            CMTime currentDuration = CMTimeConvertScale(duration, demuxHelper->timescale, kCMTimeRoundingMethod_Default);
-                            CMTime currentTimeStamp = CMTimeConvertScale(presentationTimeStamp, demuxHelper->timescale, kCMTimeRoundingMethod_Default);
-                            CMTime currentOutputTimeStamp = CMTimeConvertScale(presentationOutputTimeStamp, demuxHelper->timescale, kCMTimeRoundingMethod_Default);
+                            CMTime currentSampleDuration = CMTimeConvertScale(duration, demuxHelper->timescale, kCMTimeRoundingMethod_Default);
+                            CMTime currentSampleTimeStamp = CMTimeConvertScale(presentationTimeStamp, demuxHelper->timescale, kCMTimeRoundingMethod_Default);
+                            CMTime currentSampleOutputTimeStamp = CMTimeConvertScale(presentationOutputTimeStamp, demuxHelper->timescale, kCMTimeRoundingMethod_Default);
 
                             MP42SampleBuffer *sample = [[MP42SampleBuffer alloc] init];
-                            sample->duration = currentDuration.value;
-                            sample->presentationTimestamp = currentTimeStamp.value;
-                            sample->presentationOutputTimestamp = currentOutputTimeStamp.value;
+                            sample->duration = currentSampleDuration.value;
+                            sample->presentationTimestamp = currentSampleTimeStamp.value;
+                            sample->presentationOutputTimestamp = currentSampleOutputTimeStamp.value;
                             sample->timescale = demuxHelper->timescale;
                             sample->flags |= sync ? MP42SampleBufferFlagIsSync : 0;
                             sample->flags |= doNotDisplay ? MP42SampleBufferFlagDoNotDisplay : 0;
@@ -1316,7 +1319,7 @@ MP42_OBJC_DIRECT_MEMBERS
                             sample->attachments = (void *)attachments;
 
                             [demuxHelper->editsConstructor addSample:sample];
-                            demuxHelper->currentTime = currentOutputTimeStamp.value;
+                            demuxHelper->currentTime = currentSampleOutputTimeStamp.value;
                         }
                         CFRelease(sampleBuffer);
 
@@ -1366,7 +1369,7 @@ MP42_OBJC_DIRECT_MEMBERS
 
     AVFDemuxHelper *helper = [self helperWithTrackID:track.sourceId];
     MP42EditListsReconstructor *editsConstructor = helper->editsConstructor;
-    
+
     // Make sure the sample offsets are all positive.
     if (editsConstructor.minOffset < 0) {
         MP4SampleId samplesCount = MP4GetTrackNumberOfSamples(fileHandle, trackId);
@@ -1374,7 +1377,7 @@ MP42_OBJC_DIRECT_MEMBERS
             MP4SetSampleRenderingOffset(fileHandle,
                                         trackId,
                                         1 + i,
-                                        MP4GetSampleRenderingOffset(fileHandle, trackId, 1 + i) - editsConstructor.minOffset);
+                                        (int64_t)MP4GetSampleRenderingOffset(fileHandle, trackId, 1 + i) - editsConstructor.minOffset);
         }
     }
     
@@ -1439,7 +1442,9 @@ MP42_OBJC_DIRECT_MEMBERS
                             void *sampleData = malloc(bufferSize);
                             CMBlockBufferCopyDataBytes(buffer, 0, bufferSize, sampleData);
 
-                            analyze_EAC3((void *)&eac3Info, sampleData, bufferSize);
+                            if (bufferSize < UINT32_MAX) {
+                                analyze_EAC3((void *)&eac3Info, sampleData, (uint32_t)bufferSize);
+                            }
 
                             free(sampleData);
                             count++;
@@ -1486,7 +1491,9 @@ MP42_OBJC_DIRECT_MEMBERS
                                     pos += sampleSize;
                                 }
 
-                                analyze_EAC3((void *)&eac3Info, sampleData, sampleSize);
+                                if (sampleSize < UINT32_MAX) {
+                                    analyze_EAC3((void *)&eac3Info, sampleData, (uint32_t)sampleSize);
+                                }
 
                                 free(sampleData);
                                 count++;

@@ -37,7 +37,7 @@ MP42_OBJC_DIRECT_MEMBERS
 	NSString		*language;
 	int				index;
     long            duration;
-	NSMutableArray	*samples;
+	NSMutableArray<SBVobSubSample *> *samples;
 }
 
 - (id)initWithPrivateData:(NSArray *)idxPrivateData language:(NSString *)lang andIndex:(int)trackIndex;
@@ -197,8 +197,9 @@ static NSArray<SBVobSubTrack *> * LoadVobSubSubtitles(NSURL *theDirectory, NSStr
                         sscanf(line.UTF8String, "timestamp: %s filepos: %x", timeStr, &position);
                         long time = ParseSubTime(timeStr, 1000, YES);
                         free(timeStr);
-                        if(position > subFileSize)
+                        if (position > subFileSize) {
                             position = subFileSize;
+                        }
                         [currentTrack addSampleTime:time + delay offset:position];
                     }
                         break;
@@ -227,7 +228,7 @@ MP42_OBJC_DIRECT_MEMBERS
 {
     if ((self = [super initWithURL:fileURL])) {
 
-        NSInteger count = 0;
+        MP42TrackId count = 0;
         _VobSubTracks = LoadVobSubSubtitles(self.fileURL.URLByDeletingLastPathComponent, self.fileURL.lastPathComponent);
 
         for (SBVobSubTrack *track in _VobSubTracks) {
@@ -255,7 +256,7 @@ MP42_OBJC_DIRECT_MEMBERS
     return self;
 }
 
-- (NSUInteger)timescaleForTrack:(MP42Track *)track
+- (UInt32)timescaleForTrack:(MP42Track *)track
 {
     return 1000;
 }
@@ -304,26 +305,28 @@ MP42_OBJC_DIRECT_MEMBERS
             SBVobSubTrack *vobTrack = [_VobSubTracks objectAtIndex:track.sourceId];
             SBVobSubSample *firstSample = nil;
 
-            uint32_t lastTime = 0;
-            int sampleCount = vobTrack->samples.count;
+            uint64_t lastTime = 0;
+            NSUInteger sampleCount = vobTrack->samples.count;
 
-            for (int i = 0; i < sampleCount && !self.isCancelled; i++) {
+            for (NSUInteger i = 0; i < sampleCount && !self.isCancelled; i++) {
                 SBVobSubSample *currentSample = [vobTrack->samples objectAtIndex:i];
-                int offset = currentSample->fileOffset;
-                int nextOffset;
-                if (i == sampleCount - 1)
-                    nextOffset = [subFileData length];
-                else
-                    nextOffset = ((SBVobSubSample *)[vobTrack->samples objectAtIndex:i+1])->fileOffset;
-                int size = nextOffset - offset;
-                if (size < 0)
+                long offset = currentSample->fileOffset;
+                long nextOffset;
+                if (i == sampleCount - 1) {
+                    nextOffset = subFileData.length;
+                } else {
+                    nextOffset = [vobTrack->samples objectAtIndex:i+1]->fileOffset;
+                }
+                int size = (int)(nextOffset - offset);
+                if (size < 0) {
                     //Skip samples for which we cannot determine size
                     continue;
+                }
 
                 NSData *subData = [subFileData subdataWithRange:NSMakeRange(offset, size)];
                 uint8_t *extracted = (uint8_t *)malloc(size);
                 //The index here likely should really be track->index, but I'm not sure we can really trust it.
-                int extractedSize = ExtractVobSubPacket(extracted, (UInt8 *)[subData bytes], size, &size, -1);
+                int extractedSize = ExtractVobSubPacket(extracted, (UInt8 *)subData.bytes, size, &size, -1);
 
                 uint16_t startTimestamp, endTimestamp;
                 uint8_t forced;
@@ -332,13 +335,13 @@ MP42_OBJC_DIRECT_MEMBERS
                     continue;
                 }
 
-                uint32_t startTime = currentSample->timeStamp + startTimestamp;
-                uint32_t endTime = currentSample->timeStamp + endTimestamp;
+                uint64_t startTime = currentSample->timeStamp + startTimestamp;
+                uint64_t endTime = currentSample->timeStamp + endTimestamp;
 
-                int duration = endTimestamp - startTimestamp;
+                uint64_t duration = endTimestamp - startTimestamp;
                 if (duration <= 0 && i < sampleCount - 1) {
                     //Sample with no end duration, use the duration of the next one
-                    endTime = ((SBVobSubSample *)[vobTrack->samples objectAtIndex:i+1])->timeStamp;
+                    endTime = [vobTrack->samples objectAtIndex:i+1]->timeStamp;
                     duration = endTime - startTime;
                 }
                 if (duration <= 0) {

@@ -37,7 +37,7 @@
         CGFloat offset;
         MP42Duration assetDuration = CMTimeGetSeconds(asset.duration) * 1000;
 
-        for (NSInteger idx = 0; idx < chapters.count; idx++)
+        for (NSUInteger idx = 0; idx < chapters.count; idx++)
         {
             MP42TextSample *chapter = chapters[idx];
 

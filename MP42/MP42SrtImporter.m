@@ -93,7 +93,7 @@ MP42_OBJC_DIRECT_MEMBERS
     return nil;
 }
 
-- (NSUInteger)timescaleForTrack:(MP42Track *)track
+- (UInt32)timescaleForTrack:(MP42Track *)track
 {
     return 1000;
 }

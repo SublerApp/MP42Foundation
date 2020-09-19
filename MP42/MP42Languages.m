@@ -857,7 +857,7 @@ MP42_OBJC_DIRECT_MEMBERS
     return [self extendedTagForISO_639_2:@(lang->iso639_2)];
 }
 
-- (NSString *)extendedTagForQTCode:(NSString *)code;
+- (NSString *)extendedTagForQTCode:(NSString *)code
 {
     iso639_lang_t *lang = lang_for_qtcode(code.integerValue);
     if (strlen(lang->iso639_1)) {
@@ -868,7 +868,7 @@ MP42_OBJC_DIRECT_MEMBERS
     }
 }
 
-- (NSString *)extendedTagForISO_639_1:(NSString *)code;
+- (NSString *)extendedTagForISO_639_1:(NSString *)code
 {
     iso639_lang_t *lang = lang_for_code_s(code.UTF8String);
     if (strlen(lang->iso639_1)) {
@@ -879,7 +879,7 @@ MP42_OBJC_DIRECT_MEMBERS
     }
 }
 
-- (NSString *)extendedTagForISO_639_2:(NSString *)code2;
+- (NSString *)extendedTagForISO_639_2:(NSString *)code2
 {
     NSString *code = _ISO_639_2CodeToCode[code2];
     if (!code) {

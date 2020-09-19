@@ -1355,6 +1355,7 @@ NSData* H264Info(const char *filePath, uint32_t *pic_width, uint32_t *pic_height
             uint32_t iy = 0;
 
             NSMutableData *pictData = [[NSMutableData alloc] init];
+                //WTF
                 uint16_t temp = buffersize << 8;
                 [pictData appendBytes:&temp length:sizeof(uint16_t)];
                 [pictData appendBytes:buffer length:buffersize];
@@ -1422,7 +1423,7 @@ MP42_OBJC_DIRECT_MEMBERS
     return self;
 }
 
-- (NSUInteger)timescaleForTrack:(MP42Track *)track
+- (UInt32)timescaleForTrack:(MP42Track *)track
 {
     framerate_t *framerate;
 

@@ -18,7 +18,7 @@
 MP42_OBJC_DIRECT_MEMBERS
 @implementation MP42AudioTrack
 
-- (instancetype)initWithSourceURL:(NSURL *)URL trackID:(NSInteger)trackID fileHandle:(MP4FileHandle)fileHandle
+- (instancetype)initWithSourceURL:(NSURL *)URL trackID:(MP42TrackId)trackID fileHandle:(MP4FileHandle)fileHandle
 {
     self = [super initWithSourceURL:URL trackID:trackID fileHandle:fileHandle];
 
@@ -65,7 +65,7 @@ MP42_OBJC_DIRECT_MEMBERS
             if (audioType == 0xA9) {
                 uint64_t channels_count = 0;
                 MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.mp4a.channels", &channels_count);
-                _channels = channels_count;
+                _channels = (UInt32)channels_count;
             }
         }
         else if (MP4HaveTrackAtom(fileHandle, self.trackId, "mdia.minf.stbl.stsd.ac-3.dac3")) {
@@ -90,13 +90,13 @@ MP42_OBJC_DIRECT_MEMBERS
         else if (MP4HaveTrackAtom(fileHandle, self.trackId, "mdia.minf.stbl.stsd.alac")) {
             uint64_t channels_count = 0;
             MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.alac.channels", &channels_count);
-            _channels = channels_count;
+            _channels = (UInt32)channels_count;
         }
         else if (MP4HaveTrackAtom(fileHandle, self.trackId, "mdia.minf.stbl.stsd.twos")) {
             uint64_t channels_count = 0;
             MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.twos.channels", &channels_count);
-            _channels = channels_count;
-            _channelLayoutTag = getDefaultChannelLayout(channels_count);
+            _channels = (UInt32)channels_count;
+            _channelLayoutTag = getDefaultChannelLayout((UInt32)channels_count);
         }
 
         if (MP4HaveTrackAtom(fileHandle, self.trackId, "tref.fall")) {
@@ -161,8 +161,9 @@ MP42_OBJC_DIRECT_MEMBERS
 
     if (self.updatedProperty[@"fallback"] || !self.muxed) {
 
-        if (_fallbackTrack) {
-            _fallbackTrackId = _fallbackTrack.trackId;
+        MP42Track *fallbackTrack = _fallbackTrack;
+        if (fallbackTrack) {
+            _fallbackTrackId = fallbackTrack.trackId;
         }
 
         if (MP4HaveTrackAtom(fileHandle, self.trackId, "tref.fall") && (_fallbackTrackId == 0)) {
@@ -178,8 +179,9 @@ MP42_OBJC_DIRECT_MEMBERS
     
     if (self.updatedProperty[@"follows"] || !self.muxed) {
 
-        if (_followsTrack) {
-            _followsTrackId = _followsTrack.trackId;
+        MP42Track *followsTrack = _followsTrack;
+        if (followsTrack) {
+            _followsTrackId = followsTrack.trackId;
         }
 
         if (MP4HaveTrackAtom(fileHandle, self.trackId, "tref.folw") && (_followsTrackId == 0)) {
@@ -286,12 +288,12 @@ MP42_OBJC_DIRECT_MEMBERS
 
     [coder encodeFloat:_volume forKey:@"volume"];
 
-    [coder encodeInt64:_channels forKey:@"channels"];
-    [coder encodeInt64:_channelLayoutTag forKey:@"channelLayoutTag"];
+    [coder encodeInt32:_channels forKey:@"channels"];
+    [coder encodeInt32:_channelLayoutTag forKey:@"channelLayoutTag"];
 
-    [coder encodeInteger:_extensionType forKey:@"extensionType"];
+    [coder encodeInt32:_extensionType forKey:@"extensionType"];
 
-    [coder encodeInt64:_fallbackTrackId forKey:@"fallbackTrackId"];
+    [coder encodeInt32:_fallbackTrackId forKey:@"fallbackTrackId"];
 }
 
 - (id)initWithCoder:(NSCoder *)decoder
@@ -301,12 +303,12 @@ MP42_OBJC_DIRECT_MEMBERS
     if (self) {
         _volume = [decoder decodeFloatForKey:@"volume"];
 
-        _channels = [decoder decodeInt64ForKey:@"channels"];
-        _channelLayoutTag = [decoder decodeInt64ForKey:@"channelLayoutTag"];
+        _channels = [decoder decodeInt32ForKey:@"channels"];
+        _channelLayoutTag = [decoder decodeInt32ForKey:@"channelLayoutTag"];
 
-        _extensionType = [decoder decodeIntegerForKey:@"extensionType"];
+        _extensionType = [decoder decodeInt32ForKey:@"extensionType"];
 
-        _fallbackTrackId = [decoder decodeInt64ForKey:@"fallbackTrackId"];
+        _fallbackTrackId = [decoder decodeInt32ForKey:@"fallbackTrackId"];
     }
 
     return self;

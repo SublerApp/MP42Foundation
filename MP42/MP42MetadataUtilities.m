@@ -144,7 +144,7 @@ static const genreType_t genreType_strings[] = {
     {126, "dancehall",         "Dance Hall" },
     {255, "none",              "none" },
 
-    {0, "undefined" } // must be last
+    {0, "undefined", NULL } // must be last
 };
 
 NSString * genreFromIndex(NSInteger index)

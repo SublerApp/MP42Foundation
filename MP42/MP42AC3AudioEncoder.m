@@ -297,7 +297,7 @@ MP42_OBJC_DIRECT_MEMBERS
     }
 }
 
-- (NSData *)magicCookie
+- (nullable NSData *)magicCookie
 {
     return _magicCookie;
 }

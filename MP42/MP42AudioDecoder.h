@@ -23,7 +23,7 @@ NS_ASSUME_NONNULL_BEGIN
                         mixdownType:(MP42AudioMixdown)mixdownType
                                 drc:(float)drc
                      initialPadding:(UInt32)initialPadding
-                        magicCookie:(NSData *)magicCookie
+                        magicCookie:(nullable NSData *)magicCookie
                               error:(NSError * __autoreleasing *)error;
 
 @property (nonatomic, readonly, nullable) AudioChannelLayout *inputLayout;

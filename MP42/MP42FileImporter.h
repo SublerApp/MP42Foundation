@@ -33,7 +33,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 #pragma mark - Override
 
-- (NSUInteger)timescaleForTrack:(MP42Track *)track;
+- (UInt32)timescaleForTrack:(MP42Track *)track;
 - (NSSize)sizeForTrack:(MP42VideoTrack *)track;
 - (nullable NSData *)magicCookieForTrack:(MP42Track *)track;
 - (AudioStreamBasicDescription)audioDescriptionForTrack:(MP42AudioTrack *)track;

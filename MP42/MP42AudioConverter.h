@@ -22,7 +22,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)addSample:(MP42SampleBuffer *)sample;
 - (nullable MP42SampleBuffer *)copyEncodedSample;
 
-@property (nonatomic, readonly) NSData *magicCookie;
+@property (nonatomic, readonly, nullable) NSData *magicCookie;
 @property (nonatomic, readonly) double sampleRate;
 
 NS_ASSUME_NONNULL_END

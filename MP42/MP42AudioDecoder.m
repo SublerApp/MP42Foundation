@@ -33,7 +33,7 @@ struct MP42DecodeContext {
     AudioStreamBasicDescription *outputFormat;
 
     enum AVMatrixEncoding matrix_encoding;
-    int                   out_layout;
+    uint64_t              out_layout;
 
     int drop_samples;
 
@@ -72,7 +72,7 @@ MP42_OBJC_DIRECT_MEMBERS
                         mixdownType:(MP42AudioMixdown)mixdownType
                                 drc:(float)drc
                      initialPadding:(UInt32)initialPadding
-                        magicCookie:(NSData *)magicCookie
+                        magicCookie:(nullable NSData *)magicCookie
                               error:(NSError * __autoreleasing *)error
 {
     self = [super init];
@@ -101,9 +101,15 @@ MP42_OBJC_DIRECT_MEMBERS
                 av_freep(&_avctx);
                 return nil;
             }
-            else {
-                _avctx->extradata_size = magicCookie.length;
+            else if (magicCookie.length < UINT32_MAX) {
+                _avctx->extradata_size = (uint32_t)magicCookie.length;
                 memcpy(_avctx->extradata, magicCookie.bytes, magicCookie.length);
+            }
+            else
+            {
+                NSLog(@"Could not av_malloc extradata");
+                av_freep(&_avctx);
+                return nil;
             }
         }
 

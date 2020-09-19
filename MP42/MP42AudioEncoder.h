@@ -16,7 +16,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MP42AudioEncoder : NSObject<MP42AudioUnit>
 
-- (instancetype)initWithInputUnit:(id<MP42AudioUnit>)unit bitRate:(NSUInteger)bitRate error:(NSError * __autoreleasing *)error;
+- (instancetype)initWithInputUnit:(id<MP42AudioUnit>)unit bitRate:(UInt32)bitRate error:(NSError * __autoreleasing *)error;
 
 @property (nonatomic, readonly, nullable) AudioChannelLayout *inputLayout;
 @property (nonatomic, readonly) UInt32 inputLayoutSize;
@@ -28,7 +28,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, readonly) AudioCodecPrimeInfo primeInfo;
 
-@property (nonatomic, readonly) NSData *magicCookie;
+@property (nonatomic, readonly, nullable) NSData *magicCookie;
 
 @end
 

@@ -45,11 +45,11 @@ MP42_OBJC_DIRECT_MEMBERS
 
     NSMutableArray<MatroskaSample *> *queue;
 
-    uint64_t    timescale;
+    uint32_t    timescale;
     uint64_t    currentTime;
     uint64_t    startTime;
     int64_t     minDisplayOffset;
-    unsigned int buffer, samplesWritten, bufferFlush;
+    uint32_t buffer, samplesWritten, bufferFlush;
 
     MP42SampleBuffer *previousSample;
 }
@@ -68,7 +68,7 @@ MP42_OBJC_DIRECT_MEMBERS
 
 @end
 
-static int readData(struct StdIoStream  *ioStream, uint64_t pos, uint8_t **data, uint32_t dataSize)
+static int readData(struct StdIoStream  *ioStream, uint64_t pos, uint8_t **data, size_t dataSize)
 {
     if (fseeko(ioStream->fp, pos, SEEK_SET)) {
 #ifdef DEBUG
@@ -218,10 +218,10 @@ MP42_OBJC_DIRECT_MEMBERS
             return nil;
         }
 
-        NSInteger trackCount = mkv_GetNumTracks(_matroskaFile);
+        MP42TrackId trackCount = mkv_GetNumTracks(_matroskaFile);
         NSArray<NSNumber *> *trackSizes = [self approximatedTrackDataLength];
 
-        for (NSInteger i = 0; i < trackCount; i++) {
+        for (MP42TrackId i = 0; i < trackCount; i++) {
             TrackInfo *mkvTrack = mkv_GetTrackInfo(_matroskaFile, i);
             MP42Track *newTrack = nil;
 
@@ -248,7 +248,7 @@ MP42_OBJC_DIRECT_MEMBERS
                     videoTrack.vertOffD = 1;
 
                     dar			   = (AVRational){mkvTrack->AV.Video.DisplayWidth, mkvTrack->AV.Video.DisplayHeight};
-                    invPixelSize   = (AVRational){videoTrack.cleanApertureHeightN, videoTrack.cleanApertureWidthN};
+                    invPixelSize   = (AVRational){(int)videoTrack.cleanApertureHeightN, (int)videoTrack.cleanApertureWidthN};
                 }
                 else {
                     dar			   = (AVRational){mkvTrack->AV.Video.DisplayWidth, mkvTrack->AV.Video.DisplayHeight};
@@ -475,7 +475,7 @@ MP42_OBJC_DIRECT_MEMBERS
         }
     }
 
-    return (mkvMetadata.items.count) ? mkvMetadata : nil;
+    return mkvMetadata;
 }
 
 - (NSArray<NSNumber *> *)approximatedTrackDataLength
@@ -633,7 +633,7 @@ static NSString * TrackNameToString(TrackInfo *track)
     return (((double)StartTime) - codecDelay) / SCALE_FACTOR;
 }
 
-static uint64_t timescale(TrackInfo *trackInfo)
+static uint32_t timescale(TrackInfo *trackInfo)
 {
     if (trackInfo->Type == TT_VIDEO) {
         return 100000;
@@ -655,7 +655,7 @@ static uint64_t timescale(TrackInfo *trackInfo)
     return 1000;
 }
 
-- (NSUInteger)timescaleForTrack:(MP42Track *)track
+- (UInt32)timescaleForTrack:(MP42Track *)track
 {
     TrackInfo *trackInfo = mkv_GetTrackInfo(_matroskaFile, track.sourceId);
     return timescale(trackInfo);
@@ -788,7 +788,7 @@ static uint64_t timescale(TrackInfo *trackInfo)
     return nil;
 }
 
-- (UInt8)streamExtensionTypeForAudioTrack:(MP42AudioTrack *)track mkvTrack:(TrackInfo *)trackInfo
+- (MP42AudioEmbeddedExtension)streamExtensionTypeForAudioTrack:(MP42AudioTrack *)track mkvTrack:(TrackInfo *)trackInfo
 {
 	struct eac3_info *context = NULL;
 	uint8_t mkvpktnum = 0;
@@ -876,7 +876,7 @@ static uint64_t timescale(TrackInfo *trackInfo)
     return result;
 }
 
-- (BOOL)audioTrackUsesExplicitEncoderDelay:(MP42Track *)track;
+- (BOOL)audioTrackUsesExplicitEncoderDelay:(MP42Track *)track
 {
     TrackInfo *trackInfo = mkv_GetTrackInfo(_matroskaFile, track.sourceId);
     return trackInfo->CodecDelay != 0;
@@ -891,7 +891,7 @@ static uint64_t timescale(TrackInfo *trackInfo)
 
         NSArray<MP42Track *> *inputTracks = self.inputTracks;
 
-        NSInteger tracksNumber = inputTracks.count;
+        NSUInteger tracksNumber = inputTracks.count;
         MatroskaDemuxHelper * helpers[self.tracks.count];
 
         for (NSUInteger index = 0; index < tracksNumber; index += 1) {
@@ -1092,7 +1092,7 @@ static uint64_t timescale(TrackInfo *trackInfo)
                     }
 
                     // offset calculation
-                    int64_t offset = currentSample->startTime - demuxHelper->currentTime;
+                    int64_t offset = currentSample->startTime / 10000.0f - demuxHelper->currentTime / 10000.0f;
 
                     demuxHelper->currentTime += duration;
 
@@ -1102,7 +1102,7 @@ static uint64_t timescale(TrackInfo *trackInfo)
                         sample->size = currentSample->frameSize;
                         sample->timescale = demuxHelper->timescale;
                         sample->duration = duration / 10000.0f;
-                        sample->offset = offset / 10000.0f;
+                        sample->offset = offset;
                         sample->decodeTimestamp = StartTime;
                         sample->flags |= (currentSample->frameFlags & FRAME_KF) ? MP42SampleBufferFlagIsSync : 0;
                         sample->trackId = demuxHelper->sourceID;
@@ -1164,7 +1164,7 @@ static uint64_t timescale(TrackInfo *trackInfo)
                     }
 
                     // offset calculation
-                    int64_t offset = currentSample->startTime - demuxHelper->currentTime;
+                    int64_t offset = currentSample->startTime / 10000.0f - demuxHelper->currentTime / 10000.0f;
 
                     demuxHelper->currentTime += duration;
 
@@ -1174,7 +1174,7 @@ static uint64_t timescale(TrackInfo *trackInfo)
                         sample->size = currentSample->frameSize;
                         sample->timescale = demuxHelper->timescale;
                         sample->duration = duration / 10000.0f;
-                        sample->offset = offset / 10000.0f;
+                        sample->offset = offset;
                         sample->decodeTimestamp = StartTime;
                         sample->flags |= (currentSample->frameFlags & FRAME_KF) ? MP42SampleBufferFlagIsSync : 0;
                         sample->trackId = demuxHelper->sourceID;
@@ -1236,8 +1236,8 @@ static uint64_t timescale(TrackInfo *trackInfo)
 
     if (demuxHelper->minDisplayOffset != 0) {
 
-        for (unsigned int i = 1; i <= demuxHelper->samplesWritten; i++) {
-            int64_t correctedOffset = MP4GetSampleRenderingOffset(fileHandle, trackId, i) - demuxHelper->minDisplayOffset;
+        for (uint32_t i = 1; i <= demuxHelper->samplesWritten; i++) {
+            int64_t correctedOffset = (int64_t)MP4GetSampleRenderingOffset(fileHandle, trackId, i) - demuxHelper->minDisplayOffset;
             MP4SetSampleRenderingOffset(fileHandle,
                                         trackId,
                                         i,

@@ -26,7 +26,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly) UInt32 outputLayoutSize;
 @property (nonatomic, readonly) AudioStreamBasicDescription outputFormat;
 
-@property (nonatomic, readonly) NSData *magicCookie;
+@property (nonatomic, readonly, nullable) NSData *magicCookie;
 
 @end
 

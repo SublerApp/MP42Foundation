@@ -37,7 +37,7 @@ MP42_OBJC_DIRECT_MEMBERS
     return self;
 }
 
-- (NSUInteger)timescaleForTrack:(MP42Track *)track
+- (UInt32)timescaleForTrack:(MP42Track *)track
 {
     return 30000;
 }
@@ -229,7 +229,7 @@ static int ParseByte(const char *string, UInt8 *byte, Boolean hex)
             
             MP42SampleBuffer *sample = [[MP42SampleBuffer alloc] init];
             sample->data = bytes;
-            sample->size = byteCount + 8;
+            sample->size = (uint32_t)byteCount + 8;
             sample->duration = sampleDuration * 1001;
             sample->offset = 0;
             sample->decodeTimestamp = 0;

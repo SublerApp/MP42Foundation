@@ -34,7 +34,7 @@ MP42_OBJC_DIRECT_MEMBERS
     return self;
 }
 
-- (instancetype)initWithSourceURL:(NSURL *)URL trackID:(NSInteger)trackID fileHandle:(MP4FileHandle)fileHandle
+- (instancetype)initWithSourceURL:(NSURL *)URL trackID:(MP42TrackId)trackID fileHandle:(MP4FileHandle)fileHandle
 {
     self = [super initWithSourceURL:URL trackID:trackID fileHandle:fileHandle];
 
@@ -104,7 +104,7 @@ MP42_OBJC_DIRECT_MEMBERS
 
 - (NSString *)defaultName {
     NSBundle *bundle = [NSBundle bundleForClass:[MP42ChapterTrack class]];
-    return NSLocalizedStringFromTableInBundle(@"Chapter Track", @"Localizable", bundle, nil);
+    return NSLocalizedStringFromTableInBundle(@"Chapter Track", @"Localizable", bundle, @"Default Chapter Track name");
 }
 
 - (NSUInteger)addChapter:(MP42TextSample *)chapter
@@ -198,7 +198,7 @@ MP42_OBJC_DIRECT_MEMBERS
             refTrack = 1; 
         }
 
-        chapterCount = _chapters.count;
+        chapterCount = (uint32_t)_chapters.count;
         
         if (chapterCount) {
             // Insert a chapter at time 0 if there isn't one
@@ -282,7 +282,7 @@ MP42_OBJC_DIRECT_MEMBERS
 
 - (BOOL)exportToURL:(NSURL *)url error:(NSError * __autoreleasing *)error
 {
-	NSMutableString* file = [[NSMutableString alloc] init];
+	NSMutableString *file = [[NSMutableString alloc] init];
 	NSUInteger x = 0;
 
 	for (MP42TextSample *chapter in _chapters) {
@@ -294,11 +294,11 @@ MP42_OBJC_DIRECT_MEMBERS
 }
 
 - (BOOL)updateFromCSVFile:(NSURL *)URL error:(NSError * __autoreleasing *)outError {
-    NSArray *csvData = [NSArray arrayWithContentsOfCSVURL:URL];
+    NSArray<NSArray<NSString *> *> *csvData = [NSArray arrayWithContentsOfCSVURL:URL];
     if (csvData.count == self.chapterCount) {
         for (NSUInteger i = 0; i < csvData.count; ++i) {
-            NSArray *lineFields = csvData[i];
-            if (lineFields.count != 2 || [lineFields[0] integerValue] != i + 1) {
+            NSArray<NSString *> *lineFields = csvData[i];
+            if (lineFields.count != 2 || lineFields[0].integerValue != i + 1) {
                 if (NULL != outError)
                     *outError = MP42Error(MP42LocalizedString(@"Invalid chapters CSV file.", @"error message"),
                                           MP42LocalizedString(@"The CSV file is not a valid chapters CSV file.", @"error message"),
@@ -376,7 +376,7 @@ MP42_OBJC_DIRECT_MEMBERS
 //     <one>
 //     <John said, "Hello there.">
 //     <three>
-+ (nullable NSArray<NSArray<NSString *> *> *)arrayWithContentsOfCSVURL:(NSURL *)url;
++ (nullable NSArray<NSArray<NSString *> *> *)arrayWithContentsOfCSVURL:(NSURL *)url
 {
     NSString *str1 = STLoadFileWithUnknownEncoding(url);
     NSMutableString *csvString = STStandardizeStringNewlines(str1);
@@ -386,7 +386,7 @@ MP42_OBJC_DIRECT_MEMBERS
     if ([csvString characterAtIndex:[csvString length]-1] != '\n') [csvString appendFormat:@"%c",'\n'];
     NSScanner *sc = [NSScanner scannerWithString:csvString];
     sc.charactersToBeSkipped =  nil;
-    NSMutableArray *csvArray = [NSMutableArray array];
+    NSMutableArray<NSMutableArray<NSString *> *> *csvArray = [NSMutableArray array];
     [csvArray addObject:[NSMutableArray array]];
     NSCharacterSet *commaNewlineCS = [NSCharacterSet characterSetWithCharactersInString:@",\n"];
     while (sc.scanLocation < csvString.length) {

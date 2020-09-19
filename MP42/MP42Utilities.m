@@ -10,11 +10,11 @@
 #import "MP42SubUtilities.h"
 #import <AudioToolbox/AudioToolbox.h>
 
-NSString * StringFromTime(long long time, long timeScale)
+NSString * StringFromTime(long long time, int32_t timeScale)
 {
     NSString *time_string;
-    int hour, minute, second, frame;
-    long long result;
+    int minute, second, frame;
+    long long result, hour;
 
     result = time / timeScale; // second
     frame = time % timeScale;
@@ -27,12 +27,12 @@ NSString * StringFromTime(long long time, long timeScale)
     result = result / 60; // hour
     hour = result;
 
-    time_string = [NSString stringWithFormat:@"%d:%02d:%02d.%03d", hour, minute, second, frame]; // h:mm:ss.mss
+    time_string = [NSString stringWithFormat:@"%lld:%02d:%02d.%03d", hour, minute, second, frame]; // h:mm:ss.mss
 
     return time_string;
 }
 
-MP42Duration TimeFromString(NSString *time_string, MP42Duration timeScale)
+MP42Duration TimeFromString(NSString *time_string, int32_t timeScale)
 {
     return ParseSubTime(time_string.UTF8String, timeScale, NO);
 }

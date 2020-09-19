@@ -14,7 +14,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MP42Track (Private)
 
-- (instancetype)initWithSourceURL:(NSURL *)URL trackID:(NSInteger)trackID fileHandle:(MP42FileHandle)fileHandle;
+- (instancetype)initWithSourceURL:(NSURL *)URL trackID:(MP42TrackId)trackID fileHandle:(MP42FileHandle)fileHandle;
 - (BOOL)writeToFile:(MP42FileHandle)fileHandle error:(NSError * __autoreleasing *)outError;
 
 @property(nonatomic, readwrite) MP42TrackId trackId;

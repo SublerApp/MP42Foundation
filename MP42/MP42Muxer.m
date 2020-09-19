@@ -91,7 +91,7 @@ MP42_OBJC_DIRECT_MEMBERS
         FourCharCode format = track.format;
         MP4TrackId dstTrackId = 0;
         NSData *magicCookie = nil;
-        NSInteger timeScale = 0;
+        uint32_t timeScale = 0;
 
         if (importer) {
             magicCookie = [importer magicCookieForTrack:track];
@@ -215,23 +215,23 @@ MP42_OBJC_DIRECT_MEMBERS
 
             uint8_t *hvcCAtom = (uint8_t *)magicCookie.bytes;
 
-            if ([_options[MP42ForceHvc1] boolValue]) {
-                force_HEVC_completeness(hvcCAtom, magicCookie.length);
+            if ([_options[MP42ForceHvc1] boolValue] && magicCookie.length < UINT32_MAX) {
+                force_HEVC_completeness(hvcCAtom, (uint32_t)magicCookie.length);
             }
 
             // Check whether we can use hvc1 or hev1 fourcc.
             bool completeness = 0;
-            if (magicCookie.length && !analyze_HEVC(magicCookie.bytes, magicCookie.length, &completeness)) {
+            if (magicCookie.length && magicCookie.length < UINT32_MAX && !analyze_HEVC(magicCookie.bytes, (uint32_t)magicCookie.length, &completeness)) {
                 NSSize size = [importer sizeForTrack:(MP42VideoTrack *)track];
 
                 dstTrackId = MP4AddH265VideoTrack(_fileHandle, timeScale, MP4_INVALID_DURATION, size.width, size.height, completeness);
 
                 if (dstTrackId) {
                     if (completeness) {
-                        MP4SetTrackBytesProperty(_fileHandle, dstTrackId, "mdia.minf.stbl.stsd.hvc1.hvcC.content", magicCookie.bytes, magicCookie.length);
+                        MP4SetTrackBytesProperty(_fileHandle, dstTrackId, "mdia.minf.stbl.stsd.hvc1.hvcC.content", magicCookie.bytes, (uint32_t)magicCookie.length);
                     }
                     else {
-                        MP4SetTrackBytesProperty(_fileHandle, dstTrackId, "mdia.minf.stbl.stsd.hev1.hvcC.content", magicCookie.bytes, magicCookie.length);
+                        MP4SetTrackBytesProperty(_fileHandle, dstTrackId, "mdia.minf.stbl.stsd.hev1.hvcC.content", magicCookie.bytes, (uint32_t)magicCookie.length);
                     }
                     [importer setActiveTrack:track];
                 }
@@ -255,10 +255,10 @@ MP42_OBJC_DIRECT_MEMBERS
                                           [(MP42VideoTrack*)track width], [(MP42VideoTrack*)track height],
                                           MP4_MPEG4_VIDEO_TYPE);
 
-            if (magicCookie.length) {
+            if (magicCookie.length && magicCookie.length < UINT32_MAX) {
                 MP4SetTrackESConfiguration(_fileHandle, dstTrackId,
                                            magicCookie.bytes,
-                                           magicCookie.length);
+                                           (uint32_t)magicCookie.length);
             }
 
             [importer setActiveTrack:track];
@@ -281,10 +281,10 @@ MP42_OBJC_DIRECT_MEMBERS
                                           timeScale,
                                           1024, MP4_MPEG4_AUDIO_TYPE);
 
-            if (!track.conversionSettings && magicCookie.length) {
+            if (!track.conversionSettings && magicCookie.length && magicCookie.length < UINT32_MAX) {
                 MP4SetTrackESConfiguration(_fileHandle, dstTrackId,
                                            magicCookie.bytes,
-                                           magicCookie.length);
+                                           (uint32_t)magicCookie.length);
             }
 
             MP4SetTrackWantsRoll(_fileHandle, dstTrackId, [importer audioTrackUsesExplicitEncoderDelay:track]);
@@ -332,8 +332,9 @@ MP42_OBJC_DIRECT_MEMBERS
         else if ([track isMemberOfClass:[MP42AudioTrack class]] && format == kMP42AudioCodecType_AppleLossless) {
             dstTrackId = MP4AddALACAudioTrack(_fileHandle,
                                           timeScale);
-            if (magicCookie.length) {
-                MP4SetTrackBytesProperty(_fileHandle, dstTrackId, "mdia.minf.stbl.stsd.alac.alac.AppleLosslessMagicCookie", magicCookie.bytes, magicCookie.length);
+            if (magicCookie.length && magicCookie.length < UINT32_MAX) {
+                MP4SetTrackBytesProperty(_fileHandle, dstTrackId, "mdia.minf.stbl.stsd.alac.alac.AppleLosslessMagicCookie",
+                                         magicCookie.bytes, (uint32_t)magicCookie.length);
             }
 
             [importer setActiveTrack:track];
@@ -609,11 +610,11 @@ MP42_OBJC_DIRECT_MEMBERS
         if (track.converter && track.conversionSettings && [track isMemberOfClass:[MP42AudioTrack class]]) {
             NSData *magicCookie = track.converter.magicCookie;
 
-            if (magicCookie) {
+            if (magicCookie && magicCookie.length < UINT32_MAX) {
                 if (track.conversionSettings.format == kAudioFormatMPEG4AAC) {
                     MP4SetTrackESConfiguration(_fileHandle, track.trackId,
                                                magicCookie.bytes,
-                                               magicCookie.length);
+                                               (uint32_t)magicCookie.length);
                 }
                 else if (track.conversionSettings.format == kAudioFormatAC3) {
                     const uint64_t *ac3Info = (const uint64_t *)magicCookie.bytes;

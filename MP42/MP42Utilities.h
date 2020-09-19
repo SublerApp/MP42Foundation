@@ -21,8 +21,8 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-NSString * StringFromTime(long long time, long timeScale);
-MP42Duration TimeFromString(NSString *SMPTE_string, MP42Duration timeScale);
+NSString * StringFromTime(long long time, int32_t timeScale);
+MP42Duration TimeFromString(NSString *SMPTE_string, int32_t timeScale);
 
 BOOL isTrackMuxable(FourCharCode formatName);
 BOOL trackNeedConversion(FourCharCode formatName);

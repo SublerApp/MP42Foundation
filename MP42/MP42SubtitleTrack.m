@@ -17,7 +17,7 @@
 MP42_OBJC_DIRECT_MEMBERS
 @implementation MP42SubtitleTrack
 
-- (instancetype)initWithSourceURL:(NSURL *)URL trackID:(NSInteger)trackID fileHandle:(MP4FileHandle)fileHandle
+- (instancetype)initWithSourceURL:(NSURL *)URL trackID:(MP42TrackId)trackID fileHandle:(MP4FileHandle)fileHandle
 {
     self = [super initWithSourceURL:URL trackID:trackID fileHandle:fileHandle];
 
@@ -52,7 +52,7 @@ MP42_OBJC_DIRECT_MEMBERS
         if (MP4HaveTrackAtom(fileHandle, self.trackId, "tref.forc")) {
             uint64_t forcedId = 0;
             MP4GetTrackIntegerProperty(fileHandle, self.trackId, "tref.forc.entries.trackId", &forcedId);
-            _forcedTrackId = forcedId;
+            _forcedTrackId = (MP42TrackId)forcedId;
         }
     }
 
@@ -82,8 +82,9 @@ MP42_OBJC_DIRECT_MEMBERS
 
     if (self.updatedProperty[@"forced"] || !self.muxed) {
 
-        if (self.forcedTrack) {
-            _forcedTrackId = self.forcedTrack.trackId;
+        MP42Track *forcedTrack = self.forcedTrack;
+        if (forcedTrack) {
+            _forcedTrackId = forcedTrack.trackId;
         }
 
         if (MP4HaveTrackAtom(fileHandle, self.trackId, "tref.forc") && (_forcedTrackId == 0)) {
@@ -424,7 +425,7 @@ fail:
     [coder encodeBool:_someSamplesAreForced forKey:@"someSamplesAreForced"];
     [coder encodeBool:_allSamplesAreForced forKey:@"allSamplesAreForced"];
 
-    [coder encodeInt64:_forcedTrackId forKey:@"forcedTrackId"];
+    [coder encodeInt32:_forcedTrackId forKey:@"forcedTrackId"];
 }
 
 - (id)initWithCoder:(NSCoder *)decoder
@@ -436,7 +437,7 @@ fail:
         _someSamplesAreForced = [decoder decodeBoolForKey:@"someSamplesAreForced"];
         _allSamplesAreForced = [decoder decodeBoolForKey:@"allSamplesAreForced"];
 
-        _forcedTrackId = [decoder decodeInt64ForKey:@"forcedTrackId"];
+        _forcedTrackId = [decoder decodeInt32ForKey:@"forcedTrackId"];
     }
 
     return self;

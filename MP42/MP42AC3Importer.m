@@ -336,7 +336,7 @@ static bool GetFirstHeader(FILE* inFile)
     return self;
 }
 
-- (NSUInteger)timescaleForTrack:(MP42Track *)track
+- (UInt32)timescaleForTrack:(MP42Track *)track
 {
     return samplesPerSecond;
 }
@@ -368,18 +368,21 @@ static bool GetFirstHeader(FILE* inFile)
         int64_t currentSize = 0;
 
         while (LoadNextAc3Frame(inFile, &pBuf, &pBufSize, false) && !self.isCancelled) {
-            MP42SampleBuffer *sample = [[MP42SampleBuffer alloc] init];
 
-            void *sampleDataBuffer = malloc(pBufSize);
-            memcpy(sampleDataBuffer, pBuf, pBufSize);
+            if (pBufSize < UINT32_MAX) {
+                MP42SampleBuffer *sample = [[MP42SampleBuffer alloc] init];
 
-            sample->data = sampleDataBuffer;
-            sample->size = pBufSize;
-            sample->duration = MP4_INVALID_DURATION;
-            sample->flags |= MP42SampleBufferFlagIsSync;
-            sample->trackId = trackId;
+                void *sampleDataBuffer = malloc(pBufSize);
+                memcpy(sampleDataBuffer, pBuf, pBufSize);
 
-            [self enqueue:sample];
+                sample->data = sampleDataBuffer;
+                sample->size = (uint32_t)pBufSize;
+                sample->duration = MP4_INVALID_DURATION;
+                sample->flags |= MP42SampleBufferFlagIsSync;
+                sample->trackId = trackId;
+
+                [self enqueue:sample];
+            }
 
             sampleId++;
 

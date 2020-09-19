@@ -50,7 +50,7 @@
     return self;
 }
 
-- (nullable instancetype)initWithURL:(NSURL *)URL;
+- (nullable instancetype)initWithURL:(NSURL *)URL
 {
     self = [self init];
     if (self) {
@@ -814,8 +814,11 @@
                     [self addMetadataItemWithStringArray:tag identifier:MP42MetadataKeyScreenwriters];
                 }
 
-                if ([tag = dma[@"studio"] length]) {
-                    [self addMetadataItemWithString:tag identifier:MP42MetadataKeyStudio];
+                if ((tag = dma[@"studio"]) != nil && [tag isKindOfClass:[NSString class]]) {
+                    NSString *studio = tag;
+                    if (studio.length) {
+                        [self addMetadataItemWithString:tag identifier:MP42MetadataKeyStudio];
+                    }
                 }
             }
         }
@@ -940,7 +943,7 @@
     MP4TagsSetTVEpisodeID      (tags, self.itemsMap[MP42MetadataKeyTVEpisodeID].stringValue.UTF8String);
 
     if (self.itemsMap[MP42MetadataKeyTVSeason]) {
-        const uint32_t value = self.itemsMap[MP42MetadataKeyTVSeason].numberValue.integerValue;
+        const uint32_t value = self.itemsMap[MP42MetadataKeyTVSeason].numberValue.intValue;
         MP4TagsSetTVSeason(tags, &value);
     }
     else {
@@ -948,7 +951,7 @@
     }
 
     if (self.itemsMap[MP42MetadataKeyTVEpisodeNumber]) {
-        const uint32_t i = self.itemsMap[MP42MetadataKeyTVEpisodeNumber].numberValue.integerValue;
+        const uint32_t i = self.itemsMap[MP42MetadataKeyTVEpisodeNumber].numberValue.intValue;
         MP4TagsSetTVEpisode(tags, &i);
     }
     else {
@@ -1025,7 +1028,7 @@
     }
 
     if (self.itemsMap[MP42MetadataKeyAccountCountry]) {
-        const uint32_t i = self.itemsMap[MP42MetadataKeyAccountCountry].numberValue.integerValue;
+        const uint32_t i = self.itemsMap[MP42MetadataKeyAccountCountry].numberValue.intValue;
         MP4TagsSetITunesCountry(tags, &i);
     }
     else {
@@ -1033,7 +1036,7 @@
     }
 
     if (self.itemsMap[MP42MetadataKeyContentID]) {
-        const uint32_t i = self.itemsMap[MP42MetadataKeyContentID].numberValue.integerValue;
+        const uint32_t i = self.itemsMap[MP42MetadataKeyContentID].numberValue.intValue;
         MP4TagsSetContentID(tags, &i);
     }
     else {
@@ -1041,7 +1044,7 @@
     }
 
     if (self.itemsMap[MP42MetadataKeyGenreID]) {
-        const uint32_t i = self.itemsMap[MP42MetadataKeyGenreID].numberValue.integerValue;
+        const uint32_t i = self.itemsMap[MP42MetadataKeyGenreID].numberValue.intValue;
         MP4TagsSetGenreID(tags, &i);
     }
     else {
@@ -1049,7 +1052,7 @@
     }
 
     if (self.itemsMap[MP42MetadataKeyArtistID]) {
-        const uint32_t i = self.itemsMap[MP42MetadataKeyArtistID].numberValue.integerValue;
+        const uint32_t i = self.itemsMap[MP42MetadataKeyArtistID].numberValue.intValue;
         MP4TagsSetArtistID(tags, &i);
     }
     else {
@@ -1065,7 +1068,7 @@
     }
 
     if (self.itemsMap[MP42MetadataKeyComposerID]) {
-        const uint32_t i = self.itemsMap[MP42MetadataKeyComposerID].numberValue.integerValue;
+        const uint32_t i = self.itemsMap[MP42MetadataKeyComposerID].numberValue.intValue;
         MP4TagsSetComposerID(tags, &i);
     }
     else {
@@ -1093,23 +1096,21 @@
 
             artwork = (MP42Image *)artworks[i].value;
 
-            if (artwork.data) {
-
+            if (artwork.data && artwork.data.length < UINT32_MAX) {
                 newArtwork.data = (void *)artwork.data.bytes;
-                newArtwork.size = artwork.data.length;
+                newArtwork.size = (uint32_t)artwork.data.length;
                 newArtwork.type = (MP4TagArtworkType)artwork.type;
             }
             else {
-
                 NSArray<NSImageRep *> *representations = artwork.image.representations;
 
                 if (representations.count) {
                     NSData *bitmapData = [NSBitmapImageRep representationOfImageRepsInArray:representations
                                                                                   usingType:NSBitmapImageFileTypePNG properties:@{}];
 
-                    if (bitmapData) {
+                    if (bitmapData && bitmapData.length < UINT32_MAX) {
                         newArtwork.data = (void *)bitmapData.bytes;
-                        newArtwork.size = bitmapData.length;
+                        newArtwork.size = (uint32_t)bitmapData.length;
                         newArtwork.type = MP4_ART_PNG;
                     }
                 }
@@ -1117,8 +1118,7 @@
 
             if (tags->artworkCount > i) {
                 MP4TagsSetArtwork(tags, i, &newArtwork);
-            }
-            else {
+            } else {
                 MP4TagsAddArtwork(tags, &newArtwork);
             }
         }
@@ -1154,11 +1154,14 @@
 
         if (ratingString) {
             data->typeCode = MP4_ITMF_BT_UTF8;
-            data->valueSize = strlen(ratingString.UTF8String);
-            data->value = (uint8_t *)malloc(data->valueSize);
-            memcpy(data->value, ratingString.UTF8String, data->valueSize);
+            size_t len = strlen(ratingString.UTF8String);
+            if (len < UINT32_MAX) {
+                data->valueSize = (uint32_t)len;
+                data->value = (uint8_t *)malloc(data->valueSize);
+                memcpy(data->value, ratingString.UTF8String, data->valueSize);
 
-            MP4ItmfAddItem(fileHandle, newItem);
+                MP4ItmfAddItem(fileHandle, newItem);
+            }
         }
 
         MP4ItmfItemFree(newItem);
@@ -1257,9 +1260,11 @@
 
             MP4ItmfData *data = &newItem->dataList.elements[0];
             data->typeCode = MP4_ITMF_BT_UTF8;
-            data->valueSize = [serializedPlist length];
-            data->value = (uint8_t*)malloc( data->valueSize );
-            memcpy( data->value, [serializedPlist bytes], data->valueSize );
+            if (serializedPlist.length < UINT32_MAX) {
+                data->valueSize = (uint32_t)serializedPlist.length;
+                data->value = (uint8_t*)malloc(data->valueSize);
+                memcpy(data->value, serializedPlist.bytes, data->valueSize);
+            }
 
             MP4ItmfAddItem(fileHandle, newItem);
             MP4ItmfItemFree(newItem);

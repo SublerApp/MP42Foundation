@@ -16,8 +16,8 @@ MP42_OBJC_DIRECT_MEMBERS
     // input lines, sorted by 1. beginning time 2. original insertion order
     NSMutableArray<MP42SubLine *> *lines;
 
-    unsigned last_begin_time, last_end_time;
-    unsigned linesInput;
+    uint64_t last_begin_time, last_end_time;
+    uint64_t linesInput;
 }
 
 -(instancetype)init
@@ -54,7 +54,7 @@ static CFComparisonResult CompareLinesByBeginTime(const void *a, const void *b, 
 	
 	line->no = linesInput++;
 	
-	NSUInteger nlines = [lines count];
+	NSUInteger nlines = lines.count;
 	
 	if (!nlines || line->begin_time > ((MP42SubLine*)[lines objectAtIndex:nlines-1])->begin_time) {
 		[lines addObject:line];
@@ -74,11 +74,11 @@ static CFComparisonResult CompareLinesByBeginTime(const void *a, const void *b, 
 	NSUInteger nlines = [lines count];
 	MP42SubLine *first = [lines objectAtIndex:0];
     NSMutableString *str;
-	int i;
+    NSUInteger i;
     
     if (!_finished) {
 		if (nlines > 1) {
-			unsigned maxEndTime = first->end_time;
+            uint64_t maxEndTime = first->end_time;
 			
 			for (i = 1; i < nlines; i++) {
 				MP42SubLine *l = [lines objectAtIndex:i];
@@ -96,7 +96,7 @@ static CFComparisonResult CompareLinesByBeginTime(const void *a, const void *b, 
 
 canOutput:
 	str = [NSMutableString stringWithString:first->line];
-	unsigned begin_time = last_end_time, end_time = first->end_time;
+    uint64_t begin_time = last_end_time, end_time = first->end_time;
     unsigned frcd = first->forced, top_pos = first->top;
 	int deleted = 0;
     
@@ -169,7 +169,7 @@ canOutput:
 MP42_OBJC_DIRECT_MEMBERS
 @implementation MP42SubLine
 
--(instancetype)initWithLine:(NSString *)l start:(unsigned)s end:(unsigned)e
+-(instancetype)initWithLine:(NSString *)l start:(uint64_t)s end:(uint64_t)e
 {
 	if ((self = [super init])) {
 		if ([l characterAtIndex:[l length]-1] != '\n') l = [l stringByAppendingString:@"\n"];
@@ -182,7 +182,7 @@ MP42_OBJC_DIRECT_MEMBERS
 	return self;
 }
 
--(id)initWithLine:(NSString*)l start:(unsigned)s end:(unsigned)e top_pos:(unsigned)p forced:(unsigned)f;
+-(id)initWithLine:(NSString*)l start:(uint64_t)s end:(uint64_t)e top_pos:(unsigned)p forced:(unsigned)f
 {
 	if ((self = [self initWithLine:l start:s end:e])) {
         top = p;
@@ -194,7 +194,7 @@ MP42_OBJC_DIRECT_MEMBERS
 
 -(NSString *)description
 {
-	return [NSString stringWithFormat:@"\"%@\", from %d s to %d s",[line substringToIndex:[line length]-1],begin_time,end_time];
+    return [NSString stringWithFormat:@"\"%@\", from %llu s to %llu s",[line substringToIndex:line.length -1] ,begin_time, end_time];
 }
 
 @end
@@ -882,6 +882,14 @@ MP42SampleBuffer * copySubtitleSample(MP4TrackId subtitleTrackId, NSString *stri
 
     stringLength = strlen(string.UTF8String);
     sampleSize = 2 + (stringLength * sizeof(char)) + styleSize + (forced == 1 ? 8 : 0) + (verticalPlacement == 1 ? 16 : 0);
+
+    if (sampleSize > UINT16_MAX)
+    {
+        // Too big for a tx3g sample
+        free(styleAtom);
+        return copyEmptySubtitleSample(subtitleTrackId, duration, forced);
+    }
+
     sampleData = malloc(sampleSize);
 
     pos = 2;
@@ -924,7 +932,7 @@ MP42SampleBuffer * copySubtitleSample(MP4TrackId subtitleTrackId, NSString *stri
 
     MP42SampleBuffer *sample = [[MP42SampleBuffer alloc] init];
     sample->data = sampleData;
-    sample->size = sampleSize;
+    sample->size = (uint32_t)sampleSize;
     sample->duration = duration;
     sample->offset = 0;
     sample->decodeTimestamp = duration;
@@ -934,13 +942,24 @@ MP42SampleBuffer * copySubtitleSample(MP4TrackId subtitleTrackId, NSString *stri
     return sample;
 }
 
-MP42SampleBuffer* copyEmptySubtitleSample(MP4TrackId subtitleTrackId, MP4Duration duration, BOOL forced)
+MP42SampleBuffer * copyEmptySubtitleSample(MP4TrackId subtitleTrackId, MP4Duration duration, BOOL forced)
 {
     uint8_t *sampleData = NULL;
+    size_t sampleSize = 0;
+
     u_int8_t empty[2] = {0,0};
 
-    sampleData = malloc(2);
+    sampleSize = 2 + (forced == 1 ? 8 : 0);
+    sampleData = malloc(sampleSize);
     memcpy(sampleData, empty, 2);
+
+    // Add a frcd atom
+    if (forced) {
+        u_int8_t forcedAtom[8];
+        createForcedAtom(forcedAtom);
+
+        memcpy(sampleData + 2, forcedAtom, 8);
+    }
 
     MP42SampleBuffer *sample = [[MP42SampleBuffer alloc] init];
     sample->data = sampleData;
@@ -955,7 +974,7 @@ MP42SampleBuffer* copyEmptySubtitleSample(MP4TrackId subtitleTrackId, MP4Duratio
 }
 
 /* VobSub related */
-int ExtractVobSubPacket(UInt8 *dest, UInt8 *framedSrc, int srcSize, int *usedSrcBytes, int index) {
+int ExtractVobSubPacket(UInt8 *dest, UInt8 *framedSrc, long srcSize, int * _Nullable usedSrcBytes, int index) {
 	int copiedBytes = 0;
 	UInt8 *currentPacket = framedSrc;
 	int packetSize = INT_MAX;
@@ -1023,7 +1042,7 @@ int ExtractVobSubPacket(UInt8 *dest, UInt8 *framedSrc, int srcSize, int *usedSrc
 		} // switch (currentPacket[3])
 	} // while (currentPacket - framedSrc < srcSize)
     if (usedSrcBytes != NULL) {
-		*usedSrcBytes = currentPacket - framedSrc;
+		*usedSrcBytes = (int)(currentPacket - framedSrc);
     }
 
 	return copiedBytes;
@@ -1124,8 +1143,9 @@ Boolean ReadPacketTimes(uint8_t *packet, uint32_t length, uint16_t *startTime, u
 	int controlOffset = (packet[2] << 8) + packet[3];
 	while(loop)
 	{
-		if(controlOffset > length)
+        if (controlOffset > length) {
 			return NO;
+        }
 		uint8_t *controlSeq = packet + controlOffset;
 		int32_t i = 4;
 		int32_t end = length - controlOffset;

@@ -11,13 +11,13 @@
 #import <string.h>
 #import <CoreAudio/CoreAudio.h>
 #import <CoreMedia/CMTime.h>
+
 #include <zlib.h>
 #include <bzlib.h>
 
 #import "MP42Languages.h"
 #import "MP42MediaFormat.h"
 
-#include "intreadwrite.h"
 #include "avcodec.h"
 
 NSString * SRTStringFromTime( long long time, long timeScale , const char separator)
@@ -57,7 +57,7 @@ int updateTracksCount(MP4FileHandle fileHandle)
 {
     MP4TrackId maxTrackId = 0;
 
-    for (uint32_t i = 0; i< MP4GetNumberOfTracks(fileHandle, 0, 0); i++ )
+    for (MP4TrackId i = 0; i< MP4GetNumberOfTracks(fileHandle, 0, 0); i++ )
         if (MP4FindTrackId(fileHandle, i, 0, 0) > maxTrackId)
             maxTrackId = MP4FindTrackId(fileHandle, i, 0, 0);
 
@@ -69,7 +69,7 @@ void updateMoovDuration(MP4FileHandle fileHandle)
     MP4TrackId trackId = 0;
     MP4Duration maxTrackDuration = 0, trackDuration = 0;
 
-    for (uint32_t i = 0; i < MP4GetNumberOfTracks(fileHandle, 0, 0); i++ ) {
+    for (MP4TrackId i = 0; i < MP4GetNumberOfTracks(fileHandle, 0, 0); i++ ) {
         trackId = MP4FindTrackId(fileHandle, i, 0, 0);
         MP4GetTrackIntegerProperty(fileHandle, trackId, "tkhd.duration", &trackDuration);
         if (maxTrackDuration < trackDuration) {
@@ -81,8 +81,8 @@ void updateMoovDuration(MP4FileHandle fileHandle)
 
 uint64_t getTrackSize(MP4FileHandle fileHandle, MP4TrackId trackId)
 {
-    uint64_t i, sampleNum, dataLength;
-    i = 1;
+    MP4SampleId i = 1, sampleNum;
+    uint64_t dataLength;
     sampleNum = MP4GetTrackNumberOfSamples(fileHandle, trackId);
     dataLength = 0;
 
@@ -99,12 +99,12 @@ MP4TrackId findChapterTrackId(MP4FileHandle fileHandle)
     MP4TrackId trackId = 0;
     uint64_t trackRef;
 
-    for (uint32_t i = 0; i< MP4GetNumberOfTracks( fileHandle, 0, 0); i++ ) {
+    for (MP4TrackId i = 0; i< MP4GetNumberOfTracks( fileHandle, 0, 0); i++ ) {
         trackId = MP4FindTrackId(fileHandle, i, 0, 0);
         if (MP4HaveTrackAtom(fileHandle, trackId, "tref.chap")) {
             MP4GetTrackIntegerProperty(fileHandle, trackId, "tref.chap.entries.trackId", &trackRef);
             if (trackRef > 0) {
-                return trackRef;
+                return (MP4TrackId)trackRef;
             }
         }
     }
@@ -124,7 +124,7 @@ MP4TrackId findChapterPreviewTrackId(MP4FileHandle fileHandle)
             MP4GetTrackIntegerProperty(fileHandle, trackId, "tref.chap.entryCount", &entryCount);
             if (entryCount > 1 && MP4GetTrackIntegerProperty(fileHandle, trackId, "tref.chap.entries[1].trackId", &trackRef))
                 if (trackRef > 0) {
-                    return trackRef;
+                    return (MP4TrackId)trackRef;
                 }
         }
     }
@@ -136,7 +136,7 @@ void removeAllChapterTrackReferences(MP4FileHandle fileHandle)
 {
     MP4TrackId trackId = 0;
 
-    for (uint32_t i = 0; i< MP4GetNumberOfTracks( fileHandle, 0, 0); i++ ) {
+    for (MP4TrackId i = 0; i< MP4GetNumberOfTracks( fileHandle, 0, 0); i++ ) {
         trackId = MP4FindTrackId(fileHandle, i, 0, 0);
         if (MP4HaveTrackAtom(fileHandle, trackId, "tref.chap")) {
             MP4RemoveAllTrackReferences(fileHandle, "tref.chap", trackId);
@@ -151,7 +151,7 @@ MP4TrackId findFirstVideoTrack(MP4FileHandle fileHandle)
     if (!trackNumber) {
         return 0;
     }
-    for (uint32_t i = 0; i < trackNumber; i++) {
+    for (MP4TrackId i = 0; i < trackNumber; i++) {
         videoTrack = MP4FindTrackId(fileHandle, i, 0, 0);
         const char *trackType = MP4GetTrackType(fileHandle, videoTrack);
         if (trackType && !strcmp(trackType, MP4_VIDEO_TRACK_TYPE)) {
@@ -567,7 +567,7 @@ int copyTrackEditLists (MP4FileHandle fileHandle, MP4TrackId srcTrackId, MP4Trac
     if (trackEditCount)
         MP4SetTrackIntegerProperty(fileHandle, dstTrackId, "tkhd.duration", trackDuration);
     else {
-        uint32_t firstFrameOffset = MP4GetSampleRenderingOffset(fileHandle, dstTrackId, 1);
+        MP4Duration firstFrameOffset = MP4GetSampleRenderingOffset(fileHandle, dstTrackId, 1);
         MP4Duration editDuration = MP4ConvertFromTrackDuration(fileHandle,
                                                                srcTrackId,
                                                                MP4GetTrackDuration(fileHandle, srcTrackId),
@@ -642,7 +642,7 @@ int rgb2yuv(int rgb)
 
 void *fast_realloc_with_padding(void *ptr, unsigned int *size, unsigned int min_size)
 {
-	void *res = ptr;
+    uint8_t *res = ptr;
 	av_fast_malloc(&res, size, min_size + AV_INPUT_BUFFER_PADDING_SIZE);
 	if (res) memset(res + min_size, 0, AV_INPUT_BUFFER_PADDING_SIZE);
 	return res;
@@ -668,14 +668,14 @@ int DecompressZlib(uint8_t **sampleData, uint32_t *sampleSize)
             goto failed;
         }
         pkt_data = newpktdata;
-        zstream.avail_out = pkt_size - zstream.total_out;
+        zstream.avail_out = (unsigned int)(pkt_size - zstream.total_out);
         zstream.next_out = pkt_data + zstream.total_out;
         if (pkt_data) {
             result = inflate(&zstream, Z_NO_FLUSH);
         } else
             result = Z_MEM_ERROR;
     } while (result==Z_OK && pkt_size<10000000);
-    pkt_size = zstream.total_out;
+    pkt_size = (int)zstream.total_out;
     inflateEnd(&zstream);
     if (result != Z_STREAM_END) {
         if (result == Z_MEM_ERROR)

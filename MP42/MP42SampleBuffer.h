@@ -32,9 +32,9 @@ MP42_OBJC_DIRECT_MEMBERS
 @interface MP42SampleBuffer : NSObject {
     @public
 	void        *data;
-    uint64_t    size;
+    uint32_t    size;
 
-    uint64_t    timescale;
+    uint32_t    timescale;
     uint64_t    duration;
     int64_t     offset;
 
@@ -42,7 +42,7 @@ MP42_OBJC_DIRECT_MEMBERS
     int64_t     presentationOutputTimestamp;
     uint64_t    decodeTimestamp;
 
-    uint32_t    trackId;
+    MP42TrackId trackId;
 
     MP42SampleBufferFlag    flags;
     MP42SampleDepType       dependecyFlags;

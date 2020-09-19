@@ -61,7 +61,7 @@ static const struct {
     { kLinearPCMFormatFlagIsFloat | kLinearPCMFormatFlagIsPacked,                                            32, AV_CODEC_ID_PCM_F32LE },
     { kLinearPCMFormatFlagIsFloat | kLinearPCMFormatFlagIsPacked | kAudioFormatFlagIsBigEndian,              64, AV_CODEC_ID_PCM_F64BE },
     { kLinearPCMFormatFlagIsFloat | kLinearPCMFormatFlagIsPacked,                                            64, AV_CODEC_ID_PCM_F64LE },
-    {0, AV_CODEC_ID_NONE }
+    {0, 0, AV_CODEC_ID_NONE }
 };
 
 enum AVCodecID ASBDToCodecID(AudioStreamBasicDescription asbd)
@@ -230,12 +230,12 @@ static AudioChannelLayout *convert_layout(AudioChannelLayout *layout, UInt32* si
     return new_layout;
 }
 
-int convert_layout_to_av(AudioChannelLayout *layout, UInt32 layoutSize)
+uint64_t convert_layout_to_av(AudioChannelLayout *layout, UInt32 layoutSize)
 {
     AudioChannelLayout *layout_copy = av_malloc(layoutSize);
     memcpy(layout_copy, layout, layoutSize);
     uint64_t layout_mask = 0;
-    int i;
+    UInt32 i;
     if (!layout_copy)
         return AVERROR(ENOMEM);
     if (!(layout_copy = convert_layout(layout_copy, &layoutSize)))
@@ -254,7 +254,7 @@ done:
     return layout_mask;
 }
 
-int channel_layout_for_channels(AVCodec *codec, int channels)
+uint64_t channel_layout_for_channels(AVCodec *codec, int channels)
 {
     const uint64_t *p;
     uint64_t best_ch_layout = 0;

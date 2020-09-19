@@ -18,7 +18,7 @@ MP42_OBJC_DIRECT_MEMBERS
 MP42_OBJC_DIRECT_MEMBERS
 @implementation MP42SecurityAccessToken
 
-- (instancetype)initWithObject:(id<MP42SecurityScope>)object;
+- (instancetype)initWithObject:(id<MP42SecurityScope>)object
 {
     self = [super init];
     if (self) {
@@ -40,7 +40,7 @@ MP42_OBJC_DIRECT_MEMBERS
     }
 }
 
-+ (nullable NSURL *)URLFromBookmark:(NSData *)bookmark bookmarkDataIsStale:(BOOL * _Nullable)isStale error:(NSError **)error
++ (nullable NSURL *)URLFromBookmark:(NSData *)bookmark bookmarkDataIsStale:(BOOL * _Nullable)isStale error:(NSError * __autoreleasing *)error
 {
     NSParameterAssert(bookmark);
 
@@ -49,7 +49,7 @@ MP42_OBJC_DIRECT_MEMBERS
     return url;
 }
 
-+ (nullable NSData *)bookmarkFromURL:(NSURL *)url options:(NSURLBookmarkCreationOptions)options error:(NSError **)error
++ (nullable NSData *)bookmarkFromURL:(NSURL *)url options:(NSURLBookmarkCreationOptions)options error:(NSError * __autoreleasing *)error
 {
     NSParameterAssert(url);
 
@@ -58,7 +58,7 @@ MP42_OBJC_DIRECT_MEMBERS
     return bookmark;
 }
 
-+ (nullable NSData *)bookmarkFromURL:(NSURL *)url error:(NSError **)error
++ (nullable NSData *)bookmarkFromURL:(NSURL *)url error:(NSError * __autoreleasing *)error
 {
     return [MP42SecurityAccessToken bookmarkFromURL:url options:NSURLBookmarkCreationWithSecurityScope error:error];
 }

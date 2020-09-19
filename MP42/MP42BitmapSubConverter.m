@@ -59,8 +59,7 @@ MP42_OBJC_DIRECT_MEMBERS
 
 - (CIContext *)imgContext {
     if (!_imgContext) {
-        _imgContext = [CIContext contextWithCGContext:[[NSGraphicsContext currentContext] CGContext]
-                                               options:nil];
+        _imgContext = [[CIContext alloc] init];
     }
     return _imgContext;
 }

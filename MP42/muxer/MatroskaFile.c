@@ -39,7 +39,7 @@ int StdIoRead(StdIoStream *st, uint64_t pos, void *buffer, int count) {
 		st->error = errno; 
 		return -1; 
 	} 
-	return rd; 
+	return (int)rd;
 } 
 
 /* scan for a signature sig(big-endian) starting at file position pos 

@@ -348,9 +348,9 @@ static NSMutableString *STStandardizeStringNewlines(NSString *str)
     return info;
 }
 
-- (NSDictionary<NSString *, MP42SSAStyle *> *)parseStyles:(NSString *)styles
+- (NSDictionary<NSString *, MP42SSAStyle *> *)parseStyles:(NSString *)stylesHeader
 {
-    NSScanner *sc = [NSScanner scannerWithString:styles];
+    NSScanner *sc = [NSScanner scannerWithString:stylesHeader];
     NSMutableArray<NSString *> *formatsArray = [NSMutableArray array];
     NSMutableDictionary<NSString *, MP42SSAStyle *> *stylesDict = [NSMutableDictionary dictionary];
 

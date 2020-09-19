@@ -81,7 +81,7 @@ static NSArray<NSString *> *_supportedFileFormats;
     return [[self supportedFileFormats] containsObject:fileType.lowercaseString];
 }
 
-- (instancetype)initWithURL:(NSURL *)fileURL error:(NSError * __autoreleasing *)error;
+- (instancetype)initWithURL:(NSURL *)fileURL error:(NSError * __autoreleasing *)error
 {
     self = nil;
 
@@ -230,7 +230,7 @@ static NSArray<NSString *> *_supportedFileFormats;
 
 #pragma mark - Override
 
-- (NSUInteger)timescaleForTrack:(MP42Track *)track
+- (UInt32)timescaleForTrack:(MP42Track *)track
 {
     @throw [NSException exceptionWithName:NSInternalInconsistencyException
                                    reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
@@ -265,7 +265,7 @@ static NSArray<NSString *> *_supportedFileFormats;
                                  userInfo:nil];
 }
 
-- (BOOL)audioTrackUsesExplicitEncoderDelay:(MP42Track *)track;
+- (BOOL)audioTrackUsesExplicitEncoderDelay:(MP42Track *)track
 {
     return NO;
 }

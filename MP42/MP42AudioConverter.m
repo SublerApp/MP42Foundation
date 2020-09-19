@@ -131,7 +131,7 @@ MP42_OBJC_DIRECT_MEMBERS
     return [_encoder copyEncodedSample];
 }
 
-- (NSData *)magicCookie {
+- (nullable NSData *)magicCookie {
     return _encoder.magicCookie;
 }
 

@@ -63,7 +63,7 @@ typedef struct muxer_helper {
     return self;
 }
 
-- (instancetype)initWithSourceURL:(NSURL *)URL trackID:(NSInteger)trackID fileHandle:(MP4FileHandle)fileHandle
+- (instancetype)initWithSourceURL:(NSURL *)URL trackID:(MP42TrackId)trackID fileHandle:(MP4FileHandle)fileHandle
 {
 	if ((self = [super init])) {
         _URL = URL;
@@ -381,8 +381,8 @@ typedef struct muxer_helper {
     [coder encodeObject:_URL forKey:@"sourceURL"];
 #endif
 
-    [coder encodeInteger:_format forKey:@"format"];
-    [coder encodeInteger:_mediaType forKey:@"mediaType"];
+    [coder encodeInt32:_format forKey:@"format"];
+    [coder encodeInt32:_mediaType forKey:@"mediaType"];
     [coder encodeObject:_name forKey:@"name"];
     [coder encodeObject:_language forKey:@"language"];
 
@@ -435,8 +435,8 @@ typedef struct muxer_helper {
         _URL = [decoder decodeObjectOfClass:[NSURL class] forKey:@"sourceURL"];
     }
 
-    _format = [decoder decodeIntegerForKey:@"format"];
-    _mediaType = [decoder decodeIntegerForKey:@"mediaType"];
+    _format = [decoder decodeInt32ForKey:@"format"];
+    _mediaType = [decoder decodeInt32ForKey:@"mediaType"];
     _name = [decoder decodeObjectOfClass:[NSString class] forKey:@"name"];
     _language = [decoder decodeObjectOfClass:[NSString class] forKey:@"language"];
 
