@@ -22,6 +22,7 @@
 #import "MP42Track+Private.h"
 
 #define SCALE_FACTOR 1000000.f
+#define BUFFER_SIZE 20
 
 MP42_OBJC_DIRECT_MEMBERS
 @interface MatroskaDemuxHelper : NSObject {
@@ -324,26 +325,26 @@ MP42_OBJC_DIRECT_MEMBERS
             UInt64 scaledDuration = (UInt64)segInfo->Duration / SCALE_FACTOR;
             [newTrack setDuration:scaledDuration];
 
-            if (count) {
-                unsigned int xi = 0;
-                for (xi = 0; xi < chapters->nChildren; xi++) {
-                    uint64_t timestamp = (chapters->Children[xi].Start) / SCALE_FACTOR;
-                    if (!xi)
-                        timestamp = 0;
-                    if (xi && timestamp == 0)
-                        continue;
-                    if (chapters->Children[xi].Display && strlen(chapters->Children[xi].Display->String))
-                        [newTrack addChapter:[NSString stringWithUTF8String:chapters->Children[xi].Display->String]
-                                    duration:timestamp];
-                    else
-                        [newTrack addChapter:[NSString stringWithFormat:@"Chapter %d", xi+1]
-                                    duration:timestamp];
+            for (unsigned int xi = 0; xi < chapters->nChildren; xi++) {
+                uint64_t timestamp = (chapters->Children[xi].Start) / SCALE_FACTOR;
+                if (!xi) {
+                    timestamp = 0;
+                }
+                if (xi && timestamp == 0) {
+                    continue;
+                }
+                if (chapters->Children[xi].Display && strlen(chapters->Children[xi].Display->String)) {
+                    [newTrack addChapter:[NSString stringWithUTF8String:chapters->Children[xi].Display->String]
+                                duration:timestamp];
+                } else {
+                    [newTrack addChapter:[NSString stringWithFormat:@"Chapter %d", xi+1]
+                                duration:timestamp];
                 }
             }
             [self addTrack:newTrack];
         }
 
-        [self.metadata mergeMetadata: [self readMatroskaMetadata]];
+        [self.metadata mergeMetadata:[self readMatroskaMetadata]];
     }
 
     return self;
@@ -845,7 +846,6 @@ static uint32_t timescale(TrackInfo *trackInfo)
 {
     @autoreleasepool {
 
-        const unsigned int bufferSize = 20;
         unsigned long TrackMask = ~0;
 
         NSArray<MP42Track *> *inputTracks = self.inputTracks;
@@ -1035,7 +1035,7 @@ static uint32_t timescale(TrackInfo *trackInfo)
                 frameSample->trackId = demuxHelper->sourceID;
                 [demuxHelper->queue addObject:frameSample];
 
-                if (demuxHelper->queue.count < bufferSize) {
+                if (demuxHelper->queue.count < BUFFER_SIZE) {
                     continue;
                 } else {
                     currentSample = [demuxHelper->queue objectAtIndex:demuxHelper->buffer];
@@ -1070,10 +1070,10 @@ static uint32_t timescale(TrackInfo *trackInfo)
                         demuxHelper->minDisplayOffset = currentSample->offset;
                     }
 
-                    if (demuxHelper->buffer >= bufferSize) {
+                    if (demuxHelper->buffer >= BUFFER_SIZE) {
                         [demuxHelper->queue removeObjectAtIndex:0];
                     }
-                    if (demuxHelper->buffer < bufferSize) {
+                    if (demuxHelper->buffer < BUFFER_SIZE) {
                         demuxHelper->buffer++;
                     }
 
@@ -1131,7 +1131,7 @@ static uint32_t timescale(TrackInfo *trackInfo)
                         demuxHelper->minDisplayOffset = currentSample->offset;
                     }
 
-                    if (demuxHelper->buffer >= bufferSize) {
+                    if (demuxHelper->buffer >= BUFFER_SIZE) {
                         [demuxHelper->queue removeObjectAtIndex:0];
                     }
 
@@ -1139,7 +1139,7 @@ static uint32_t timescale(TrackInfo *trackInfo)
                     [self enqueue:currentSample];
 
                     demuxHelper->bufferFlush++;
-                    if (demuxHelper->bufferFlush >= bufferSize - 1) {
+                    if (demuxHelper->bufferFlush >= BUFFER_SIZE - 1) {
                         break;
                     }
                 }
