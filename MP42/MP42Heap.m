@@ -8,21 +8,21 @@
 
 #import "MP42Heap.h"
 
-void swap(id *i, id *j) {
+static void swap(id *i, id *j) {
 	id temp = *i;
 	*i = *j;
 	*j = temp;
 }
 
-uint64 parent(uint64 i) {
+static uint64 parent(uint64 i) {
     return (i + 1) / 2 - 1;
 }
 
-uint64 left(uint64 i) {
+static uint64 left(uint64 i) {
     return i * 2 + 1;
 }
 
-uint64 right(uint64 i) {
+static uint64 right(uint64 i) {
     return i * 2 + 2;
 }
 
@@ -64,8 +64,9 @@ MP42_OBJC_DIRECT_MEMBERS
 }
 
 - (id)extract NS_RETURNS_RETAINED {
-    if (!_len)
+    if (!_len) {
         return nil;
+    }
 
     id temp = _array[0];
     _array[0] = _array[--_len];
@@ -81,10 +82,12 @@ MP42_OBJC_DIRECT_MEMBERS
         uint64 l = left(i);
         uint64 r = right(i);
 
-        if (l < _len && _cmptr(_array[l], _array[largest]) >= NSOrderedDescending)
+        if (l < _len && _cmptr(_array[l], _array[largest]) >= NSOrderedDescending) {
             largest = l;
-        if (r < _len && _cmptr(_array[r], _array[largest]) >= NSOrderedDescending)
+        }
+        if (r < _len && _cmptr(_array[r], _array[largest]) >= NSOrderedDescending) {
             largest = r;
+        }
 
         if (largest != i) {
             swap(&_array[i], &_array[largest]);
