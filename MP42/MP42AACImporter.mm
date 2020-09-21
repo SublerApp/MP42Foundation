@@ -801,7 +801,7 @@ static bool GetFirstHeader(FILE* inFile)
                 break;
         }
 
-        u_int8_t* pConfig = NULL;
+        u_int8_t *pConfig = NULL;
         u_int32_t configLength = 0;
         
         MP4AV_AacGetConfiguration(
@@ -811,8 +811,9 @@ static bool GetFirstHeader(FILE* inFile)
                                   samplesPerSecond,
                                   channelConfig);
 
-        [newTrack setChannels:channelConfig];
-        [newTrack setDataLength:[[[[NSFileManager defaultManager] attributesOfItemAtPath:self.fileURL.path error:nil] valueForKey:NSFileSize] unsignedLongLongValue]];
+        newTrack.timescale = samplesPerSecond;
+        newTrack.channels = channelConfig;
+        newTrack.dataLength = [[[NSFileManager.defaultManager attributesOfItemAtPath:self.fileURL.path error:nil] valueForKey:NSFileSize] unsignedLongLongValue];
 
         aacInfo = [[NSMutableData alloc] init];
         [aacInfo appendBytes:pConfig length:configLength];
@@ -822,16 +823,6 @@ static bool GetFirstHeader(FILE* inFile)
     }
 
     return self;
-}
-
-- (UInt32)timescaleForTrack:(MP42Track *)track
-{
-    return samplesPerSecond;
-}
-
-- (NSSize)sizeForTrack:(MP42VideoTrack *)track
-{
-    return NSMakeSize(0, 0);
 }
 
 - (NSData *)magicCookieForTrack:(MP42Track *)track

@@ -54,10 +54,6 @@ MP42_OBJC_DIRECT_MEMBERS
              @"ac3", @"eac3", @"ec3", @"webvtt", @"vtt", @"caf", @"aif", @"aiff", @"aifc", @"wav", @"flac"];
 }
 
-- (BOOL)supportsPreciseTimestamps {
-    return YES;
-}
-
 - (FourCharCode)formatForTrack:(AVAssetTrack *)track {
     FourCharCode result = 0;
     CMFormatDescriptionRef formatDescription = (__bridge CMFormatDescriptionRef)track.formatDescriptions.firstObject;
@@ -337,6 +333,7 @@ MP42_OBJC_DIRECT_MEMBERS
 			[self fourCCoverrideForAtmos:newTrack];
             newTrack.trackId = track.trackID;
             newTrack.URL = self.fileURL;
+            newTrack.timescale = [self timescaleForTrack:track];
 
             // Use the global duration if track duration is not available.
             CMTimeRange timeRange = track.timeRange;
@@ -731,31 +728,21 @@ MP42_OBJC_DIRECT_MEMBERS
     }
 }
 
-#pragma mark - Overrides
-
-- (UInt32)timescaleForTrack:(MP42Track *)track {
-    AVAssetTrack *assetTrack = [_localAsset trackWithTrackID:track.sourceId];
-
+- (UInt32)timescaleForTrack:(AVAssetTrack *)track {
     // Prefer the asbd sample rate, naturalTimeScale might not be
     // the right one if we are reading for .ts
-    if ([assetTrack.mediaType isEqualToString:AVMediaTypeAudio] && assetTrack.naturalTimeScale == 90000) {
-        CMFormatDescriptionRef formatDescription = (__bridge CMFormatDescriptionRef)assetTrack.formatDescriptions.firstObject;
+    if ([track.mediaType isEqualToString:AVMediaTypeAudio] && track.naturalTimeScale == 90000) {
+        CMFormatDescriptionRef formatDescription = (__bridge CMFormatDescriptionRef)track.formatDescriptions.firstObject;
 
         if (formatDescription) {
             const AudioStreamBasicDescription *asbd = CMAudioFormatDescriptionGetStreamBasicDescription(formatDescription);
             return asbd->mSampleRate;
         }
     }
-    return assetTrack.naturalTimeScale;
+    return track.naturalTimeScale;
 }
 
-- (NSSize)sizeForTrack:(MP42VideoTrack *)track {
-    if ([track isKindOfClass:[MP42VideoTrack class]]) {
-        return NSMakeSize(track.width, track.height);
-    } else {
-        return NSMakeSize(0, 0);
-    }
-}
+#pragma mark - Overrides
 
 - (NSData *)magicCookieForTrack:(MP42Track *)track {
 
@@ -1005,6 +992,10 @@ MP42_OBJC_DIRECT_MEMBERS
     return result;
 }
 
+- (BOOL)supportsPreciseTimestamps {
+    return YES;
+}
+
 - (BOOL)audioTrackUsesExplicitEncoderDelay:(MP42Track *)track
 {
     return YES;
@@ -1036,14 +1027,13 @@ MP42_OBJC_DIRECT_MEMBERS
 
             if ([assetReader canAddOutput:assetReaderOutput]) {
                 [assetReader addOutput:assetReaderOutput];
-            }
-            else {
+            } else {
                 NSLog(@"Unable to add the output to assetReader!");
             }
 
             AVFDemuxHelper *demuxHelper = [[AVFDemuxHelper alloc] init];
             demuxHelper->sourceID = track.sourceId;
-            demuxHelper->timescale = [self timescaleForTrack:track];
+            demuxHelper->timescale = track.timescale;
             demuxHelper->format = track.format;
             demuxHelper->assetReaderOutput = assetReaderOutput;
             demuxHelper->editsConstructor = [[MP42EditListsReconstructor alloc] init];
@@ -1361,7 +1351,7 @@ MP42_OBJC_DIRECT_MEMBERS
     return nil;
 }
 
-- (BOOL)cleanUp:(MP42Track *)track fileHandle:(MP4FileHandle)fileHandle {
+- (void)cleanUp:(MP42Track *)track fileHandle:(MP4FileHandle)fileHandle {
     uint32_t timescale = MP4GetTimeScale(fileHandle);
 
     MP4Duration trackDuration = 0;
@@ -1399,8 +1389,6 @@ MP42_OBJC_DIRECT_MEMBERS
     if (trackDuration) {
         MP4SetTrackIntegerProperty(fileHandle, trackId, "tkhd.duration", trackDuration);
     }
-
-    return YES;
 }
 
 - (NSString *)description

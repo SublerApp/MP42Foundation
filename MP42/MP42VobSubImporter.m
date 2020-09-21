@@ -239,6 +239,7 @@ MP42_OBJC_DIRECT_MEMBERS
             newTrack.alternateGroup = 2;
             newTrack.trackId = count++;
             newTrack.language = [MP42Languages.defaultManager extendedTagForISO_639_1:track->language];
+            newTrack.timescale = 1000;
             newTrack.duration = track->duration;
 
             [self addTrack:newTrack];
@@ -254,16 +255,6 @@ MP42_OBJC_DIRECT_MEMBERS
     }
 
     return self;
-}
-
-- (UInt32)timescaleForTrack:(MP42Track *)track
-{
-    return 1000;
-}
-
-- (NSSize)sizeForTrack:(MP42VideoTrack *)track
-{
-    return NSMakeSize(track.trackWidth, track.trackHeight);
 }
 
 - (NSData *)magicCookieForTrack:(MP42Track *)track

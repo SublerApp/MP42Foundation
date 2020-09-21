@@ -37,6 +37,7 @@ typedef struct muxer_helper {
 @property(nonatomic, readwrite) MP42CodecType format;
 @property(nonatomic, readwrite) MP42MediaType mediaType;
 
+@property(nonatomic, readwrite) uint32_t timescale;
 @property(nonatomic, readwrite) MP42Duration duration;
 @property(nonatomic, readwrite) uint64_t dataLength;
 @property(nonatomic, readwrite) uint32_t bitrate;

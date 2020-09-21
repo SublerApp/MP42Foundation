@@ -314,6 +314,7 @@ static bool GetFirstHeader(FILE* inFile)
         lfeon = (firstHeader[6] >> lfe_offset) & 0x1;
 
         samplesPerSecond = MP4AV_Ac3GetSamplingRate(firstHeader);
+        newTrack.timescale = samplesPerSecond;
 
         readAC3Config(acmod, lfeon, &channels, &channelLayoutTag);
 
@@ -328,22 +329,12 @@ static bool GetFirstHeader(FILE* inFile)
         [ac3Info appendBytes:&lfeon length:sizeof(uint64_t)];
         [ac3Info appendBytes:&frmsizecod length:sizeof(uint64_t)];
 
-        [newTrack setDataLength:[[[[NSFileManager defaultManager] attributesOfItemAtPath:self.fileURL.path error:nil] valueForKey:NSFileSize] unsignedLongLongValue]];
+        [newTrack setDataLength:[[[NSFileManager.defaultManager attributesOfItemAtPath:self.fileURL.path error:nil] valueForKey:NSFileSize] unsignedLongLongValue]];
         
         [self addTrack:newTrack];
     }
 
     return self;
-}
-
-- (UInt32)timescaleForTrack:(MP42Track *)track
-{
-    return samplesPerSecond;
-}
-
-- (NSSize)sizeForTrack:(MP42VideoTrack *)track
-{
-      return NSMakeSize(0, 0);
 }
 
 - (NSData *)magicCookieForTrack:(MP42Track *)track

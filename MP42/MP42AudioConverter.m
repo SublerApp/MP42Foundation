@@ -102,7 +102,7 @@ MP42_OBJC_DIRECT_MEMBERS
 {
     AudioStreamBasicDescription asbd;
     bzero(&asbd, sizeof(AudioStreamBasicDescription));
-    asbd.mSampleRate = [track.importer timescaleForTrack:track];;
+    asbd.mSampleRate = track.timescale;
     asbd.mChannelsPerFrame = track.channels;
 
     if (track.format == kMP42AudioCodecType_LinearPCM) {

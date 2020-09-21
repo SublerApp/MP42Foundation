@@ -52,16 +52,6 @@ typedef struct MP4DemuxHelper {
     return self;
 }
 
-- (UInt32)timescaleForTrack:(MP42Track *)track
-{
-    return MP4GetTrackTimeScale(_fileHandle, track.sourceId);
-}
-
-- (NSSize)sizeForTrack:(MP42VideoTrack *)track
-{
-    return NSMakeSize(track.width, track.height);
-}
-
 - (NSData *)magicCookieForTrack:(MP42Track *)track
 {
     if (!_fileHandle) {
@@ -391,7 +381,7 @@ typedef struct MP4DemuxHelper {
     }
 }
 
-- (BOOL)cleanUp:(MP42Track *)track fileHandle:(MP4FileHandle)dstFileHandle
+- (void)cleanUp:(MP42Track *)track fileHandle:(MP4FileHandle)dstFileHandle
 {
     MP4TrackId srcTrackId = track.sourceId;
     MP4TrackId dstTrackId = track.trackId;
@@ -423,8 +413,6 @@ typedef struct MP4DemuxHelper {
         MP4AddTrackEdit(dstFileHandle, dstTrackId, MP4_INVALID_EDIT_ID, firstFrameOffset,
                         editDuration, 0);
     }
-    
-    return YES;
 }
 
 - (NSString *)description

@@ -30,21 +30,12 @@ MP42_OBJC_DIRECT_MEMBERS
 
         newTrack.format = kMP42ClosedCaptionCodecType_CEA608;
         newTrack.URL = self.fileURL;
+        newTrack.timescale = 30000;
 
         [self addTrack:newTrack];
     }
 
     return self;
-}
-
-- (UInt32)timescaleForTrack:(MP42Track *)track
-{
-    return 30000;
-}
-
-- (NSSize)sizeForTrack:(MP42VideoTrack *)track
-{
-      return NSMakeSize(track.trackWidth, track.trackHeight);
 }
 
 - (nullable NSData *)magicCookieForTrack:(MP42Track *)track

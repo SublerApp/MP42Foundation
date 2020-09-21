@@ -206,7 +206,6 @@ static uint8_t exp_golomb_bits[256] = {
 static const char *ProgName = "Subler";
 static int Verbosity = 0;
 
-#include "mp4v2.h"
 #include <assert.h>
 #include <ctype.h> /* isdigit, isprint, isspace */
 #include <errno.h>
@@ -1415,7 +1414,7 @@ MP42_OBJC_DIRECT_MEMBERS
             newTrack.origLevel = newTrack.newLevel = level;
         }
 
-        [newTrack setDataLength:[[[[NSFileManager defaultManager] attributesOfItemAtPath:self.fileURL.path error:nil] valueForKey:NSFileSize] unsignedLongLongValue]];
+        newTrack.dataLength = [[[NSFileManager.defaultManager attributesOfItemAtPath:self.fileURL.path error:nil] valueForKey:NSFileSize] unsignedLongLongValue];
 
         [self addTrack:newTrack];
     }
@@ -1423,8 +1422,9 @@ MP42_OBJC_DIRECT_MEMBERS
     return self;
 }
 
-- (UInt32)timescaleForTrack:(MP42Track *)track
+- (void)setup
 {
+    MP42VideoTrack *track = self.tracks.firstObject;
     framerate_t *framerate;
 
     for (framerate = (framerate_t *)framerates; framerate->code; framerate++) {
@@ -1436,12 +1436,7 @@ MP42_OBJC_DIRECT_MEMBERS
     timescale = framerate->timescale;
     mp4FrameDuration = framerate->duration;
 
-    return timescale;
-}
-
-- (NSSize)sizeForTrack:(MP42VideoTrack *)track
-{
-    return NSMakeSize(track.trackWidth, track.trackHeight);
+    track.timescale = timescale;
 }
 
 - (NSData *)magicCookieForTrack:(MP42Track *)track
@@ -1639,7 +1634,7 @@ MP42_OBJC_DIRECT_MEMBERS
     }
 }
 
-- (BOOL)cleanUp:(MP42Track *)track fileHandle:(MP4FileHandle)fileHandle
+- (void)cleanUp:(MP42Track *)track fileHandle:(MP4FileHandle)fileHandle
 {
     MP4TrackId trackId = track.trackId;
 
@@ -1661,8 +1656,6 @@ MP42_OBJC_DIRECT_MEMBERS
     }
 
     DpbClean(&h264_dpb);
-
-    return YES;
 }
 
 - (NSString *)description

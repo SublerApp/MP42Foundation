@@ -230,20 +230,6 @@ static NSArray<NSString *> *_supportedFileFormats;
 
 #pragma mark - Override
 
-- (UInt32)timescaleForTrack:(MP42Track *)track
-{
-    @throw [NSException exceptionWithName:NSInternalInconsistencyException
-                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
-                                 userInfo:nil];
-}
-
-- (NSSize)sizeForTrack:(MP42VideoTrack *)track
-{
-    @throw [NSException exceptionWithName:NSInternalInconsistencyException
-                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
-                                 userInfo:nil];
-}
-
 - (nullable NSData *)magicCookieForTrack:(MP42Track *)track
 {
     @throw [NSException exceptionWithName:NSInternalInconsistencyException
@@ -257,6 +243,8 @@ static NSArray<NSString *> *_supportedFileFormats;
                                    reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
                                  userInfo:nil];
 }
+
+- (void)setup {}
 
 - (void)demux
 {
@@ -275,9 +263,6 @@ static NSArray<NSString *> *_supportedFileFormats;
     return NO;
 }
 
-- (BOOL)cleanUp:(MP42Track *)track fileHandle:(MP4FileHandle)fileHandle
-{
-    return YES;
-}
+- (void)cleanUp:(MP42Track *)track fileHandle:(MP4FileHandle)fileHandle {}
 
 @end

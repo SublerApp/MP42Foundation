@@ -41,6 +41,7 @@ MP42_OBJC_DIRECT_MEMBERS
 
         track.format = kMP42SubtitleCodecType_3GText;
         track.URL = self.fileURL;
+        track.timescale = 1000;
         track.alternateGroup = 2;
         track.language = getFilenameLanguage((__bridge CFStringRef)self.fileURL.path);
 
@@ -82,16 +83,6 @@ MP42_OBJC_DIRECT_MEMBERS
 - (nullable NSData *)magicCookieForTrack:(MP42Track *)track
 {
     return nil;
-}
-
-- (UInt32)timescaleForTrack:(MP42Track *)track
-{
-    return 1000;
-}
-
-- (NSSize)sizeForTrack:(MP42VideoTrack *)track
-{
-    return NSMakeSize(track.trackWidth, track.trackHeight);
 }
 
 - (void)demux
