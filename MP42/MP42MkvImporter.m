@@ -172,14 +172,17 @@ MP42_OBJC_DIRECT_MEMBERS
 
             // Text
             else if (mkvTrack->Type == TT_SUB) {
-                newTrack = [[MP42SubtitleTrack alloc] init];
-                newTrack.alternateGroup = 2;
+                MP42SubtitleTrack *subtitlesTrack = [[MP42SubtitleTrack alloc] init];
+                subtitlesTrack.alternateGroup = 2;
+                subtitlesTrack.allSamplesAreForced = mkvTrack->Forced;
 
-                for (MP42Track *subtitleTrack in self.tracks) {
-                    if ([subtitleTrack isMemberOfClass:[MP42SubtitleTrack class]]) {
+                for (MP42Track *track in self.tracks) {
+                    if ([track isMemberOfClass:[MP42SubtitleTrack class]]) {
                         newTrack.enabled = NO;
                     }
                 }
+
+                newTrack = subtitlesTrack;
             }
 
             if (newTrack) {
