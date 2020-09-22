@@ -33,6 +33,7 @@ int MP4SetTrackDisabled(MP4FileHandle fileHandle, MP4TrackId trackId);
 
 int updateTracksCount(MP4FileHandle fileHandle);
 void updateMoovDuration(MP4FileHandle fileHandle);
+void updateMajorBrand(MP42FileHandle fileHandle, NSURL *url);
 
 uint64_t getTrackSize(MP4FileHandle fileHandle, MP4TrackId trackId);
 

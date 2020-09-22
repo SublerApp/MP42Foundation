@@ -78,6 +78,22 @@ void updateMoovDuration(MP4FileHandle fileHandle)
     MP4SetIntegerProperty(fileHandle, "moov.mvhd.duration", maxTrackDuration);
 }
 
+void updateMajorBrand(MP42FileHandle fileHandle, NSURL *url)
+{
+    NSString *fileExtension = url.pathExtension;
+    char *majorBrand = "mp42";
+
+    if ([fileExtension isEqualToString:MP42FileTypeM4V]) {
+        majorBrand = "M4V ";
+    } else if ([fileExtension isEqualToString:MP42FileTypeM4A] ||
+               [fileExtension isEqualToString:MP42FileTypeM4B] ||
+               [fileExtension isEqualToString:MP42FileTypeM4R]) {
+        majorBrand = "M4A ";
+    }
+
+    MP4SetStringProperty(fileHandle, "ftyp.majorBrand", majorBrand);
+}
+
 uint64_t getTrackSize(MP4FileHandle fileHandle, MP4TrackId trackId)
 {
     MP4SampleId i = 1, sampleNum;

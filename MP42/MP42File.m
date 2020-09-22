@@ -164,7 +164,7 @@ MP42_OBJC_DIRECT_MEMBERS
 - (instancetype)initWithURL:(NSURL *)URL error:(NSError * _Nullable __autoreleasing *)error {
     self = [super init];
     if (self) {
-        _URL = [URL fileReferenceURL];
+        _URL = URL.fileReferenceURL;
 
         // Open the file for reading
         if (![self startReading]) {
@@ -1050,8 +1050,11 @@ MP42_OBJC_DIRECT_MEMBERS
 #endif
     [self.importers removeAllObjects];
 
-    // Update modified tracks properties
+    // Update moov atom
     updateMoovDuration(self.fileHandle);
+    updateMajorBrand(self.fileHandle, self.URL);
+
+    // Update modified tracks properties
     for (MP42Track *track in tracksToUpdate) {
         if (track.isEdited) {
             if (![track writeToFile:self.fileHandle error:outError]) {
