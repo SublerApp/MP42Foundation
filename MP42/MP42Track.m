@@ -103,12 +103,7 @@ typedef struct muxer_helper {
             // Track flags
             uint64_t temp;
             MP4GetTrackIntegerProperty(fileHandle, _trackId, "tkhd.flags", &temp);
-            if (temp & TRACK_ENABLED) {
-                _enabled = YES;
-            }
-            else {
-                _enabled = NO;
-            }
+            _enabled = temp & TRACK_ENABLED;
 
             MP4GetTrackIntegerProperty(fileHandle, _trackId, "tkhd.alternate_group", &_alternateGroup);
 
@@ -137,8 +132,7 @@ typedef struct muxer_helper {
                     }
 
                     count++;
-                }
-                else {
+                } else {
                     found = NO;
                 }
             }
