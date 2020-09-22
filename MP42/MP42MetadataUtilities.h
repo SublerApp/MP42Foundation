@@ -3,7 +3,7 @@
 //  MP42Foundation
 //
 //  Created by Damiano Galassi on 12/01/17.
-//  Copyright © 2017 Damiano Galassi. All rights reserved.
+//  Copyright © 2020 Damiano Galassi. All rights reserved.
 //
 
 #ifndef MP42MetadataUtilities_h

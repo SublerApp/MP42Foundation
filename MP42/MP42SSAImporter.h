@@ -1,9 +1,9 @@
 //
-//  MP42SrtImporter.h
+//  MP42SSAImporter.h
 //  Subler
 //
 //  Created by Damiano Galassi on 31/01/10.
-//  Copyright 2010 Damiano Galassi All rights reserved.
+//  Copyright 2020 Damiano Galassi All rights reserved.
 //
 
 #import <Foundation/Foundation.h>

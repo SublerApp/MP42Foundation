@@ -3,7 +3,7 @@
 //  Subler
 //
 //  Created by Damiano Galassi on 07/12/10.
-//  Copyright 2010 Damiano Galassi All rights reserved.
+//  Copyright 2020 Damiano Galassi All rights reserved.
 //
 
 #import "MP42AACImporter.h"

@@ -3,12 +3,11 @@
  *  Subler
  *
  *  Created by Damiano Galassi on 30/01/09.
- *  Copyright 2009 Damiano Galassi. All rights reserved.
+ *  Copyright 2020 Damiano Galassi. All rights reserved.
  *
  */
 
 #import "MP42PrivateUtilities.h"
-#import <string.h>
 #import <CoreAudio/CoreAudio.h>
 #import <CoreMedia/CMTime.h>
 

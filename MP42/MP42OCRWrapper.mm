@@ -3,7 +3,7 @@
 //  Subler
 //
 //  Created by Damiano Galassi on 27/03/11.
-//  Copyright 2011 Damiano Galassi. All rights reserved.
+//  Copyright 2020 Damiano Galassi. All rights reserved.
 //
 
 #import "MP42OCRWrapper.h"
@@ -34,11 +34,6 @@ public:
         tess_base_api.SetSourceResolution(70);
         tess_base_api.SetRectangle(0, 0, (int)width, (int)height);
         char *text = tess_base_api.GetUTF8Text();
-        /*char *text = tess_base_api.TesseractRect(image,
-                                                 (int)bytes_per_pixel,
-                                                 (int)bytes_per_line,
-                                                 0, 0,
-                                                 (int)width, (int)height);*/
         return text;
     }
 

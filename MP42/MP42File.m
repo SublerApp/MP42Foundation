@@ -3,7 +3,7 @@
 //  Subler
 //
 //  Created by Damiano Galassi on 31/01/09.
-//  Copyright 2009 Damiano Galassi. All rights reserved.
+//  Copyright 2020 Damiano Galassi. All rights reserved.
 //
 
 #import "MP42File.h"
@@ -272,15 +272,18 @@ MP42_OBJC_DIRECT_MEMBERS
     for (MP42Track *ref in self.itracks) {
         if ([ref isMemberOfClass:[MP42AudioTrack class]]) {
             MP42AudioTrack *a = (MP42AudioTrack *)ref;
-            if (a.fallbackTrackId)
+            if (a.fallbackTrackId) {
                 a.fallbackTrack = [self trackWithTrackID:a.fallbackTrackId];
-            if (a.followsTrackId)
+            }
+            if (a.followsTrackId) {
                 a.followsTrack = [self trackWithTrackID:a.followsTrackId];
+            }
         }
         if ([ref isMemberOfClass:[MP42SubtitleTrack class]]) {
             MP42SubtitleTrack *a = (MP42SubtitleTrack *)ref;
-            if (a.forcedTrackId)
+            if (a.forcedTrackId) {
                 a.forcedTrack = [self trackWithTrackID:a.forcedTrackId];
+            }
         }
     }
 }
@@ -329,18 +332,19 @@ MP42_OBJC_DIRECT_MEMBERS
 - (NSUInteger)duration {
     NSUInteger duration = 0;
     NSUInteger trackDuration = 0;
-    for (MP42Track *track in self.itracks)
-        if ((trackDuration = [track duration]) > duration)
+    for (MP42Track *track in self.itracks) {
+        if ((trackDuration = [track duration]) > duration) {
             duration = trackDuration;
-
+        }
+    }
     return duration;
 }
 
 - (uint64_t)dataSize {
     uint64_t estimation = 0;
-    for (MP42Track *track in self.itracks)
+    for (MP42Track *track in self.itracks) {
         estimation += track.dataLength;
-
+    }
     return estimation;
 }
 
@@ -370,7 +374,6 @@ MP42_OBJC_DIRECT_MEMBERS
             return track;
         }
     }
-
     return nil;
 }
 
@@ -532,13 +535,11 @@ MP42_OBJC_DIRECT_MEMBERS
 - (void)moveTracks:(NSArray<MP42Track *> *)tracks toIndex:(NSUInteger)index {
     NSAssert(self.status != MP42StatusWriting, @"Unsupported operation: trying to move tracks while the file is open for writing");
 
-    for (id track in tracks.reverseObjectEnumerator)
-    {
+    for (id track in tracks.reverseObjectEnumerator) {
         NSUInteger sourceIndex = [self.itracks indexOfObject:track];
         [self.itracks removeObjectAtIndex:sourceIndex];
 
-        if (sourceIndex < index)
-        {
+        if (sourceIndex < index) {
             index--;
         }
 
@@ -723,14 +724,16 @@ MP42_OBJC_DIRECT_MEMBERS
 #pragma mark - Editing internal
 
 - (void)removeMuxedTrack:(MP42Track *)track {
-    if (!self.fileHandle)
+    if (!self.fileHandle) {
         return;
+    }
 
     // We have to handle a few special cases here.
     if ([track isMemberOfClass:[MP42ChapterTrack class]]) {
         MP4ChapterType err = MP4DeleteChapters(self.fileHandle, MP4ChapterTypeAny, track.trackId);
-        if (err == 0)
+        if (err == 0) {
             MP4DeleteTrack(self.fileHandle, track.trackId);
+        }
     } else {
         MP4DeleteTrack(self.fileHandle, track.trackId);
     }
@@ -899,11 +902,13 @@ MP42_OBJC_DIRECT_MEMBERS
         uint32_t supportedBrandsCount = 0;
         uint32_t flags = 0;
 
-        if ([options[MP4264BitData] boolValue])
+        if ([options[MP4264BitData] boolValue]) {
             flags += 0x01;
+        }
 
-        if ([options[MP4264BitTime] boolValue])
+        if ([options[MP4264BitTime] boolValue]) {
             flags += 0x02;
+        }
 
         if ([fileExtension isEqualToString:MP42FileTypeM4V]) {
             majorBrand = "M4V ";
