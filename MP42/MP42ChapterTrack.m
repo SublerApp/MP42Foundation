@@ -187,9 +187,6 @@ MP42_OBJC_DIRECT_MEMBERS
         uint32_t i = 0;
         uint64_t sum = 0, moovDuration;
 
-        // get the list of chapters
-        MP4GetChapters(fileHandle, &fileChapters, &chapterCount, MP4ChapterTypeQt);
-
         MP4DeleteChapters(fileHandle, MP4ChapterTypeAny, self.trackId);
         updateTracksCount(fileHandle);
 

@@ -1012,7 +1012,7 @@ MP42_OBJC_DIRECT_MEMBERS
         NSUInteger tracksNumber = self.inputTracks.count;
 
         AVAssetReader *assetReader = [[AVAssetReader alloc] initWithAsset:_localAsset error:NULL];
-        AVFDemuxHelper * helpers[tracksNumber];
+        AVFDemuxHelper *helpers[tracksNumber];
 
         if (assetReader == nil) {
             [self setDone];
@@ -1499,10 +1499,12 @@ MP42_OBJC_DIRECT_MEMBERS
 
     MP42AudioEmbeddedExtension result = kMP42AudioEmbeddedExtension_None;
 
-	if (eac3Info && eac3Info->ec3_extension_type == EC3Extension_JOC) {
-		result = kMP42AudioEmbeddedExtension_JOC;
-		free(eac3Info);
-	}
+    if (eac3Info) {
+        if (eac3Info->ec3_extension_type == EC3Extension_JOC) {
+            result = kMP42AudioEmbeddedExtension_JOC;
+        }
+        free_EAC3_context(eac3Info);
+    }
 
 	return result;
 }

@@ -382,6 +382,7 @@ MP42_OBJC_DIRECT_MEMBERS
                 trackSizes[Track] += FrameSize;
                 trackTimestamp[Track] = StartTime;
                 i++;
+                free(frame);
             } else {
                 break;
             }
@@ -503,6 +504,7 @@ static NSString * TrackNameToString(TrackInfo *track)
 
     mkv_SetTrackMask(_matroskaFile, TrackMask);
     mkv_ReadFrame(_matroskaFile, 0, &Track, &StartTime, &EndTime, &FilePos, &FrameSize, &frame, &FrameFlags, &FrameDiscard);
+    free(frame);
     mkv_Seek(_matroskaFile, 0, 0);
 
     TrackInfo *trackInfo = mkv_GetTrackInfo(_matroskaFile, Id);
@@ -615,15 +617,18 @@ static uint32_t timescale(TrackInfo *trackInfo)
 			struct eac3_info *context = NULL;
             SegmentInfo *segInfo = mkv_GetFileInfo(_matroskaFile);
 
-			while (!mkv_ReadFrame(_matroskaFile, 0, &rt, &StartTime, &EndTime, &FilePos, &FrameSize, &Frame, &FrameFlags, &FrameDiscard) && StartTime < (segInfo->Duration / 64))
-			{
+			while (!mkv_ReadFrame(_matroskaFile, 0, &rt, &StartTime, &EndTime, &FilePos, &FrameSize, &Frame, &FrameFlags, &FrameDiscard)) {
+                if (StartTime < (segInfo->Duration / 64)) {
+                    free(Frame);
+                    break;
+                }
                 if (copyMkvPacket(trackInfo, &Frame, &FrameSize)) {
 #ifdef DEBUG_PARSER
 					printf("\n\nMP42MkvImporter.magicCookieForTrack Analyzing MKV EAC3 packet number %d at filepos 0x%llX (%llu) with size 0x%X (%u) bits\n", mkvpktnum++, FilePos, FilePos, FrameSize * 8, FrameSize * 8);
 #endif
 					analyze_EAC3((void *)&context, (uint8_t *)Frame, FrameSize);
-                    free(Frame);
                 }
+                free(Frame);
             }
 
             if (context) {
@@ -670,22 +675,28 @@ static uint32_t timescale(TrackInfo *trackInfo)
 		uint64_t    StartTime, EndTime, FilePos;
 		uint32_t    rt, FrameSize, FrameFlags;
         int64_t     FrameDiscard;
-        char       *frame = NULL;
+        char       *Frame = NULL;
 		
-		while (!mkv_ReadFrame(_matroskaFile, 0, &rt, &StartTime, &EndTime, &FilePos, &FrameSize, &frame, &FrameFlags, &FrameDiscard) && mkvpktnum++ < 5) {
+		while (!mkv_ReadFrame(_matroskaFile, 0, &rt, &StartTime, &EndTime, &FilePos, &FrameSize, &Frame, &FrameFlags, &FrameDiscard)) {
+            if (mkvpktnum++ < 5) {
+                free(Frame);
+                break;
+            }
 #ifdef DEBUG_PARSER
-				printf("\nMP42MkvImporter.streamExtensionTypeForAudioTrack analyzing MKV EAC3 packet number %d at filepos 0x%llX (%llu) with size 0x%X (%u) bits\n", mkvpktnum++, FilePos, FilePos, FrameSize * 8, FrameSize * 8);
+            printf("\nMP42MkvImporter.streamExtensionTypeForAudioTrack analyzing MKV EAC3 packet number %d at filepos 0x%llX (%llu) with size 0x%X (%u) bits\n", mkvpktnum++, FilePos,   FilePos, FrameSize * 8, FrameSize * 8);
 #endif
-				analyze_EAC3((void *)&context, (uint8_t *)frame, FrameSize);		//NB! This routine allocates buffer for context, because we're passing NULL as input!
+            analyze_EAC3((void *)&context, (uint8_t *)Frame, FrameSize); // This routine allocates buffer for context, because we're passing NULL as input!
+            free(Frame);
 		}
 	}
 
     mkv_Seek(_matroskaFile, 0, 0);
 
-	if (context && context->ec3_extension_type == EC3Extension_JOC)
-	{
-		track.extensionType = kMP42AudioEmbeddedExtension_JOC;
-		free(context);
+	if (context) {
+        if (context->ec3_extension_type == EC3Extension_JOC) {
+            track.extensionType = kMP42AudioEmbeddedExtension_JOC;
+        }
+        free_EAC3_context(context);
 	}
 	
 	return track.extensionType;
@@ -791,7 +802,13 @@ static uint32_t timescale(TrackInfo *trackInfo)
         MP42SampleBuffer *frameSample = nil, *currentSample = nil;
         int64_t     duration, next_duration;
 
-        while (!mkv_ReadFrame(_matroskaFile, 0, &Track, &StartTime, &EndTime, &FilePos, &FrameSize, &Frame, &FrameFlags, &FrameDiscard) && !self.isCancelled) {
+        while (!mkv_ReadFrame(_matroskaFile, 0, &Track, &StartTime, &EndTime, &FilePos, &FrameSize, &Frame, &FrameFlags, &FrameDiscard)) {
+
+            if (self.cancelled) {
+                free(Frame);
+                break;
+            }
+
             self.progress = (StartTime / _fileDuration / 10000);
 
             MatroskaDemuxHelper *demuxHelper = helpers[Track];

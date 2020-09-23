@@ -595,7 +595,7 @@ MP42_OBJC_DIRECT_MEMBERS
             if (!(update % 200)) {
                 progress = 0;
                 for (MP42FileImporter *importerHelper in trackImportersArray) {
-                    progress += [importerHelper progress];
+                    progress += importerHelper.progress;
                 }
 
                 progress /= tracksImportersCount;

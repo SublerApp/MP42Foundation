@@ -1045,6 +1045,13 @@ MP42_OBJC_DIRECT_MEMBERS
     for (MP42Track *track in self.itracks) {
         track.importer = nil;
     }
+
+    for (MP42FileImporter *importer in self.importers.allValues) {
+        for (MP42Track *track in importer.tracks) {
+            track.importer = nil;
+        }
+    }
+
 #ifdef SB_SANDBOX
     [importersTokens removeAllObjects];
 #endif
