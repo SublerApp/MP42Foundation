@@ -348,7 +348,7 @@ MP42_OBJC_DIRECT_MEMBERS
                 newTrack.dataLength = track.totalSampleDataLength;
             }
             else {
-                newTrack.dataLength = newTrack.duration * newTrack.bitrate / 1000;
+                newTrack.dataLength = newTrack.duration * newTrack.bitrate / 1000 / 8;
             }
 
             NSArray<AVMetadataItem *> *trackMetadata = [track metadataForFormat:AVMetadataFormatQuickTimeUserData];
@@ -1151,7 +1151,6 @@ MP42_OBJC_DIRECT_MEMBERS
                             [demuxHelper->editsConstructor addSample:sample];
                             [self enqueue:sample];
 
-                            currentDataLength += bufferSize;
                             demuxHelper->currentTime = currentOutputTimeStamp.value;
                         }
                         // The CMSampleBufferRef contains more than one sample
@@ -1282,7 +1281,6 @@ MP42_OBJC_DIRECT_MEMBERS
                                 [self enqueue:sample];
 
                                 currentOutputTimeStamp.value = currentOutputTimeStamp.value + sampleTimingInfo.duration.value;
-                                currentDataLength += sampleSize;
                             }
 
                             demuxHelper->currentTime = currentOutputTimeStamp.value;
@@ -1311,6 +1309,8 @@ MP42_OBJC_DIRECT_MEMBERS
                             [demuxHelper->editsConstructor addSample:sample];
                             demuxHelper->currentTime = currentSampleOutputTimeStamp.value;
                         }
+
+                        currentDataLength += bufferSize;
                         CFRelease(sampleBuffer);
 
                     } else {
