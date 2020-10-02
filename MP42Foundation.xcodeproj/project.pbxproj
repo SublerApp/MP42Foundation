@@ -1236,7 +1236,6 @@
 					"$(SRCROOT)/contrib/**",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
-				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "-w";
 				SWIFT_INCLUDE_PATHS = "$(SRCROOT)/contrib/**";
@@ -1320,7 +1319,6 @@
 					"$(SRCROOT)/contrib/**",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
-				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "-w";
 				SWIFT_COMPILATION_MODE = wholemodule;
