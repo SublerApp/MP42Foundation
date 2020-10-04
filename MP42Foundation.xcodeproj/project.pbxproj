@@ -418,6 +418,9 @@
 		A9DFBDA0195FF5BA00410060 /* MP42Heap.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MP42Heap.m; sourceTree = "<group>"; };
 		A9DFBDC91960174500410060 /* MP42EditListsReconstructor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MP42EditListsReconstructor.h; sourceTree = "<group>"; };
 		A9DFBDCA1960174500410060 /* MP42EditListsReconstructor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MP42EditListsReconstructor.m; sourceTree = "<group>"; };
+		A9E059D32529DF97000E0E9A /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
+		A9E059D42529DF97000E0E9A /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
+		A9E059D52529DF97000E0E9A /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		A9E42D3D22A2835500A94E9C /* libtiff.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libtiff.a; path = contrib/Tesseract/lib/libtiff.a; sourceTree = "<group>"; };
 		A9E8FB841D4664E80071A5F1 /* libbz2.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libbz2.tbd; path = usr/lib/libbz2.tbd; sourceTree = SDKROOT; };
 		A9E8FB861D4664F70071A5F1 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
@@ -899,6 +902,7 @@
 				en,
 				Base,
 				it,
+				"zh-Hans",
 			);
 			mainGroup = A9B9C1E3182391DF00416A4E;
 			productRefGroup = A9B9C1EE182391DF00416A4E /* Products */;
@@ -1069,6 +1073,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				A9AA2B831DBF954000C9D897 /* it */,
+				A9E059D42529DF97000E0E9A /* zh-Hans */,
 			);
 			name = Localizable.strings;
 			sourceTree = "<group>";
@@ -1078,6 +1083,7 @@
 			children = (
 				A9B9C1FA182391DF00416A4E /* en */,
 				A9BA1ACC1DBF76FD00FD0B38 /* it */,
+				A9E059D32529DF97000E0E9A /* zh-Hans */,
 			);
 			name = InfoPlist.strings;
 			sourceTree = "<group>";
@@ -1086,6 +1092,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				A9BA1AEA1DBF7DBE00FD0B38 /* it */,
+				A9E059D52529DF97000E0E9A /* zh-Hans */,
 			);
 			name = Localizable.strings;
 			sourceTree = "<group>";

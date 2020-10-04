@@ -1,0 +1,6 @@
+/* Bundle name */
+"CFBundleName" = "MP42Foundation";
+
+/* Copyright (human-readable) */
+"NSHumanReadableCopyright" = "Copyright © 2020 Damiano Galassi. All rights reserved.";
+
