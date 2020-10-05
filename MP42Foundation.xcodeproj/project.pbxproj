@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -883,6 +883,7 @@
 		A9B9C1E4182391DF00416A4E /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				CLASSPREFIX = MP42;
 				LastUpgradeCheck = 1220;
 				ORGANIZATIONNAME = "Damiano Galassi";
 				TargetAttributes = {
@@ -895,7 +896,7 @@
 				};
 			};
 			buildConfigurationList = A9B9C1E7182391DF00416A4E /* Build configuration list for PBXProject "MP42Foundation" */;
-			compatibilityVersion = "Xcode 9.3";
+			compatibilityVersion = "Xcode 11.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
