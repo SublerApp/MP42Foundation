@@ -620,7 +620,7 @@ static uint32_t timescale(TrackInfo *trackInfo)
             SegmentInfo *segInfo = mkv_GetFileInfo(_matroskaFile);
 
 			while (!mkv_ReadFrame(_matroskaFile, 0, &rt, &StartTime, &EndTime, &FilePos, &FrameSize, &Frame, &FrameFlags, &FrameDiscard)) {
-                if (StartTime < (segInfo->Duration / 64)) {
+                if (StartTime > (segInfo->Duration / 64)) {
                     free(Frame);
                     break;
                 }
