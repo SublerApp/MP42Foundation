@@ -567,6 +567,8 @@ static uint32_t timescale(TrackInfo *trackInfo)
             int firstFrame = mkv_ReadFrame(_matroskaFile, 0, &rt, &StartTime, &EndTime, &FilePos, &FrameSize, &Frame, &FrameFlags, &FrameDiscard);
 
             if (firstFrame != 0) {
+                mkv_Seek(_matroskaFile, 0, 0);
+                free(Frame);
                 return nil;
             }
 
@@ -635,10 +637,9 @@ static uint32_t timescale(TrackInfo *trackInfo)
                 magicCookie = (NSData *)CFBridgingRelease(createCookie_EAC3(context));
                 free(context);
             }
+
+            mkv_Seek(_matroskaFile, 0, 0);
         }
-
-        mkv_Seek(_matroskaFile, 0, 0);
-
         return magicCookie;
     }
     else if (!strcmp(trackInfo->CodecID, "S_VOBSUB")) {
@@ -678,7 +679,7 @@ static uint32_t timescale(TrackInfo *trackInfo)
         char       *Frame = NULL;
 		
 		while (!mkv_ReadFrame(_matroskaFile, 0, &rt, &StartTime, &EndTime, &FilePos, &FrameSize, &Frame, &FrameFlags, &FrameDiscard)) {
-            if (mkvpktnum++ < 5) {
+            if (mkvpktnum++ > 5) {
                 free(Frame);
                 break;
             }
