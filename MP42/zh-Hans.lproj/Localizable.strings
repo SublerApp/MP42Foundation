@@ -17,6 +17,9 @@
 "Artist" = "艺人";
 
 /* No comment provided by engineer. */
+"artist ID" = "艺人 ID";
+
+/* No comment provided by engineer. */
 "Atmos" = "杜比全景声";
 
 /* No comment provided by engineer. */
@@ -47,6 +50,12 @@
 "Composer" = "作曲者";
 
 /* No comment provided by engineer. */
+"composer ID" = "作曲者 ID";
+
+/* No comment provided by engineer. */
+"content ID" = "内容 ID";
+
+/* No comment provided by engineer. */
 "Copyright" = "版权";
 
 /* No comment provided by engineer. */
@@ -74,6 +83,9 @@
 "E-AC3" = "E-AC3";
 
 /* No comment provided by engineer. */
+"Encoding Tool" = "编码方式";
+
+/* No comment provided by engineer. */
 "Executive Producer" = "监制";
 
 /* No comment provided by engineer. */
@@ -99,6 +111,9 @@
 
 /* No comment provided by engineer. */
 "Genre" = "类型";
+
+/* No comment provided by engineer. */
+"genre ID" = "类型 ID";
 
 /* No comment provided by engineer. */
 "Grouping" = "归类";
@@ -137,10 +152,16 @@
 "Long Description" = "完整描述";
 
 /* No comment provided by engineer. */
+"Lyricist" = "词作者";
+
+/* No comment provided by engineer. */
 "Lyrics" = "歌词";
 
 /* No comment provided by engineer. */
 "Media Kind" = "媒体种类";
+
+/* No comment provided by engineer. */
+"Metadata Track" = "元数据轨道";
 
 /* No comment provided by engineer. */
 "MP1" = "MP1";
@@ -150,6 +171,12 @@
 
 /* No comment provided by engineer. */
 "MP3" = "MP3";
+
+/* No comment provided by engineer. */
+"MPEG-1 Video" = "MPEG-1 视频";
+
+/* No comment provided by engineer. */
+"MPEG-2 Video" = "MPEG-2 视频";
 
 /* No comment provided by engineer. */
 "Name" = "标题";
@@ -164,10 +191,16 @@
 "PGS" = "PGS";
 
 /* No comment provided by engineer. */
+"playlist ID" = "播放列表 ID";
+
+/* No comment provided by engineer. */
 "PNG" = "PNG";
 
 /* No comment provided by engineer. */
 "Podcast" = "播客";
+
+/* No comment provided by engineer. */
+"Producers" = "制作人";
 
 /* No comment provided by engineer. */
 "ProRes 422" = "ProRes 422";
@@ -185,10 +218,16 @@
 "ProRes 4444" = "ProRes 4444";
 
 /* No comment provided by engineer. */
+"Purchase Date" = "购买日期";
+
+/* No comment provided by engineer. */
 "Rating" = "分级";
 
 /* No comment provided by engineer. */
 "Rating Annotation" = "分级注释";
+
+/* No comment provided by engineer. */
+"Record Company" = "唱片公司";
 
 /* No comment provided by engineer. */
 "Release Date" = "发行时间";
@@ -198,6 +237,24 @@
 
 /* No comment provided by engineer. */
 "Series Description" = "节目描述";
+
+/* No comment provided by engineer. */
+"Sort Album" = "专辑分类";
+
+/* No comment provided by engineer. */
+"Sort Album Artist" = "专辑艺人分类";
+
+/* No comment provided by engineer. */
+"Sort Artist" = "艺人分类";
+
+/* No comment provided by engineer. */
+"Sort Composer" = "作曲者分类";
+
+/* No comment provided by engineer. */
+"Sort Name" = "标题分类";
+
+/* No comment provided by engineer. */
+"Sort TV Show" = "节目分类";
 
 /* No comment provided by engineer. */
 "Sound Track" = "音频轨道";
@@ -210,6 +267,9 @@
 
 /* No comment provided by engineer. */
 "Subtitle Track" = "字幕轨道";
+
+/* No comment provided by engineer. */
+"Track #" = "音轨";
 
 /* No comment provided by engineer. */
 "True HD" = "True HD";
@@ -243,6 +303,9 @@
 
 /* No comment provided by engineer. */
 "WebVTT" = "WebVTT";
+
+/* No comment provided by engineer. */
+"Work Name" = "作品名称";
 
 /* No comment provided by engineer. */
 "XID" = "XID";
