@@ -1,6 +1,6 @@
 //
 // mp42-Bridging-Header.h
-// Copyright © 2020 Damiano Galassi. All rights reserved.
+// Copyright © 2021 Damiano Galassi. All rights reserved.
 //
 
 #ifndef mp42_Bridging_Header_h

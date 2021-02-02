@@ -1,6 +1,6 @@
 //
 // MP42-Shared-Swift.h
-// Copyright © 2020 Damiano Galassi. All rights reserved.
+// Copyright © 2021 Damiano Galassi. All rights reserved.
 //
 
 #ifndef MP42_Shared_Swift_h
