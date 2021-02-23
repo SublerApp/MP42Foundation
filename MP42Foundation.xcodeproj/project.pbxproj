@@ -884,7 +884,7 @@
 			isa = PBXProject;
 			attributes = {
 				CLASSPREFIX = MP42;
-				LastUpgradeCheck = 1220;
+				LastUpgradeCheck = 1250;
 				ORGANIZATIONNAME = "Damiano Galassi";
 				TargetAttributes = {
 					A910B5A218394E900064028F = {
@@ -1117,12 +1117,6 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/../Frameworks",
 				);
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/contrib/mp42v2",
-					"$(PROJECT_DIR)/contrib/Tesseract/lib",
-					"$(PROJECT_DIR)/contrib/ffmpeg/lib",
-				);
 				OTHER_LDFLAGS = (
 					"-read_only_relocs",
 					suppress,
@@ -1151,12 +1145,6 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 					"@loader_path/../Frameworks",
-				);
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/contrib/mp42v2",
-					"$(PROJECT_DIR)/contrib/Tesseract/lib",
-					"$(PROJECT_DIR)/contrib/ffmpeg/lib",
 				);
 				OTHER_LDFLAGS = (
 					"-read_only_relocs",
@@ -1240,16 +1228,20 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
-					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
 					"$(SRCROOT)/contrib/**",
 				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(PROJECT_DIR)/contrib/mp42v2",
+					"$(PROJECT_DIR)/contrib/Tesseract/lib",
+					"$(PROJECT_DIR)/contrib/ffmpeg/lib",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "-w";
 				SWIFT_INCLUDE_PATHS = "$(SRCROOT)/contrib/**";
 				SWIFT_OBJC_INTERFACE_HEADER_NAME = "MP42-Swift.h";
 				SWIFT_PRECOMPILE_BRIDGING_HEADER = NO;
-				USER_HEADER_SEARCH_PATHS = "";
 			};
 			name = Debug;
 		};
@@ -1323,8 +1315,12 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
-					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
 					"$(SRCROOT)/contrib/**",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(PROJECT_DIR)/contrib/mp42v2",
+					"$(PROJECT_DIR)/contrib/Tesseract/lib",
+					"$(PROJECT_DIR)/contrib/ffmpeg/lib",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				OTHER_CFLAGS = "";
@@ -1333,7 +1329,6 @@
 				SWIFT_INCLUDE_PATHS = "$(SRCROOT)/contrib/**";
 				SWIFT_OBJC_INTERFACE_HEADER_NAME = "MP42-Swift.h";
 				SWIFT_PRECOMPILE_BRIDGING_HEADER = NO;
-				USER_HEADER_SEARCH_PATHS = "";
 			};
 			name = Release;
 		};
@@ -1359,12 +1354,6 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 					"@loader_path/Frameworks",
-				);
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/contrib/mp42v2",
-					"$(PROJECT_DIR)/contrib/Tesseract/lib",
-					"$(PROJECT_DIR)/contrib/ffmpeg/lib",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.galad.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = MP42Foundation;
@@ -1397,12 +1386,6 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 					"@loader_path/Frameworks",
-				);
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/contrib/mp42v2",
-					"$(PROJECT_DIR)/contrib/Tesseract/lib",
-					"$(PROJECT_DIR)/contrib/ffmpeg/lib",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.galad.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = MP42Foundation;

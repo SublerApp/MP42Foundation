@@ -7,7 +7,7 @@
  * For full terms see the file COPYING file or visit http://www.gnu.org/licenses/gpl-2.0.html
  */
 
-#include <avcodec.h>
+#include <libavcodec/avcodec.h>
 #include "audio_resample.h"
 #include <libavutil/opt.h>
 

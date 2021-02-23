@@ -10,7 +10,7 @@
 #import "MP42Languages.h"
 
 // Tesseract OCR
-#include "baseapi.h"
+#include <tesseract/baseapi.h>
 
 using namespace tesseract;
 
