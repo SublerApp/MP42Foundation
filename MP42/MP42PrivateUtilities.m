@@ -381,18 +381,7 @@ NSString *guessStringLanguage(NSString *stringFromFileAtURL)
     }];
 
     NSString *language = sortedValues.lastObject;
-
-    if (language) {
-        NSLocale *locale = [[NSLocale alloc] initWithLocaleIdentifier:@"en"];
-        NSString *languageName = [locale displayNameForKey:NSLocaleLanguageCode
-                                                     value:language];
-
-        if (languageName) {
-            return [MP42Languages.defaultManager extendedTagForLang:languageName];
-        }
-    }
-
-    return nil;
+    return language ? language : nil;
 }
 
 #pragma mark -
