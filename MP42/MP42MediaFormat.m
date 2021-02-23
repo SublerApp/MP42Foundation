@@ -130,6 +130,10 @@ NSString *localizedVideoDisplayName(FourCharCode mediaSubtype)
             result = NSLocalizedString(@"HEVC (Parameter Sets in Bitstream)", nil);
             break;
 
+        case kMP42VideoCodecType_DolbyVisionHEVC:
+            result = NSLocalizedString(@"Dolby Vision HEVC", nil);
+            break;
+
         case kMP42VideoCodecType_MPEG4Video:
             result = NSLocalizedString(@"MPEG-4 Visual", nil);
             break;
