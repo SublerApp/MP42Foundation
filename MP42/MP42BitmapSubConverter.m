@@ -36,6 +36,7 @@ MP42_OBJC_DIRECT_MEMBERS
     CIContext               *_imgContext;
     AVCodec                 *avCodec;
     AVCodecContext          *avContext;
+    AVPacket                *pkt;
 
     MP42Fifo<MP42SampleBuffer *> *_inputSamplesBuffer;
     MP42Fifo<MP42SampleBuffer *> *_outputSamplesBuffer;
@@ -141,12 +142,11 @@ MP42_OBJC_DIRECT_MEMBERS
                     memcpy(codecData, sampleBuffer->data, sampleBuffer->size);
                 }
 
-                AVPacket pkt;
                 AVSubtitle subtitle;
-                av_init_packet(&pkt);
-                pkt.data = codecData;
-                pkt.size = bufferSize;
-                ret = avcodec_decode_subtitle2(avContext, &subtitle, &got_sub, &pkt);
+                pkt->data = codecData;
+                pkt->size = bufferSize;
+                ret = avcodec_decode_subtitle2(avContext, &subtitle, &got_sub, pkt);
+                av_packet_unref(pkt);
 
                 if (ret < 0 || !got_sub) {
                     NSLog(@"Error decoding DVD subtitle %d / %ld", ret, (long)bufferSize);
@@ -262,7 +262,6 @@ MP42_OBJC_DIRECT_MEMBERS
                 }
                 
                 avsubtitle_free(&subtitle);
-                av_packet_unref(&pkt);
             }
         }
         dispatch_semaphore_signal(_done);
@@ -282,14 +281,13 @@ MP42_OBJC_DIRECT_MEMBERS
                     break;
                 }
 
-                AVPacket pkt;
                 AVSubtitle subtitle;
-                av_init_packet(&pkt);
-                pkt.data = sampleBuffer->data;
-                pkt.size = sampleBuffer->size;
+                pkt->data = sampleBuffer->data;
+                pkt->size = sampleBuffer->size;
 
                 int ret, got_sub;
-                ret = avcodec_decode_subtitle2(avContext, &subtitle, &got_sub, &pkt);
+                ret = avcodec_decode_subtitle2(avContext, &subtitle, &got_sub, pkt);
+                av_packet_unref(pkt);
 
                 if (ret < 0 || !got_sub || !subtitle.num_rects) {
                     MP42SampleBuffer *subSample = copyEmptySubtitleSample(sampleBuffer->trackId, sampleBuffer->duration, NO);
@@ -381,7 +379,6 @@ MP42_OBJC_DIRECT_MEMBERS
                 [_outputSamplesBuffer enqueue:subSample];
 
                 avsubtitle_free(&subtitle);
-                av_packet_unref(&pkt);
             }
         }
         dispatch_semaphore_signal(_done);
@@ -402,6 +399,7 @@ MP42_OBJC_DIRECT_MEMBERS
 
         if (avCodec) {
             avContext = avcodec_alloc_context3(NULL);
+            pkt = av_packet_alloc();
 
             if (avcodec_open2(avContext, avCodec, NULL)) {
                 NSLog(@"Error opening subtitle decoder");
@@ -460,6 +458,9 @@ MP42_OBJC_DIRECT_MEMBERS
     if (avContext) {
         avcodec_close(avContext);
         av_freep(&avContext);
+    }
+    if (pkt) {
+        av_packet_free(&pkt);
     }
     if (codecData) {
         av_freep(&codecData);
