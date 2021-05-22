@@ -149,6 +149,10 @@ MP42_OBJC_DIRECT_MEMBERS
                     videoTrack.matrixCoefficients = mkvTrack->AV.Video.Colour.MatrixCoefficients;
                 }
 
+                if (mkvTrack->AV.Video.Colour.Range) {
+                    videoTrack.colorRange = mkvTrack->AV.Video.Colour.Range;
+                }
+
                 newTrack = videoTrack;
             }
 
@@ -378,7 +382,7 @@ MP42_OBJC_DIRECT_MEMBERS
         StartTime = 0;
         int i = 0;
         while (StartTime < (segInfo->Duration / 64)) {
-            if (!mkv_ReadFrame(_matroskaFile, 0, &Track, &StartTime, &EndTime, &FilePos, &FrameSize, &frame, &FrameFlags, &FrameDiscard)) {
+            if (!mkv_ReadFrame(_matroskaFile, 0, &Track, &StartTime, &EndTime, &FilePos, &FrameSize, &frame, &FrameFlags, &FrameDiscard, NULL, NULL, NULL)) {
                 trackSizes[Track] += FrameSize;
                 trackTimestamp[Track] = StartTime;
                 i++;
@@ -503,7 +507,7 @@ static NSString * TrackNameToString(TrackInfo *track)
     TrackMask &= ~(1l << Id);
 
     mkv_SetTrackMask(_matroskaFile, TrackMask);
-    mkv_ReadFrame(_matroskaFile, 0, &Track, &StartTime, &EndTime, &FilePos, &FrameSize, &frame, &FrameFlags, &FrameDiscard);
+    mkv_ReadFrame(_matroskaFile, 0, &Track, &StartTime, &EndTime, &FilePos, &FrameSize, &frame, &FrameFlags, &FrameDiscard, NULL, NULL, NULL);
     free(frame);
     mkv_Seek(_matroskaFile, 0, 0);
 
@@ -564,7 +568,7 @@ static uint32_t timescale(TrackInfo *trackInfo)
 
         if (!strcmp(trackInfo->CodecID, "A_AC3")) {
             // read first header to create track
-            int firstFrame = mkv_ReadFrame(_matroskaFile, 0, &rt, &StartTime, &EndTime, &FilePos, &FrameSize, &Frame, &FrameFlags, &FrameDiscard);
+            int firstFrame = mkv_ReadFrame(_matroskaFile, 0, &rt, &StartTime, &EndTime, &FilePos, &FrameSize, &Frame, &FrameFlags, &FrameDiscard, NULL, NULL, NULL);
 
             if (firstFrame != 0) {
                 mkv_Seek(_matroskaFile, 0, 0);
@@ -619,7 +623,7 @@ static uint32_t timescale(TrackInfo *trackInfo)
 			struct eac3_info *context = NULL;
             SegmentInfo *segInfo = mkv_GetFileInfo(_matroskaFile);
 
-			while (!mkv_ReadFrame(_matroskaFile, 0, &rt, &StartTime, &EndTime, &FilePos, &FrameSize, &Frame, &FrameFlags, &FrameDiscard)) {
+			while (!mkv_ReadFrame(_matroskaFile, 0, &rt, &StartTime, &EndTime, &FilePos, &FrameSize, &Frame, &FrameFlags, &FrameDiscard, NULL, NULL, NULL)) {
                 if (StartTime > (segInfo->Duration / 64)) {
                     free(Frame);
                     break;
@@ -678,7 +682,7 @@ static uint32_t timescale(TrackInfo *trackInfo)
         int64_t     FrameDiscard;
         char       *Frame = NULL;
 		
-		while (!mkv_ReadFrame(_matroskaFile, 0, &rt, &StartTime, &EndTime, &FilePos, &FrameSize, &Frame, &FrameFlags, &FrameDiscard)) {
+		while (!mkv_ReadFrame(_matroskaFile, 0, &rt, &StartTime, &EndTime, &FilePos, &FrameSize, &Frame, &FrameFlags, &FrameDiscard, NULL, NULL, NULL)) {
             if (mkvpktnum++ > 5) {
                 free(Frame);
                 break;
@@ -803,7 +807,7 @@ static uint32_t timescale(TrackInfo *trackInfo)
         MP42SampleBuffer *frameSample = nil, *currentSample = nil;
         int64_t     duration, next_duration;
 
-        while (!mkv_ReadFrame(_matroskaFile, 0, &Track, &StartTime, &EndTime, &FilePos, &FrameSize, &Frame, &FrameFlags, &FrameDiscard)) {
+        while (!mkv_ReadFrame(_matroskaFile, 0, &Track, &StartTime, &EndTime, &FilePos, &FrameSize, &Frame, &FrameFlags, &FrameDiscard, NULL, NULL, NULL)) {
 
             if (self.cancelled) {
                 free(Frame);

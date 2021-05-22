@@ -121,13 +121,17 @@ struct QueueEntry {
   unsigned int         Length;
   char                *Data;
 
-  ulonglong            Start;
+  longlong             Start;
   ulonglong            End;
   ulonglong            Position;
 
   longlong             DiscardPadding;
 
   unsigned int         flags;
+
+  unsigned int         AdditionalID;
+  unsigned int         DataAdditionalLength;
+  char                *DataAdditional;
 };
 
 struct Queue {
@@ -521,9 +525,11 @@ static struct QueueEntry  *QAlloc(MatroskaFile *mf) {
     for (i=0;i<QSEGSIZE-1;++i) {
       qe[i].next = qe+i+1;
       qe[i].Data = NULL;
+      qe[i].DataAdditional = NULL;
     }
     qe[QSEGSIZE-1].next = NULL;
     qe[QSEGSIZE-1].Data = NULL;
+    qe[QSEGSIZE-1].DataAdditional = NULL;
 
     mf->QFreeList = qe;
   }
@@ -537,6 +543,8 @@ static struct QueueEntry  *QAlloc(MatroskaFile *mf) {
 static inline void QFree(MatroskaFile *mf,struct QueueEntry *qe) {
   mf->cache->memfree(mf->cache, qe->Data);
   qe->Data = NULL;
+  mf->cache->memfree(mf->cache, qe->DataAdditional);
+  qe->DataAdditional = NULL;
   qe->next = mf->QFreeList;
   mf->QFreeList = qe;
 }
@@ -1152,7 +1160,9 @@ static void parseFirstCluster(MatroskaFile *mf,ulonglong toplen) {
       tc = readUInt(mf,(unsigned)len);
       if (!seenTimecode) {
         seenTimecode = 1;
-        mf->firstTimecode += tc;
+        // Commented out, MP42Foundation wants the real timecode,
+        // not timecode starting at 0.
+        //mf->firstTimecode += tc;
       }
 
       if (seenBlock) {
@@ -1169,7 +1179,9 @@ out:
       tc = readSInt(mf, 2);
       if (!seenBlock) {
         seenBlock = 1;
-        mf->firstTimecode += tc;
+        // Commented out, MP42Foundation wants the real timecode,
+        // not timecode starting at 0.
+        //mf->firstTimecode += tc;
       }
 
       if (seenTimecode)
@@ -1182,7 +1194,9 @@ out:
           tc = readSInt(mf,2);
           if (!seenBlock) {
             seenBlock = 1;
-            mf->firstTimecode += tc;
+            // Commented out, MP42Foundation wants the real timecode,
+            // not timecode starting at 0.
+            //mf->firstTimecode += tc;
           }
 
           if (seenTimecode)
@@ -1272,6 +1286,30 @@ static void parseVideoColourInfo(MatroskaFile *mf,ulonglong toplen,struct TrackI
   ENDFOR(mf);
 }
 
+static void parseProjection(MatroskaFile *mf,ulonglong toplen,struct TrackInfo *ti) {
+  FOREACH(mf,toplen)
+    case 0x7671: // Projection Type
+      ti->AV.Video.Projection.ProjectionType = readUInt(mf, (unsigned)len);
+      break;
+    case 0x7672: // Projection Private
+      if (len<=20) // 20-bytes
+      {
+        readbytes(mf,ti->AV.Video.Projection.ProjectionPrivate,(int)len);
+        ti->AV.Video.Projection.ProjectionPrivateSize = len;
+      }
+      break;
+    case 0x7673: // ProjectionPoseYaw
+      ti->AV.Video.Projection.ProjectionPoseYaw = readFloat(mf,(unsigned)len);
+      break;
+    case 0x7674: // ProjectionPosePitch
+      ti->AV.Video.Projection.ProjectionPosePitch = readFloat(mf,(unsigned)len);
+      break;
+    case 0x7675: // ProjectionPoseRoll
+      ti->AV.Video.Projection.ProjectionPoseRoll = readFloat(mf,(unsigned)len);
+      break;
+  ENDFOR(mf);
+}
+
 static void parseVideoInfo(MatroskaFile *mf,ulonglong toplen,struct TrackInfo *ti) {
   ulonglong v;
   char            dW = 0, dH = 0;
@@ -1357,6 +1395,9 @@ static void parseVideoInfo(MatroskaFile *mf,ulonglong toplen,struct TrackInfo *t
     case 0x55b0: // Colour
       parseVideoColourInfo(mf,len,ti);
       break;
+    case 0x7670: // Projection
+      parseProjection(mf,len,ti);
+      break;
   ENDFOR(mf);
 
   // DisplayWidth/Height defaults don't apply for DisplayUnit != 0
@@ -1424,9 +1465,9 @@ static void parseTrackEntry(MatroskaFile *mf,ulonglong toplen) {
   size_t            cplen = 0, cslen = 0, cpadd = 0;
   unsigned            CompScope, num_comp = 0;
 
-  if (mf->nTracks >= MAX_TRACKS)
-  {
+  if (mf->nTracks >= MAX_TRACKS) {
     //errorjmp(mf,"Too many tracks.");
+    skipbytes(mf, toplen);
     return;
   }
 
@@ -2312,9 +2353,8 @@ static void parseSegment(MatroskaFile *mf,ulonglong toplen) {
   parsePointers(mf);
 }
 
-#if 0
-static void parseBlockAdditions(MatroskaFile *mf, ulonglong toplen, ulonglong timecode, unsigned track) {
-  ulonglong        add_id = 1, add_pos, add_len;
+static void parseBlockAdditions(MatroskaFile *mf, ulonglong toplen, struct QueueEntry *qe) {
+  ulonglong        add_id = 1, add_len;
   unsigned char        have_add;
   void *add_data;
 
@@ -2327,33 +2367,27 @@ static void parseBlockAdditions(MatroskaFile *mf, ulonglong toplen, ulonglong ti
           add_id = readUInt(mf, (unsigned)len);
           break;
         case 0xa5: // BlockAddition
-          add_pos = filepos(mf);
-          add_len = len;
-          add_data = mf->cache->memrealloc(mf->cache,add_data,add_len);
-          readbytes(mf, add_data, len);
+          if (add_data == NULL) {
+            add_len = len;
+            add_data = mf->cache->memrealloc(mf->cache,add_data,add_len);
+            readbytes(mf, add_data, len);
+          } else
+              skipbytes(mf,len);
           ++have_add;
           break;
       ENDFOR(mf);
-      if (have_add == 1 && id > 0 && id < 255) {
-        struct QueueEntry *qe = QAlloc(mf);
-        qe->Start = qe->End = timecode;
-        qe->Position = add_pos;
-        qe->Length = (unsigned)add_len;
-        qe->Data = (char *)add_data;
-        qe->flags = FRAME_UNKNOWN_START | FRAME_UNKNOWN_END |
-          (((unsigned)add_id << FRAME_STREAM_SHIFT) & FRAME_STREAM_MASK);
-        qe->DiscardPadding = 0;
-
-        QPut(&mf->Queues[track],qe);
+      if (have_add == 1 && qe->DataAdditional == NULL) {
+        qe->AdditionalID = add_id;
+        qe->DataAdditional = add_data;
+        qe->DataAdditionalLength = add_len;
       } else if(add_data) {
         mf->cache->memfree(mf->cache,add_data);
       }
       break;
   ENDFOR(mf);
 }
-#endif
 
-static void parseBlockGroup(MatroskaFile *mf,ulonglong toplen,ulonglong timecode, int blockex) {
+static void parseBlockGroup(MatroskaFile *mf,ulonglong toplen,longlong timecode, int blockex) {
   ulonglong        v;
   ulonglong        duration = 0;
   ulonglong        dpos;
@@ -2407,7 +2441,7 @@ found:
 
       // recalculate this block's timecode to final timecode in ns
       timecode = mul3(mf->Tracks[tracknum]->TimecodeScale,
-        (timecode - mf->firstTimecode + block_timecode) * mf->Seg.TimecodeScale);
+        (timecode /*- mf->firstTimecode*/ + block_timecode) * mf->Seg.TimecodeScale);
 
       c = readch(mf);
       if (c==EOF)
@@ -2502,9 +2536,9 @@ found:
       have_duration = 1;
       break;
     case 0x75a1: // BlockAdditions
-      /*if (nframes > 0) // have some frames
-        parseBlockAdditions(mf, len, timecode, tracknum);
-      else*/
+      if (nframes == 1) // have some frames (limited to cases with no lacing)
+        parseBlockAdditions(mf, len, qf);
+      else
         skipbytes(mf, len);
       break;
     case 0x75a2: // DiscardPadding
@@ -2574,6 +2608,8 @@ static void ClearQueue(MatroskaFile *mf,struct Queue *q) {
     qn = qe->next;
     mf->cache->memfree(mf->cache, qe->Data);
     qe->Data = NULL;
+    mf->cache->memfree(mf->cache, qe->DataAdditional);
+    qe->DataAdditional = NULL;
     qe->next = mf->QFreeList;
     mf->QFreeList = qe;
   }
@@ -2881,7 +2917,7 @@ static void fixupChapter(ulonglong adj, struct Chapter *ch) {
 
 static longlong        findLastTimecode(MatroskaFile *mf) {
   ulonglong   nd = 0;
-  unsigned    n,vtrack,retry=0;
+  unsigned    n,vtrack,vtrackid,retry=0,cueoffset=0;
 
   if (mf->nTracks == 0)
     return -1;
@@ -2889,6 +2925,7 @@ static longlong        findLastTimecode(MatroskaFile *mf) {
   for (n=vtrack=0;n<mf->nTracks;++n)
     if (mf->Tracks[n]->Type == TT_VIDEO) {
       vtrack = n;
+      vtrackid = mf->Tracks[n]->Number;
       goto ok;
     }
 
@@ -2907,11 +2944,17 @@ ok:
       if (retry > 0 && (mf->pCluster + (MAXDURATIONREAD << retry) > mf->pSegmentTop) && (mf->pCluster + (MAXDURATIONREAD << (retry - 1)) > mf->pSegmentTop))
         break;
     } else {
-      if (retry >= mf->nCues)
+      if ((retry + cueoffset) >= mf->nCues)
         break;
 
-      mf->readPosition = mf->Cues[mf->nCues - (1 + retry)].Position + mf->pSegment;
-      mf->tcCluster = mf->Cues[mf->nCues - (1 + retry)].Time / mf->Seg.TimecodeScale;
+      struct Cue *pCue = &mf->Cues[mf->nCues - (1 + retry + cueoffset)];
+      while ((retry + cueoffset) < (mf->nCues - 1) && pCue->Track != vtrackid) {
+          cueoffset++;
+          pCue = &mf->Cues[mf->nCues - (1 + retry + cueoffset)];
+      }
+
+      mf->readPosition = pCue->Position + mf->pSegment;
+      mf->tcCluster = pCue->Time / mf->Seg.TimecodeScale;
     }
 
     do
@@ -3729,7 +3772,8 @@ int              mkv_ReadFrame(MatroskaFile *mf,
                             ulonglong mask,unsigned int *track,
                             ulonglong *StartTime,ulonglong *EndTime,
                             ulonglong *FilePos,unsigned int *FrameSize,
-                            char **FrameData,unsigned int *FrameFlags, longlong *FrameDiscard)
+                            char **FrameData,unsigned int *FrameFlags, longlong *FrameDiscard,
+                            unsigned int *FrameAdditionalSize, char **FrameAdditionalData, unsigned int *FrameAdditionalID)
 {
   unsigned int            i,j;
   struct QueueEntry *qe;
@@ -3762,6 +3806,14 @@ int              mkv_ReadFrame(MatroskaFile *mf,
       *FrameData = qe->Data;
       *FrameFlags = qe->flags;
       *FrameDiscard = qe->DiscardPadding;
+
+      if (FrameAdditionalSize && FrameAdditionalData && FrameAdditionalID) {
+        *FrameAdditionalSize = qe->DataAdditionalLength;
+        *FrameAdditionalData = qe->DataAdditional;
+        *FrameAdditionalID = qe->AdditionalID;
+
+        qe->DataAdditional = NULL;
+      }
 
       qe->Data = NULL;
       QFree(mf,qe);
