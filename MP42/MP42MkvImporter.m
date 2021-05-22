@@ -150,7 +150,7 @@ MP42_OBJC_DIRECT_MEMBERS
                 }
 
                 if (mkvTrack->AV.Video.Colour.Range) {
-                    videoTrack.colorRange = mkvTrack->AV.Video.Colour.Range;
+                    videoTrack.colorRange = mkvTrack->AV.Video.Colour.Range == 2 ? 1 : 0;
                 }
 
                 newTrack = videoTrack;

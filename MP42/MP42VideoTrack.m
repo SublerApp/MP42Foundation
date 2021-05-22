@@ -187,6 +187,7 @@ static uint32_t convertToFixedPoint(CGFloat value) {
                     }
                     else {
                         MP4AddColr(fileHandle, self.trackId, _colorPrimaries, _transferCharacteristics, _matrixCoefficients);
+                        MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.colr.full_range_flag", _colorRange);
                     }
                 }
                 else {
@@ -266,6 +267,13 @@ static uint32_t convertToFixedPoint(CGFloat value) {
 {
     self.updatedProperty[@"colr"] = @YES;
     _matrixCoefficients = matrixCoefficients;
+    self.edited = YES;
+}
+
+- (void)setColorRange:(uint16_t)colorRange
+{
+    self.updatedProperty[@"colr"] = @YES;
+    _colorRange = colorRange;
     self.edited = YES;
 }
 

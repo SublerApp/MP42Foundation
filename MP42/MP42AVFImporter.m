@@ -253,6 +253,11 @@ MP42_OBJC_DIRECT_MEMBERS
                                 videoTrack.matrixCoefficients = 9;
                             }
                         }
+
+                        CFBooleanRef colorRange = CMFormatDescriptionGetExtension(formatDescription, kCMFormatDescriptionExtension_FullRangeVideo);
+                        if (colorRange) {
+                            videoTrack.colorRange = CFBooleanGetValue(colorRange);
+                        }
                     }
 
                     newTrack = videoTrack;
