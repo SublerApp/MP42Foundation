@@ -23,6 +23,7 @@
 @property(nonatomic, readwrite) uint16_t colorPrimaries;
 @property(nonatomic, readwrite) uint16_t transferCharacteristics;
 @property(nonatomic, readwrite) uint16_t matrixCoefficients;
+@property(nonatomic, readwrite) uint16_t colorRange;
 
 // Pixel Aspect Ratio
 @property(nonatomic, readwrite) uint64_t hSpacing;

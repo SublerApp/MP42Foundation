@@ -69,6 +69,12 @@ MP42_OBJC_DIRECT_MEMBERS
                     _transferCharacteristics = (uint16_t)transferCharacteristics;
                     _matrixCoefficients = (uint16_t)matrixCoefficients;
                 }
+
+                if (!strcmp(type, "nclx")) {
+                    uint64_t colorRange;
+                    MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.colr.full_range_flag", &colorRange);
+                    _colorRange = (uint16_t)colorRange;
+                }
             }
         }
 
@@ -173,6 +179,9 @@ static uint32_t convertToFixedPoint(CGFloat value) {
                                 MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.colr.primariesIndex", _colorPrimaries);
                                 MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.colr.transferFunctionIndex", _transferCharacteristics);
                                 MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.colr.matrixIndex", _matrixCoefficients);
+                            }
+                            if (!strcmp(type, "nclx")) {
+                                MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.colr.full_range_flag", _colorRange);
                             }
                         }
                     }
@@ -317,6 +326,7 @@ static uint32_t convertToFixedPoint(CGFloat value) {
         copy->_colorPrimaries = _colorPrimaries;
         copy->_transferCharacteristics = _transferCharacteristics;
         copy->_matrixCoefficients = _matrixCoefficients;
+        copy->_colorRange = _colorRange;
 
         copy->_hSpacing = _hSpacing;
         copy->_vSpacing = _vSpacing;
@@ -361,6 +371,7 @@ static uint32_t convertToFixedPoint(CGFloat value) {
     [coder encodeInt32:_colorPrimaries forKey:@"colorPrimaries"];
     [coder encodeInt32:_transferCharacteristics forKey:@"transferCharacteristics"];
     [coder encodeInt32:_matrixCoefficients forKey:@"matrixCoefficients"];
+    [coder encodeInt32:_colorRange forKey:@"coloRange"];
 
     [coder encodeInt64:_hSpacing forKey:@"hSpacing"];
     [coder encodeInt64:_vSpacing forKey:@"vSpacing"];
@@ -393,6 +404,7 @@ static uint32_t convertToFixedPoint(CGFloat value) {
         _colorPrimaries = (uint16_t)[decoder decodeInt32ForKey:@"colorPrimaries"];
         _transferCharacteristics = (uint16_t)[decoder decodeInt32ForKey:@"transferCharacteristics"];
         _matrixCoefficients = (uint16_t)[decoder decodeInt32ForKey:@"matrixCoefficients"];
+        _colorRange = (uint16_t)[decoder decodeInt32ForKey:@"colorRange"];
 
         _hSpacing = [decoder decodeInt64ForKey:@"hSpacing"];
         _vSpacing = [decoder decodeInt64ForKey:@"vSpacing"];
