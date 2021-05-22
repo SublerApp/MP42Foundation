@@ -121,7 +121,7 @@ struct QueueEntry {
   unsigned int         Length;
   char                *Data;
 
-  longlong             Start;
+  ulonglong            Start;
   ulonglong            End;
   ulonglong            Position;
 
@@ -2387,7 +2387,7 @@ static void parseBlockAdditions(MatroskaFile *mf, ulonglong toplen, struct Queue
   ENDFOR(mf);
 }
 
-static void parseBlockGroup(MatroskaFile *mf,ulonglong toplen,longlong timecode, int blockex) {
+static void parseBlockGroup(MatroskaFile *mf,ulonglong toplen,ulonglong timecode, int blockex) {
   ulonglong        v;
   ulonglong        duration = 0;
   ulonglong        dpos;
@@ -2441,7 +2441,7 @@ found:
 
       // recalculate this block's timecode to final timecode in ns
       timecode = mul3(mf->Tracks[tracknum]->TimecodeScale,
-        (timecode /*- mf->firstTimecode*/ + block_timecode) * mf->Seg.TimecodeScale);
+        (timecode - mf->firstTimecode + block_timecode) * mf->Seg.TimecodeScale);
 
       c = readch(mf);
       if (c==EOF)
