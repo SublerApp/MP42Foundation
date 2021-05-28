@@ -258,6 +258,48 @@ MP42_OBJC_DIRECT_MEMBERS
                         if (colorRange) {
                             videoTrack.colorRange = CFBooleanGetValue(colorRange);
                         }
+
+                        if (@available(macOS 10.13, *)) {
+                            CFDataRef masteringExtension = CMFormatDescriptionGetExtension(formatDescription, kCMFormatDescriptionExtension_MasteringDisplayColorVolume);
+                            if (masteringExtension && CFDataGetLength(masteringExtension) >= 24) {
+                                MP42MasteringDisplayMetadataPayload *masteringPayload = (MP42MasteringDisplayMetadataPayload *)CFDataGetBytePtr(masteringExtension);
+                                MP42MasteringDisplayMetadata mastering;
+
+                                const int chromaDen = 50000;
+                                const int lumaDen = 10000;
+
+                                mastering.display_primaries[0][0] = make_rational(CFSwapInt16BigToHost(masteringPayload->display_primaries_rx), chromaDen);
+                                mastering.display_primaries[0][1] = make_rational(CFSwapInt16BigToHost(masteringPayload->display_primaries_ry), chromaDen);
+                                mastering.display_primaries[1][0] = make_rational(CFSwapInt16BigToHost(masteringPayload->display_primaries_gx), chromaDen);
+                                mastering.display_primaries[1][1] = make_rational(CFSwapInt16BigToHost(masteringPayload->display_primaries_gy), chromaDen);
+                                mastering.display_primaries[2][0] = make_rational(CFSwapInt16BigToHost(masteringPayload->display_primaries_bx), chromaDen);
+                                mastering.display_primaries[2][1] = make_rational(CFSwapInt16BigToHost(masteringPayload->display_primaries_by), chromaDen);
+
+                                mastering.white_point[0] = make_rational(CFSwapInt16BigToHost(masteringPayload->white_point_x), chromaDen);
+                                mastering.white_point[1] = make_rational(CFSwapInt16BigToHost(masteringPayload->white_point_y), chromaDen);
+
+                                mastering.max_luminance = make_rational(CFSwapInt32BigToHost(masteringPayload->max_display_mastering_luminance), lumaDen);
+                                mastering.min_luminance = make_rational(CFSwapInt32BigToHost(masteringPayload->min_display_mastering_luminance), lumaDen);
+
+                                mastering.has_primaries = 1;
+                                mastering.has_luminance = 1;
+
+                                videoTrack.mastering = mastering;
+                            }
+                        }
+
+                        if (@available(macOS 10.13, *)) {
+                            CFDataRef collExtension = CMFormatDescriptionGetExtension(formatDescription, kCMFormatDescriptionExtension_ContentLightLevelInfo);
+                            if (collExtension && CFDataGetLength(collExtension) >= 4) {
+                                MP42ContentLightMetadataPayload *collPayload = (MP42ContentLightMetadataPayload *)CFDataGetBytePtr(collExtension);
+                                MP42ContentLightMetadata coll;
+                                coll.MaxCLL = CFSwapInt16BigToHost(collPayload->MaxCLL);
+                                coll.MaxFALL = CFSwapInt16BigToHost(collPayload->MaxFALL);
+
+                                videoTrack.coll = coll;
+                            }
+                        }
+
                     }
 
                     newTrack = videoTrack;

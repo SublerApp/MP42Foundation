@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import <MP42Foundation/MP42Track.h>
+#import <MP42Foundation/MP42MasteringDisplayMetadata.h>
 
 @interface MP42VideoTrack : MP42Track <NSSecureCoding, NSCopying>
 
@@ -24,6 +25,10 @@
 @property(nonatomic, readwrite) uint16_t transferCharacteristics;
 @property(nonatomic, readwrite) uint16_t matrixCoefficients;
 @property(nonatomic, readwrite) uint16_t colorRange;
+
+// HDR Mastering Metadata
+@property(nonatomic, readwrite) MP42MasteringDisplayMetadata mastering;
+@property(nonatomic, readwrite) MP42ContentLightMetadata coll;
 
 // Pixel Aspect Ratio
 @property(nonatomic, readwrite) uint64_t hSpacing;

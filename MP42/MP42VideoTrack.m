@@ -78,6 +78,53 @@ MP42_OBJC_DIRECT_MEMBERS
             }
         }
 
+        if (MP4HaveTrackAtom(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.clli")) {
+            uint64_t maxCLL, maxFALL;
+            MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.clli.maxContentLightLevel", &maxCLL);
+            MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.clli.maxPicAverageLightLevel", &maxFALL);
+            _coll.MaxCLL = (unsigned int)maxCLL;
+            _coll.MaxFALL = (unsigned int)maxFALL;
+        }
+
+        if (MP4HaveTrackAtom(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.mdcv")) {
+            uint64_t displayPrimariesGX, displayPrimariesGY, displayPrimariesBX,
+                     displayPrimariesBY, displayPrimariesRX, displayPrimariesRY,
+                     whitePointX, whitePointY,
+                     maxDisplayMasteringLuminance, minDisplayMasteringLuminance;
+
+            MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.mdcv.displayPrimariesGX", &displayPrimariesGX);
+            MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.mdcv.displayPrimariesGY", &displayPrimariesGY);
+            MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.mdcv.displayPrimariesBX", &displayPrimariesBX);
+            MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.mdcv.displayPrimariesBY", &displayPrimariesBY);
+            MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.mdcv.displayPrimariesRX", &displayPrimariesRX);
+            MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.mdcv.displayPrimariesRY", &displayPrimariesRY);
+
+            MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.mdcv.whitePointX", &whitePointX);
+            MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.mdcv.whitePointY", &whitePointY);
+
+            MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.mdcv.maxDisplayMasteringLuminance", &maxDisplayMasteringLuminance);
+            MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.mdcv.minDisplayMasteringLuminance", &minDisplayMasteringLuminance);
+
+            const int chromaDen = 50000;
+            const int lumaDen = 10000;
+
+            _mastering.display_primaries[0][0] = make_rational((int)displayPrimariesRX,  chromaDen);
+            _mastering.display_primaries[0][1] = make_rational((int)displayPrimariesRY,  chromaDen);
+            _mastering.display_primaries[1][0] = make_rational((int)displayPrimariesGX,  chromaDen);
+            _mastering.display_primaries[1][1] = make_rational((int)displayPrimariesGY,  chromaDen);
+            _mastering.display_primaries[2][0] = make_rational((int)displayPrimariesBX,  chromaDen);
+            _mastering.display_primaries[2][1] = make_rational((int)displayPrimariesBY,  chromaDen);
+
+            _mastering.white_point[0] = make_rational((int)whitePointX, chromaDen);
+            _mastering.white_point[1] = make_rational((int)whitePointY, chromaDen);
+
+            _mastering.max_luminance = make_rational((int)maxDisplayMasteringLuminance, lumaDen);
+            _mastering.min_luminance = make_rational((int)minDisplayMasteringLuminance, lumaDen);
+
+            _mastering.has_primaries = 1;
+            _mastering.has_luminance = 1;
+        }
+
         if (MP4HaveTrackAtom(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.clap")) {
             MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.clap.cleanApertureWidthN", &_cleanApertureWidthN);
             MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.clap.cleanApertureWidthD", &_cleanApertureWidthD);
@@ -140,10 +187,10 @@ static uint32_t convertToFixedPoint(CGFloat value) {
 
         uint8_t *val;
         uint8_t nval[36];
-        uint32_t *ptr32 = (uint32_t *) nval;
+        uint32_t *ptr32 = (uint32_t *)nval;
         uint32_t size;
 
-        MP4GetTrackBytesProperty(fileHandle ,self.trackId, "tkhd.matrix", &val, &size);
+        MP4GetTrackBytesProperty(fileHandle, self.trackId, "tkhd.matrix", &val, &size);
         memcpy(nval, val, size);
         ptr32[0] = convertToFixedPoint(_transform.a);
         ptr32[1] = convertToFixedPoint(_transform.b);
@@ -155,22 +202,10 @@ static uint32_t convertToFixedPoint(CGFloat value) {
 
         free(val);
 
-        if (self.updatedProperty[@"hSpacing"] || self.updatedProperty[@"vSpacing"]) {
-            if (_hSpacing >= 1 && _vSpacing >= 1) {
-                if (MP4HaveTrackAtom(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.pasp")) {
-                    MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.pasp.hSpacing", _hSpacing);
-                    MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.pasp.vSpacing", _vSpacing);
-                }
-                else {
-                    MP4AddPixelAspectRatio(fileHandle, self.trackId, (uint32_t)_hSpacing, (uint32_t)_vSpacing);
-                }
-            }
-        }
-
-        if (self.updatedProperty[@"colr"] &&
-            (self.format == kMP42VideoCodecType_H264 || self.format == kMP42VideoCodecType_MPEG4Video
+        if ((self.format == kMP42VideoCodecType_H264 || self.format == kMP42VideoCodecType_MPEG4Video
              || self.format == kMP42VideoCodecType_HEVC || self.format == kMP42VideoCodecType_HEVC_PSinBitstream)) {
 
+            if (self.updatedProperty[@"colr"] || self.muxed == NO) {
                 if (_colorPrimaries > 0 && _transferCharacteristics > 0 && _matrixCoefficients > 0) {
                     const char *type;
                     if (MP4HaveTrackAtom(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.colr")) {
@@ -195,25 +230,69 @@ static uint32_t convertToFixedPoint(CGFloat value) {
                 }
             }
 
-        if (_cleanApertureWidthN >= 1 && _cleanApertureHeightN >= 1) {
-            if (MP4HaveTrackAtom(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.clap")) {
-                MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.clap.cleanApertureWidthN", _cleanApertureWidthN);
-                MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.clap.cleanApertureWidthD", _cleanApertureWidthD);
-
-                MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.clap.cleanApertureHeightN", _cleanApertureHeightN);
-                MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.clap.cleanApertureHeightD", _cleanApertureHeightD);
-
-                MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.clap.horizOffN", _horizOffN);
-                MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.clap.horizOffD", _horizOffD);
-
-                MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.clap.vertOffN", _vertOffN);
-                MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.clap.vertOffD", _vertOffD);
+            if (self.updatedProperty[@"coll"] || self.muxed == NO) {
+                if (self.coll.MaxCLL > 0 && self.coll.MaxFALL > 0) {
+                    MP4SetContentLightMetadata(fileHandle, self.trackId, _coll.MaxCLL, _coll.MaxFALL);
+                }
+                else {
+                    MP4SetContentLightMetadata(fileHandle, self.trackId, 0, 0);
+                }
             }
-            else
-                MP4AddCleanAperture(fileHandle, self.trackId,
-                                    (uint32_t)_cleanApertureWidthN, (uint32_t)_cleanApertureWidthD,
-                                    (uint32_t)_cleanApertureHeightN, (uint32_t)_cleanApertureHeightD,
-                                    (uint32_t)_horizOffN, (uint32_t)_horizOffD, (uint32_t)_vertOffN, (uint32_t)_vertOffD);
+
+            if (self.updatedProperty[@"mdcv"] || self.muxed == NO) {
+                if (self.mastering.has_primaries && self.mastering.has_luminance) {
+                    const int chromaDen = 50000;
+                    const int lumaDen = 10000;
+                    MP4SetMasteringDisplayMetadata(fileHandle, self.trackId,
+                                                    mp42_rescale_q(_mastering.display_primaries[1][0], chromaDen),
+                                                    mp42_rescale_q(_mastering.display_primaries[1][1], chromaDen),
+                                                    mp42_rescale_q(_mastering.display_primaries[2][0], chromaDen),
+                                                    mp42_rescale_q(_mastering.display_primaries[2][1], chromaDen),
+                                                    mp42_rescale_q(_mastering.display_primaries[0][0], chromaDen),
+                                                    mp42_rescale_q(_mastering.display_primaries[0][1], chromaDen),
+                                                    mp42_rescale_q(_mastering.white_point[0], chromaDen),
+                                                    mp42_rescale_q(_mastering.white_point[1], chromaDen),
+                                                    (uint32_t)mp42_rescale_q(_mastering.max_luminance, lumaDen),
+                                                    (uint32_t)mp42_rescale_q(_mastering.min_luminance, lumaDen));
+                }
+                else {
+                    MP4SetMasteringDisplayMetadata(fileHandle, self.trackId, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+                }
+            }
+
+            if (self.updatedProperty[@"hSpacing"] || self.updatedProperty[@"vSpacing"] || self.muxed == NO) {
+                if (_hSpacing >= 1 && _vSpacing >= 1) {
+                    if (MP4HaveTrackAtom(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.pasp")) {
+                        MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.pasp.hSpacing", _hSpacing);
+                        MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.pasp.vSpacing", _vSpacing);
+                    }
+                    else {
+                        MP4AddPixelAspectRatio(fileHandle, self.trackId, (uint32_t)_hSpacing, (uint32_t)_vSpacing);
+                    }
+                }
+            }
+
+            if (_cleanApertureWidthN >= 1 && _cleanApertureHeightN >= 1) {
+                if (MP4HaveTrackAtom(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.clap")) {
+                    MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.clap.cleanApertureWidthN", _cleanApertureWidthN);
+                    MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.clap.cleanApertureWidthD", _cleanApertureWidthD);
+
+                    MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.clap.cleanApertureHeightN", _cleanApertureHeightN);
+                    MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.clap.cleanApertureHeightD", _cleanApertureHeightD);
+
+                    MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.clap.horizOffN", _horizOffN);
+                    MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.clap.horizOffD", _horizOffD);
+
+                    MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.clap.vertOffN", _vertOffN);
+                    MP4SetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.clap.vertOffD", _vertOffD);
+                }
+                else {
+                    MP4AddCleanAperture(fileHandle, self.trackId,
+                                        (uint32_t)_cleanApertureWidthN, (uint32_t)_cleanApertureWidthD,
+                                        (uint32_t)_cleanApertureHeightN, (uint32_t)_cleanApertureHeightD,
+                                        (uint32_t)_horizOffN, (uint32_t)_horizOffD, (uint32_t)_vertOffN, (uint32_t)_vertOffD);
+                }
+            }
         }
 
         if (self.format == kMP42VideoCodecType_H264) {
@@ -277,6 +356,20 @@ static uint32_t convertToFixedPoint(CGFloat value) {
     self.edited = YES;
 }
 
+- (void)setMastering:(MP42MasteringDisplayMetadata)mastering
+{
+    self.updatedProperty[@"mdcv"] = @YES;
+    _mastering = mastering;
+    self.edited = YES;
+}
+
+- (void)setColl:(MP42ContentLightMetadata)coll
+{
+    self.updatedProperty[@"coll"] = @YES;
+    _coll = coll;
+    self.edited = YES;
+}
+
 - (void)setHSpacing:(uint64_t)newHSpacing
 {
     _hSpacing = newHSpacing;
@@ -336,6 +429,9 @@ static uint32_t convertToFixedPoint(CGFloat value) {
         copy->_matrixCoefficients = _matrixCoefficients;
         copy->_colorRange = _colorRange;
 
+        copy->_mastering = _mastering;
+        copy->_coll = _coll;
+
         copy->_hSpacing = _hSpacing;
         copy->_vSpacing = _vSpacing;
 
@@ -379,7 +475,33 @@ static uint32_t convertToFixedPoint(CGFloat value) {
     [coder encodeInt32:_colorPrimaries forKey:@"colorPrimaries"];
     [coder encodeInt32:_transferCharacteristics forKey:@"transferCharacteristics"];
     [coder encodeInt32:_matrixCoefficients forKey:@"matrixCoefficients"];
-    [coder encodeInt32:_colorRange forKey:@"coloRange"];
+    [coder encodeInt32:_colorRange forKey:@"colorRange"];
+
+    [coder encodeInt32:_mastering.display_primaries[0][0].num forKey:@"displayPrimaries00Num"];
+    [coder encodeInt32:_mastering.display_primaries[0][0].den forKey:@"displayPrimaries00Den"];
+    [coder encodeInt32:_mastering.display_primaries[0][1].num forKey:@"displayPrimaries01Num"];
+    [coder encodeInt32:_mastering.display_primaries[0][1].den forKey:@"displayPrimaries01Den"];
+
+    [coder encodeInt32:_mastering.display_primaries[1][0].num forKey:@"displayPrimaries10Num"];
+    [coder encodeInt32:_mastering.display_primaries[1][0].den forKey:@"displayPrimaries10Den"];
+    [coder encodeInt32:_mastering.display_primaries[1][1].num forKey:@"displayPrimaries11Num"];
+    [coder encodeInt32:_mastering.display_primaries[1][1].den forKey:@"displayPrimaries11Den"];
+
+    [coder encodeInt32:_mastering.display_primaries[2][0].num forKey:@"displayPrimaries20Num"];
+    [coder encodeInt32:_mastering.display_primaries[2][0].den forKey:@"displayPrimaries20Den"];
+    [coder encodeInt32:_mastering.display_primaries[2][1].num forKey:@"displayPrimaries21Num"];
+    [coder encodeInt32:_mastering.display_primaries[2][1].den forKey:@"displayPrimaries21Den"];
+
+    [coder encodeInt32:_mastering.white_point[0].num forKey:@"whitePoint0Num"];
+    [coder encodeInt32:_mastering.white_point[0].den forKey:@"whitePoint0Den"];
+    [coder encodeInt32:_mastering.white_point[1].num forKey:@"whitePoint1Num"];
+    [coder encodeInt32:_mastering.white_point[1].den forKey:@"whitePoint1Den"];
+
+    [coder encodeInt32:_mastering.has_primaries forKey:@"hasPrimaries"];
+    [coder encodeInt32:_mastering.has_luminance forKey:@"hasLuminance"];
+
+    [coder encodeInt64:_coll.MaxCLL forKey:@"maxCLL"];
+    [coder encodeInt64:_coll.MaxFALL forKey:@"maxFALL"];
 
     [coder encodeInt64:_hSpacing forKey:@"hSpacing"];
     [coder encodeInt64:_vSpacing forKey:@"vSpacing"];
@@ -414,6 +536,32 @@ static uint32_t convertToFixedPoint(CGFloat value) {
         _matrixCoefficients = (uint16_t)[decoder decodeInt32ForKey:@"matrixCoefficients"];
         _colorRange = (uint16_t)[decoder decodeInt32ForKey:@"colorRange"];
 
+        _mastering.display_primaries[0][0].num = [decoder decodeInt32ForKey:@"displayPrimaries00Num"];
+        _mastering.display_primaries[0][0].den = [decoder decodeInt32ForKey:@"displayPrimaries00Den"];
+        _mastering.display_primaries[0][1].num = [decoder decodeInt32ForKey:@"displayPrimaries01Num"];
+        _mastering.display_primaries[0][1].den = [decoder decodeInt32ForKey:@"displayPrimaries01Den"];
+
+        _mastering.display_primaries[1][0].num = [decoder decodeInt32ForKey:@"displayPrimaries10Num"];
+        _mastering.display_primaries[1][0].den = [decoder decodeInt32ForKey:@"displayPrimaries10Den"];
+        _mastering.display_primaries[1][1].num = [decoder decodeInt32ForKey:@"displayPrimaries11Num"];
+        _mastering.display_primaries[1][1].den = [decoder decodeInt32ForKey:@"displayPrimaries11Den"];
+
+        _mastering.display_primaries[2][0].num = [decoder decodeInt32ForKey:@"displayPrimaries20Num"];
+        _mastering.display_primaries[2][0].den = [decoder decodeInt32ForKey:@"displayPrimaries20Den"];
+        _mastering.display_primaries[2][1].num = [decoder decodeInt32ForKey:@"displayPrimaries21Num"];
+        _mastering.display_primaries[2][1].den = [decoder decodeInt32ForKey:@"displayPrimaries21Den"];
+
+        _mastering.white_point[0].num = [decoder decodeInt32ForKey:@"whitePoint0Num"];
+        _mastering.white_point[0].den = [decoder decodeInt32ForKey:@"whitePoint0Den"];
+        _mastering.white_point[1].num = [decoder decodeInt32ForKey:@"whitePoint1Num"];
+        _mastering.white_point[1].den = [decoder decodeInt32ForKey:@"whitePoint1Den"];
+
+        _mastering.has_primaries = [decoder decodeInt32ForKey:@"hasPrimaries"] > 0;
+        _mastering.has_luminance = [decoder decodeInt32ForKey:@"hasLuminance"] > 0;
+
+        _coll.MaxCLL = (uint32_t)[decoder decodeInt64ForKey:@"maxCLL"];
+        _coll.MaxFALL = (uint32_t)[decoder decodeInt64ForKey:@"maxFALL"];
+
         _hSpacing = [decoder decodeInt64ForKey:@"hSpacing"];
         _vSpacing = [decoder decodeInt64ForKey:@"vSpacing"];
 
@@ -435,7 +583,7 @@ static uint32_t convertToFixedPoint(CGFloat value) {
 }
 
 - (NSString *)description {
-    return [[super description] stringByAppendingFormat:@", %lld x %lld", _width, _height];
+    return [super.description stringByAppendingFormat:@", %lld x %lld", _width, _height];
 }
 
 @end

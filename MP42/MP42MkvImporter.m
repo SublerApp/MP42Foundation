@@ -153,6 +153,44 @@ MP42_OBJC_DIRECT_MEMBERS
                     videoTrack.colorRange = mkvTrack->AV.Video.Colour.Range == 2 ? 1 : 0;
                 }
 
+                MP42MasteringDisplayMetadata mastering;
+                bzero(&mastering, sizeof(MP42MasteringDisplayMetadata));
+
+                if (mkvTrack->AV.Video.Colour.MasteringMetadata.PrimaryRChromaticityX &&
+                    mkvTrack->AV.Video.Colour.MasteringMetadata.PrimaryRChromaticityY &&
+                    mkvTrack->AV.Video.Colour.MasteringMetadata.PrimaryGChromaticityX &&
+                    mkvTrack->AV.Video.Colour.MasteringMetadata.PrimaryGChromaticityY &&
+                    mkvTrack->AV.Video.Colour.MasteringMetadata.PrimaryBChromaticityX &&
+                    mkvTrack->AV.Video.Colour.MasteringMetadata.PrimaryBChromaticityY) {
+                    mastering.display_primaries[0][0] = mp42_d2q(mkvTrack->AV.Video.Colour.MasteringMetadata.PrimaryRChromaticityX, INT_MAX);
+                    mastering.display_primaries[0][1] = mp42_d2q(mkvTrack->AV.Video.Colour.MasteringMetadata.PrimaryRChromaticityY, INT_MAX);
+                    mastering.display_primaries[1][0] = mp42_d2q(mkvTrack->AV.Video.Colour.MasteringMetadata.PrimaryGChromaticityX, INT_MAX);
+                    mastering.display_primaries[1][1] = mp42_d2q(mkvTrack->AV.Video.Colour.MasteringMetadata.PrimaryGChromaticityY, INT_MAX);
+                    mastering.display_primaries[2][0] = mp42_d2q(mkvTrack->AV.Video.Colour.MasteringMetadata.PrimaryBChromaticityX, INT_MAX);
+                    mastering.display_primaries[2][1] = mp42_d2q(mkvTrack->AV.Video.Colour.MasteringMetadata.PrimaryBChromaticityY, INT_MAX);
+                    mastering.white_point[0] = mp42_d2q(mkvTrack->AV.Video.Colour.MasteringMetadata.WhitePointChromaticityX, INT_MAX);
+                    mastering.white_point[1] = mp42_d2q(mkvTrack->AV.Video.Colour.MasteringMetadata.WhitePointChromaticityY, INT_MAX);
+                    mastering.has_primaries = 1;
+                }
+
+                if (mkvTrack->AV.Video.Colour.MasteringMetadata.LuminanceMin && mkvTrack->AV.Video.Colour.MasteringMetadata.LuminanceMax) {
+                    mastering.min_luminance = mp42_d2q(mkvTrack->AV.Video.Colour.MasteringMetadata.LuminanceMin, INT_MAX);
+                    mastering.max_luminance = mp42_d2q(mkvTrack->AV.Video.Colour.MasteringMetadata.LuminanceMax, INT_MAX);
+                    mastering.has_luminance = 1;
+                }
+
+                if (mastering.has_primaries && mastering.has_luminance) {
+                    videoTrack.mastering = mastering;
+                }
+
+                if (mkvTrack->AV.Video.Colour.MaxCLL && mkvTrack->AV.Video.Colour.MaxFALL)
+                {
+                    MP42ContentLightMetadata coll;
+                    coll.MaxCLL = mkvTrack->AV.Video.Colour.MaxCLL;
+                    coll.MaxFALL = mkvTrack->AV.Video.Colour.MaxFALL;
+                    videoTrack.coll = coll;
+                }
+
                 newTrack = videoTrack;
             }
 
