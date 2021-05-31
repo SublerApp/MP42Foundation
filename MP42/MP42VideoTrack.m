@@ -203,7 +203,8 @@ static uint32_t convertToFixedPoint(CGFloat value) {
         free(val);
 
         if ((self.format == kMP42VideoCodecType_H264 || self.format == kMP42VideoCodecType_MPEG4Video
-             || self.format == kMP42VideoCodecType_HEVC || self.format == kMP42VideoCodecType_HEVC_PSinBitstream)) {
+             || self.format == kMP42VideoCodecType_HEVC || self.format == kMP42VideoCodecType_HEVC_PSinBitstream
+             || self.format == kMP42VideoCodecType_AV1)) {
 
             if (self.updatedProperty[@"colr"] || self.muxed == NO) {
                 if (_colorPrimaries > 0 && _transferCharacteristics > 0 && _matrixCoefficients > 0) {

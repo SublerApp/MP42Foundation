@@ -812,6 +812,9 @@ MP42_OBJC_DIRECT_MEMBERS
             else if (code == kCMVideoCodecType_HEVC || code == 'hev1') {
                 magicCookie = CFDictionaryGetValue(atoms, @"hvcC");
             }
+            else if (code == 'av01') {
+                magicCookie = CFDictionaryGetValue(atoms, @"av1C");
+            }
             else if (code == kCMVideoCodecType_MPEG4Video) {
                 magicCookie = CFDictionaryGetValue(atoms, @"esds");
             }

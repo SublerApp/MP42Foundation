@@ -39,7 +39,8 @@ MP42Duration TimeFromString(NSString *time_string, int32_t timeScale)
 
 BOOL isTrackMuxable(FourCharCode format)
 {
-    FourCharCode supportedFormats[] = {kMP42VideoCodecType_HEVC,
+    FourCharCode supportedFormats[] = {kMP42VideoCodecType_AV1,
+                                       kMP42VideoCodecType_HEVC,
                                        kMP42VideoCodecType_HEVC_PSinBitstream,
                                        kMP42VideoCodecType_H264,
                                        kMP42VideoCodecType_MPEG4Video,

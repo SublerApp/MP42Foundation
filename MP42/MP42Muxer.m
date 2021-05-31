@@ -247,6 +247,30 @@ MP42_OBJC_DIRECT_MEMBERS
             }
         }
 
+        // AV1 video track
+        else if ([track isMemberOfClass:[MP42VideoTrack class]] && (format == kMP42VideoCodecType_AV1)) {
+
+            if (magicCookie.length && magicCookie.length < UINT32_MAX) {
+
+                dstTrackId = MP4AddAV1VideoTrack(_fileHandle, timeScale, MP4_INVALID_DURATION,
+                                                  ((MP42VideoTrack *)track).width, ((MP42VideoTrack *)track).height);
+
+                if (dstTrackId) {
+                    MP4SetTrackBytesProperty(_fileHandle, dstTrackId, "mdia.minf.stbl.stsd.av01.av1C.av1Config", magicCookie.bytes, (uint32_t)magicCookie.length);
+                    [importer setActiveTrack:track];
+                }
+                else {
+                    [unsupportedTracks addObject:track];
+                    continue;
+                }
+            }
+            else {
+                [unsupportedTracks addObject:track];
+                continue;
+            }
+        }
+
+
         // MPEG-4 Visual video track
         else if ([track isMemberOfClass:[MP42VideoTrack class]] && format == kMP42VideoCodecType_MPEG4Video) {
             MP4SetVideoProfileLevel(_fileHandle, MPEG4_SP_L3);

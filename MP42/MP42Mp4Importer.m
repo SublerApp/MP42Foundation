@@ -223,6 +223,14 @@ typedef struct MP4DemuxHelper {
             free(ppValue);
             return magicCookie;
         }
+        else if (!strcmp(media_data_name, "av01")) {
+            uint8_t    *ppValue;
+            uint32_t    pValueSize;
+            MP4GetTrackBytesProperty(_fileHandle, srcTrackId, "mdia.minf.stbl.stsd.av01.av1C.av1Config", &ppValue, &pValueSize);
+            magicCookie = [NSData dataWithBytes:ppValue length:pValueSize];
+            free(ppValue);
+            return magicCookie;
+        }
         else if (!strcmp(media_data_name, "mp4v")) {
             uint8_t *ppConfig; uint32_t pConfigSize;
             MP4GetTrackESConfiguration(_fileHandle, srcTrackId, &ppConfig, &pConfigSize);
