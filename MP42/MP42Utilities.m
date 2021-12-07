@@ -42,6 +42,8 @@ BOOL isTrackMuxable(FourCharCode format)
     FourCharCode supportedFormats[] = {kMP42VideoCodecType_AV1,
                                        kMP42VideoCodecType_HEVC,
                                        kMP42VideoCodecType_HEVC_PSinBitstream,
+                                       kMP42VideoCodecType_DolbyVisionHEVC,
+                                       kMP42VideoCodecType_DolbyVisionHEVC_PSinBitstream,
                                        kMP42VideoCodecType_H264,
                                        kMP42VideoCodecType_MPEG4Video,
                                        kMP42VideoCodecType_JPEG,

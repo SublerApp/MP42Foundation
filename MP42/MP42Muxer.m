@@ -213,6 +213,7 @@ MP42_OBJC_DIRECT_MEMBERS
         else if ([track isMemberOfClass:[MP42VideoTrack class]] &&
                  (format == kMP42VideoCodecType_HEVC || format == kMP42VideoCodecType_HEVC_PSinBitstream)) {
 
+            MP42VideoTrack *videoTrack = (MP42VideoTrack *)track;
             uint8_t *hvcCAtom = (uint8_t *)magicCookie.bytes;
 
             if ([_options[MP42ForceHvc1] boolValue] && magicCookie.length < UINT32_MAX) {
@@ -224,16 +225,57 @@ MP42_OBJC_DIRECT_MEMBERS
             if (magicCookie.length && magicCookie.length < UINT32_MAX && !analyze_HEVC(magicCookie.bytes, (uint32_t)magicCookie.length, &completeness)) {
 
                 dstTrackId = MP4AddH265VideoTrack(_fileHandle, timeScale, MP4_INVALID_DURATION,
-                                                  ((MP42VideoTrack *)track).width, ((MP42VideoTrack *)track).height,
+                                                  videoTrack.width, videoTrack.height,
+                                                  magicCookie.bytes, (uint32_t)magicCookie.length,
                                                   completeness);
 
                 if (dstTrackId) {
-                    if (completeness) {
-                        MP4SetTrackBytesProperty(_fileHandle, dstTrackId, "mdia.minf.stbl.stsd.hvc1.hvcC.content", magicCookie.bytes, (uint32_t)magicCookie.length);
+                    if (videoTrack.dolbyVision.versionMajor > 0) {
+                        MP4SetDolbyVisionMetadata(_fileHandle, dstTrackId,
+                                                  videoTrack.dolbyVision.versionMajor,
+                                                  videoTrack.dolbyVision.versionMinor,
+                                                  videoTrack.dolbyVision.profile,
+                                                  videoTrack.dolbyVision.level,
+                                                  videoTrack.dolbyVision.rpuPresentFlag,
+                                                  videoTrack.dolbyVision.elPresentFlag,
+                                                  videoTrack.dolbyVision.blPresentFlag,
+                                                  videoTrack.dolbyVision.blSignalCompatibilityId);
                     }
-                    else {
-                        MP4SetTrackBytesProperty(_fileHandle, dstTrackId, "mdia.minf.stbl.stsd.hev1.hvcC.content", magicCookie.bytes, (uint32_t)magicCookie.length);
-                    }
+                    [importer setActiveTrack:track];
+                }
+                else {
+                    [unsupportedTracks addObject:track];
+                    continue;
+                }
+            }
+            else {
+                [unsupportedTracks addObject:track];
+                continue;
+            }
+        }
+
+        // Dolby Vision H.265 video track
+        else if ([track isMemberOfClass:[MP42VideoTrack class]] &&
+                 (format == kMP42VideoCodecType_DolbyVisionHEVC || format == kMP42VideoCodecType_DolbyVisionHEVC_PSinBitstream)) {
+
+            MP42VideoTrack *videoTrack = (MP42VideoTrack *)track;
+            bool completeness = 0;
+            if (magicCookie.length && magicCookie.length < UINT32_MAX && !analyze_HEVC(magicCookie.bytes, (uint32_t)magicCookie.length, &completeness)) {
+
+                dstTrackId = MP4AddDolbyVisionH265VideoTrack(_fileHandle, timeScale, MP4_INVALID_DURATION,
+                                                             videoTrack.width, videoTrack.height,
+                                                             magicCookie.bytes, (uint32_t)magicCookie.length,
+                                                             videoTrack.dolbyVision.versionMajor,
+                                                             videoTrack.dolbyVision.versionMinor,
+                                                             videoTrack.dolbyVision.profile,
+                                                             videoTrack.dolbyVision.level,
+                                                             videoTrack.dolbyVision.rpuPresentFlag,
+                                                             videoTrack.dolbyVision.elPresentFlag,
+                                                             videoTrack.dolbyVision.blPresentFlag,
+                                                             videoTrack.dolbyVision.blSignalCompatibilityId,
+                                                             completeness);
+
+                if (dstTrackId) {
                     [importer setActiveTrack:track];
                 }
                 else {
@@ -249,14 +291,14 @@ MP42_OBJC_DIRECT_MEMBERS
 
         // AV1 video track
         else if ([track isMemberOfClass:[MP42VideoTrack class]] && (format == kMP42VideoCodecType_AV1)) {
-
+            MP42VideoTrack *videoTrack = (MP42VideoTrack *)track;
             if (magicCookie.length && magicCookie.length < UINT32_MAX) {
 
                 dstTrackId = MP4AddAV1VideoTrack(_fileHandle, timeScale, MP4_INVALID_DURATION,
-                                                  ((MP42VideoTrack *)track).width, ((MP42VideoTrack *)track).height);
+                                                  videoTrack.width, videoTrack.height,
+                                                 magicCookie.bytes, (uint32_t)magicCookie.length);
 
                 if (dstTrackId) {
-                    MP4SetTrackBytesProperty(_fileHandle, dstTrackId, "mdia.minf.stbl.stsd.av01.av1C.av1Config", magicCookie.bytes, (uint32_t)magicCookie.length);
                     [importer setActiveTrack:track];
                 }
                 else {
