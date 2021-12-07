@@ -112,7 +112,6 @@
 		A9422FC61D4917AF000DB435 /* audio_resample.c in Sources */ = {isa = PBXBuildFile; fileRef = A9422FC31D4917AF000DB435 /* audio_resample.c */; };
 		A9422FC71D4917AF000DB435 /* audio_resample.h in Headers */ = {isa = PBXBuildFile; fileRef = A9422FC41D4917AF000DB435 /* audio_resample.h */; };
 		A9422FC81D4917AF000DB435 /* audio_resample.h in Headers */ = {isa = PBXBuildFile; fileRef = A9422FC41D4917AF000DB435 /* audio_resample.h */; };
-		A951C183233F4B8F00D63AF8 /* libpng16.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A9B0F2B322A2A36D0012E099 /* libpng16.a */; };
 		A951C184233F4B8F00D63AF8 /* libtiff.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A9E42D3D22A2835500A94E9C /* libtiff.a */; };
 		A951C185233F4B9F00D63AF8 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = A9E8FB861D4664F70071A5F1 /* libz.tbd */; };
 		A951C186233F4BB100D63AF8 /* libbz2.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = A9E8FB841D4664E80071A5F1 /* libbz2.tbd */; };
@@ -124,6 +123,10 @@
 		A96523461BAC315900E994E0 /* NSString+MP42Additions.h in Headers */ = {isa = PBXBuildFile; fileRef = A96523431BAC315900E994E0 /* NSString+MP42Additions.h */; };
 		A96523471BAC315900E994E0 /* NSString+MP42Additions.m in Sources */ = {isa = PBXBuildFile; fileRef = A96523441BAC315900E994E0 /* NSString+MP42Additions.m */; };
 		A96523491BAC315900E994E0 /* NSString+MP42Additions.m in Sources */ = {isa = PBXBuildFile; fileRef = A96523441BAC315900E994E0 /* NSString+MP42Additions.m */; };
+		A966CF00275F658000AF8813 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A966CEFF275F658000AF8813 /* Accelerate.framework */; };
+		A966CF01275F658500AF8813 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A966CEFF275F658000AF8813 /* Accelerate.framework */; };
+		A966CF03275F6E6900AF8813 /* liblept.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A99DB6A71D4648B700C6E56C /* liblept.a */; };
+		A966CF04275F6FB500AF8813 /* libtiff.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A9E42D3D22A2835500A94E9C /* libtiff.a */; };
 		A96D28931BAD390400403327 /* MP42Metadata+Private.h in Headers */ = {isa = PBXBuildFile; fileRef = A96D28921BAD390400403327 /* MP42Metadata+Private.h */; };
 		A96D28941BAD390400403327 /* MP42Metadata+Private.h in Headers */ = {isa = PBXBuildFile; fileRef = A96D28921BAD390400403327 /* MP42Metadata+Private.h */; };
 		A9762BA82660CF590055E0B3 /* MP42MasteringDisplayMetadata.h in Headers */ = {isa = PBXBuildFile; fileRef = A9762BA62660CF590055E0B3 /* MP42MasteringDisplayMetadata.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -139,7 +142,6 @@
 		A989F10F1823B3B40070AD8C /* MP42TextSample.h in Headers */ = {isa = PBXBuildFile; fileRef = A989F10D1823B3B40070AD8C /* MP42TextSample.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A989F1101823B3B40070AD8C /* MP42TextSample.m in Sources */ = {isa = PBXBuildFile; fileRef = A989F10E1823B3B40070AD8C /* MP42TextSample.m */; };
 		A99DB6A51D4648A800C6E56C /* libmp4v2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A99DB6A41D4648A800C6E56C /* libmp4v2.a */; };
-		A99DB6AA1D4648B700C6E56C /* liblept.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A99DB6A71D4648B700C6E56C /* liblept.a */; };
 		A99DB6AB1D4648B700C6E56C /* libtesseract.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A99DB6A81D4648B700C6E56C /* libtesseract.a */; };
 		A99DB6AF1D4648D100C6E56C /* libavcodec.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A99DB6AC1D4648D100C6E56C /* libavcodec.a */; };
 		A99DB6B11D4648D100C6E56C /* libavutil.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A99DB6AE1D4648D100C6E56C /* libavutil.a */; };
@@ -152,9 +154,7 @@
 		A9AA2B821DBF954000C9D897 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = A9AA2B841DBF954000C9D897 /* Localizable.strings */; };
 		A9AEFE151B9B111B00771292 /* MP42FileImporter+Private.h in Headers */ = {isa = PBXBuildFile; fileRef = A9AEFE141B9B111B00771292 /* MP42FileImporter+Private.h */; };
 		A9AEFE161B9B111B00771292 /* MP42FileImporter+Private.h in Headers */ = {isa = PBXBuildFile; fileRef = A9AEFE141B9B111B00771292 /* MP42FileImporter+Private.h */; };
-		A9B0F28722A29E640012E099 /* libtiff.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A9E42D3D22A2835500A94E9C /* libtiff.a */; };
 		A9B0F28922A29E9C0012E099 /* liblzma.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = A9B0F28822A29E9C0012E099 /* liblzma.tbd */; };
-		A9B0F2B422A2A36D0012E099 /* libpng16.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A9B0F2B322A2A36D0012E099 /* libpng16.a */; };
 		A9B0F2D622A2A5270012E099 /* tessdata in CopyFiles */ = {isa = PBXBuildFile; fileRef = A9B0F2D522A2A5270012E099 /* tessdata */; };
 		A9B5C956241A302E000ACD15 /* SampleCursor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9B5C954241A302E000ACD15 /* SampleCursor.swift */; };
 		A9B9C1F1182391DF00416A4E /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9B9C1F0182391DF00416A4E /* Cocoa.framework */; };
@@ -308,6 +308,7 @@
 		A957E5A7203FF96800A5F776 /* CoreImage.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreImage.framework; path = System/Library/Frameworks/CoreImage.framework; sourceTree = SDKROOT; };
 		A96523431BAC315900E994E0 /* NSString+MP42Additions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+MP42Additions.h"; sourceTree = "<group>"; };
 		A96523441BAC315900E994E0 /* NSString+MP42Additions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+MP42Additions.m"; sourceTree = "<group>"; };
+		A966CEFF275F658000AF8813 /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
 		A96D28921BAD390400403327 /* MP42Metadata+Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "MP42Metadata+Private.h"; sourceTree = "<group>"; };
 		A9762BA62660CF590055E0B3 /* MP42MasteringDisplayMetadata.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MP42MasteringDisplayMetadata.h; sourceTree = "<group>"; };
 		A9762BAC2660D71E0055E0B3 /* MP42Rational.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MP42Rational.h; sourceTree = "<group>"; };
@@ -446,6 +447,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A966CF01275F658500AF8813 /* Accelerate.framework in Frameworks */,
 				A951C18B233F4C5A00D63AF8 /* VideoToolbox.framework in Frameworks */,
 				A951C188233F4BC100D63AF8 /* libiconv.tbd in Frameworks */,
 				A951C187233F4BB700D63AF8 /* liblzma.tbd in Frameworks */,
@@ -456,11 +458,10 @@
 				A90801011D4B830A002B6950 /* libavcodec.a in Frameworks */,
 				A90801031D4B830A002B6950 /* libavutil.a in Frameworks */,
 				A90801041D4B830A002B6950 /* libswresample.a in Frameworks */,
+				A951C184233F4B8F00D63AF8 /* libtiff.a in Frameworks */,
 				A90800FF1D4B82FB002B6950 /* liblept.a in Frameworks */,
 				A90801001D4B82FB002B6950 /* libtesseract.a in Frameworks */,
 				A90800FD1D4B82E8002B6950 /* libmp4v2.a in Frameworks */,
-				A951C183233F4B8F00D63AF8 /* libpng16.a in Frameworks */,
-				A951C184233F4B8F00D63AF8 /* libtiff.a in Frameworks */,
 				A910B6331839511A0064028F /* AudioToolbox.framework in Frameworks */,
 				A910B6321839510B0064028F /* Quartz.framework in Frameworks */,
 				A910B630183950F80064028F /* AVFoundation.framework in Frameworks */,
@@ -473,6 +474,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A966CF00275F658000AF8813 /* Accelerate.framework in Frameworks */,
 				A93EE6EA1D48A01A003E3B56 /* libswresample.a in Frameworks */,
 				A9E8FB871D4664F70071A5F1 /* libz.tbd in Frameworks */,
 				A9E8FB851D4664E80071A5F1 /* libbz2.tbd in Frameworks */,
@@ -480,9 +482,8 @@
 				A99DB6B31D46497B00C6E56C /* libiconv.tbd in Frameworks */,
 				A99DB6AF1D4648D100C6E56C /* libavcodec.a in Frameworks */,
 				A99DB6B11D4648D100C6E56C /* libavutil.a in Frameworks */,
-				A9B0F28722A29E640012E099 /* libtiff.a in Frameworks */,
-				A9B0F2B422A2A36D0012E099 /* libpng16.a in Frameworks */,
-				A99DB6AA1D4648B700C6E56C /* liblept.a in Frameworks */,
+				A966CF04275F6FB500AF8813 /* libtiff.a in Frameworks */,
+				A966CF03275F6E6900AF8813 /* liblept.a in Frameworks */,
 				A99DB6AB1D4648B700C6E56C /* libtesseract.a in Frameworks */,
 				A99DB6A51D4648A800C6E56C /* libmp4v2.a in Frameworks */,
 				A9B9C4931823986200416A4E /* Quartz.framework in Frameworks */,
@@ -523,6 +524,7 @@
 		A9B9C1EF182391DF00416A4E /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				A966CEFF275F658000AF8813 /* Accelerate.framework */,
 				A9B0F2B322A2A36D0012E099 /* libpng16.a */,
 				A9B0F28822A29E9C0012E099 /* liblzma.tbd */,
 				A9E42D3D22A2835500A94E9C /* libtiff.a */,
