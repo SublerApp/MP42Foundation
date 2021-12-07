@@ -300,6 +300,39 @@ MP42_OBJC_DIRECT_MEMBERS
                             }
                         }
 
+                        if (@available(macOS 10.13, *)) {
+                            CFDictionaryRef extentions = CMFormatDescriptionGetExtensions(formatDescription);
+                            CFDictionaryRef atoms = CFDictionaryGetValue(extentions, kCMFormatDescriptionExtension_SampleDescriptionExtensionAtoms);
+                            CFDataRef dvExtension = CFDictionaryGetValue(atoms, @"dvcC");
+
+                            if (!dvExtension) {
+                                dvExtension = CFDictionaryGetValue(atoms, @"dvvC");
+                            }
+                            if (!dvExtension) {
+                                dvExtension = CFDictionaryGetValue(atoms, @"dvwC");
+                            }
+
+                            if (dvExtension && CFDataGetLength(dvExtension) >= 24) {
+                                MP42DolbyVisionMetadata dv;
+                                uint8_t buffer[24];
+                                CFDataGetBytes(dvExtension, CFRangeMake(0, 24), buffer);
+
+                                dv.versionMajor = buffer[0];
+                                dv.versionMinor = buffer[1];
+
+                                dv.profile = (buffer[2] & 0xfe) >> 1;
+                                dv.level = ((buffer[2] & 0x1) << 7) + ((buffer[3] & 0xf8) >> 3);
+
+                                dv.rpuPresentFlag = (buffer[3] & 0x4) >> 2;
+                                dv.elPresentFlag = (buffer[3] & 0x2) >> 1;
+                                dv.blPresentFlag = buffer[3] & 0x1;
+
+                                dv.blSignalCompatibilityId = (buffer[4] & 0xf0) >> 4;
+
+                                videoTrack.dolbyVision = dv;
+                            }
+                        }
+
                     }
 
                     newTrack = videoTrack;

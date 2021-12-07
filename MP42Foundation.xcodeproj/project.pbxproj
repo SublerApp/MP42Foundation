@@ -152,6 +152,8 @@
 		A9A0C9A419814C9B00A72763 /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9A0C9A319814C9B00A72763 /* AudioUnit.framework */; };
 		A9A268E2196D6367003AFF57 /* MP42EditListsReconstructor.m in Sources */ = {isa = PBXBuildFile; fileRef = A9DFBDCA1960174500410060 /* MP42EditListsReconstructor.m */; };
 		A9AA2B821DBF954000C9D897 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = A9AA2B841DBF954000C9D897 /* Localizable.strings */; };
+		A9AAD4FF275F935D00E586F6 /* MP42DolbyVisionMetadata.h in Headers */ = {isa = PBXBuildFile; fileRef = A9AAD4FE275F935D00E586F6 /* MP42DolbyVisionMetadata.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		A9AAD500275F935D00E586F6 /* MP42DolbyVisionMetadata.h in Headers */ = {isa = PBXBuildFile; fileRef = A9AAD4FE275F935D00E586F6 /* MP42DolbyVisionMetadata.h */; };
 		A9AEFE151B9B111B00771292 /* MP42FileImporter+Private.h in Headers */ = {isa = PBXBuildFile; fileRef = A9AEFE141B9B111B00771292 /* MP42FileImporter+Private.h */; };
 		A9AEFE161B9B111B00771292 /* MP42FileImporter+Private.h in Headers */ = {isa = PBXBuildFile; fileRef = A9AEFE141B9B111B00771292 /* MP42FileImporter+Private.h */; };
 		A9B0F28922A29E9C0012E099 /* liblzma.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = A9B0F28822A29E9C0012E099 /* liblzma.tbd */; };
@@ -328,6 +330,7 @@
 		A9A0C99B19814B0800A72763 /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
 		A9A0C9A319814C9B00A72763 /* AudioUnit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioUnit.framework; path = System/Library/Frameworks/AudioUnit.framework; sourceTree = SDKROOT; };
 		A9AA2B831DBF954000C9D897 /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = it.lproj/Localizable.strings; sourceTree = "<group>"; };
+		A9AAD4FE275F935D00E586F6 /* MP42DolbyVisionMetadata.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MP42DolbyVisionMetadata.h; sourceTree = "<group>"; };
 		A9AEFE141B9B111B00771292 /* MP42FileImporter+Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "MP42FileImporter+Private.h"; sourceTree = "<group>"; };
 		A9B0F28822A29E9C0012E099 /* liblzma.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = liblzma.tbd; path = usr/lib/liblzma.tbd; sourceTree = SDKROOT; };
 		A9B0F2B322A2A36D0012E099 /* libpng16.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libpng16.a; path = contrib/Tesseract/lib/libpng16.a; sourceTree = "<group>"; };
@@ -719,6 +722,7 @@
 				A941C95D1F82A9B800FC5E8D /* MP42SSAConverter.m */,
 				A9762BAC2660D71E0055E0B3 /* MP42Rational.h */,
 				A9762BAD2660D71E0055E0B3 /* MP42Rational.c */,
+				A9AAD4FE275F935D00E586F6 /* MP42DolbyVisionMetadata.h */,
 				A9762BA62660CF590055E0B3 /* MP42MasteringDisplayMetadata.h */,
 				A96523431BAC315900E994E0 /* NSString+MP42Additions.h */,
 				A96523441BAC315900E994E0 /* NSString+MP42Additions.m */,
@@ -777,6 +781,7 @@
 				A9ED5B0E1F824A9B00E0E4FA /* MP42SSAParser.h in Headers */,
 				A99FCBC51BAD65EF0058E27A /* MP42Track+Private.h in Headers */,
 				A9AEFE161B9B111B00771292 /* MP42FileImporter+Private.h in Headers */,
+				A9AAD500275F935D00E586F6 /* MP42DolbyVisionMetadata.h in Headers */,
 				A96523461BAC315900E994E0 /* NSString+MP42Additions.h in Headers */,
 				A941C9571F82996600FC5E8D /* MP42TextSubConverter.h in Headers */,
 				A908011A1D4B83A3002B6950 /* MP42AudioUnit.h in Headers */,
@@ -805,6 +810,7 @@
 				A9022A941D6F3FD9005F0920 /* MP42MetadataItem.h in Headers */,
 				A9B9C2871823923200416A4E /* MP42Metadata.h in Headers */,
 				A9B9C2851823923200416A4E /* MP42MediaFormat.h in Headers */,
+				A9AAD4FF275F935D00E586F6 /* MP42DolbyVisionMetadata.h in Headers */,
 				A989F10F1823B3B40070AD8C /* MP42TextSample.h in Headers */,
 				A9B9C2831823923200416A4E /* MP42Image.h in Headers */,
 				A9B9C2C41823957800416A4E /* MP42Languages.h in Headers */,

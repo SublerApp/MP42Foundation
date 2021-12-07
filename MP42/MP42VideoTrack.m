@@ -125,6 +125,69 @@ MP42_OBJC_DIRECT_MEMBERS
             _mastering.has_luminance = 1;
         }
 
+        if (MP4HaveTrackAtom(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.dvcC")) {
+            uint64_t versionMajor, versionMinor, profile, level, rpuPresentFlag, elPresentFlag, blPresentFlag, blSignalCompatibilityId;
+
+            MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.dvcC.dv_version_major", &versionMajor);
+            MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.dvcC.dv_version_minor", &versionMinor);
+            MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.dvcC.dv_profile", &profile);
+            MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.dvcC.dv_level", &level);
+            MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.dvcC.rpu_present_flag", &rpuPresentFlag);
+            MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.dvcC.el_present_flag", &elPresentFlag);
+            MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.dvcC.bl_present_flag", &blPresentFlag);
+            MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.dvcC.dv_bl_signal_compatibility_id", &blSignalCompatibilityId);
+
+            _dolbyVision.versionMajor = versionMajor;
+            _dolbyVision.versionMinor = versionMinor;
+            _dolbyVision.profile = profile;
+            _dolbyVision.level = level;
+            _dolbyVision.rpuPresentFlag = rpuPresentFlag;
+            _dolbyVision.elPresentFlag = elPresentFlag;
+            _dolbyVision.blPresentFlag = blPresentFlag;
+            _dolbyVision.blSignalCompatibilityId = blSignalCompatibilityId;
+        }
+        else if (MP4HaveTrackAtom(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.dvvC")) {
+            uint64_t versionMajor, versionMinor, profile, level, rpuPresentFlag, elPresentFlag, blPresentFlag, blSignalCompatibilityId;
+
+            MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.dvvC.dv_version_major", &versionMajor);
+            MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.dvvC.dv_version_minor", &versionMinor);
+            MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.dvvC.dv_profile", &profile);
+            MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.dvvC.dv_level", &level);
+            MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.dvvC.rpu_present_flag", &rpuPresentFlag);
+            MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.dvvC.el_present_flag", &elPresentFlag);
+            MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.dvvC.bl_present_flag", &blPresentFlag);
+            MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.dvvC.dv_bl_signal_compatibility_id", &blSignalCompatibilityId);
+
+            _dolbyVision.versionMajor = versionMajor;
+            _dolbyVision.versionMinor = versionMinor;
+            _dolbyVision.profile = profile;
+            _dolbyVision.level = level;
+            _dolbyVision.rpuPresentFlag = rpuPresentFlag;
+            _dolbyVision.elPresentFlag = elPresentFlag;
+            _dolbyVision.blPresentFlag = blPresentFlag;
+            _dolbyVision.blSignalCompatibilityId = blSignalCompatibilityId;
+        }
+        else if (MP4HaveTrackAtom(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.dvwC")) {
+            uint64_t versionMajor, versionMinor, profile, level, rpuPresentFlag, elPresentFlag, blPresentFlag, blSignalCompatibilityId;
+
+            MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.dvwC.dv_version_major", &versionMajor);
+            MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.dvwC.dv_version_minor", &versionMinor);
+            MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.dvwC.dv_profile", &profile);
+            MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.dvwC.dv_level", &level);
+            MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.dvwC.rpu_present_flag", &rpuPresentFlag);
+            MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.dvwC.el_present_flag", &elPresentFlag);
+            MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.dvwC.bl_present_flag", &blPresentFlag);
+            MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.dvwC.dv_bl_signal_compatibility_id", &blSignalCompatibilityId);
+
+            _dolbyVision.versionMajor = versionMajor;
+            _dolbyVision.versionMinor = versionMinor;
+            _dolbyVision.profile = profile;
+            _dolbyVision.level = level;
+            _dolbyVision.rpuPresentFlag = rpuPresentFlag;
+            _dolbyVision.elPresentFlag = elPresentFlag;
+            _dolbyVision.blPresentFlag = blPresentFlag;
+            _dolbyVision.blSignalCompatibilityId = blSignalCompatibilityId;
+        }
         if (MP4HaveTrackAtom(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.clap")) {
             MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.clap.cleanApertureWidthN", &_cleanApertureWidthN);
             MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.clap.cleanApertureWidthD", &_cleanApertureWidthD);
@@ -411,6 +474,21 @@ static uint32_t convertToFixedPoint(CGFloat value) {
     }
 }
 
+- (NSString *)formatSummary
+{
+    NSMutableString *summary = [super.formatSummary mutableCopy];
+    if (_mastering.has_luminance && _mastering.has_primaries) {
+        [summary appendString:@" HDR10"];
+    }
+    if (_dolbyVision.versionMajor) {
+        if (![summary containsString:@"Dolby Vision"]) {
+            [summary appendString:@" Dolby Vision"];
+        }
+        [summary appendFormat:@" %d.%d", _dolbyVision.profile, _dolbyVision.level];
+    }
+    return summary;
+}
+
 #pragma mark - NSCopying
 
 - (instancetype)copyWithZone:(NSZone *)zone
@@ -432,6 +510,7 @@ static uint32_t convertToFixedPoint(CGFloat value) {
 
         copy->_mastering = _mastering;
         copy->_coll = _coll;
+        copy->_dolbyVision = _dolbyVision;
 
         copy->_hSpacing = _hSpacing;
         copy->_vSpacing = _vSpacing;
@@ -507,6 +586,15 @@ static uint32_t convertToFixedPoint(CGFloat value) {
     [coder encodeInt64:_hSpacing forKey:@"hSpacing"];
     [coder encodeInt64:_vSpacing forKey:@"vSpacing"];
 
+    [coder encodeInt32:_dolbyVision.versionMajor forKey:@"DVversionMajor"];
+    [coder encodeInt32:_dolbyVision.versionMinor forKey:@"DVversionMinor"];
+    [coder encodeInt32:_dolbyVision.profile forKey:@"DVprofile"];
+    [coder encodeInt32:_dolbyVision.level forKey:@"DVlevel"];
+    [coder encodeInt32:_dolbyVision.rpuPresentFlag forKey:@"DVrpuPresentFlag"];
+    [coder encodeInt32:_dolbyVision.elPresentFlag forKey:@"DVelPresentFlag"];
+    [coder encodeInt32:_dolbyVision.blPresentFlag forKey:@"DVblPresentFlag"];
+    [coder encodeInt32:_dolbyVision.blSignalCompatibilityId forKey:@"DVblSignalCompatibilityId"];
+
     [coder encodeDouble:_transform.a forKey:@"transformA"];
     [coder encodeDouble:_transform.b forKey:@"transformB"];
     [coder encodeDouble:_transform.c forKey:@"transformC"];
@@ -562,6 +650,15 @@ static uint32_t convertToFixedPoint(CGFloat value) {
 
         _coll.MaxCLL = (uint32_t)[decoder decodeInt64ForKey:@"maxCLL"];
         _coll.MaxFALL = (uint32_t)[decoder decodeInt64ForKey:@"maxFALL"];
+
+        _dolbyVision.versionMajor = [decoder decodeInt32ForKey:@"DVversionMajor"];
+        _dolbyVision.versionMinor = [decoder decodeInt32ForKey:@"DVversionMinor"];
+        _dolbyVision.profile      = [decoder decodeInt32ForKey:@"DVprofile"];
+        _dolbyVision.level        = [decoder decodeInt32ForKey:@"DVlevel"];
+        _dolbyVision.rpuPresentFlag = [decoder decodeInt32ForKey:@"DVrpuPresentFlag"];
+        _dolbyVision.elPresentFlag  = [decoder decodeInt32ForKey:@"DVelPresentFlag"];
+        _dolbyVision.blPresentFlag  = [decoder decodeInt32ForKey:@"DVblPresentFlag"];
+        _dolbyVision.blSignalCompatibilityId = [decoder decodeInt32ForKey:@"DVblSignalCompatibilityId"];
 
         _hSpacing = [decoder decodeInt64ForKey:@"hSpacing"];
         _vSpacing = [decoder decodeInt64ForKey:@"vSpacing"];
