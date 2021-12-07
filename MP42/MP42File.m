@@ -1038,7 +1038,7 @@ MP42_OBJC_DIRECT_MEMBERS
 
     // Remove the unsupported tracks from the array of the tracks
     // to update. Unsupported tracks haven't been muxed, so there is no
-    // to update them.
+    // need to update them.
     NSMutableArray<MP42Track *> *tracksToUpdate = [self.itracks mutableCopy];
     [tracksToUpdate removeObjectsInArray:unsupportedTracks];
 
