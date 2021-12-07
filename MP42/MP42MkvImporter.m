@@ -191,6 +191,37 @@ MP42_OBJC_DIRECT_MEMBERS
                     videoTrack.coll = coll;
                 }
 
+                BlockAdditionMapping *bams;
+                unsigned int bamCount = 0;
+                mkv_GetBlockAdditionMappings(_matroskaFile, &bams, &bamCount);
+
+                for (unsigned int xi = 0; xi < bamCount; xi++) {
+                    BlockAdditionMapping *blockAddition = &bams[xi];
+                    if (blockAddition->TrackId == i &&
+                        (blockAddition->Value == 0x64766343 || blockAddition->Value == 0x664767643 || blockAddition->Value == 0x64767643) &&
+                        blockAddition->Length >= 24) {
+                        uint8_t *data = malloc(blockAddition->Length);
+
+                        if (readData(_ioStream, blockAddition->Position, &data, blockAddition->Length)) {
+                            MP42DolbyVisionMetadata dv;
+
+                            dv.versionMajor = data[0];
+                            dv.versionMinor = data[1];
+
+                            dv.profile = (data[2] & 0xfe) >> 1;
+                            dv.level = ((data[2] & 0x1) << 7) + ((data[3] & 0xf8) >> 3);
+
+                            dv.rpuPresentFlag = (data[3] & 0x4) >> 2;
+                            dv.elPresentFlag = (data[3] & 0x2) >> 1;
+                            dv.blPresentFlag = data[3] & 0x1;
+
+                            dv.blSignalCompatibilityId = (data[4] & 0xf0) >> 4;
+
+                            videoTrack.dolbyVision = dv;
+                        }
+                    }
+                }
+
                 newTrack = videoTrack;
             }
 
@@ -229,6 +260,11 @@ MP42_OBJC_DIRECT_MEMBERS
 
             if (newTrack) {
                 newTrack.format = CodecIDToFourCC(mkvTrack);
+
+                if ([newTrack isKindOfClass:[MP42VideoTrack class]] && ((MP42VideoTrack *)newTrack).dolbyVision.profile == 5) {
+                    newTrack.format = kMP42VideoCodecType_DolbyVisionHEVC_PSinBitstream;
+                }
+
                 newTrack.trackId = i;
                 newTrack.URL = self.fileURL;
                 newTrack.dataLength = trackSizes[i].unsignedLongLongValue;

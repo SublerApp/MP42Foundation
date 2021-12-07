@@ -220,6 +220,10 @@ struct MatroskaFile {
   // Tags
   unsigned int            nTags,nTagsSize;
   struct Tag            *Tags;
+
+  // BlockAdditions
+  unsigned int            nBlockAdditionMappings,nBlockAdditionMappingsSize;
+  struct BlockAdditionMapping            *BlockAdditionMappings;
 };
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1460,6 +1464,7 @@ static void CopyStr(char **src,char **dst) {
 
 static void parseTrackEntry(MatroskaFile *mf,ulonglong toplen) {
   struct TrackInfo  t,*tp,**tpp;
+  struct BlockAdditionMapping *bamap;
   ulonglong            v;
   char                    *cp = NULL, *cs = NULL;
   size_t            cplen = 0, cslen = 0, cpadd = 0;
@@ -1537,6 +1542,28 @@ static void parseTrackEntry(MatroskaFile *mf,ulonglong toplen) {
       break;
     case 0x55ee: // MaxBlockAdditionID
       t.MaxBlockAdditionID = (unsigned)readUInt(mf,(unsigned)len);
+      break;
+    case 0x41e4: // BlockAdditionMapping
+      bamap = AGET(mf,BlockAdditionMappings);
+      memset(bamap,0,sizeof(*bamap));
+      bamap->TrackId = mf->nTracks;
+      FOREACH(mf, len)
+        case 0x41f0: // BlockAddIDValue
+          bamap->Value = readUInt(mf,(unsigned)len);
+          break;
+        case 0x41a4: // BlockAddIDName
+          readUInt(mf,(unsigned)len);
+          STRGETM(mf,bamap->Name,len);
+          break;
+        case 0x41e7: // BlockAddIDType
+          bamap->Value = readUInt(mf,(unsigned)len);
+          break;
+        case 0x41ed: // BlockAddIDExtraData
+          bamap->Position = filepos(mf);
+          bamap->Length = len;
+          skipbytes(mf,len);
+          break;
+      ENDFOR(mf);
       break;
     case 0x536e: // Name
       if (t.Name)
@@ -3368,6 +3395,11 @@ void              mkv_Close(MatroskaFile *mf) {
   }
   mf->cache->memfree(mf->cache,mf->Attachments);
 
+  for (i=0;i<mf->nBlockAdditionMappings;++i) {
+    mf->cache->memfree(mf->cache,mf->BlockAdditionMappings[i].Name);
+  }
+  mf->cache->memfree(mf->cache,mf->BlockAdditionMappings);
+
   for (i=0;i<mf->nChapters;++i)
     DeleteChapter(mf,&mf->Chapters[i]);
   mf->cache->memfree(mf->cache,mf->Chapters);
@@ -3403,6 +3435,11 @@ TrackInfo     *mkv_GetTrackInfo(MatroskaFile *mf,unsigned track) {
     return NULL;
 
   return mf->Tracks[track];
+}
+
+void              mkv_GetBlockAdditionMappings(MatroskaFile *mf,BlockAdditionMapping **bam,unsigned *count) {
+  *bam = mf->BlockAdditionMappings;
+  *count = mf->nBlockAdditionMappings;
 }
 
 void              mkv_GetAttachments(MatroskaFile *mf,Attachment **at,unsigned *count) {
