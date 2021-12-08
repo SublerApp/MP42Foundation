@@ -188,6 +188,24 @@ MP42_OBJC_DIRECT_MEMBERS
             _dolbyVision.blPresentFlag = blPresentFlag;
             _dolbyVision.blSignalCompatibilityId = blSignalCompatibilityId;
         }
+
+        if (MP4HaveTrackAtom(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.hvcE")) {
+            uint8_t *ppValue;
+            uint32_t pValueSize = 0;
+            MP4GetTrackBytesProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.hvcE.HEVCConfig", &ppValue, &pValueSize);
+            if (pValueSize) {
+                _dolbyVisionELConfiguration = [NSData dataWithBytesNoCopy:ppValue length:pValueSize];
+            }
+        }
+        else if (MP4HaveTrackAtom(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.avcE")) {
+            uint8_t *ppValue;
+            uint32_t pValueSize = 0;
+            MP4GetTrackBytesProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.avcE.AVCConfig", &ppValue, &pValueSize);
+            if (pValueSize) {
+                _dolbyVisionELConfiguration = [NSData dataWithBytesNoCopy:ppValue length:pValueSize];
+            }
+        }
+
         if (MP4HaveTrackAtom(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.clap")) {
             MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.clap.cleanApertureWidthN", &_cleanApertureWidthN);
             MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.clap.cleanApertureWidthD", &_cleanApertureWidthD);
@@ -484,7 +502,7 @@ static uint32_t convertToFixedPoint(CGFloat value) {
         if (![summary containsString:@"Dolby Vision"]) {
             [summary appendString:@" Dolby Vision"];
         }
-        [summary appendFormat:@" %d.%d", _dolbyVision.profile, _dolbyVision.level];
+        [summary appendFormat:@" %d.%d", _dolbyVision.profile, _dolbyVision.blSignalCompatibilityId];
     }
     return summary;
 }
@@ -511,6 +529,7 @@ static uint32_t convertToFixedPoint(CGFloat value) {
         copy->_mastering = _mastering;
         copy->_coll = _coll;
         copy->_dolbyVision = _dolbyVision;
+        copy->_dolbyVisionELConfiguration = _dolbyVisionELConfiguration;
 
         copy->_hSpacing = _hSpacing;
         copy->_vSpacing = _vSpacing;
@@ -594,6 +613,7 @@ static uint32_t convertToFixedPoint(CGFloat value) {
     [coder encodeInt32:_dolbyVision.elPresentFlag forKey:@"DVelPresentFlag"];
     [coder encodeInt32:_dolbyVision.blPresentFlag forKey:@"DVblPresentFlag"];
     [coder encodeInt32:_dolbyVision.blSignalCompatibilityId forKey:@"DVblSignalCompatibilityId"];
+    [coder encodeObject:_dolbyVisionELConfiguration forKey:@"DVELConfiguration"];
 
     [coder encodeDouble:_transform.a forKey:@"transformA"];
     [coder encodeDouble:_transform.b forKey:@"transformB"];
@@ -659,6 +679,7 @@ static uint32_t convertToFixedPoint(CGFloat value) {
         _dolbyVision.elPresentFlag  = [decoder decodeInt32ForKey:@"DVelPresentFlag"];
         _dolbyVision.blPresentFlag  = [decoder decodeInt32ForKey:@"DVblPresentFlag"];
         _dolbyVision.blSignalCompatibilityId = [decoder decodeInt32ForKey:@"DVblSignalCompatibilityId"];
+        _dolbyVisionELConfiguration = [decoder decodeObjectOfClass:[NSData class] forKey:@"DVELConfiguration"];
 
         _hSpacing = [decoder decodeInt64ForKey:@"hSpacing"];
         _vSpacing = [decoder decodeInt64ForKey:@"vSpacing"];

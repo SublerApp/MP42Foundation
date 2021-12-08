@@ -241,6 +241,11 @@ MP42_OBJC_DIRECT_MEMBERS
                                                   videoTrack.dolbyVision.blPresentFlag,
                                                   videoTrack.dolbyVision.blSignalCompatibilityId);
                     }
+                    if (videoTrack.dolbyVisionELConfiguration) {
+                        MP4SetDolbyVisionELConfiguration(_fileHandle, dstTrackId,
+                                                         videoTrack.dolbyVisionELConfiguration.bytes,
+                                                         (uint32_t)videoTrack.dolbyVisionELConfiguration.length);
+                    }
                     [importer setActiveTrack:track];
                 }
                 else {
@@ -259,6 +264,12 @@ MP42_OBJC_DIRECT_MEMBERS
                  (format == kMP42VideoCodecType_DolbyVisionHEVC || format == kMP42VideoCodecType_DolbyVisionHEVC_PSinBitstream)) {
 
             MP42VideoTrack *videoTrack = (MP42VideoTrack *)track;
+            uint8_t *hvcCAtom = (uint8_t *)magicCookie.bytes;
+
+            if ([_options[MP42ForceHvc1] boolValue] && magicCookie.length < UINT32_MAX) {
+                force_HEVC_completeness(hvcCAtom, (uint32_t)magicCookie.length);
+            }
+
             bool completeness = 0;
             if (magicCookie.length && magicCookie.length < UINT32_MAX && !analyze_HEVC(magicCookie.bytes, (uint32_t)magicCookie.length, &completeness)) {
 
@@ -276,6 +287,11 @@ MP42_OBJC_DIRECT_MEMBERS
                                                              completeness);
 
                 if (dstTrackId) {
+                    if (videoTrack.dolbyVisionELConfiguration) {
+                        MP4SetDolbyVisionELConfiguration(_fileHandle, dstTrackId,
+                                                         videoTrack.dolbyVisionELConfiguration.bytes,
+                                                         (uint32_t)videoTrack.dolbyVisionELConfiguration.length);
+                    }
                     [importer setActiveTrack:track];
                 }
                 else {

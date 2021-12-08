@@ -27,12 +27,13 @@
 @property(nonatomic, readwrite) uint16_t matrixCoefficients;
 @property(nonatomic, readwrite) uint16_t colorRange;
 
-// HDR Mastering Metadata
+// HDR10 Mastering Metadata
 @property(nonatomic, readwrite) MP42MasteringDisplayMetadata mastering;
 @property(nonatomic, readwrite) MP42ContentLightMetadata coll;
 
 // Dolby Vision
 @property(nonatomic, readwrite) MP42DolbyVisionMetadata dolbyVision;
+@property(nonatomic, readwrite) NSData *dolbyVisionELConfiguration;
 
 // Pixel Aspect Ratio
 @property(nonatomic, readwrite) uint64_t hSpacing;

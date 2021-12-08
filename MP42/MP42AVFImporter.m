@@ -331,6 +331,16 @@ MP42_OBJC_DIRECT_MEMBERS
 
                                 videoTrack.dolbyVision = dv;
                             }
+
+                            CFDataRef dvELConfiguration = CFDictionaryGetValue(atoms, @"hvcE");
+
+                            if (!dvELConfiguration) {
+                                dvELConfiguration = CFDictionaryGetValue(atoms, @"avcE");
+                            }
+
+                            if (dvELConfiguration) {
+                                videoTrack.dolbyVisionELConfiguration = (__bridge NSData *)(dvELConfiguration);
+                            }
                         }
 
                     }
