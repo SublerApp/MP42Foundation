@@ -849,13 +849,14 @@ MP42_OBJC_DIRECT_MEMBERS
             CFDictionaryRef atoms = CFDictionaryGetValue(extentions, kCMFormatDescriptionExtension_SampleDescriptionExtensionAtoms);
             CFDataRef magicCookie = NULL;
 
-            if (code == kCMVideoCodecType_H264) {
+            if (code == kCMVideoCodecType_H264 || code == kMP42VideoCodecType_DolbyVisionH264) {
                 magicCookie = CFDictionaryGetValue(atoms, @"avcC");
             }
-            else if (code == kCMVideoCodecType_HEVC || code == 'hev1') {
+            else if (code == kCMVideoCodecType_HEVC || code == kMP42VideoCodecType_HEVC_PSinBitstream ||
+                     code == kCMVideoCodecType_DolbyVisionHEVC || code == kMP42VideoCodecType_DolbyVisionHEVC_PSinBitstream) {
                 magicCookie = CFDictionaryGetValue(atoms, @"hvcC");
             }
-            else if (code == 'av01') {
+            else if (code == kMP42VideoCodecType_AV1) {
                 magicCookie = CFDictionaryGetValue(atoms, @"av1C");
             }
             else if (code == kCMVideoCodecType_MPEG4Video) {
