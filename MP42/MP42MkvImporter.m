@@ -201,6 +201,7 @@ MP42_OBJC_DIRECT_MEMBERS
                     if (blockAddition->TrackId == i) {
                         if ((blockAddition->Value == 'dvcC' ||
                              blockAddition->Value == 0x664767643 ||
+                             blockAddition->Value == 'dvwC' ||
                              blockAddition->Value == 'dvvC') &&
                             blockAddition->Length >= 24) {
                             uint8_t *buffer = malloc(blockAddition->Length);
@@ -221,13 +222,16 @@ MP42_OBJC_DIRECT_MEMBERS
                                 dv.blSignalCompatibilityId = (buffer[4] & 0xf0) >> 4;
 
                                 videoTrack.dolbyVision = dv;
-                                free(buffer);
                             }
+                            free(buffer);
                         }
                         else if (blockAddition->Value == 'hvcE' || blockAddition->Value == 'avcE') {
                             uint8_t *buffer = malloc(blockAddition->Length);
                             if (readData(_ioStream, blockAddition->Position, &buffer, blockAddition->Length)) {
                                 videoTrack.dolbyVisionELConfiguration = [NSData dataWithBytesNoCopy:buffer length:blockAddition->Length];
+                            }
+                            else {
+                                free(buffer);
                             }
                         }
                     }
