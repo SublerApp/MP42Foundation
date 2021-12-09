@@ -30,7 +30,7 @@ MP42_OBJC_DIRECT_MEMBERS
         MP4GetTrackFloatProperty(fileHandle, self.trackId, "tkhd.height", &_trackHeight);
 
         _transform = CGAffineTransformIdentity;
-        
+
         uint8_t *val;
         uint8_t nval[36];
         uint32_t *ptr32 = (uint32_t*) nval;

@@ -74,7 +74,7 @@ typedef struct muxer_helper {
         _updatedProperty = [[NSMutableDictionary alloc] init];
 
         if (fileHandle) {
-            _format = getTrackMediaSubType(fileHandle, _trackId);
+            _format = getTrackMediaSubType(fileHandle, _trackId, 0);
             _mediaType = getTrackMediaType(fileHandle, _trackId);
 
             NSString *trackName = getTrackName(fileHandle, _trackId);

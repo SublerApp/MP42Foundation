@@ -24,7 +24,7 @@ MP42_OBJC_DIRECT_MEMBERS
 
     if (self) {
         MP4GetTrackFloatProperty(fileHandle, self.trackId, "tkhd.volume", &_volume);
-        const char *dataName = MP4GetTrackMediaDataName(fileHandle, self.trackId);
+        const char *dataName = MP4GetTrackMediaDataName(fileHandle, self.trackId, 0);
 		_extensionType = kMP42AudioEmbeddedExtension_None;
 
         if (dataName && !strcmp(dataName, "mp4a")) {

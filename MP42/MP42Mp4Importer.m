@@ -62,7 +62,7 @@ typedef struct MP4DemuxHelper {
     MP4TrackId srcTrackId = track.sourceId;
 
     const char *trackType = MP4GetTrackType(_fileHandle, srcTrackId);
-    const char *media_data_name = MP4GetTrackMediaDataName(_fileHandle, srcTrackId);
+    const char *media_data_name = MP4GetTrackMediaDataName(_fileHandle, srcTrackId, 0);
 
     if (!trackType) {
         return nil;

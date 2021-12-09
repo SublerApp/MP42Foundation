@@ -214,10 +214,10 @@ FourCharCode getTrackMediaType(MP4FileHandle fileHandle, MP4TrackId Id)
     return kMP42MediaType_Unknown;
 }
 
-FourCharCode getTrackMediaSubType(MP4FileHandle fileHandle, MP4TrackId Id)
+FourCharCode getTrackMediaSubType(MP4FileHandle fileHandle, MP4TrackId Id, uint32_t index)
 {
     const char *type = MP4GetTrackType(fileHandle, Id);
-    const char *dataName = MP4GetTrackMediaDataName(fileHandle, Id);
+    const char *dataName = MP4GetTrackMediaDataName(fileHandle, Id, index);
     if (dataName && strlen(dataName) == 4) {
         if (!strcmp(dataName, "avc1")) {
             return kMP42VideoCodecType_H264;
