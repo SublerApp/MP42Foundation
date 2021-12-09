@@ -25,7 +25,10 @@ public:
                 path = [[NSBundle bundleForClass:[MP42OCRWrapper class]].bundlePath stringByAppendingString:@"/Versions/A/Resources/tessdata/"].fileSystemRepresentation;
             }
 
-            tess_base_api.Init(path, lang.UTF8String, mode);
+            int result = tess_base_api.Init(path, lang.UTF8String, mode);
+            if (result == -1) {
+                throw EIO;
+            }
         }
     }
 
@@ -109,7 +112,12 @@ MP42_OBJC_DIRECT_MEMBERS
             dataURL = nil;
         }
 
-        tess_base = new OCRWrapper(lang, dataURL, mode);
+        try {
+            tess_base = new OCRWrapper(lang, dataURL, mode);
+        }
+        catch(int e) {
+            tess_base = new OCRWrapper(@"eng", nil, OEM_LSTM_ONLY);
+        }
     }
     return self;
 }
