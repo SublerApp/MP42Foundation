@@ -254,7 +254,7 @@ MP42_OBJC_DIRECT_MEMBERS
         return [NSString stringWithFormat:@"%@, %u ch", localizedDisplayName(self.mediaType, self.conversionSettings.format), channels];
     }
     else {
-        if (_channels > 0) {
+        if (_channels > 0 && self.mediaType != kMP42AudioCodecType_DTS) {
             if (_extensionType) {
                 return [NSString stringWithFormat:@"%@+%@, %u ch", localizedDisplayName(self.mediaType, self.format),
                         localizedDisplayName(self.mediaType, self.extensionType),
