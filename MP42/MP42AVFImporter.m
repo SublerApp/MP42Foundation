@@ -303,46 +303,47 @@ MP42_OBJC_DIRECT_MEMBERS
                         if (@available(macOS 10.13, *)) {
                             CFDictionaryRef extentions = CMFormatDescriptionGetExtensions(formatDescription);
                             CFDictionaryRef atoms = CFDictionaryGetValue(extentions, kCMFormatDescriptionExtension_SampleDescriptionExtensionAtoms);
-                            CFDataRef dvExtension = CFDictionaryGetValue(atoms, @"dvcC");
+                            if (atoms) {
+                                CFDataRef dvExtension = CFDictionaryGetValue(atoms, @"dvcC");
 
-                            if (!dvExtension) {
-                                dvExtension = CFDictionaryGetValue(atoms, @"dvvC");
-                            }
-                            if (!dvExtension) {
-                                dvExtension = CFDictionaryGetValue(atoms, @"dvwC");
-                            }
+                                if (!dvExtension) {
+                                    dvExtension = CFDictionaryGetValue(atoms, @"dvvC");
+                                }
+                                if (!dvExtension) {
+                                    dvExtension = CFDictionaryGetValue(atoms, @"dvwC");
+                                }
 
-                            if (dvExtension && CFDataGetLength(dvExtension) >= 24) {
-                                MP42DolbyVisionMetadata dv;
-                                uint8_t buffer[24];
-                                CFDataGetBytes(dvExtension, CFRangeMake(0, 24), buffer);
+                                if (dvExtension && CFDataGetLength(dvExtension) >= 24) {
+                                    MP42DolbyVisionMetadata dv;
+                                    uint8_t buffer[24];
+                                    CFDataGetBytes(dvExtension, CFRangeMake(0, 24), buffer);
 
-                                dv.versionMajor = buffer[0];
-                                dv.versionMinor = buffer[1];
+                                    dv.versionMajor = buffer[0];
+                                    dv.versionMinor = buffer[1];
 
-                                dv.profile = (buffer[2] & 0xfe) >> 1;
-                                dv.level = ((buffer[2] & 0x1) << 7) + ((buffer[3] & 0xf8) >> 3);
+                                    dv.profile = (buffer[2] & 0xfe) >> 1;
+                                    dv.level = ((buffer[2] & 0x1) << 7) + ((buffer[3] & 0xf8) >> 3);
 
-                                dv.rpuPresentFlag = (buffer[3] & 0x4) >> 2;
-                                dv.elPresentFlag = (buffer[3] & 0x2) >> 1;
-                                dv.blPresentFlag = buffer[3] & 0x1;
+                                    dv.rpuPresentFlag = (buffer[3] & 0x4) >> 2;
+                                    dv.elPresentFlag = (buffer[3] & 0x2) >> 1;
+                                    dv.blPresentFlag = buffer[3] & 0x1;
 
-                                dv.blSignalCompatibilityId = (buffer[4] & 0xf0) >> 4;
+                                    dv.blSignalCompatibilityId = (buffer[4] & 0xf0) >> 4;
 
-                                videoTrack.dolbyVision = dv;
-                            }
+                                    videoTrack.dolbyVision = dv;
+                                }
 
-                            CFDataRef dvELConfiguration = CFDictionaryGetValue(atoms, @"hvcE");
+                                CFDataRef dvELConfiguration = CFDictionaryGetValue(atoms, @"hvcE");
 
-                            if (!dvELConfiguration) {
-                                dvELConfiguration = CFDictionaryGetValue(atoms, @"avcE");
-                            }
+                                if (!dvELConfiguration) {
+                                    dvELConfiguration = CFDictionaryGetValue(atoms, @"avcE");
+                                }
 
-                            if (dvELConfiguration) {
-                                videoTrack.dolbyVisionELConfiguration = (__bridge NSData *)(dvELConfiguration);
+                                if (dvELConfiguration) {
+                                    videoTrack.dolbyVisionELConfiguration = (__bridge NSData *)(dvELConfiguration);
+                                }
                             }
                         }
-
                     }
 
                     newTrack = videoTrack;
@@ -776,7 +777,7 @@ MP42_OBJC_DIRECT_MEMBERS
                                                MP42MetadataKeyName,             AVMetadataQuickTimeMetadataKeyTitle, nil];
         
         for (NSString *qtKey in quicktimeMetadataDict.allKeys) {
-            items = [AVMetadataItem metadataItemsFromArray:quicktimeMetadata withKey:qtKey keySpace:AVMetadataKeySpaceQuickTimeUserData];
+            items = [AVMetadataItem metadataItemsFromArray:quicktimeMetadata withKey:qtKey keySpace:AVMetadataKeySpaceQuickTimeMetadata];
             if (items.count) {
                 [self.metadata addMetadataItem:[self metadataItemWithValue:items.lastObject.value identifier:quicktimeMetadataDict[qtKey]]];
             }
