@@ -13,13 +13,13 @@
 
 @interface MP42VideoTrack : MP42Track <NSSecureCoding, NSCopying>
 
-@property(nonatomic, readwrite) uint64_t width;
-@property(nonatomic, readwrite) uint64_t height;
-
 @property(nonatomic, readwrite) float trackWidth;
 @property(nonatomic, readwrite) float trackHeight;
 
 @property(nonatomic, readwrite) CGAffineTransform transform;
+
+@property(nonatomic, readwrite) uint64_t width;
+@property(nonatomic, readwrite) uint64_t height;
 
 // Color
 @property(nonatomic, readwrite) uint16_t colorPrimaries;

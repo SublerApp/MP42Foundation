@@ -25,12 +25,12 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  *  Returns the complete list of available metadata.
  */
-@property (nonatomic, class, readonly)NSArray<NSString *> *availableMetadata;
+@property (nonatomic, class, readonly) NSArray<NSString *> *availableMetadata;
 
 /**
  *  Returns the complete list of writable metadata.
  */
-@property (nonatomic, class, readonly)NSArray<NSString *> *writableMetadata;
+@property (nonatomic, class, readonly) NSArray<NSString *> *writableMetadata;
 
 - (void)addMetadataItems:(NSArray<MP42MetadataItem *> *)items;
 - (void)addMetadataItem:(MP42MetadataItem *)item;
