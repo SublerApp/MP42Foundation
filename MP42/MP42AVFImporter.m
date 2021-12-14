@@ -403,7 +403,7 @@ MP42_OBJC_DIRECT_MEMBERS
                 }
                 else if (chapters) {
                     // It looks like there is no way to know what text track is used for chapters in the original file.
-                        newTrack = chapters;
+                    newTrack = chapters;
                 }
                 else {
                     newTrack = [[MP42SubtitleTrack alloc] init];
@@ -821,7 +821,7 @@ MP42_OBJC_DIRECT_MEMBERS
 
 - (UInt32)timescaleForTrack:(AVAssetTrack *)track {
     // Prefer the asbd sample rate, naturalTimeScale might not be
-    // the right one if we are reading for .ts
+    // the right one if we are reading from .ts
     if ([track.mediaType isEqualToString:AVMediaTypeAudio] && track.naturalTimeScale == 90000) {
         CMFormatDescriptionRef formatDescription = (__bridge CMFormatDescriptionRef)track.formatDescriptions.firstObject;
 
@@ -850,18 +850,21 @@ MP42_OBJC_DIRECT_MEMBERS
             CFDictionaryRef atoms = CFDictionaryGetValue(extentions, kCMFormatDescriptionExtension_SampleDescriptionExtensionAtoms);
             CFDataRef magicCookie = NULL;
 
-            if (code == kCMVideoCodecType_H264 || code == kMP42VideoCodecType_DolbyVisionH264) {
-                magicCookie = CFDictionaryGetValue(atoms, @"avcC");
-            }
-            else if (code == kCMVideoCodecType_HEVC || code == kMP42VideoCodecType_HEVC_PSinBitstream ||
-                     code == kCMVideoCodecType_DolbyVisionHEVC || code == kMP42VideoCodecType_DolbyVisionHEVC_PSinBitstream) {
-                magicCookie = CFDictionaryGetValue(atoms, @"hvcC");
-            }
-            else if (code == kMP42VideoCodecType_AV1) {
-                magicCookie = CFDictionaryGetValue(atoms, @"av1C");
-            }
-            else if (code == kCMVideoCodecType_MPEG4Video) {
-                magicCookie = CFDictionaryGetValue(atoms, @"esds");
+            if (atoms)
+            {
+                if (code == kCMVideoCodecType_H264 || code == kMP42VideoCodecType_DolbyVisionH264) {
+                    magicCookie = CFDictionaryGetValue(atoms, @"avcC");
+                }
+                else if (code == kCMVideoCodecType_HEVC || code == kMP42VideoCodecType_HEVC_PSinBitstream ||
+                         code == kCMVideoCodecType_DolbyVisionHEVC || code == kMP42VideoCodecType_DolbyVisionHEVC_PSinBitstream) {
+                    magicCookie = CFDictionaryGetValue(atoms, @"hvcC");
+                }
+                else if (code == kMP42VideoCodecType_AV1) {
+                    magicCookie = CFDictionaryGetValue(atoms, @"av1C");
+                }
+                else if (code == kCMVideoCodecType_MPEG4Video) {
+                    magicCookie = CFDictionaryGetValue(atoms, @"esds");
+                }
             }
 
             return (__bridge NSData *)magicCookie;
@@ -1061,9 +1064,10 @@ MP42_OBJC_DIRECT_MEMBERS
 
                 CFDictionaryRef extentions = CMFormatDescriptionGetExtensions(formatDescription);
                 CFDictionaryRef atoms = CFDictionaryGetValue(extentions, kCMFormatDescriptionExtension_SampleDescriptionExtensionAtoms);
-                CFDataRef magicCookie = CFDictionaryGetValue(atoms, @"vttC");
-
-                return (__bridge NSData *)magicCookie;
+                if (atoms) {
+                    CFDataRef magicCookie = CFDictionaryGetValue(atoms, @"vttC");
+                    return (__bridge NSData *)magicCookie;
+                }
             }
         }
 
