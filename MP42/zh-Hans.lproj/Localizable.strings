@@ -5,6 +5,9 @@
 "AC3" = "AC3";
 
 /* No comment provided by engineer. */
+"Acknowledgement" = "致谢";
+
+/* No comment provided by engineer. */
 "Album" = "专辑";
 
 /* No comment provided by engineer. */
@@ -12,6 +15,12 @@
 
 /* No comment provided by engineer. */
 "Apple Lossless" = "Apple 无损音频编码";
+
+/* No comment provided by engineer. */
+"Arranger" = "编曲者";
+
+/* No comment provided by engineer. */
+"Art Director" = "艺术导演";
 
 /* No comment provided by engineer. */
 "Artist" = "艺人";
@@ -23,10 +32,16 @@
 "Atmos" = "杜比全景声";
 
 /* No comment provided by engineer. */
+"ATSC" = "高级电视系统委员会";
+
+/* No comment provided by engineer. */
 "AV1" = "AV1";
 
 /* No comment provided by engineer. */
-"Cast" = "表演者";
+"Cast" = "主演";
+
+/* No comment provided by engineer. */
+"Category" = "归类";
 
 /* No comment provided by engineer. */
 "CEA-608" = "CEA-608";
@@ -38,7 +53,13 @@
 "Chapter Track" = "章节标记";
 
 /* No comment provided by engineer. */
+"Cinepak" = "高压缩倍率影片";
+
+/* No comment provided by engineer. */
 "Closed Caption Track" = "隐藏式字幕轨道";
+
+/* No comment provided by engineer. */
+"Codirector" = "联合导演";
 
 /* No comment provided by engineer. */
 "Comments" = "注释";
@@ -53,10 +74,25 @@
 "composer ID" = "作曲者 ID";
 
 /* No comment provided by engineer. */
+"Conductor" = "指挥";
+
+/* No comment provided by engineer. */
 "content ID" = "内容 ID";
 
 /* No comment provided by engineer. */
+"Content Rating" = "内容分级";
+
+/* No comment provided by engineer. */
 "Copyright" = "版权";
+
+/* No comment provided by engineer. */
+"Counter 32" = "32位计数器";
+
+/* No comment provided by engineer. */
+"Counter 64" = "64位计数器";
+
+/* No comment provided by engineer. */
+"Credits" = "工作人员";
 
 /* No comment provided by engineer. */
 "Description" = "简短描述";
@@ -98,16 +134,19 @@
 "FairPlay CEA-608" = "FairPlay CEA-608";
 
 /* No comment provided by engineer. */
-"FairPlay Sound" = "FairPlay Sound";
+"FairPlay Sound" = "FairPlay 音频";
 
 /* No comment provided by engineer. */
 "FairPlay Tx3g" = "FairPlay Tx3g";
 
 /* No comment provided by engineer. */
-"FairPlay Video" = "FairPlay Video";
+"FairPlay Video" = "FairPlay 视频";
 
 /* No comment provided by engineer. */
 "FLAC" = "FLAC";
+
+/* No comment provided by engineer. */
+"Gapless" = "无缝播放";
 
 /* No comment provided by engineer. */
 "Genre" = "类型";
@@ -128,6 +167,9 @@
 "H.264 (Parameter Sets in Bitstream)" = "H.264 (Parameter Sets in Bitstream)";
 
 /* No comment provided by engineer. */
+"HD Video" = "清晰度";
+
+/* No comment provided by engineer. */
 "HE-AAC" = "HE-AAC";
 
 /* No comment provided by engineer. */
@@ -135,6 +177,18 @@
 
 /* No comment provided by engineer. */
 "HEVC (Parameter Sets in Bitstream)" = "HEVC (Parameter Sets in Bitstream)";
+
+/* No comment provided by engineer. */
+"Hint" = "提示";
+
+/* No comment provided by engineer. */
+"Hint Track" = "提示轨道";
+
+/* No comment provided by engineer. */
+"iTunes Account" = "iTunes 账户";
+
+/* No comment provided by engineer. */
+"iTunes Account Type" = "iTunes 账户类型";
 
 /* No comment provided by engineer. */
 "iTunes Country" = "iTunes 地区";
@@ -147,6 +201,9 @@
 
 /* No comment provided by engineer. */
 "Keywords" = "关键词";
+
+/* No comment provided by engineer. */
+"Linear Notes" = "唱片说明";
 
 /* No comment provided by engineer. */
 "Long Description" = "完整描述";
@@ -164,6 +221,15 @@
 "Metadata Track" = "元数据轨道";
 
 /* No comment provided by engineer. */
+"Movement Count" = "乐章数";
+
+/* No comment provided by engineer. */
+"Movement Name" = "乐章标题";
+
+/* No comment provided by engineer. */
+"Movement Number" = "乐章编号";
+
+/* No comment provided by engineer. */
 "MP1" = "MP1";
 
 /* No comment provided by engineer. */
@@ -179,13 +245,25 @@
 "MPEG-2 Video" = "MPEG-2 视频";
 
 /* No comment provided by engineer. */
+"Muxed Track" = "已混流轨道";
+
+/* No comment provided by engineer. */
 "Name" = "标题";
 
 /* No comment provided by engineer. */
 "Online Extras" = "在线特辑";
 
 /* No comment provided by engineer. */
+"Opus" = "Opus";
+
+/* No comment provided by engineer. */
+"Original Artist" = "原唱艺人";
+
+/* No comment provided by engineer. */
 "PCM" = "PCM";
+
+/* No comment provided by engineer. */
+"Performer" = "表演者";
 
 /* No comment provided by engineer. */
 "PGS" = "PGS";
@@ -218,6 +296,9 @@
 "ProRes 4444" = "ProRes 4444";
 
 /* No comment provided by engineer. */
+"Publisher" = "出版商";
+
+/* No comment provided by engineer. */
 "Purchase Date" = "购买日期";
 
 /* No comment provided by engineer. */
@@ -239,6 +320,24 @@
 "Series Description" = "节目描述";
 
 /* No comment provided by engineer. */
+"Show Work And Movement" = "显示作品和乐章";
+
+/* No comment provided by engineer. */
+"Soloist" = "独奏家";
+
+/* No comment provided by engineer. */
+"Song Description" = "歌曲描述";
+
+/* No comment provided by engineer. */
+"Song Producer" = "歌曲制作人";
+
+/* No comment provided by engineer. */
+"Sorenson Video" = "Sorenson 视频";
+
+/* No comment provided by engineer. */
+"Sorenson Video 3" = "Sorenson 视频3";
+
+/* No comment provided by engineer. */
 "Sort Album" = "专辑分类";
 
 /* No comment provided by engineer. */
@@ -257,6 +356,9 @@
 "Sort TV Show" = "节目分类";
 
 /* No comment provided by engineer. */
+"Sound Engineer" = "音响师";
+
+/* No comment provided by engineer. */
 "Sound Track" = "音频轨道";
 
 /* No comment provided by engineer. */
@@ -269,7 +371,40 @@
 "Subtitle Track" = "字幕轨道";
 
 /* No comment provided by engineer. */
+"Tempo" = "节奏";
+
+/* No comment provided by engineer. */
+"Text" = "文本";
+
+/* No comment provided by engineer. */
+"Text Track" = "文本轨道";
+
+/* No comment provided by engineer. */
+"Thanks" = "感谢";
+
+/* No comment provided by engineer. */
+"Theora" = "Theora 视频";
+
+/* No comment provided by engineer. */
+"TimeCode" = "时间码";
+
+/* No comment provided by engineer. */
+"TimeCode 64" = "64位时间码";
+
+/* No comment provided by engineer. */
+"TimeCode Track" = "时间码轨道";
+
+/* No comment provided by engineer. */
+"Timed Metadata" = "定时的元数据";
+
+/* No comment provided by engineer. */
 "Track #" = "音轨";
+
+/* No comment provided by engineer. */
+"Track Sub-Title" = "副标题";
+
+/* No comment provided by engineer. */
+"True Audio" = "True Audio";
 
 /* No comment provided by engineer. */
 "True HD" = "True HD";
@@ -279,6 +414,9 @@
 
 /* No comment provided by engineer. */
 "TV Episode ID" = "剧集 ID";
+
+/* No comment provided by engineer. */
+"TV Network" = "电视网";
 
 /* No comment provided by engineer. */
 "TV Season" = "季";
@@ -294,6 +432,9 @@
 
 /* No comment provided by engineer. */
 "VobSub" = "VobSub";
+
+/* No comment provided by engineer. */
+"Vorbis" = "Vorbis";
 
 /* No comment provided by engineer. */
 "VP8" = "VP8";
