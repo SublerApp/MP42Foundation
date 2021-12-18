@@ -255,6 +255,8 @@
 		A9ED5B141F824BC100E0E4FA /* MP42SSAImporter.m in Sources */ = {isa = PBXBuildFile; fileRef = A9ED5B111F824BC000E0E4FA /* MP42SSAImporter.m */; };
 		A9ED5B151F824BC100E0E4FA /* MP42SSAImporter.h in Headers */ = {isa = PBXBuildFile; fileRef = A9ED5B121F824BC000E0E4FA /* MP42SSAImporter.h */; };
 		A9ED5B161F824BC100E0E4FA /* MP42SSAImporter.h in Headers */ = {isa = PBXBuildFile; fileRef = A9ED5B121F824BC000E0E4FA /* MP42SSAImporter.h */; };
+		A9FD169F27661B690096BBA8 /* SampleDescription.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9FD169E27661B690096BBA8 /* SampleDescription.swift */; };
+		A9FD16A027661B690096BBA8 /* SampleDescription.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9FD169E27661B690096BBA8 /* SampleDescription.swift */; };
 		FFE849961EBCAFDF000AA078 /* MP42AC3AudioEncoder.h in Headers */ = {isa = PBXBuildFile; fileRef = FFE849941EBCAFDF000AA078 /* MP42AC3AudioEncoder.h */; };
 		FFE849971EBCAFDF000AA078 /* MP42AC3AudioEncoder.m in Sources */ = {isa = PBXBuildFile; fileRef = FFE849951EBCAFDF000AA078 /* MP42AC3AudioEncoder.m */; };
 /* End PBXBuildFile section */
@@ -441,6 +443,7 @@
 		A9ED5B0C1F824A9B00E0E4FA /* MP42SSAParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MP42SSAParser.m; sourceTree = "<group>"; };
 		A9ED5B111F824BC000E0E4FA /* MP42SSAImporter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MP42SSAImporter.m; sourceTree = "<group>"; };
 		A9ED5B121F824BC000E0E4FA /* MP42SSAImporter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MP42SSAImporter.h; sourceTree = "<group>"; };
+		A9FD169E27661B690096BBA8 /* SampleDescription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleDescription.swift; sourceTree = "<group>"; };
 		FFE849941EBCAFDF000AA078 /* MP42AC3AudioEncoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MP42AC3AudioEncoder.h; sourceTree = "<group>"; };
 		FFE849951EBCAFDF000AA078 /* MP42AC3AudioEncoder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MP42AC3AudioEncoder.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -573,6 +576,7 @@
 				6661A2ED20890B4400B1A669 /* MP42Foundation.h */,
 				A9B9C2301823923100416A4E /* MP42File.h */,
 				A9B9C2311823923100416A4E /* MP42File.m */,
+				A9FD169E27661B690096BBA8 /* SampleDescription.swift */,
 				A9B9C2501823923100416A4E /* MP42Track.h */,
 				A9B9C2511823923100416A4E /* MP42Track.m */,
 				A99FCBC31BAD65EF0058E27A /* MP42Track+Private.h */,
@@ -984,6 +988,7 @@
 				A941A7B71DA7B08600FB2A7C /* MP42MetadataFormat.m in Sources */,
 				A910B5DC18394EB20064028F /* MP42Languages.m in Sources */,
 				A9059DCF1D870F8D000D1B9A /* MP42ConversionSettings.m in Sources */,
+				A9FD16A027661B690096BBA8 /* SampleDescription.swift in Sources */,
 				A910B5E018394EB20064028F /* MP42PrivateUtilities.m in Sources */,
 				A910B5E218394EB20064028F /* MP42Utilities.m in Sources */,
 				A910B5E418394EB20064028F /* MP42SubUtilities.m in Sources */,
@@ -1050,6 +1055,7 @@
 				A9DFBDA3195FF5BA00410060 /* MP42Heap.m in Sources */,
 				A9059DCC1D870B9C000D1B9A /* MP42ConversionSettings.m in Sources */,
 				A9B9C26B1823923200416A4E /* MP42AudioConverter.m in Sources */,
+				A9FD169F27661B690096BBA8 /* SampleDescription.swift in Sources */,
 				A941C9601F82A9B900FC5E8D /* MP42SSAConverter.m in Sources */,
 				A9B9C2711823923200416A4E /* MP42BitmapSubConverter.m in Sources */,
 				A9B9C28E1823923200416A4E /* MP42Muxer.m in Sources */,

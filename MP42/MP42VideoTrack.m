@@ -10,6 +10,7 @@
 #import "MP42Track+Private.h"
 #import "MP42MediaFormat.h"
 #import "MP42PrivateUtilities.h"
+#import "MP42-Shared-Swift.h"
 #import <mp4v2.h>
 
 MP42_OBJC_DIRECT_MEMBERS
@@ -45,6 +46,16 @@ MP42_OBJC_DIRECT_MEMBERS
         _transform.tx = CFSwapInt32BigToHost(ptr32[6]) / 0x10000;
         _transform.ty = CFSwapInt32BigToHost(ptr32[7]) / 0x10000;
         free(val);
+
+        // Sample descriptions
+        uint32_t count = MP4GetTrackNumberOfSampleDescriptions(fileHandle, self.trackId);
+
+        NSMutableArray<MP42SampleDescription *> *descriptions = [NSMutableArray array];
+        for (uint32_t index = 0; index < count; index++) {
+            MP42VideoSampleDescription *description = [[MP42VideoSampleDescription alloc] initWithFileHandle:fileHandle trackId:self.trackId index:index];
+            [descriptions addObject:description];
+        }
+        self.sampleDescriptions = [descriptions copy];
 
         if (MP4HaveTrackAtom(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.pasp")) {
             MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.pasp.hSpacing", &_hSpacing);

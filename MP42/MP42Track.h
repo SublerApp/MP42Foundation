@@ -12,6 +12,7 @@
 #import <MP42Foundation/MP42SecurityAccessToken.h>
 
 @class MP42SampleBuffer;
+@class MP42SampleDescription;
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -23,8 +24,11 @@ NS_ASSUME_NONNULL_BEGIN
 @property(nonatomic, readonly) MP42TrackId trackId;
 
 @property(nonatomic, readonly, copy, nullable) NSURL *URL;
-@property(nonatomic, readonly) MP42CodecType format;
+
+@property(nonatomic, readonly) NSArray<MP42SampleDescription *> *sampleDescriptions;
+
 @property(nonatomic, readonly) MP42MediaType mediaType;
+@property(nonatomic, readonly) MP42CodecType format;
 
 @property(nonatomic, readonly) uint32_t timescale;
 @property(nonatomic, readonly) MP42Duration duration;

@@ -26,6 +26,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property(nonatomic, readwrite) MP42CodecType format;
 @property(nonatomic, readwrite) MP42MediaType mediaType;
 
+@property(nonatomic, readwrite) NSArray<MP42SampleDescription *> *sampleDescriptions;
+
 @property(nonatomic, readwrite) uint32_t timescale;
 @property(nonatomic, readwrite) MP42Duration duration;
 @property(nonatomic, readwrite) uint32_t bitrate;

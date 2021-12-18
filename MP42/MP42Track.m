@@ -37,6 +37,8 @@ typedef struct muxer_helper {
 @property(nonatomic, readwrite) MP42CodecType format;
 @property(nonatomic, readwrite) MP42MediaType mediaType;
 
+@property(nonatomic, readwrite) NSArray<MP42SampleDescription *> *sampleDescriptions;
+
 @property(nonatomic, readwrite) uint32_t timescale;
 @property(nonatomic, readwrite) MP42Duration duration;
 @property(nonatomic, readwrite) uint64_t dataLength;
@@ -144,11 +146,13 @@ typedef struct muxer_helper {
     return self;
 }
 
-- (NSString *)description {
+- (NSString *)description
+{
     return [NSString stringWithFormat:@"Track: %d, %@, %@, %llu kbit/s, %@", self.trackId, self.name, self.timeString, self.dataLength / self.duration * 8, localizedDisplayName(self.mediaType, self.format)];
 }
 
-- (void)dealloc {
+- (void)dealloc
+{
     [self free_muxer_helper];
 }
 
