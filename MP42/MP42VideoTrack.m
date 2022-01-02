@@ -3,7 +3,7 @@
 //  Subler
 //
 //  Created by Damiano Galassi on 31/01/09.
-//  Copyright 2021 Damiano Galassi. All rights reserved.
+//  Copyright 2022 Damiano Galassi. All rights reserved.
 //
 
 #import "MP42VideoTrack.h"
@@ -48,14 +48,14 @@ MP42_OBJC_DIRECT_MEMBERS
         free(val);
 
         // Sample descriptions
-        uint32_t count = MP4GetTrackNumberOfSampleDescriptions(fileHandle, self.trackId);
-
-        NSMutableArray<MP42SampleDescription *> *descriptions = [NSMutableArray array];
-        for (uint32_t index = 0; index < count; index++) {
-            MP42VideoSampleDescription *description = [[MP42VideoSampleDescription alloc] initWithFileHandle:fileHandle trackId:self.trackId index:index];
-            [descriptions addObject:description];
-        }
-        self.sampleDescriptions = [descriptions copy];
+//        uint32_t count = MP4GetTrackNumberOfSampleDescriptions(fileHandle, self.trackId);
+//
+//        NSMutableArray<MP42SampleDescription *> *descriptions = [NSMutableArray array];
+//        for (uint32_t index = 0; index < count; index++) {
+//            MP42VideoSampleDescription *description = [[MP42VideoSampleDescription alloc] initWithFileHandle:fileHandle trackId:self.trackId index:index];
+//            [descriptions addObject:description];
+//        }
+//        self.sampleDescriptions = [descriptions copy];
 
         if (MP4HaveTrackAtom(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.pasp")) {
             MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.pasp.hSpacing", &_hSpacing);

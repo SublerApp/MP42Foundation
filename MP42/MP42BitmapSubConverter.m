@@ -4,7 +4,7 @@
 //
 //  Created by Damiano Galassi on 26/03/11.
 //  VobSub code taken from Perian VobSubCodec.c
-//  Copyright 2021 Damiano Galassi. All rights reserved.
+//  Copyright 2022 Damiano Galassi. All rights reserved.
 //
 
 #import "MP42BitmapSubConverter.h"
