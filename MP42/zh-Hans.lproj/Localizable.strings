@@ -14,6 +14,9 @@
 "Album Artist" = "专辑艺人";
 
 /* No comment provided by engineer. */
+"Animation" = "动画";
+
+/* No comment provided by engineer. */
 "Apple Lossless" = "Apple 无损音频编码";
 
 /* No comment provided by engineer. */
@@ -119,6 +122,9 @@
 "E-AC3" = "E-AC3";
 
 /* No comment provided by engineer. */
+"Encoded By" = "编码者";
+
+/* No comment provided by engineer. */
 "Encoding Tool" = "编码方式";
 
 /* No comment provided by engineer. */
@@ -164,7 +170,7 @@
 "H.264" = "H.264";
 
 /* No comment provided by engineer. */
-"H.264 (Parameter Sets in Bitstream)" = "H.264 (Parameter Sets in Bitstream)";
+"H.264 (Parameter Sets in Bitstream)" = "H.264 (参数集位于比特流中)";
 
 /* No comment provided by engineer. */
 "HD Video" = "清晰度";
@@ -176,7 +182,7 @@
 "HEVC" = "HEVC";
 
 /* No comment provided by engineer. */
-"HEVC (Parameter Sets in Bitstream)" = "HEVC (Parameter Sets in Bitstream)";
+"HEVC (Parameter Sets in Bitstream)" = "HEVC (参数集位于比特流中)";
 
 /* No comment provided by engineer. */
 "Hint" = "提示";
@@ -245,6 +251,27 @@
 "MPEG-2 Video" = "MPEG-2 视频";
 
 /* No comment provided by engineer. */
+"MPEG-4 Control" = "MPEG-4 控制信息";
+
+/* No comment provided by engineer. */
+"MPEG-4 Control Track" = "MPEG-4 控制轨道";
+
+/* No comment provided by engineer. */
+"MPEG-4 ODSM" = "MPEG-4 ODSM";
+
+/* No comment provided by engineer. */
+"MPEG-4 ODSM Track" = "MPEG-4 ODSM 轨道";
+
+/* No comment provided by engineer. */
+"MPEG-4 SDSM" = "MPEG-4 SDSM";
+
+/* No comment provided by engineer. */
+"MPEG-4 SDSM Track" = "MPEG-4 SDSM 轨道";
+
+/* No comment provided by engineer. */
+"MPEG-4 Visual" = "MPEG-4 视觉信息";
+
+/* No comment provided by engineer. */
 "Muxed Track" = "已混流轨道";
 
 /* No comment provided by engineer. */
@@ -267,6 +294,9 @@
 
 /* No comment provided by engineer. */
 "PGS" = "PGS";
+
+/* No comment provided by engineer. */
+"Phonogram Rights" = "录音制品版权";
 
 /* No comment provided by engineer. */
 "playlist ID" = "播放列表 ID";
@@ -447,6 +477,9 @@
 
 /* No comment provided by engineer. */
 "Work Name" = "作品名称";
+
+/* No comment provided by engineer. */
+"XAVC Long GOP" = "XAVC Long GOP";
 
 /* No comment provided by engineer. */
 "XID" = "XID";
