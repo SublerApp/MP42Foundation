@@ -1,0 +1,168 @@
+/* No comment provided by engineer. */
+"AAC" = "AAC";
+
+/* No comment provided by engineer. */
+"AC3" = "AC3";
+
+/* No comment provided by engineer. */
+"Album" = "Album";
+
+/* No comment provided by engineer. */
+"Atmos" = "Atmos";
+
+/* No comment provided by engineer. */
+"ATSC" = "ATSC";
+
+/* No comment provided by engineer. */
+"AV1" = "AV1";
+
+/* No comment provided by engineer. */
+"CEA-608" = "CEA-608";
+
+/* No comment provided by engineer. */
+"CEA-708" = "CEA-708";
+
+/* No comment provided by engineer. */
+"Cinepak" = "Cinepak";
+
+/* No comment provided by engineer. */
+"Composer" = "Compositeur";
+
+/* No comment provided by engineer. */
+"composer ID" = "ID Compositeur";
+
+/* No comment provided by engineer. */
+"Copyright" = "Droits d'auteur";
+
+/* No comment provided by engineer. */
+"Description" = "Description";
+
+/* No comment provided by engineer. */
+"DTS" = "DTS";
+
+/* No comment provided by engineer. */
+"DV NTSC" = "DV NTSC";
+
+/* No comment provided by engineer. */
+"DV PAL" = "DV PAL";
+
+/* No comment provided by engineer. */
+"DVC Pro PAL" = "DVC Pro PAL";
+
+/* No comment provided by engineer. */
+"E-AC3" = "E-AC3";
+
+/* No comment provided by engineer. */
+"FairPlay AAC" = "AAC FairPlay";
+
+/* No comment provided by engineer. */
+"FLAC" = "FLAC";
+
+/* No comment provided by engineer. */
+"Genre" = "Genre";
+
+/* No comment provided by engineer. */
+"H.263" = "H.263";
+
+/* No comment provided by engineer. */
+"H.264" = "H.264";
+
+/* No comment provided by engineer. */
+"HE-AAC" = "HE-AAC";
+
+/* No comment provided by engineer. */
+"HEVC" = "HEVC";
+
+/* No comment provided by engineer. */
+"JPEG" = "JPEG";
+
+/* No comment provided by engineer. */
+"Long Description" = "Description longue";
+
+/* No comment provided by engineer. */
+"MP1" = "MP1";
+
+/* No comment provided by engineer. */
+"MP2" = "MP2";
+
+/* No comment provided by engineer. */
+"MP3" = "MP3";
+
+/* No comment provided by engineer. */
+"Name" = "Nom";
+
+/* No comment provided by engineer. */
+"Opus" = "Opus";
+
+/* No comment provided by engineer. */
+"PCM" = "PCM";
+
+/* No comment provided by engineer. */
+"PGS" = "PGS";
+
+/* No comment provided by engineer. */
+"PNG" = "PNG";
+
+/* No comment provided by engineer. */
+"Podcast" = "Podcast";
+
+/* No comment provided by engineer. */
+"ProRes 422" = "ProRes 422";
+
+/* No comment provided by engineer. */
+"ProRes 422 HQ" = "ProRes 422 HQ";
+
+/* No comment provided by engineer. */
+"ProRes 422 LT" = "ProRes 422 LT";
+
+/* No comment provided by engineer. */
+"ProRes 422 Proxy" = "ProRes 422 Proxy";
+
+/* No comment provided by engineer. */
+"ProRes 4444" = "ProRes 4444";
+
+/* No comment provided by engineer. */
+"Release Date" = "Date de sortie";
+
+/* No comment provided by engineer. */
+"Sort Composer" = "Trier le compositeur";
+
+/* No comment provided by engineer. */
+"SSA" = "SSA";
+
+/* No comment provided by engineer. */
+"Studio" = "Studio";
+
+/* No comment provided by engineer. */
+"Tempo" = "Tempo";
+
+/* No comment provided by engineer. */
+"Text" = "Texte";
+
+/* No comment provided by engineer. */
+"Thanks" = "Remerciements";
+
+/* No comment provided by engineer. */
+"True Audio" = "True Audio";
+
+/* No comment provided by engineer. */
+"True HD" = "True HD";
+
+/* No comment provided by engineer. */
+"Tx3g" = "Tx3g";
+
+/* No comment provided by engineer. */
+"VobSub" = "VobSub";
+
+/* No comment provided by engineer. */
+"Vorbis" = "Vorbis";
+
+/* No comment provided by engineer. */
+"VP8" = "VP8";
+
+/* No comment provided by engineer. */
+"VP9" = "VP9";
+
+/* No comment provided by engineer. */
+"WebVTT" = "WebVTT";
+

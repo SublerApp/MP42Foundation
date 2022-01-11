@@ -290,6 +290,8 @@
 		A908010F1D4B83A3002B6950 /* MP42AudioEncoder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MP42AudioEncoder.m; sourceTree = "<group>"; };
 		A90801101D4B83A3002B6950 /* MP42AudioUnit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MP42AudioUnit.h; sourceTree = "<group>"; };
 		A910B5A318394E900064028F /* libmp42.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libmp42.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		A9146866278D8F0C00860468 /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/Localizable.strings; sourceTree = "<group>"; };
+		A9146867278D8F0C00860468 /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/Localizable.strings; sourceTree = "<group>"; };
 		A91711E4187D547D00459495 /* MP42PreviewGenerator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MP42PreviewGenerator.h; sourceTree = "<group>"; };
 		A91711E5187D547D00459495 /* MP42PreviewGenerator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MP42PreviewGenerator.m; sourceTree = "<group>"; };
 		A917286519FD2BCE00348DF8 /* MP42Logging.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MP42Logging.h; sourceTree = "<group>"; };
@@ -932,6 +934,7 @@
 				Base,
 				it,
 				"zh-Hans",
+				fr,
 			);
 			mainGroup = A9B9C1E3182391DF00416A4E;
 			productRefGroup = A9B9C1EE182391DF00416A4E /* Products */;
@@ -1107,6 +1110,7 @@
 			children = (
 				A9AA2B831DBF954000C9D897 /* it */,
 				A9E059D42529DF97000E0E9A /* zh-Hans */,
+				A9146866278D8F0C00860468 /* fr */,
 			);
 			name = Localizable.strings;
 			sourceTree = "<group>";
@@ -1126,6 +1130,7 @@
 			children = (
 				A9BA1AEA1DBF7DBE00FD0B38 /* it */,
 				A9E059D52529DF97000E0E9A /* zh-Hans */,
+				A9146867278D8F0C00860468 /* fr */,
 			);
 			name = Localizable.strings;
 			sourceTree = "<group>";
