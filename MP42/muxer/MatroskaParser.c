@@ -1552,7 +1552,6 @@ static void parseTrackEntry(MatroskaFile *mf,ulonglong toplen) {
           bamap->Value = readUInt(mf,(unsigned)len);
           break;
         case 0x41a4: // BlockAddIDName
-          readUInt(mf,(unsigned)len);
           STRGETM(mf,bamap->Name,len);
           break;
         case 0x41e7: // BlockAddIDType
