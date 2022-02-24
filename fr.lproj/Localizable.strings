@@ -29,6 +29,9 @@
 "Artist" = "Artiste";
 
 /* No comment provided by engineer. */
+"artist ID" = "ID Artiste";
+
+/* No comment provided by engineer. */
 "Atmos" = "Atmos";
 
 /* No comment provided by engineer. */
@@ -75,6 +78,9 @@
 
 /* No comment provided by engineer. */
 "Conductor" = "Chef d'orchestre";
+
+/* No comment provided by engineer. */
+"content ID" = "ID Contenu";
 
 /* No comment provided by engineer. */
 "Content Rating" = "Évaluation du contenu";
@@ -152,6 +158,9 @@
 "Genre" = "Genre";
 
 /* No comment provided by engineer. */
+"genre ID" = "ID Genre";
+
+/* No comment provided by engineer. */
 "Grouping" = "Regroupement";
 
 /* No comment provided by engineer. */
@@ -180,6 +189,15 @@
 
 /* No comment provided by engineer. */
 "Hint Track" = "Piste d'indice";
+
+/* No comment provided by engineer. */
+"iTunes Account" = "Compte iTunes";
+
+/* No comment provided by engineer. */
+"iTunes Account Type" = "Type de compte iTunes";
+
+/* No comment provided by engineer. */
+"iTunes Country" = "Pays iTunes";
 
 /* No comment provided by engineer. */
 "JPEG" = "JPEG";
@@ -215,7 +233,7 @@
 "Movement Name" = "Nom du mouvement";
 
 /* No comment provided by engineer. */
-"Movement Number" = "Nombre de mouvements";
+"Movement Number" = "Numéro du mouvement";
 
 /* No comment provided by engineer. */
 "MP1" = "MP1";
@@ -279,6 +297,9 @@
 
 /* No comment provided by engineer. */
 "Phonogram Rights" = "Droits de phonogramme";
+
+/* No comment provided by engineer. */
+"playlist ID" = "ID Liste de lecture";
 
 /* No comment provided by engineer. */
 "PNG" = "PNG";
@@ -386,7 +407,31 @@
 "Text" = "Texte";
 
 /* No comment provided by engineer. */
+"Text Track" = "Piste Texte";
+
+/* No comment provided by engineer. */
 "Thanks" = "Remerciements";
+
+/* No comment provided by engineer. */
+"Theora" = "Théorie";
+
+/* No comment provided by engineer. */
+"TimeCode" = "Code Temporel";
+
+/* No comment provided by engineer. */
+"TimeCode 64" = "Code Temporel 64";
+
+/* No comment provided by engineer. */
+"TimeCode Track" = "Piste de Code Temporel";
+
+/* No comment provided by engineer. */
+"Timed Metadata" = "Métadonnées chronométrées";
+
+/* No comment provided by engineer. */
+"Track #" = "Piste #";
+
+/* No comment provided by engineer. */
+"Track Sub-Title" = "Sous-titre de la piste";
 
 /* No comment provided by engineer. */
 "True Audio" = "True Audio";
@@ -395,7 +440,25 @@
 "True HD" = "True HD";
 
 /* No comment provided by engineer. */
+"TV Episode #" = "Épisode TV #";
+
+/* No comment provided by engineer. */
+"TV Episode ID" = "ID Épisode TV";
+
+/* No comment provided by engineer. */
+"TV Network" = "Chaîne TV";
+
+/* No comment provided by engineer. */
+"TV Season" = "Saison TV";
+
+/* No comment provided by engineer. */
+"TV Show" = "Émission TV";
+
+/* No comment provided by engineer. */
 "Tx3g" = "Tx3g";
+
+/* No comment provided by engineer. */
+"Video Track" = "Piste Vidéo";
 
 /* No comment provided by engineer. */
 "VobSub" = "VobSub";
@@ -411,4 +474,13 @@
 
 /* No comment provided by engineer. */
 "WebVTT" = "WebVTT";
+
+/* No comment provided by engineer. */
+"Work Name" = "Nom de travail";
+
+/* No comment provided by engineer. */
+"XAVC Long GOP" = "XAVC Long GOP";
+
+/* No comment provided by engineer. */
+"XID" = "XID";
 
