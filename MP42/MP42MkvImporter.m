@@ -191,48 +191,30 @@ MP42_OBJC_DIRECT_MEMBERS
                     videoTrack.coll = coll;
                 }
 
-                BlockAdditionMapping *bams;
-                unsigned int bamCount = 0;
-                mkv_GetBlockAdditionMappings(_matroskaFile, &bams, &bamCount);
+                for (unsigned int xi = 0; xi < mkvTrack->nBlockAdditionMappings; xi++) {
+                    struct BlockAdditionMapping *blockAddition = &mkvTrack->BlockAdditionMappings[xi];
 
-                for (unsigned int xi = 0; xi < bamCount; xi++) {
-                    BlockAdditionMapping *blockAddition = &bams[xi];
+                    if (blockAddition->ID == i) {
+                        if ((blockAddition->Type == 'dvcC' || blockAddition->Type == 'dvwC' || blockAddition->Type == 'dvvC') && blockAddition->Length >= 24) {
+                            uint8_t *buffer = blockAddition->Data;
+                            MP42DolbyVisionMetadata dv;
 
-                    if (blockAddition->TrackId == i) {
-                        if ((blockAddition->Value == 'dvcC' ||
-                             blockAddition->Value == 0x664767643 ||
-                             blockAddition->Value == 'dvwC' ||
-                             blockAddition->Value == 'dvvC') &&
-                            blockAddition->Length >= 24) {
-                            uint8_t *buffer = malloc(blockAddition->Length);
+                            dv.versionMajor = buffer[0];
+                            dv.versionMinor = buffer[1];
 
-                            if (readData(_ioStream, blockAddition->Position, &buffer, blockAddition->Length)) {
-                                MP42DolbyVisionMetadata dv;
+                            dv.profile = (buffer[2] & 0xfe) >> 1;
+                            dv.level = ((buffer[2] & 0x1) << 7) + ((buffer[3] & 0xf8) >> 3);
 
-                                dv.versionMajor = buffer[0];
-                                dv.versionMinor = buffer[1];
+                            dv.rpuPresentFlag = (buffer[3] & 0x4) >> 2;
+                            dv.elPresentFlag = (buffer[3] & 0x2) >> 1;
+                            dv.blPresentFlag = buffer[3] & 0x1;
 
-                                dv.profile = (buffer[2] & 0xfe) >> 1;
-                                dv.level = ((buffer[2] & 0x1) << 7) + ((buffer[3] & 0xf8) >> 3);
+                            dv.blSignalCompatibilityId = (buffer[4] & 0xf0) >> 4;
 
-                                dv.rpuPresentFlag = (buffer[3] & 0x4) >> 2;
-                                dv.elPresentFlag = (buffer[3] & 0x2) >> 1;
-                                dv.blPresentFlag = buffer[3] & 0x1;
-
-                                dv.blSignalCompatibilityId = (buffer[4] & 0xf0) >> 4;
-
-                                videoTrack.dolbyVision = dv;
-                            }
-                            free(buffer);
+                            videoTrack.dolbyVision = dv;
                         }
-                        else if (blockAddition->Value == 'hvcE' || blockAddition->Value == 'avcE') {
-                            uint8_t *buffer = malloc(blockAddition->Length);
-                            if (readData(_ioStream, blockAddition->Position, &buffer, blockAddition->Length)) {
-                                videoTrack.dolbyVisionELConfiguration = [NSData dataWithBytesNoCopy:buffer length:blockAddition->Length];
-                            }
-                            else {
-                                free(buffer);
-                            }
+                        else if (blockAddition->Type == 'hvcE' || blockAddition->Type == 'avcE') {
+                            videoTrack.dolbyVisionELConfiguration = [NSData dataWithBytes:blockAddition->Data length:blockAddition->Length];
                         }
                     }
                 }

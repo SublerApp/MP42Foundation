@@ -220,10 +220,6 @@ struct MatroskaFile {
   // Tags
   unsigned int            nTags,nTagsSize;
   struct Tag            *Tags;
-
-  // BlockAdditions
-  unsigned int            nBlockAdditionMappings,nBlockAdditionMappingsSize;
-  struct BlockAdditionMapping            *BlockAdditionMappings;
 };
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1462,9 +1458,34 @@ static void CopyStr(char **src,char **dst) {
   *dst += l;
 }
 
+static void parseBlockAdditionalMapping(MatroskaFile *mf,ulonglong toplen,struct TrackInfo *ti) {
+  ulonglong   v;
+  struct BlockAdditionMapping ba,*bat;
+
+  memset(&ba, 0, sizeof(ba));
+
+  FOREACH(mf,toplen)
+    case 0x41F0: // BlockAddIDValue
+      ba.ID = readUInt(mf,(unsigned)len);
+      break;
+    case 0x41E7: // BlockAddIDType
+      ba.Type = readUInt(mf,(unsigned)len);
+      break;
+    case 0x41ED: // BlockAddIDExtraData
+      ba.Length = len;
+      STRGETM(mf,ba.Data,len);
+      break;
+  ENDFOR(mf);
+
+  if (!ba.Data)
+      return;
+
+  bat = ASGET(mf,ti,BlockAdditionMappings);
+  memcpy(bat,&ba,sizeof(ba));
+}
+
 static void parseTrackEntry(MatroskaFile *mf,ulonglong toplen) {
   struct TrackInfo  t,*tp,**tpp;
-  struct BlockAdditionMapping *bamap;
   ulonglong            v;
   char                    *cp = NULL, *cs = NULL;
   size_t            cplen = 0, cslen = 0, cpadd = 0;
@@ -1542,27 +1563,6 @@ static void parseTrackEntry(MatroskaFile *mf,ulonglong toplen) {
       break;
     case 0x55ee: // MaxBlockAdditionID
       t.MaxBlockAdditionID = (unsigned)readUInt(mf,(unsigned)len);
-      break;
-    case 0x41e4: // BlockAdditionMapping
-      bamap = AGET(mf,BlockAdditionMappings);
-      memset(bamap,0,sizeof(*bamap));
-      bamap->TrackId = mf->nTracks;
-      FOREACH(mf, len)
-        case 0x41f0: // BlockAddIDValue
-          bamap->Value = readUInt(mf,(unsigned)len);
-          break;
-        case 0x41a4: // BlockAddIDName
-          STRGETM(mf,bamap->Name,len);
-          break;
-        case 0x41e7: // BlockAddIDType
-          bamap->Value = readUInt(mf,(unsigned)len);
-          break;
-        case 0x41ed: // BlockAddIDExtraData
-          bamap->Position = filepos(mf);
-          bamap->Length = len;
-          skipbytes(mf,len);
-          break;
-      ENDFOR(mf);
       break;
     case 0x536e: // Name
       if (t.Name)
@@ -1666,6 +1666,9 @@ static void parseTrackEntry(MatroskaFile *mf,ulonglong toplen) {
           ENDFOR(mf);
           break;
       ENDFOR(mf);
+      break;
+    case 0x41E4: // BlockAdditionalMapping
+      parseBlockAdditionalMapping(mf,len,&t);
       break;
   ENDFOR(mf);
 
@@ -3365,8 +3368,12 @@ void              mkv_Close(MatroskaFile *mf) {
   if (mf==NULL)
     return;
 
-  for (i=0;i<mf->nTracks;++i)
+  for (i=0;i<mf->nTracks;++i) {
+    for (j=0;j<mf->Tracks[i]->nBlockAdditionMappings;++j)
+        mf->cache->memfree(mf->cache,mf->Tracks[i]->BlockAdditionMappings[j].Data);
+    mf->cache->memfree(mf->cache,mf->Tracks[i]->BlockAdditionMappings);
     mf->cache->memfree(mf->cache,mf->Tracks[i]);
+  }
   mf->cache->memfree(mf->cache,mf->Tracks);
 
   for (i=0;i<mf->nQBlocks;++i) {
@@ -3393,11 +3400,6 @@ void              mkv_Close(MatroskaFile *mf) {
     mf->cache->memfree(mf->cache,mf->Attachments[i].MimeType);
   }
   mf->cache->memfree(mf->cache,mf->Attachments);
-
-  for (i=0;i<mf->nBlockAdditionMappings;++i) {
-    mf->cache->memfree(mf->cache,mf->BlockAdditionMappings[i].Name);
-  }
-  mf->cache->memfree(mf->cache,mf->BlockAdditionMappings);
 
   for (i=0;i<mf->nChapters;++i)
     DeleteChapter(mf,&mf->Chapters[i]);
@@ -3434,11 +3436,6 @@ TrackInfo     *mkv_GetTrackInfo(MatroskaFile *mf,unsigned track) {
     return NULL;
 
   return mf->Tracks[track];
-}
-
-void              mkv_GetBlockAdditionMappings(MatroskaFile *mf,BlockAdditionMapping **bam,unsigned *count) {
-  *bam = mf->BlockAdditionMappings;
-  *count = mf->nBlockAdditionMappings;
 }
 
 void              mkv_GetAttachments(MatroskaFile *mf,Attachment **at,unsigned *count) {

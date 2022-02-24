@@ -114,16 +114,11 @@ typedef struct MatroskaFile MatroskaFile;
 #define    TT_SUB        17
 
 struct BlockAdditionMapping {
-    ulonglong    Value;
-    char        *Name;
-    ulonglong    Type;
-    void        *ExtraData;
-    ulonglong    Position;
-    ulonglong    Length;
-    unsigned     TrackId;
+  unsigned int ID;
+  unsigned int Type;
+  unsigned int Length;
+  void *Data;
 };
-
-typedef struct BlockAdditionMapping  BlockAdditionMapping;
 
 struct TrackInfo {
   unsigned char      Number;
@@ -215,6 +210,10 @@ struct TrackInfo {
   char            *CodecID;
 
   unsigned int NeedKeyframes;
+
+  // BlockAdditionMappings
+  unsigned int nBlockAdditionMappings,nBlockAdditionMappingsSize;
+  struct BlockAdditionMapping *BlockAdditionMappings;
 };
 
 typedef struct TrackInfo  TrackInfo;
@@ -365,12 +364,6 @@ X SegmentInfo   *mkv_GetFileInfo(/* in */ MatroskaFile *mf);
 /* Get track information */
 X unsigned int  mkv_GetNumTracks(/* in */ MatroskaFile *mf);
 X TrackInfo     *mkv_GetTrackInfo(/* in */ MatroskaFile *mf,/* in */ unsigned track);
-
-/* block addition mappings*/
-X void          mkv_GetBlockAdditionMappings(/* in */   MatroskaFile *mf,
-                 /* out */  BlockAdditionMapping **bam,
-                 /* out */  unsigned *count);
-
 
 /* chapters, tags and attachments */
 X void          mkv_GetAttachments(/* in */   MatroskaFile *mf,
