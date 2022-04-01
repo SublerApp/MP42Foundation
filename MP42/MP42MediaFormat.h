@@ -94,6 +94,7 @@ enum : MP42VideoCodecType
     kMP42VideoCodecType_AppleProRes422      = 'apcn',
     kMP42VideoCodecType_AppleProRes422LT    = 'apcs',
     kMP42VideoCodecType_AppleProRes422Proxy = 'apco',
+    kMP42VideoCodecType_AppleProResRAW      = 'aprn',
 
     kMP42VideoCodecType_DVCNTSC             = 'dvc ',
     kMP42VideoCodecType_DVCPAL              = 'dvcp',

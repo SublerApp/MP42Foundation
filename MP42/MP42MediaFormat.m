@@ -202,6 +202,9 @@ NSString *localizedVideoDisplayName(FourCharCode mediaSubtype)
             result = NSLocalizedString(@"ProRes 422 Proxy", nil);
             break;
 
+        case kMP42VideoCodecType_AppleProResRAW:
+            result = NSLocalizedString(@"ProRes RAW", nil);
+            break;
         case kMP42VideoCodecType_DVCNTSC:
             result = NSLocalizedString(@"DV NTSC", nil);
             break;
