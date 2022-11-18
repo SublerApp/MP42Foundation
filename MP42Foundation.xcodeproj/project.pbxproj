@@ -323,6 +323,9 @@
 		A97EA7C61D4B8A2D00257CEA /* FFmpegUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FFmpegUtils.m; sourceTree = "<group>"; };
 		A989F10D1823B3B40070AD8C /* MP42TextSample.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MP42TextSample.h; sourceTree = "<group>"; };
 		A989F10E1823B3B40070AD8C /* MP42TextSample.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MP42TextSample.m; sourceTree = "<group>"; };
+		A9944E1028A90EDB00A2C84F /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
+		A9944E1128A90EDB00A2C84F /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
+		A9944E1228A90EDB00A2C84F /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		A99DB6A41D4648A800C6E56C /* libmp4v2.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libmp4v2.a; path = contrib/mp42v2/libmp4v2.a; sourceTree = "<group>"; };
 		A99DB6A71D4648B700C6E56C /* liblept.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = liblept.a; path = contrib/Tesseract/lib/liblept.a; sourceTree = "<group>"; };
 		A99DB6A81D4648B700C6E56C /* libtesseract.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libtesseract.a; path = contrib/Tesseract/lib/libtesseract.a; sourceTree = "<group>"; };
@@ -342,9 +345,6 @@
 		A9B5C954241A302E000ACD15 /* SampleCursor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleCursor.swift; sourceTree = "<group>"; };
 		A9B9C1ED182391DF00416A4E /* MP42Foundation.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = MP42Foundation.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		A9B9C1F0182391DF00416A4E /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
-		A9B9C1F3182391DF00416A4E /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
-		A9B9C1F4182391DF00416A4E /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
-		A9B9C1F5182391DF00416A4E /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		A9B9C1F8182391DF00416A4E /* MP42Foundation-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "MP42Foundation-Info.plist"; sourceTree = "<group>"; };
 		A9B9C1FA182391DF00416A4E /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		A9B9C1FC182391DF00416A4E /* MP42Foundation-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MP42Foundation-Prefix.pch"; sourceTree = "<group>"; };
@@ -533,43 +533,35 @@
 			isa = PBXGroup;
 			children = (
 				A966CEFF275F658000AF8813 /* Accelerate.framework */,
-				A9B0F2B322A2A36D0012E099 /* libpng16.a */,
-				A9B0F28822A29E9C0012E099 /* liblzma.tbd */,
-				A9E42D3D22A2835500A94E9C /* libtiff.a */,
+				A9B9C2D71823970E00416A4E /* AVFoundation.framework */,
+				A9B9C2D91823971F00416A4E /* AudioToolbox.framework */,
+				A9A0C9A319814C9B00A72763 /* AudioUnit.framework */,
 				A957E5A7203FF96800A5F776 /* CoreImage.framework */,
-				A9D6CD651F9E3A8500CCEE3E /* VideoToolbox.framework */,
+				A9B9C2DD1823973200416A4E /* CoreMedia.framework */,
+				A9A0C99B19814B0800A72763 /* CoreAudio.framework */,
+				A9B9C1F0182391DF00416A4E /* Cocoa.framework */,
+				A9944E1228A90EDB00A2C84F /* Foundation.framework */,
+				A9944E1028A90EDB00A2C84F /* CoreData.framework */,
+				A9944E1128A90EDB00A2C84F /* AppKit.framework */,
 				A9D6CD611F9E3A7F00CCEE3E /* MediaToolbox.framework */,
-				A90801051D4B830A002B6950 /* libavfilter.a */,
-				A90801061D4B830A002B6950 /* libavformat.a */,
-				A9D599BA1D4885E0001C22BD /* libswresample.a */,
+				A9D6CD651F9E3A8500CCEE3E /* VideoToolbox.framework */,
+				A9B9C4921823986200416A4E /* Quartz.framework */,
+				A9B0F28822A29E9C0012E099 /* liblzma.tbd */,
 				A9E8FB861D4664F70071A5F1 /* libz.tbd */,
 				A9E8FB841D4664E80071A5F1 /* libbz2.tbd */,
 				A99DB6B21D46497B00C6E56C /* libiconv.tbd */,
 				A99DB6AC1D4648D100C6E56C /* libavcodec.a */,
 				A99DB6AE1D4648D100C6E56C /* libavutil.a */,
+				A90801051D4B830A002B6950 /* libavfilter.a */,
+				A90801061D4B830A002B6950 /* libavformat.a */,
+				A9D599BA1D4885E0001C22BD /* libswresample.a */,
 				A99DB6A71D4648B700C6E56C /* liblept.a */,
 				A99DB6A81D4648B700C6E56C /* libtesseract.a */,
 				A99DB6A41D4648A800C6E56C /* libmp4v2.a */,
-				A9A0C9A319814C9B00A72763 /* AudioUnit.framework */,
-				A9B9C4921823986200416A4E /* Quartz.framework */,
-				A9B9C2DD1823973200416A4E /* CoreMedia.framework */,
-				A9B9C2D91823971F00416A4E /* AudioToolbox.framework */,
-				A9A0C99B19814B0800A72763 /* CoreAudio.framework */,
-				A9B9C2D71823970E00416A4E /* AVFoundation.framework */,
-				A9B9C1F0182391DF00416A4E /* Cocoa.framework */,
-				A9B9C1F2182391DF00416A4E /* Other Frameworks */,
+				A9B0F2B322A2A36D0012E099 /* libpng16.a */,
+				A9E42D3D22A2835500A94E9C /* libtiff.a */,
 			);
 			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		A9B9C1F2182391DF00416A4E /* Other Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				A9B9C1F3182391DF00416A4E /* Foundation.framework */,
-				A9B9C1F4182391DF00416A4E /* CoreData.framework */,
-				A9B9C1F5182391DF00416A4E /* AppKit.framework */,
-			);
-			name = "Other Frameworks";
 			sourceTree = "<group>";
 		};
 		A9B9C1F6182391DF00416A4E /* MP42 */ = {
@@ -914,7 +906,7 @@
 			isa = PBXProject;
 			attributes = {
 				CLASSPREFIX = MP42;
-				LastUpgradeCheck = 1250;
+				LastUpgradeCheck = 1400;
 				ORGANIZATIONNAME = "Damiano Galassi";
 				TargetAttributes = {
 					A910B5A218394E900064028F = {
@@ -1144,6 +1136,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "MP42/MP42Foundation-Prefix.pch";
 				GCC_PREPROCESSOR_DEFINITIONS = "$(inherited)";
@@ -1173,6 +1166,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "MP42/MP42Foundation-Prefix.pch";
 				GCC_PREPROCESSOR_DEFINITIONS = "$(inherited)";
@@ -1241,6 +1235,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CLANG_WARN__EXIT_TIME_DESTRUCTORS = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = c11;
@@ -1269,11 +1264,11 @@
 					"$(SRCROOT)/contrib/**",
 				);
 				LIBRARY_SEARCH_PATHS = (
-					"$(PROJECT_DIR)/contrib/mp42v2",
-					"$(PROJECT_DIR)/contrib/Tesseract/lib",
-					"$(PROJECT_DIR)/contrib/ffmpeg/lib",
+					"$(SRCROOT)/contrib/mp42v2",
+					"$(SRCROOT)/contrib/Tesseract/lib",
+					"$(SRCROOT)/contrib/ffmpeg/lib",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "-w";
@@ -1329,6 +1324,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CLANG_WARN__EXIT_TIME_DESTRUCTORS = YES;
 				COPY_PHASE_STRIP = YES;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -1357,11 +1353,11 @@
 					"$(SRCROOT)/contrib/**",
 				);
 				LIBRARY_SEARCH_PATHS = (
-					"$(PROJECT_DIR)/contrib/mp42v2",
-					"$(PROJECT_DIR)/contrib/Tesseract/lib",
-					"$(PROJECT_DIR)/contrib/ffmpeg/lib",
+					"$(SRCROOT)/contrib/mp42v2",
+					"$(SRCROOT)/contrib/Tesseract/lib",
+					"$(SRCROOT)/contrib/ffmpeg/lib",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "-w";
 				SWIFT_COMPILATION_MODE = wholemodule;
@@ -1377,6 +1373,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -1412,6 +1409,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;

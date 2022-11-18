@@ -259,89 +259,83 @@ MP42_OBJC_DIRECT_MEMBERS
                             videoTrack.colorRange = CFBooleanGetValue(colorRange);
                         }
 
-                        if (@available(macOS 10.13, *)) {
-                            CFDataRef masteringExtension = CMFormatDescriptionGetExtension(formatDescription, kCMFormatDescriptionExtension_MasteringDisplayColorVolume);
-                            if (masteringExtension && CFDataGetLength(masteringExtension) >= 24) {
-                                MP42MasteringDisplayMetadataPayload *masteringPayload = (MP42MasteringDisplayMetadataPayload *)CFDataGetBytePtr(masteringExtension);
-                                MP42MasteringDisplayMetadata mastering;
+                        CFDataRef masteringExtension = CMFormatDescriptionGetExtension(formatDescription, kCMFormatDescriptionExtension_MasteringDisplayColorVolume);
+                        if (masteringExtension && CFDataGetLength(masteringExtension) >= 24) {
+                            MP42MasteringDisplayMetadataPayload *masteringPayload = (MP42MasteringDisplayMetadataPayload *)CFDataGetBytePtr(masteringExtension);
+                            MP42MasteringDisplayMetadata mastering;
 
-                                const int chromaDen = 50000;
-                                const int lumaDen = 10000;
+                            const int chromaDen = 50000;
+                            const int lumaDen = 10000;
 
-                                mastering.display_primaries[0][0] = make_rational(CFSwapInt16BigToHost(masteringPayload->display_primaries_rx), chromaDen);
-                                mastering.display_primaries[0][1] = make_rational(CFSwapInt16BigToHost(masteringPayload->display_primaries_ry), chromaDen);
-                                mastering.display_primaries[1][0] = make_rational(CFSwapInt16BigToHost(masteringPayload->display_primaries_gx), chromaDen);
-                                mastering.display_primaries[1][1] = make_rational(CFSwapInt16BigToHost(masteringPayload->display_primaries_gy), chromaDen);
-                                mastering.display_primaries[2][0] = make_rational(CFSwapInt16BigToHost(masteringPayload->display_primaries_bx), chromaDen);
-                                mastering.display_primaries[2][1] = make_rational(CFSwapInt16BigToHost(masteringPayload->display_primaries_by), chromaDen);
+                            mastering.display_primaries[0][0] = make_rational(CFSwapInt16BigToHost(masteringPayload->display_primaries_rx), chromaDen);
+                            mastering.display_primaries[0][1] = make_rational(CFSwapInt16BigToHost(masteringPayload->display_primaries_ry), chromaDen);
+                            mastering.display_primaries[1][0] = make_rational(CFSwapInt16BigToHost(masteringPayload->display_primaries_gx), chromaDen);
+                            mastering.display_primaries[1][1] = make_rational(CFSwapInt16BigToHost(masteringPayload->display_primaries_gy), chromaDen);
+                            mastering.display_primaries[2][0] = make_rational(CFSwapInt16BigToHost(masteringPayload->display_primaries_bx), chromaDen);
+                            mastering.display_primaries[2][1] = make_rational(CFSwapInt16BigToHost(masteringPayload->display_primaries_by), chromaDen);
 
-                                mastering.white_point[0] = make_rational(CFSwapInt16BigToHost(masteringPayload->white_point_x), chromaDen);
-                                mastering.white_point[1] = make_rational(CFSwapInt16BigToHost(masteringPayload->white_point_y), chromaDen);
+                            mastering.white_point[0] = make_rational(CFSwapInt16BigToHost(masteringPayload->white_point_x), chromaDen);
+                            mastering.white_point[1] = make_rational(CFSwapInt16BigToHost(masteringPayload->white_point_y), chromaDen);
 
-                                mastering.max_luminance = make_rational(CFSwapInt32BigToHost(masteringPayload->max_display_mastering_luminance), lumaDen);
-                                mastering.min_luminance = make_rational(CFSwapInt32BigToHost(masteringPayload->min_display_mastering_luminance), lumaDen);
+                            mastering.max_luminance = make_rational(CFSwapInt32BigToHost(masteringPayload->max_display_mastering_luminance), lumaDen);
+                            mastering.min_luminance = make_rational(CFSwapInt32BigToHost(masteringPayload->min_display_mastering_luminance), lumaDen);
 
-                                mastering.has_primaries = 1;
-                                mastering.has_luminance = 1;
+                            mastering.has_primaries = 1;
+                            mastering.has_luminance = 1;
 
-                                videoTrack.mastering = mastering;
-                            }
+                            videoTrack.mastering = mastering;
                         }
 
-                        if (@available(macOS 10.13, *)) {
-                            CFDataRef collExtension = CMFormatDescriptionGetExtension(formatDescription, kCMFormatDescriptionExtension_ContentLightLevelInfo);
-                            if (collExtension && CFDataGetLength(collExtension) >= 4) {
-                                MP42ContentLightMetadataPayload *collPayload = (MP42ContentLightMetadataPayload *)CFDataGetBytePtr(collExtension);
-                                MP42ContentLightMetadata coll;
-                                coll.MaxCLL = CFSwapInt16BigToHost(collPayload->MaxCLL);
-                                coll.MaxFALL = CFSwapInt16BigToHost(collPayload->MaxFALL);
+                        CFDataRef collExtension = CMFormatDescriptionGetExtension(formatDescription, kCMFormatDescriptionExtension_ContentLightLevelInfo);
+                        if (collExtension && CFDataGetLength(collExtension) >= 4) {
+                            MP42ContentLightMetadataPayload *collPayload = (MP42ContentLightMetadataPayload *)CFDataGetBytePtr(collExtension);
+                            MP42ContentLightMetadata coll;
+                            coll.MaxCLL = CFSwapInt16BigToHost(collPayload->MaxCLL);
+                            coll.MaxFALL = CFSwapInt16BigToHost(collPayload->MaxFALL);
 
-                                videoTrack.coll = coll;
-                            }
+                            videoTrack.coll = coll;
                         }
 
-                        if (@available(macOS 10.13, *)) {
-                            CFDictionaryRef extentions = CMFormatDescriptionGetExtensions(formatDescription);
-                            CFDictionaryRef atoms = CFDictionaryGetValue(extentions, kCMFormatDescriptionExtension_SampleDescriptionExtensionAtoms);
-                            if (atoms) {
-                                CFDataRef dvExtension = CFDictionaryGetValue(atoms, @"dvcC");
+                        CFDictionaryRef extentions = CMFormatDescriptionGetExtensions(formatDescription);
+                        CFDictionaryRef atoms = CFDictionaryGetValue(extentions, kCMFormatDescriptionExtension_SampleDescriptionExtensionAtoms);
+                        if (atoms) {
+                            CFDataRef dvExtension = CFDictionaryGetValue(atoms, @"dvcC");
 
-                                if (!dvExtension) {
-                                    dvExtension = CFDictionaryGetValue(atoms, @"dvvC");
-                                }
-                                if (!dvExtension) {
-                                    dvExtension = CFDictionaryGetValue(atoms, @"dvwC");
-                                }
+                            if (!dvExtension) {
+                                dvExtension = CFDictionaryGetValue(atoms, @"dvvC");
+                            }
+                            if (!dvExtension) {
+                                dvExtension = CFDictionaryGetValue(atoms, @"dvwC");
+                            }
 
-                                if (dvExtension && CFDataGetLength(dvExtension) >= 24) {
-                                    MP42DolbyVisionMetadata dv;
-                                    uint8_t buffer[24];
-                                    CFDataGetBytes(dvExtension, CFRangeMake(0, 24), buffer);
+                            if (dvExtension && CFDataGetLength(dvExtension) >= 24) {
+                                MP42DolbyVisionMetadata dv;
+                                uint8_t buffer[24];
+                                CFDataGetBytes(dvExtension, CFRangeMake(0, 24), buffer);
 
-                                    dv.versionMajor = buffer[0];
-                                    dv.versionMinor = buffer[1];
+                                dv.versionMajor = buffer[0];
+                                dv.versionMinor = buffer[1];
 
-                                    dv.profile = (buffer[2] & 0xfe) >> 1;
-                                    dv.level = ((buffer[2] & 0x1) << 7) + ((buffer[3] & 0xf8) >> 3);
+                                dv.profile = (buffer[2] & 0xfe) >> 1;
+                                dv.level = ((buffer[2] & 0x1) << 7) + ((buffer[3] & 0xf8) >> 3);
 
-                                    dv.rpuPresentFlag = (buffer[3] & 0x4) >> 2;
-                                    dv.elPresentFlag = (buffer[3] & 0x2) >> 1;
-                                    dv.blPresentFlag = buffer[3] & 0x1;
+                                dv.rpuPresentFlag = (buffer[3] & 0x4) >> 2;
+                                dv.elPresentFlag = (buffer[3] & 0x2) >> 1;
+                                dv.blPresentFlag = buffer[3] & 0x1;
 
-                                    dv.blSignalCompatibilityId = (buffer[4] & 0xf0) >> 4;
+                                dv.blSignalCompatibilityId = (buffer[4] & 0xf0) >> 4;
 
-                                    videoTrack.dolbyVision = dv;
-                                }
+                                videoTrack.dolbyVision = dv;
+                            }
 
-                                CFDataRef dvELConfiguration = CFDictionaryGetValue(atoms, @"hvcE");
+                            CFDataRef dvELConfiguration = CFDictionaryGetValue(atoms, @"hvcE");
 
-                                if (!dvELConfiguration) {
-                                    dvELConfiguration = CFDictionaryGetValue(atoms, @"avcE");
-                                }
+                            if (!dvELConfiguration) {
+                                dvELConfiguration = CFDictionaryGetValue(atoms, @"avcE");
+                            }
 
-                                if (dvELConfiguration) {
-                                    videoTrack.dolbyVisionELConfiguration = (__bridge NSData *)(dvELConfiguration);
-                                }
+                            if (dvELConfiguration) {
+                                videoTrack.dolbyVisionELConfiguration = (__bridge NSData *)(dvELConfiguration);
                             }
                         }
                     }

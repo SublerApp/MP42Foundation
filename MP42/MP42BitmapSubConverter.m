@@ -25,7 +25,8 @@
 
 #include "FFmpegUtils.h"
 
-#import <QuartzCore/QuartzCore.h>
+@import QuartzCore;
+@import CoreImage;
 
 MP42_OBJC_DIRECT_MEMBERS
 @interface MP42BitmapSubConverter ()
