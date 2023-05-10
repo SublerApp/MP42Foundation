@@ -25,6 +25,13 @@ typedef struct MP42ContentLightMetadata {
     uint32_t MaxFALL;
 } MP42ContentLightMetadata;
 
+typedef struct MP42AmbientViewingEnviroment {
+    uint32_t ambient_illuminance;
+    uint16_t ambient_light_x;
+    uint16_t ambient_light_y;
+} MP42AmbientViewingEnviroment;
+
+
 // matches payload of ISO/IEC 23008-2:2015(E), D.2.28 Mastering display colour volume SEI message
 typedef struct MP42MasteringDisplayMetadataPayload {
     uint16_t display_primaries_gx;
@@ -45,5 +52,6 @@ typedef struct MP42ContentLightMetadataPayload {
     uint16_t MaxCLL;
     uint16_t MaxFALL;
 } MP42ContentLightMetadataPayload;
+
 
 #endif /* MP42MasteringDisplayMetadata_h */

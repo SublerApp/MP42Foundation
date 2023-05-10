@@ -136,6 +136,18 @@ MP42_OBJC_DIRECT_MEMBERS
             _mastering.has_luminance = 1;
         }
 
+        if (MP4HaveTrackAtom(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.amve")) {
+            uint64_t ambientIlluminance, ambientLightX, ambientLightY;
+
+            MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.amve.ambientIlluminance", &ambientIlluminance);
+            MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.amve.ambientLightX", &ambientLightX);
+            MP4GetTrackIntegerProperty(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.amve.ambientLightY", &ambientLightY);
+
+            _ambient.ambient_illuminance = (uint32_t)ambientIlluminance;
+            _ambient.ambient_light_x = ambientLightX;
+            _ambient.ambient_light_y = ambientLightY;
+        }
+
         if (MP4HaveTrackAtom(fileHandle, self.trackId, "mdia.minf.stbl.stsd.*.dvcC")) {
             uint64_t versionMajor, versionMinor, profile, level, rpuPresentFlag, elPresentFlag, blPresentFlag, blSignalCompatibilityId;
 
@@ -350,6 +362,16 @@ static uint32_t convertToFixedPoint(CGFloat value) {
                 }
                 else {
                     MP4SetMasteringDisplayMetadata(fileHandle, self.trackId, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+                }
+            }
+
+            if (self.updatedProperty[@"amve"] || self.muxed == NO) {
+                if (self.ambient.ambient_illuminance && self.ambient.ambient_light_x && self.ambient.ambient_light_y) {
+                    MP4SetAmbientViewingEnviroment(fileHandle, self.trackId,
+                                                _ambient.ambient_illuminance, _ambient.ambient_light_x, _ambient.ambient_light_y);
+                }
+                else {
+                    MP4SetAmbientViewingEnviroment(fileHandle, self.trackId, 0, 0, 0);
                 }
             }
 

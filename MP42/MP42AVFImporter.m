@@ -296,6 +296,20 @@ MP42_OBJC_DIRECT_MEMBERS
                             videoTrack.coll = coll;
                         }
 
+                        if (@available(macOS 12.0, *)) {
+                            CFDataRef ambientExtension = CMFormatDescriptionGetExtension(formatDescription, kCMFormatDescriptionExtension_AmbientViewingEnvironment);
+                            if (ambientExtension && CFDataGetLength(ambientExtension) >= 8) {
+                                MP42AmbientViewingEnviroment *ambientPayload = (MP42AmbientViewingEnviroment *)CFDataGetBytePtr(ambientExtension);
+                                MP42AmbientViewingEnviroment ambient;
+
+                                ambient.ambient_illuminance = CFSwapInt32BigToHost(ambientPayload->ambient_illuminance);
+                                ambient.ambient_light_x = CFSwapInt16BigToHost(ambientPayload->ambient_light_x);
+                                ambient.ambient_light_y = CFSwapInt16BigToHost(ambientPayload->ambient_light_y);
+
+                                videoTrack.ambient = ambient;
+                            }
+                        }
+
                         CFDictionaryRef extentions = CMFormatDescriptionGetExtensions(formatDescription);
                         CFDictionaryRef atoms = CFDictionaryGetValue(extentions, kCMFormatDescriptionExtension_SampleDescriptionExtensionAtoms);
                         if (atoms) {

@@ -35,6 +35,9 @@
 @property(nonatomic, readwrite) MP42DolbyVisionMetadata dolbyVision;
 @property(nonatomic, readwrite) NSData *dolbyVisionELConfiguration;
 
+// Ambient viewning enviroment
+@property(nonatomic, readwrite) MP42AmbientViewingEnviroment ambient;
+
 // Pixel Aspect Ratio
 @property(nonatomic, readwrite) uint64_t hSpacing;
 @property(nonatomic, readwrite) uint64_t vSpacing;
