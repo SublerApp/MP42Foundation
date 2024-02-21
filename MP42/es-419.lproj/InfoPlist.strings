@@ -1,2 +1,3 @@
-/* Localized versions of Info.plist keys */
+/* Copyright (human-readable) */
+"NSHumanReadableCopyright" = "Copyright © 2022 Damiano Galassi. Reservados todos los derechos.";
 

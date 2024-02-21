@@ -275,6 +275,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		50682E722B86B6BC008DB28B /* es-419 */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "es-419"; path = "es-419.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
+		50682E732B86B6CC008DB28B /* es-419 */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "es-419"; path = "es-419.lproj/Localizable.strings"; sourceTree = "<group>"; };
+		50682E742B86B6E3008DB28B /* es-419 */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "es-419"; path = "es-419.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		6661A2ED20890B4400B1A669 /* MP42Foundation.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MP42Foundation.h; sourceTree = "<group>"; };
 		7538B2042505A99700898792 /* mp42-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "mp42-Bridging-Header.h"; sourceTree = "<group>"; };
 		7538B2062506B29D00898792 /* MP42-Shared-Swift.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MP42-Shared-Swift.h"; sourceTree = "<group>"; };
@@ -930,6 +933,7 @@
 				it,
 				"zh-Hans",
 				fr,
+				"es-419",
 			);
 			mainGroup = A9B9C1E3182391DF00416A4E;
 			productRefGroup = A9B9C1EE182391DF00416A4E /* Products */;
@@ -1106,6 +1110,7 @@
 				A9AA2B831DBF954000C9D897 /* it */,
 				A9E059D42529DF97000E0E9A /* zh-Hans */,
 				A9146866278D8F0C00860468 /* fr */,
+				50682E732B86B6CC008DB28B /* es-419 */,
 			);
 			name = Localizable.strings;
 			sourceTree = "<group>";
@@ -1116,6 +1121,7 @@
 				A9B9C1FA182391DF00416A4E /* en */,
 				A9BA1ACC1DBF76FD00FD0B38 /* it */,
 				A9E059D32529DF97000E0E9A /* zh-Hans */,
+				50682E722B86B6BC008DB28B /* es-419 */,
 			);
 			name = InfoPlist.strings;
 			sourceTree = "<group>";
@@ -1126,6 +1132,7 @@
 				A9BA1AEA1DBF7DBE00FD0B38 /* it */,
 				A9E059D52529DF97000E0E9A /* zh-Hans */,
 				A9146867278D8F0C00860468 /* fr */,
+				50682E742B86B6E3008DB28B /* es-419 */,
 			);
 			name = Localizable.strings;
 			sourceTree = "<group>";
