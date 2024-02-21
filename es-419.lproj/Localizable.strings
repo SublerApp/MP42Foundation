@@ -1,0 +1,264 @@
+/* No comment provided by engineer. */
+"Acknowledgement" = "Reconocimiento";
+
+/* No comment provided by engineer. */
+"Album Artist" = "Artista del álbum";
+
+/* No comment provided by engineer. */
+"Arranger" = "Arreglista";
+
+/* No comment provided by engineer. */
+"Art Director" = "Director de arte";
+
+/* No comment provided by engineer. */
+"Artist" = "Artista";
+
+/* No comment provided by engineer. */
+"Cast" = "Reparto";
+
+/* No comment provided by engineer. */
+"Category" = "Categoría";
+
+/* No comment provided by engineer. */
+"Chapter Track" = "Pista de capítulo";
+
+/* No comment provided by engineer. */
+"Closed Caption Track" = "Pista de subtítulo";
+
+/* No comment provided by engineer. */
+"Codirector" = "Co-director";
+
+/* No comment provided by engineer. */
+"Comments" = "Comentarios";
+
+/* No comment provided by engineer. */
+"Compilation" = "Compilación";
+
+/* No comment provided by engineer. */
+"Composer" = "Compositor";
+
+/* No comment provided by engineer. */
+"Conductor" = "Conductor";
+
+/* No comment provided by engineer. */
+"Content Rating" = "Clasificación de contenido";
+
+/* No comment provided by engineer. */
+"Copyright" = "Copyright";
+
+/* No comment provided by engineer. */
+"Credits" = "Créditos";
+
+/* No comment provided by engineer. */
+"Description" = "Descripción";
+
+/* No comment provided by engineer. */
+"Director" = "Director";
+
+/* No comment provided by engineer. */
+"Disk #" = "Disco #";
+
+/* No comment provided by engineer. */
+"Encoded By" = "Codificado por";
+
+/* No comment provided by engineer. */
+"Encoding Tool" = "Herramienta de codificación";
+
+/* No comment provided by engineer. */
+"Executive Producer" = "Productor ejecutivo";
+
+/* No comment provided by engineer. */
+"Gapless" = "Sin pausa";
+
+/* No comment provided by engineer. */
+"Genre" = "Género";
+
+/* No comment provided by engineer. */
+"Grouping" = "Grupo";
+
+/* No comment provided by engineer. */
+"Hint Track" = "Pista de pistas";
+
+/* No comment provided by engineer. */
+"Keywords" = "Palabras clave";
+
+/* No comment provided by engineer. */
+"Linear Notes" = "Notas lineales";
+
+/* No comment provided by engineer. */
+"Long Description" = "Descripción completa";
+
+/* No comment provided by engineer. */
+"Lyricist" = "Letrista";
+
+/* No comment provided by engineer. */
+"Lyrics" = "Letra";
+
+/* No comment provided by engineer. */
+"Media Kind" = "Tipo";
+
+/* No comment provided by engineer. */
+"Metadata Track" = "Pista de metadatos";
+
+/* No comment provided by engineer. */
+"Movement Count" = "Cantidad de movimientos";
+
+/* No comment provided by engineer. */
+"Movement Name" = "Nombre del movimiento";
+
+/* No comment provided by engineer. */
+"Movement Number" = "Número del movimiento";
+
+/* No comment provided by engineer. */
+"Muxed Track" = "Pista mezclada";
+
+/* No comment provided by engineer. */
+"Name" = "Nombre";
+
+/* No comment provided by engineer. */
+"Online Extras" = "Extras en línea";
+
+/* No comment provided by engineer. */
+"Original Artist" = "Artista original";
+
+/* No comment provided by engineer. */
+"Performer" = "Intérprete";
+
+/* No comment provided by engineer. */
+"Phonogram Rights" = "Derechos de fonograma";
+
+/* No comment provided by engineer. */
+"Producers" = "Productores";
+
+/* No comment provided by engineer. */
+"Publisher" = "Editor";
+
+/* No comment provided by engineer. */
+"Purchase Date" = "Fecha de compra";
+
+/* No comment provided by engineer. */
+"Rating" = "Clasificación";
+
+/* No comment provided by engineer. */
+"Rating Annotation" = "Nota de clasificación";
+
+/* No comment provided by engineer. */
+"Record Company" = "Sello discográfico";
+
+/* No comment provided by engineer. */
+"Release Date" = "Fecha de lanzamiento";
+
+/* No comment provided by engineer. */
+"Screenwriters" = "Guionistas";
+
+/* No comment provided by engineer. */
+"Series Description" = "Descripción del programa";
+
+/* No comment provided by engineer. */
+"Show Work And Movement" = "Mostrar Trabajo y Movimiento";
+
+/* No comment provided by engineer. */
+"Soloist" = "Solista";
+
+/* No comment provided by engineer. */
+"Song Description" = "Descripción de la canción";
+
+/* No comment provided by engineer. */
+"Song Producer" = "Productor de la canción";
+
+/* No comment provided by engineer. */
+"Sort Album" = "Ordenar álbum";
+
+/* No comment provided by engineer. */
+"Sort Album Artist" = "Ordenar artista del álbum";
+
+/* No comment provided by engineer. */
+"Sort Artist" = "Ordenar artista";
+
+/* No comment provided by engineer. */
+"Sort Composer" = "Ordenar compositor";
+
+/* No comment provided by engineer. */
+"Sort Name" = "Ordenar nombre";
+
+/* No comment provided by engineer. */
+"Sort TV Show" = "Ordenar Programa de TV";
+
+/* No comment provided by engineer. */
+"Sound Engineer" = "Ingeniero de sonido";
+
+/* No comment provided by engineer. */
+"Sound Track" = "Pista de audio";
+
+/* No comment provided by engineer. */
+"Studio" = "Estudio";
+
+/* No comment provided by engineer. */
+"Subtitle Track" = "Pista de subtítulo";
+
+/* No comment provided by engineer. */
+"TV Episode #" = "Episodio #";
+
+/* No comment provided by engineer. */
+"TV Episode ID" = "ID del episodio";
+
+/* No comment provided by engineer. */
+"TV Network" = "Cadena de TV";
+
+/* No comment provided by engineer. */
+"TV Season" = "Temporada";
+
+/* No comment provided by engineer. */
+"TV Show" = "Programa";
+
+/* No comment provided by engineer. */
+"Tempo" = "Tempo";
+
+/* No comment provided by engineer. */
+"Text" = "Texto";
+
+/* No comment provided by engineer. */
+"Text Track" = "Pista de texto";
+
+/* No comment provided by engineer. */
+"Thanks" = "Agradecimientos";
+
+/* No comment provided by engineer. */
+"Track #" = "Pista #";
+
+/* No comment provided by engineer. */
+"Track Sub-Title" = "Subtítulo de pista";
+
+/* No comment provided by engineer. */
+"Unnamed Set" = "Preset sin título";
+
+/* No comment provided by engineer. */
+"Video Track" = "Pista de vídeo";
+
+/* No comment provided by engineer. */
+"Work Name" = "Nombre de trabajo";
+
+/* No comment provided by engineer. */
+"iTunes Account" = "Cuenta de iTunes";
+
+/* No comment provided by engineer. */
+"iTunes Account Type" = "Tipo de cuenta de iTunes";
+
+/* No comment provided by engineer. */
+"iTunes Country" = "País de iTunes";
+
+/* No comment provided by engineer. */
+"artist ID" = "ID del artista";
+
+/* No comment provided by engineer. */
+"composer ID" = "ID del compositor";
+
+/* No comment provided by engineer. */
+"content ID" = "ID del contenido";
+
+/* No comment provided by engineer. */
+"genre ID" = "ID del género";
+
+/* No comment provided by engineer. */
+"playlist ID" = "ID de la playlist";
+
