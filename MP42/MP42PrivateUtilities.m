@@ -228,6 +228,12 @@ FourCharCode getTrackMediaSubType(MP4FileHandle fileHandle, MP4TrackId Id, uint3
         else if (!strcmp(dataName, "hev1")) {
             return kMP42VideoCodecType_HEVC_PSinBitstream;
         }
+        else if (!strcmp(dataName, "vvc1")) {
+            return kMP42VideoCodecType_VVC;
+        }
+        else if (!strcmp(dataName, "vvic")) {
+            return kMP42VideoCodecType_VVC_PSinBitstream;
+        }
         else if (!strcmp(dataName, "av01")) {
             return kMP42VideoCodecType_AV1;
         }
