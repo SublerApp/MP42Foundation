@@ -308,6 +308,7 @@ static uint32_t convertToFixedPoint(CGFloat value) {
 
         if ((self.format == kMP42VideoCodecType_H264 || self.format == kMP42VideoCodecType_MPEG4Video
              || self.format == kMP42VideoCodecType_HEVC || self.format == kMP42VideoCodecType_HEVC_PSinBitstream
+             || self.format == kMP42VideoCodecType_VVC || self.format == kMP42VideoCodecType_VVC_PSinBitstream
              || self.format == kMP42VideoCodecType_AV1)) {
 
             if (self.updatedProperty[@"colr"] || self.muxed == NO) {
@@ -367,11 +368,11 @@ static uint32_t convertToFixedPoint(CGFloat value) {
 
             if (self.updatedProperty[@"amve"] || self.muxed == NO) {
                 if (self.ambient.ambient_illuminance && self.ambient.ambient_light_x && self.ambient.ambient_light_y) {
-                    MP4SetAmbientViewingEnviroment(fileHandle, self.trackId,
-                                                _ambient.ambient_illuminance, _ambient.ambient_light_x, _ambient.ambient_light_y);
+                    MP4SetAmbientViewingEnvironment(fileHandle, self.trackId,
+                                                   _ambient.ambient_illuminance, _ambient.ambient_light_x, _ambient.ambient_light_y);
                 }
                 else {
-                    MP4SetAmbientViewingEnviroment(fileHandle, self.trackId, 0, 0, 0);
+                    MP4SetAmbientViewingEnvironment(fileHandle, self.trackId, 0, 0, 0);
                 }
             }
 

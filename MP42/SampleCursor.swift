@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import mp4v2
+import CMP42
 
 private struct Edit {
     /// The media start time of the edit segment in track time scale units of the track in the mp4 file.
@@ -130,7 +130,7 @@ private struct Edit {
 
     private func resetMediaTime() {
         let edit = edits[currentEdit]
-        currentSampleId = MP4GetSampleIdFromTime(fileHandle, trackId, edit.mediaStart, false)
+        currentSampleId = MP4GetSampleIdFromTime(fileHandle, trackId, edit.mediaStart, 0)
         let time = MP4GetSampleTime(fileHandle, trackId, currentSampleId)
         currentSampleId -= 1
 

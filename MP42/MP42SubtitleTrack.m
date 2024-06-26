@@ -242,7 +242,7 @@ static void insertTagsFromStyleRecord(style_record record, NSMutableString *samp
         MP4Duration sampleDuration;
         MP4Duration renderingOffset;
         MP4Timestamp pStartTime;
-        bool isSyncSample;
+        unsigned char isSyncSample;
         BOOL forced = NO;
         BOOL tbox = NO;
 

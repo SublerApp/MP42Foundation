@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 52;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -16,7 +16,6 @@
 		A9059DCB1D870B9C000D1B9A /* MP42ConversionSettings.h in Headers */ = {isa = PBXBuildFile; fileRef = A9059DC91D870B9C000D1B9A /* MP42ConversionSettings.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A9059DCC1D870B9C000D1B9A /* MP42ConversionSettings.m in Sources */ = {isa = PBXBuildFile; fileRef = A9059DCA1D870B9C000D1B9A /* MP42ConversionSettings.m */; };
 		A9059DCF1D870F8D000D1B9A /* MP42ConversionSettings.m in Sources */ = {isa = PBXBuildFile; fileRef = A9059DCA1D870B9C000D1B9A /* MP42ConversionSettings.m */; };
-		A90800FD1D4B82E8002B6950 /* libmp4v2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A99DB6A41D4648A800C6E56C /* libmp4v2.a */; };
 		A90800FF1D4B82FB002B6950 /* liblept.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A99DB6A71D4648B700C6E56C /* liblept.a */; };
 		A90801001D4B82FB002B6950 /* libtesseract.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A99DB6A81D4648B700C6E56C /* libtesseract.a */; };
 		A90801011D4B830A002B6950 /* libavcodec.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A99DB6AC1D4648D100C6E56C /* libavcodec.a */; };
@@ -119,6 +118,9 @@
 		A951C188233F4BC100D63AF8 /* libiconv.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = A99DB6B21D46497B00C6E56C /* libiconv.tbd */; };
 		A951C18B233F4C5A00D63AF8 /* VideoToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9D6CD651F9E3A8500CCEE3E /* VideoToolbox.framework */; };
 		A951C190233F4CA300D63AF8 /* MP42AC3AudioEncoder.m in Sources */ = {isa = PBXBuildFile; fileRef = FFE849951EBCAFDF000AA078 /* MP42AC3AudioEncoder.m */; };
+		A95BCF942C2AE05C00DF5B14 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A95BCF932C2AE05C00DF5B14 /* CoreVideo.framework */; };
+		A95BCF952C2AE06A00DF5B14 /* CoreImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A957E5A7203FF96800A5F776 /* CoreImage.framework */; };
+		A95BCF982C2AEFAF00DF5B14 /* libmp4v2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A95BCF972C2AEFAF00DF5B14 /* libmp4v2.a */; };
 		A96523451BAC315900E994E0 /* NSString+MP42Additions.h in Headers */ = {isa = PBXBuildFile; fileRef = A96523431BAC315900E994E0 /* NSString+MP42Additions.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A96523461BAC315900E994E0 /* NSString+MP42Additions.h in Headers */ = {isa = PBXBuildFile; fileRef = A96523431BAC315900E994E0 /* NSString+MP42Additions.h */; };
 		A96523471BAC315900E994E0 /* NSString+MP42Additions.m in Sources */ = {isa = PBXBuildFile; fileRef = A96523441BAC315900E994E0 /* NSString+MP42Additions.m */; };
@@ -141,7 +143,6 @@
 		A97EA7CA1D4B8A2D00257CEA /* FFmpegUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = A97EA7C61D4B8A2D00257CEA /* FFmpegUtils.m */; };
 		A989F10F1823B3B40070AD8C /* MP42TextSample.h in Headers */ = {isa = PBXBuildFile; fileRef = A989F10D1823B3B40070AD8C /* MP42TextSample.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A989F1101823B3B40070AD8C /* MP42TextSample.m in Sources */ = {isa = PBXBuildFile; fileRef = A989F10E1823B3B40070AD8C /* MP42TextSample.m */; };
-		A99DB6A51D4648A800C6E56C /* libmp4v2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A99DB6A41D4648A800C6E56C /* libmp4v2.a */; };
 		A99DB6AB1D4648B700C6E56C /* libtesseract.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A99DB6A81D4648B700C6E56C /* libtesseract.a */; };
 		A99DB6AF1D4648D100C6E56C /* libavcodec.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A99DB6AC1D4648D100C6E56C /* libavcodec.a */; };
 		A99DB6B11D4648D100C6E56C /* libavutil.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A99DB6AE1D4648D100C6E56C /* libavutil.a */; };
@@ -231,10 +232,9 @@
 		A9B9C2AF1823923200416A4E /* sfifo.h in Headers */ = {isa = PBXBuildFile; fileRef = A9B9C2651823923200416A4E /* sfifo.h */; };
 		A9B9C2C41823957800416A4E /* MP42Languages.h in Headers */ = {isa = PBXBuildFile; fileRef = A9B9C2C21823957800416A4E /* MP42Languages.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A9B9C2C51823957800416A4E /* MP42Languages.m in Sources */ = {isa = PBXBuildFile; fileRef = A9B9C2C31823957800416A4E /* MP42Languages.m */; };
-		A9B9C2D81823970E00416A4E /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9B9C2D71823970E00416A4E /* AVFoundation.framework */; settings = {ATTRIBUTES = (Required, ); }; };
+		A9B9C2D81823970E00416A4E /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9B9C2D71823970E00416A4E /* AVFoundation.framework */; };
 		A9B9C2DA1823971F00416A4E /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9B9C2D91823971F00416A4E /* AudioToolbox.framework */; };
-		A9B9C2DE1823973200416A4E /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9B9C2DD1823973200416A4E /* CoreMedia.framework */; settings = {ATTRIBUTES = (Required, ); }; };
-		A9B9C4931823986200416A4E /* Quartz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9B9C4921823986200416A4E /* Quartz.framework */; };
+		A9B9C2DE1823973200416A4E /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9B9C2DD1823973200416A4E /* CoreMedia.framework */; };
 		A9BA1AE91DBF7DBE00FD0B38 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = A9BA1AEB1DBF7DBE00FD0B38 /* Localizable.strings */; };
 		A9D6CD641F9E3A7F00CCEE3E /* MediaToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9D6CD611F9E3A7F00CCEE3E /* MediaToolbox.framework */; };
 		A9D6CD661F9E3A8500CCEE3E /* VideoToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9D6CD651F9E3A8500CCEE3E /* VideoToolbox.framework */; };
@@ -312,6 +312,8 @@
 		A9422FC31D4917AF000DB435 /* audio_resample.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = audio_resample.c; sourceTree = "<group>"; };
 		A9422FC41D4917AF000DB435 /* audio_resample.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = audio_resample.h; sourceTree = "<group>"; };
 		A957E5A7203FF96800A5F776 /* CoreImage.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreImage.framework; path = System/Library/Frameworks/CoreImage.framework; sourceTree = SDKROOT; };
+		A95BCF932C2AE05C00DF5B14 /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = System/Library/Frameworks/CoreVideo.framework; sourceTree = SDKROOT; };
+		A95BCF972C2AEFAF00DF5B14 /* libmp4v2.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libmp4v2.a; path = contrib/mp4v2/libmp4v2.a; sourceTree = "<group>"; };
 		A96523431BAC315900E994E0 /* NSString+MP42Additions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+MP42Additions.h"; sourceTree = "<group>"; };
 		A96523441BAC315900E994E0 /* NSString+MP42Additions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+MP42Additions.m"; sourceTree = "<group>"; };
 		A966CEFF275F658000AF8813 /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
@@ -326,7 +328,6 @@
 		A9944E1028A90EDB00A2C84F /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
 		A9944E1128A90EDB00A2C84F /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		A9944E1228A90EDB00A2C84F /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
-		A99DB6A41D4648A800C6E56C /* libmp4v2.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libmp4v2.a; path = contrib/mp42v2/libmp4v2.a; sourceTree = "<group>"; };
 		A99DB6A71D4648B700C6E56C /* liblept.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = liblept.a; path = contrib/Tesseract/lib/liblept.a; sourceTree = "<group>"; };
 		A99DB6A81D4648B700C6E56C /* libtesseract.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libtesseract.a; path = contrib/Tesseract/lib/libtesseract.a; sourceTree = "<group>"; };
 		A99DB6AC1D4648D100C6E56C /* libavcodec.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavcodec.a; path = contrib/ffmpeg/lib/libavcodec.a; sourceTree = "<group>"; };
@@ -469,7 +470,6 @@
 				A951C184233F4B8F00D63AF8 /* libtiff.a in Frameworks */,
 				A90800FF1D4B82FB002B6950 /* liblept.a in Frameworks */,
 				A90801001D4B82FB002B6950 /* libtesseract.a in Frameworks */,
-				A90800FD1D4B82E8002B6950 /* libmp4v2.a in Frameworks */,
 				A910B6331839511A0064028F /* AudioToolbox.framework in Frameworks */,
 				A910B6321839510B0064028F /* Quartz.framework in Frameworks */,
 				A910B630183950F80064028F /* AVFoundation.framework in Frameworks */,
@@ -482,7 +482,17 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A95BCF952C2AE06A00DF5B14 /* CoreImage.framework in Frameworks */,
+				A95BCF942C2AE05C00DF5B14 /* CoreVideo.framework in Frameworks */,
 				A966CF00275F658000AF8813 /* Accelerate.framework in Frameworks */,
+				A9B9C2DA1823971F00416A4E /* AudioToolbox.framework in Frameworks */,
+				A9A0C99C19814B0800A72763 /* CoreAudio.framework in Frameworks */,
+				A9A0C9A419814C9B00A72763 /* AudioUnit.framework in Frameworks */,
+				A9B9C2D81823970E00416A4E /* AVFoundation.framework in Frameworks */,
+				A9B9C2DE1823973200416A4E /* CoreMedia.framework in Frameworks */,
+				A9B9C1F1182391DF00416A4E /* Cocoa.framework in Frameworks */,
+				A9D6CD661F9E3A8500CCEE3E /* VideoToolbox.framework in Frameworks */,
+				A9D6CD641F9E3A7F00CCEE3E /* MediaToolbox.framework in Frameworks */,
 				A93EE6EA1D48A01A003E3B56 /* libswresample.a in Frameworks */,
 				A9E8FB871D4664F70071A5F1 /* libz.tbd in Frameworks */,
 				A9E8FB851D4664E80071A5F1 /* libbz2.tbd in Frameworks */,
@@ -493,16 +503,7 @@
 				A966CF04275F6FB500AF8813 /* libtiff.a in Frameworks */,
 				A966CF03275F6E6900AF8813 /* liblept.a in Frameworks */,
 				A99DB6AB1D4648B700C6E56C /* libtesseract.a in Frameworks */,
-				A99DB6A51D4648A800C6E56C /* libmp4v2.a in Frameworks */,
-				A9B9C4931823986200416A4E /* Quartz.framework in Frameworks */,
-				A9B9C2DA1823971F00416A4E /* AudioToolbox.framework in Frameworks */,
-				A9A0C99C19814B0800A72763 /* CoreAudio.framework in Frameworks */,
-				A9A0C9A419814C9B00A72763 /* AudioUnit.framework in Frameworks */,
-				A9B9C2D81823970E00416A4E /* AVFoundation.framework in Frameworks */,
-				A9B9C2DE1823973200416A4E /* CoreMedia.framework in Frameworks */,
-				A9B9C1F1182391DF00416A4E /* Cocoa.framework in Frameworks */,
-				A9D6CD661F9E3A8500CCEE3E /* VideoToolbox.framework in Frameworks */,
-				A9D6CD641F9E3A7F00CCEE3E /* MediaToolbox.framework in Frameworks */,
+				A95BCF982C2AEFAF00DF5B14 /* libmp4v2.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -532,6 +533,7 @@
 		A9B9C1EF182391DF00416A4E /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				A95BCF932C2AE05C00DF5B14 /* CoreVideo.framework */,
 				A966CEFF275F658000AF8813 /* Accelerate.framework */,
 				A9B9C2D71823970E00416A4E /* AVFoundation.framework */,
 				A9B9C2D91823971F00416A4E /* AudioToolbox.framework */,
@@ -557,7 +559,7 @@
 				A9D599BA1D4885E0001C22BD /* libswresample.a */,
 				A99DB6A71D4648B700C6E56C /* liblept.a */,
 				A99DB6A81D4648B700C6E56C /* libtesseract.a */,
-				A99DB6A41D4648A800C6E56C /* libmp4v2.a */,
+				A95BCF972C2AEFAF00DF5B14 /* libmp4v2.a */,
 				A9B0F2B322A2A36D0012E099 /* libpng16.a */,
 				A9E42D3D22A2835500A94E9C /* libtiff.a */,
 			);
@@ -905,8 +907,9 @@
 		A9B9C1E4182391DF00416A4E /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				BuildIndependentTargetsInParallel = YES;
 				CLASSPREFIX = MP42;
-				LastUpgradeCheck = 1400;
+				LastUpgradeCheck = 1540;
 				ORGANIZATIONNAME = "Damiano Galassi";
 				TargetAttributes = {
 					A910B5A218394E900064028F = {
@@ -1193,6 +1196,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_LOCALIZABILITY_EMPTY_CONTEXT = YES;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -1201,6 +1205,7 @@
 				CLANG_ANALYZER_SECURITY_INSECUREAPI_STRCPY = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_CXX_LIBRARY = "compiler-default";
+				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_TIDY_BUGPRONE_REDUNDANT_BRANCH_CONDITION = YES;
 				CLANG_TIDY_MISC_REDUNDANT_EXPRESSION = YES;
@@ -1235,9 +1240,9 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CLANG_WARN__EXIT_TIME_DESTRUCTORS = YES;
 				COPY_PHASE_STRIP = NO;
-				DEAD_CODE_STRIPPING = YES;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = c11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -1261,10 +1266,12 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(SRCROOT)/contrib/**",
+					"$(SRCROOT)/contrib/Tesseract/**",
+					"$(SRCROOT)/contrib/ffmpeg/include/**",
+					"$(SRCROOT)/contrib/mp4v2/",
 				);
 				LIBRARY_SEARCH_PATHS = (
-					"$(SRCROOT)/contrib/mp42v2",
+					"$(SRCROOT)/contrib/mp4v2",
 					"$(SRCROOT)/contrib/Tesseract/lib",
 					"$(SRCROOT)/contrib/ffmpeg/lib",
 				);
@@ -1272,7 +1279,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "-w";
-				SWIFT_INCLUDE_PATHS = "$(SRCROOT)/contrib/**";
+				SWIFT_INCLUDE_PATHS = "$(SRCROOT)/contrib/mp4v2/";
 				SWIFT_OBJC_INTERFACE_HEADER_NAME = "MP42-Swift.h";
 				SWIFT_PRECOMPILE_BRIDGING_HEADER = NO;
 			};
@@ -1282,6 +1289,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_LOCALIZABILITY_EMPTY_CONTEXT = YES;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -1290,6 +1298,7 @@
 				CLANG_ANALYZER_SECURITY_INSECUREAPI_STRCPY = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_CXX_LIBRARY = "compiler-default";
+				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_TIDY_BUGPRONE_REDUNDANT_BRANCH_CONDITION = YES;
 				CLANG_TIDY_MISC_REDUNDANT_EXPRESSION = YES;
@@ -1328,6 +1337,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = c11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = "";
@@ -1350,10 +1360,12 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(SRCROOT)/contrib/**",
+					"$(SRCROOT)/contrib/Tesseract/**",
+					"$(SRCROOT)/contrib/ffmpeg/include/**",
+					"$(SRCROOT)/contrib/mp4v2/",
 				);
 				LIBRARY_SEARCH_PATHS = (
-					"$(SRCROOT)/contrib/mp42v2",
+					"$(SRCROOT)/contrib/mp4v2",
 					"$(SRCROOT)/contrib/Tesseract/lib",
 					"$(SRCROOT)/contrib/ffmpeg/lib",
 				);
@@ -1361,7 +1373,7 @@
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "-w";
 				SWIFT_COMPILATION_MODE = wholemodule;
-				SWIFT_INCLUDE_PATHS = "$(SRCROOT)/contrib/**";
+				SWIFT_INCLUDE_PATHS = "$(SRCROOT)/contrib/mp4v2/";
 				SWIFT_OBJC_INTERFACE_HEADER_NAME = "MP42-Swift.h";
 				SWIFT_PRECOMPILE_BRIDGING_HEADER = NO;
 			};
@@ -1373,7 +1385,6 @@
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				COMBINE_HIDPI_IMAGES = YES;
-				DEAD_CODE_STRIPPING = YES;
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -1409,7 +1420,6 @@
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				COMBINE_HIDPI_IMAGES = YES;
-				DEAD_CODE_STRIPPING = YES;
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;

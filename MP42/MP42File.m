@@ -304,7 +304,7 @@ MP42_OBJC_DIRECT_MEMBERS
             MP4Duration duration;
             MP4Duration renderingOffset;
             MP4Timestamp pStartTime;
-            bool isSyncSample;
+            unsigned char isSyncSample;
 
             if (!MP4ReadSample(self.fileHandle,
                                track.trackId,

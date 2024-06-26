@@ -239,6 +239,22 @@ typedef struct MP4DemuxHelper {
             free(ppValue);
             return magicCookie;
         }
+        else if (!strcmp(media_data_name, "vvc1")) {
+            uint8_t    *ppValue;
+            uint32_t    pValueSize;
+            MP4GetTrackBytesProperty(_fileHandle, srcTrackId, "mdia.minf.stbl.stsd.vvc1.vvcC.content", &ppValue, &pValueSize);
+            magicCookie = [NSData dataWithBytes:ppValue length:pValueSize];
+            free(ppValue);
+            return magicCookie;
+        }
+        else if (!strcmp(media_data_name, "vvic")) {
+            uint8_t    *ppValue;
+            uint32_t    pValueSize;
+            MP4GetTrackBytesProperty(_fileHandle, srcTrackId, "mdia.minf.stbl.stsd.vvic.vvcC.content", &ppValue, &pValueSize);
+            magicCookie = [NSData dataWithBytes:ppValue length:pValueSize];
+            free(ppValue);
+            return magicCookie;
+        }
         else if (!strcmp(media_data_name, "av01")) {
             uint8_t    *ppValue;
             uint32_t    pValueSize;
@@ -352,8 +368,8 @@ typedef struct MP4DemuxHelper {
                     MP4Duration duration;
                     MP4Duration renderingOffset;
                     MP4Timestamp pStartTime;
-                    bool isSyncSample;
-                    bool hasDependencyFlags;
+                    unsigned char isSyncSample;
+                    unsigned char hasDependencyFlags;
                     uint32_t dependencyFlags;
 
                     demuxHelper->currentSampleId = demuxHelper->currentSampleId + 1;

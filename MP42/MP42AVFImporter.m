@@ -867,6 +867,9 @@ MP42_OBJC_DIRECT_MEMBERS
                          code == kCMVideoCodecType_DolbyVisionHEVC || code == kMP42VideoCodecType_DolbyVisionHEVC_PSinBitstream) {
                     magicCookie = CFDictionaryGetValue(atoms, @"hvcC");
                 }
+                else if (code == kMP42VideoCodecType_VVC || code == kMP42VideoCodecType_VVC_PSinBitstream) {
+                    magicCookie = CFDictionaryGetValue(atoms, @"vvcC");
+                }
                 else if (code == kMP42VideoCodecType_AV1) {
                     magicCookie = CFDictionaryGetValue(atoms, @"av1C");
                 }

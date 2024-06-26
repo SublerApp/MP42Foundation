@@ -117,11 +117,6 @@ MP42_OBJC_DIRECT_MEMBERS
     return _image;
 }
 
-- (NSString *)imageRepresentationType
-{
-    return IKImageBrowserNSImageRepresentationType;
-}
-
 - (NSString *)uuid
 {
     @synchronized(self) {

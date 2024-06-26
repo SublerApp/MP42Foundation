@@ -270,7 +270,7 @@ MP42_OBJC_DIRECT_MEMBERS
                 force_HEVC_completeness(hvcCAtom, (uint32_t)magicCookie.length);
             }
 
-            bool completeness = 0;
+            bool completeness = false;
             if (magicCookie.length && magicCookie.length < UINT32_MAX && !analyze_HEVC(magicCookie.bytes, (uint32_t)magicCookie.length, &completeness)) {
 
                 dstTrackId = MP4AddDolbyVisionH265VideoTrack(_fileHandle, timeScale, MP4_INVALID_DURATION,
@@ -305,6 +305,56 @@ MP42_OBJC_DIRECT_MEMBERS
             }
         }
 
+        // H.266 video track
+        else if ([track isMemberOfClass:[MP42VideoTrack class]] &&
+                 (format == kMP42VideoCodecType_VVC || format == kMP42VideoCodecType_VVC_PSinBitstream)) {
+
+            MP42VideoTrack *videoTrack = (MP42VideoTrack *)track;
+//            uint8_t *vvcCAtom = (uint8_t *)magicCookie.bytes;
+
+//            if ([_options[MP42ForceHvc1] boolValue] && magicCookie.length < UINT32_MAX) {
+//                force_HEVC_completeness(hvcCAtom, (uint32_t)magicCookie.length);
+//            }
+
+            // Check whether we can use hvc1 or hev1 fourcc.
+            bool completeness = true;
+            if (magicCookie.length && magicCookie.length < UINT32_MAX && !analyze_HEVC(magicCookie.bytes, (uint32_t)magicCookie.length, &completeness)) {
+
+                dstTrackId = MP4AddVVCVideoTrack(_fileHandle, timeScale, MP4_INVALID_DURATION,
+                                                 videoTrack.width, videoTrack.height,
+                                                 magicCookie.bytes, (uint32_t)magicCookie.length,
+                                                 completeness);
+
+                if (dstTrackId) {
+                    if (videoTrack.dolbyVision.versionMajor > 0) {
+                        MP4SetDolbyVisionMetadata(_fileHandle, dstTrackId,
+                                                  videoTrack.dolbyVision.versionMajor,
+                                                  videoTrack.dolbyVision.versionMinor,
+                                                  videoTrack.dolbyVision.profile,
+                                                  videoTrack.dolbyVision.level,
+                                                  videoTrack.dolbyVision.rpuPresentFlag,
+                                                  videoTrack.dolbyVision.elPresentFlag,
+                                                  videoTrack.dolbyVision.blPresentFlag,
+                                                  videoTrack.dolbyVision.blSignalCompatibilityId);
+                    }
+                    if (videoTrack.dolbyVisionELConfiguration) {
+                        MP4SetDolbyVisionELConfiguration(_fileHandle, dstTrackId,
+                                                         videoTrack.dolbyVisionELConfiguration.bytes,
+                                                         (uint32_t)videoTrack.dolbyVisionELConfiguration.length);
+                    }
+                    [importer setActiveTrack:track];
+                }
+                else {
+                    [unsupportedTracks addObject:track];
+                    continue;
+                }
+            }
+            else {
+                [unsupportedTracks addObject:track];
+                continue;
+            }
+        }
+
         // AV1 video track
         else if ([track isMemberOfClass:[MP42VideoTrack class]] && (format == kMP42VideoCodecType_AV1)) {
             MP42VideoTrack *videoTrack = (MP42VideoTrack *)track;
@@ -315,6 +365,22 @@ MP42_OBJC_DIRECT_MEMBERS
                                                  magicCookie.bytes, (uint32_t)magicCookie.length);
 
                 if (dstTrackId) {
+                    if (videoTrack.dolbyVision.versionMajor > 0) {
+                        MP4SetDolbyVisionMetadata(_fileHandle, dstTrackId,
+                                                  videoTrack.dolbyVision.versionMajor,
+                                                  videoTrack.dolbyVision.versionMinor,
+                                                  videoTrack.dolbyVision.profile,
+                                                  videoTrack.dolbyVision.level,
+                                                  videoTrack.dolbyVision.rpuPresentFlag,
+                                                  videoTrack.dolbyVision.elPresentFlag,
+                                                  videoTrack.dolbyVision.blPresentFlag,
+                                                  videoTrack.dolbyVision.blSignalCompatibilityId);
+                    }
+                    if (videoTrack.dolbyVisionELConfiguration) {
+                        MP4SetDolbyVisionELConfiguration(_fileHandle, dstTrackId,
+                                                         videoTrack.dolbyVisionELConfiguration.bytes,
+                                                         (uint32_t)videoTrack.dolbyVisionELConfiguration.length);
+                    }
                     [importer setActiveTrack:track];
                 }
                 else {
@@ -649,13 +715,14 @@ MP42_OBJC_DIRECT_MEMBERS
                         bool err = false;
                         if (sampleBuffer->dependecyFlags) {
                             err = MP4WriteSampleDependency(_fileHandle, trackId, sampleBuffer->data, sampleBuffer->size,
-                                                              sampleBuffer->duration, sampleBuffer->offset,
-                                                              sampleBuffer->flags & MP42SampleBufferFlagIsSync, sampleBuffer->dependecyFlags);
+                                                           sampleBuffer->duration, sampleBuffer->offset,
+                                                           (sampleBuffer->flags & MP42SampleBufferFlagIsSync) != 0,
+                                                           sampleBuffer->dependecyFlags);
                         } else {
                             err = MP4WriteSample(_fileHandle, trackId,
                                                  sampleBuffer->data, sampleBuffer->size,
                                                  sampleBuffer->duration, sampleBuffer->offset,
-                                                 sampleBuffer->flags & MP42SampleBufferFlagIsSync);
+                                                 (sampleBuffer->flags & MP42SampleBufferFlagIsSync) != 0);
                         }
                         if (!err) {
                             _cancelled = YES;

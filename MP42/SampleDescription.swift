@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import mp4v2
+import CMP42
 
 @objc(MP42SampleDescription) public class SampleDescription: NSObject {
     let format: MP42CodecType
@@ -105,7 +105,7 @@ struct H264Profile {
 
         var hSpacing: UInt64 = 1, vSpacing: UInt64 = 1
 
-        if MP4HaveTrackAtom(fileHandle, trackId, "mdia.minf.stbl.stsd.[\(index)].pasp") {
+        if MP4HaveTrackAtom(fileHandle, trackId, "mdia.minf.stbl.stsd.[\(index)].pasp") != 0 {
             MP4GetTrackIntegerProperty(fileHandle, trackId, "mdia.minf.stbl.stsd.[\(index)].pasp.hSpacing", &hSpacing)
             MP4GetTrackIntegerProperty(fileHandle, trackId, "mdia.minf.stbl.stsd.[\(index)].pasp.vSpacing", &vSpacing)
         }
@@ -114,7 +114,7 @@ struct H264Profile {
 
         // Content light level
 
-        if MP4HaveTrackAtom(fileHandle, trackId, "mdia.minf.stbl.stsd.[\(index)].clli") {
+        if MP4HaveTrackAtom(fileHandle, trackId, "mdia.minf.stbl.stsd.[\(index)].clli") != 0 {
             var maxCLL: UInt64 = 0, maxFALL: UInt64 = 0
 
             MP4GetTrackIntegerProperty(fileHandle, trackId, "mdia.minf.stbl.stsd.[\(index)].clli.maxContentLightLevel", &maxCLL)
@@ -125,7 +125,7 @@ struct H264Profile {
 
         // Mastering display metadata
 
-        if MP4HaveTrackAtom(fileHandle, trackId, "mdia.minf.stbl.stsd.[\(index)].mdcv") {
+        if MP4HaveTrackAtom(fileHandle, trackId, "mdia.minf.stbl.stsd.[\(index)].mdcv") != 0 {
             var displayPrimariesGX: UInt64 = 0, displayPrimariesGY: UInt64 = 0, displayPrimariesBX: UInt64 = 0,
                 displayPrimariesBY: UInt64 = 0, displayPrimariesRX: UInt64 = 0, displayPrimariesRY: UInt64 = 0,
                 whitePointX: UInt64 = 0, whitePointY: UInt64 = 0,
@@ -162,7 +162,7 @@ struct H264Profile {
 
         // Dolby Vision Configuration
 
-        if MP4HaveTrackAtom(fileHandle, trackId, "mdia.minf.stbl.stsd.[\(index)].dvcC") {
+        if MP4HaveTrackAtom(fileHandle, trackId, "mdia.minf.stbl.stsd.[\(index)].dvcC") != 0 {
             var versionMajor: UInt64 = 0, versionMinor: UInt64 = 0, profile: UInt64 = 0,
                 level: UInt64 = 0, rpuPresentFlag: UInt64 = 0, elPresentFlag: UInt64 = 0,
                 blPresentFlag: UInt64 = 0, blSignalCompatibilityId: UInt64 = 0;
@@ -183,7 +183,7 @@ struct H264Profile {
         }
 
         // Clean aperture
-        if MP4HaveTrackAtom(fileHandle, trackId, "mdia.minf.stbl.stsd.[\(index)].clap") {
+        if MP4HaveTrackAtom(fileHandle, trackId, "mdia.minf.stbl.stsd.[\(index)].clap") != 0 {
             var widthN: UInt64 = 0, widthD: UInt64 = 0,
                 heightN: UInt64 = 0, heightD: UInt64 = 0,
                 horizOffN: UInt64 = 0, horizOffD: UInt64 = 0,

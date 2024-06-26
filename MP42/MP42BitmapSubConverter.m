@@ -25,7 +25,6 @@
 
 #include "FFmpegUtils.h"
 
-@import QuartzCore;
 @import CoreImage;
 
 MP42_OBJC_DIRECT_MEMBERS
