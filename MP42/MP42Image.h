@@ -7,10 +7,13 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <AppKit/NSPasteboard.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
 @class NSImage;
+
+extern NSPasteboardType const MP42PasteboardTypeArtwork;
 
 typedef enum MP42TagArtworkType_e {
     MP42_ART_UNDEFINED = 0,
@@ -20,7 +23,7 @@ typedef enum MP42TagArtworkType_e {
     MP42_ART_PNG       = 4
 } MP42TagArtworkType;
 
-@interface MP42Image : NSObject <NSSecureCoding, NSCopying>
+@interface MP42Image : NSObject <NSSecureCoding, NSCopying, NSPasteboardWriting, NSPasteboardReading>
 
 - (instancetype)initWithURL:(NSURL *)url type:(MP42TagArtworkType)type;
 - (instancetype)initWithImage:(NSImage *)image;

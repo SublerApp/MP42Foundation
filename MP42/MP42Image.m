@@ -10,6 +10,8 @@
 #import <Quartz/Quartz.h>
 #import "MP42Utilities.h"
 
+NSPasteboardType const MP42PasteboardTypeArtwork = @"org.subler.artworkdata";
+
 @interface MP42Image ()
 
 @property (atomic, readonly) NSString *uuid;
@@ -165,6 +167,46 @@ MP42_OBJC_DIRECT_MEMBERS
     _type = [decoder decodeIntForKey:@"MP42ImageType"];
 
     return self;
+}
+
+- (instancetype)initWithPasteboardPropertyList:(id)propertyList
+                              ofType:(NSPasteboardType)type
+{
+    if ([type isEqualToString:MP42PasteboardTypeArtwork]) {
+        MP42Image *unarchivedImage = [NSKeyedUnarchiver unarchiveObjectWithData:propertyList];
+        if ([unarchivedImage isKindOfClass:[MP42Image class]]) {
+            return unarchivedImage;
+        }
+    }
+
+    return nil;
+}
+
+- (nullable id)pasteboardPropertyListForType:(nonnull NSPasteboardType)type
+{
+    if ([type isEqualToString:NSPasteboardTypeTIFF]) {
+        NSArray<NSImageRep *> *representations = self.image.representations;
+        if (representations) {
+            return [NSBitmapImageRep representationOfImageRepsInArray:representations
+                                                            usingType:NSBitmapImageFileTypeTIFF
+                                                           properties:@{}];
+        }
+    }
+    else if ([type isEqualToString:MP42PasteboardTypeArtwork]) {
+        return [NSKeyedArchiver archivedDataWithRootObject:self];
+    }
+
+    return nil;
+}
+
+- (nonnull NSArray<NSPasteboardType> *)writableTypesForPasteboard:(nonnull NSPasteboard *)pasteboard
+{
+    return @[MP42PasteboardTypeArtwork, NSPasteboardTypeTIFF];
+}
+
++ (nonnull NSArray<NSPasteboardType> *)readableTypesForPasteboard:(nonnull NSPasteboard *)pasteboard
+{
+    return @[MP42PasteboardTypeArtwork];
 }
 
 @end
