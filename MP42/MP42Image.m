@@ -7,16 +7,9 @@
 //
 
 #import "MP42Image.h"
-#import <Quartz/Quartz.h>
 #import "MP42Utilities.h"
 
 NSPasteboardType const MP42PasteboardTypeArtwork = @"org.subler.artworkdata";
-
-@interface MP42Image ()
-
-@property (atomic, readonly) NSString *uuid;
-
-@end
 
 MP42_OBJC_DIRECT_MEMBERS
 @implementation MP42Image {
@@ -26,7 +19,6 @@ MP42_OBJC_DIRECT_MEMBERS
 @synthesize url = _url;
 @synthesize data = _data;
 @synthesize type = _type;
-@synthesize uuid = _uuid;
 
 - (instancetype)initWithURL:(NSURL *)url type:(MP42TagArtworkType)type
 {
@@ -117,27 +109,6 @@ MP42_OBJC_DIRECT_MEMBERS
     }
 
     return _image;
-}
-
-- (NSString *)uuid
-{
-    @synchronized(self) {
-        if (_uuid == nil) {
-            _uuid = [[NSProcessInfo processInfo] globallyUniqueString];
-        }
-    }
-
-    return _uuid;
-}
-
-- (NSString *)imageUID
-{
-    return self.uuid;
-}
-
-- (id)imageRepresentation
-{
-    return self.image;
 }
 
 + (BOOL)supportsSecureCoding
