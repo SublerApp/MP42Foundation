@@ -601,6 +601,20 @@ MP42_OBJC_DIRECT_MEMBERS
     }
 }
 
+- (void)inferTracksLanguages {
+    for (MP42Track *track in self.itracks) {
+        if ([track.language isEqualToString:@"zh"])
+        {
+            if ([track.name isEqualToString:@"Simplified"]) {
+                track.language = @"zh-Hans";
+            }
+            else if ([track.name isEqualToString:@"Traditional"]) {
+                track.language = @"zh-Hant";
+            }
+        }
+    }
+}
+
 - (void)setTrack:(MP42Track *)track mediaCharacteristics:(NSSet<NSString *> *)tags {
     track.mediaCharacteristicTags = tags;
 

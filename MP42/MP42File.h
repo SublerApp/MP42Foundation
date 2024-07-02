@@ -146,6 +146,8 @@ typedef void (^MP42FileProgressHandler)(double progress);
  */
 - (void)organizeAlternateGroups;
 
+- (void)inferTracksLanguages;
+
 - (void)inferMediaCharacteristics;
 
 /**
