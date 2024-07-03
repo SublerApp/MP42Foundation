@@ -450,12 +450,29 @@ MP42_OBJC_DIRECT_MEMBERS
                 newTrack.dataLength = newTrack.duration * newTrack.bitrate / 1000 / 8;
             }
 
-            NSArray<AVMetadataItem *> *trackMetadata = [track metadataForFormat:AVMetadataFormatQuickTimeUserData];
+            NSArray<AVMetadataFormat> *formats = track.availableMetadataFormats;
+
+            AVMetadataFormat format = AVMetadataFormatQuickTimeUserData;
+            AVMetadataIdentifier taggedIdentifier = AVMetadataIdentifierQuickTimeUserDataTaggedCharacteristic;
+            AVMetadataIdentifier titleIdentifier = AVMetadataQuickTimeUserDataKeyTrackName;
+
+            if ([formats containsObject:AVMetadataFormatQuickTimeUserData]) {
+                format = AVMetadataFormatQuickTimeUserData;
+                taggedIdentifier = AVMetadataIdentifierQuickTimeUserDataTaggedCharacteristic;
+                titleIdentifier = AVMetadataQuickTimeUserDataKeyTrackName;
+            }
+            else if ([formats containsObject:AVMetadataFormatISOUserData]) {
+                format = AVMetadataFormatISOUserData;
+                taggedIdentifier = AVMetadataIdentifierISOUserDataTaggedCharacteristic;
+                titleIdentifier = AVMetadata3GPUserDataKeyTitle;
+            }
+
+            NSArray<AVMetadataItem *> *trackMetadata = [track metadataForFormat:format];
 
             // "name" is undefined in AVMetadataFormat.h, so read the official track name "tnam", and then "name".
             //  On 10.7, "name" is returned as an NSData
             NSString *trackName = [[[AVMetadataItem metadataItemsFromArray:trackMetadata
-                                                            withKey:AVMetadataQuickTimeUserDataKeyTrackName
+                                                                   withKey:titleIdentifier
                                                                   keySpace:nil] firstObject] stringValue];
 
             if (trackName.length) {
@@ -483,8 +500,8 @@ MP42_OBJC_DIRECT_MEMBERS
             }
 
             NSArray<AVMetadataItem *> *mediaTags = [AVMetadataItem metadataItemsFromArray:trackMetadata
-                                                                     filteredByIdentifier:AVMetadataIdentifierQuickTimeUserDataTaggedCharacteristic];
-            
+                                                                     filteredByIdentifier:taggedIdentifier];
+
             if (mediaTags.count) {
                 NSMutableSet<NSString *> *tags = [NSMutableSet set];
                 
@@ -493,6 +510,8 @@ MP42_OBJC_DIRECT_MEMBERS
                 }
                 newTrack.mediaCharacteristicTags = tags;
             }
+
+            newTrack.enabled = track.isEnabled;
 
             [self addTrack:newTrack];
         }
