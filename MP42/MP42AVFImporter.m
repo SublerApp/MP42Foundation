@@ -707,6 +707,7 @@ MP42_OBJC_DIRECT_MEMBERS
                                             MP42MetadataKeyPublisher,           AVMetadataiTunesMetadataKeyPublisher,
                                             MP42MetadataKeySoundEngineer,       AVMetadataiTunesMetadataKeySoundEngineer,
                                             MP42MetadataKeySoloist,             AVMetadataiTunesMetadataKeySoloist,
+                                            MP42MetadataKeyDiscCompilation,     AVMetadataiTunesMetadataKeyDiscCompilation,
                                             MP42MetadataKeyCredits,             AVMetadataiTunesMetadataKeyCredits,
                                             MP42MetadataKeyThanks,              AVMetadataiTunesMetadataKeyThanks,
                                             MP42MetadataKeyOnlineExtras,        AVMetadataiTunesMetadataKeyOnlineExtras,

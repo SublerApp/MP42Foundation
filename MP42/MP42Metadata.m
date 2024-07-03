@@ -137,6 +137,7 @@
             MP42MetadataKeyPublisher,
             MP42MetadataKeySoundEngineer,
             MP42MetadataKeySoloist,
+            MP42MetadataKeyDiscCompilation,
             MP42MetadataKeyCredits,
             MP42MetadataKeyThanks,
             MP42MetadataKeyWorkName,
@@ -222,6 +223,7 @@
             MP42MetadataKeyPublisher,
             MP42MetadataKeySoundEngineer,
             MP42MetadataKeySoloist,
+            MP42MetadataKeyDiscCompilation,
             MP42MetadataKeyCredits,
             MP42MetadataKeyThanks,
             MP42MetadataKeyWorkName,
@@ -620,6 +622,9 @@
     if (tags->soloist) {
         [self addMetadataItemWithUTF8String:tags->soloist identifier:MP42MetadataKeySoloist];
     }
+    if (tags->compilation) {
+        [self addMetadataItemWithBool:*tags->compilation identifier:MP42MetadataKeyDiscCompilation];
+    }
     if (tags->credits) {
         [self addMetadataItemWithUTF8String:tags->credits identifier:MP42MetadataKeyCredits];
     }
@@ -904,6 +909,12 @@
     MP4TagsSetPublisher        (tags, self.itemsMap[MP42MetadataKeyPublisher].stringValue.UTF8String);
     MP4TagsSetSoundEngineer    (tags, self.itemsMap[MP42MetadataKeySoundEngineer].stringValue.UTF8String);
     MP4TagsSetSoloist          (tags, self.itemsMap[MP42MetadataKeySoloist].stringValue.UTF8String);
+
+    if (self.itemsMap[MP42MetadataKeyDiscCompilation]) {
+        uint8_t value = self.itemsMap[MP42MetadataKeyDiscCompilation].numberValue.intValue;
+        MP4TagsSetCompilation(tags, &value);
+    }
+
     MP4TagsSetCredits          (tags, self.itemsMap[MP42MetadataKeyCredits].stringValue.UTF8String);
     MP4TagsSetThanks           (tags, self.itemsMap[MP42MetadataKeyThanks].stringValue.UTF8String);
     MP4TagsSetOnlineExtras     (tags, self.itemsMap[MP42MetadataKeyOnlineExtras].stringValue.UTF8String);

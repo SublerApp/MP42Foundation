@@ -52,7 +52,8 @@ static NSCalendar *_calendar;
                            MP42MetadataKeyGapless:             @(MP42MetadataItemDataTypeBool),
                            MP42MetadataKeyiTunesU:             @(MP42MetadataItemDataTypeBool),
                            MP42MetadataKeyPodcast:             @(MP42MetadataItemDataTypeBool),
-                           MP42MetadataKeyShowWorkAndMovement: @(MP42MetadataItemDataTypeBool)};
+                           MP42MetadataKeyShowWorkAndMovement: @(MP42MetadataItemDataTypeBool),
+                           MP42MetadataKeyDiscCompilation:     @(MP42MetadataItemDataTypeBool)};
     }
 
     NSTimeZone *gmt =  [NSTimeZone timeZoneForSecondsFromGMT:0];

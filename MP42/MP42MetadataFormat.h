@@ -86,7 +86,7 @@ extern NSString *const MP42MetadataKeyPerformer;                // String
 extern NSString *const MP42MetadataKeyPublisher;                // String
 extern NSString *const MP42MetadataKeySoundEngineer;            // String
 extern NSString *const MP42MetadataKeySoloist;                  // String
-extern NSString *const MP42MetadataKeyDiscCompilation;          // String
+extern NSString *const MP42MetadataKeyDiscCompilation;          // Int
 
 // Classic Music Specific Metadata Keys
 extern NSString *const MP42MetadataKeyWorkName;                 // String
