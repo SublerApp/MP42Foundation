@@ -141,13 +141,10 @@ MP42_OBJC_DIRECT_MEMBERS
 }
 
 - (instancetype)initWithPasteboardPropertyList:(id)propertyList
-                              ofType:(NSPasteboardType)type
+                                        ofType:(NSPasteboardType)type
 {
     if ([type isEqualToString:MP42PasteboardTypeArtwork]) {
-        MP42Image *unarchivedImage = [NSKeyedUnarchiver unarchiveObjectWithData:propertyList];
-        if ([unarchivedImage isKindOfClass:[MP42Image class]]) {
-            return unarchivedImage;
-        }
+        return [NSKeyedUnarchiver unarchivedObjectOfClass:[MP42Image class] fromData:propertyList error:NULL];
     }
 
     return nil;
@@ -164,7 +161,7 @@ MP42_OBJC_DIRECT_MEMBERS
         }
     }
     else if ([type isEqualToString:MP42PasteboardTypeArtwork]) {
-        return [NSKeyedArchiver archivedDataWithRootObject:self];
+        return [NSKeyedArchiver archivedDataWithRootObject:self requiringSecureCoding:YES error:NULL];
     }
 
     return nil;
