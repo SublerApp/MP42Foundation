@@ -32,9 +32,11 @@ MP42_OBJC_DIRECT_MEMBERS
 
 - (instancetype)initWithImage:(NSImage *)image
 {
-    if (self = [super init])
+    if (self = [super init]) {
         _image = [image copy];
-    
+        _type = MP42_ART_PNG;
+    }
+
     return self;
 }
 
@@ -92,6 +94,11 @@ MP42_OBJC_DIRECT_MEMBERS
         } else if (_url) {
             NSError *outError = nil;
             _data = [NSData dataWithContentsOfURL:_url options:NSDataReadingUncached error:&outError];
+        } else if (_image) {
+            NSArray<NSImageRep *> *representations = _image.representations;
+            if (representations.count) {
+                _data = [NSBitmapImageRep representationOfImageRepsInArray:representations usingType:NSBitmapImageFileTypePNG properties:@{}];
+            }
         }
     }
 
@@ -109,6 +116,11 @@ MP42_OBJC_DIRECT_MEMBERS
     }
 
     return _image;
+}
+
+- (NSString *)debugDescription
+{
+    return [NSString stringWithFormat:@"<%@: %p> type: %d", [self class], self, _type];
 }
 
 + (BOOL)supportsSecureCoding

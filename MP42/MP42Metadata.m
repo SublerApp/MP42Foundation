@@ -1102,35 +1102,19 @@
 
         NSArray<MP42MetadataItem *> *artworks = [self metadataItemsFilteredByIdentifier:MP42MetadataKeyCoverArt];
         for (uint32_t i = 0; i < artworks.count; i++) {
-            MP42Image *artwork;
-            MP4TagArtwork newArtwork;
-
-            artwork = (MP42Image *)artworks[i].value;
+            MP42Image *artwork = (MP42Image *)artworks[i].value;
 
             if (artwork.data && artwork.data.length < UINT32_MAX) {
+                MP4TagArtwork newArtwork;
                 newArtwork.data = (void *)artwork.data.bytes;
                 newArtwork.size = (uint32_t)artwork.data.length;
                 newArtwork.type = (MP4TagArtworkType)artwork.type;
-            }
-            else {
-                NSArray<NSImageRep *> *representations = artwork.image.representations;
 
-                if (representations.count) {
-                    NSData *bitmapData = [NSBitmapImageRep representationOfImageRepsInArray:representations
-                                                                                  usingType:NSBitmapImageFileTypePNG properties:@{}];
-
-                    if (bitmapData && bitmapData.length < UINT32_MAX) {
-                        newArtwork.data = (void *)bitmapData.bytes;
-                        newArtwork.size = (uint32_t)bitmapData.length;
-                        newArtwork.type = MP4_ART_PNG;
-                    }
+                if (tags->artworkCount > i) {
+                    MP4TagsSetArtwork(tags, i, &newArtwork);
+                } else {
+                    MP4TagsAddArtwork(tags, &newArtwork);
                 }
-            }
-
-            if (tags->artworkCount > i) {
-                MP4TagsSetArtwork(tags, i, &newArtwork);
-            } else {
-                MP4TagsAddArtwork(tags, &newArtwork);
             }
         }
     }
