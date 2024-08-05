@@ -64,6 +64,7 @@ MP42_OBJC_DIRECT_MEMBERS
             case 'ms \0':
                 result = kMP42AudioCodecType_AC3;
                 break;
+            case kAudioFormatFLAC:
             case 'XiFL':
                 result = kMP42AudioCodecType_FLAC;
                 break;
@@ -90,7 +91,7 @@ MP42_OBJC_DIRECT_MEMBERS
         _localAsset = [AVAsset assetWithURL:self.fileURL];
         _helpers = [NSMutableArray array];
 
-        NSArray<AVAssetTrack *> *tracks = [_localAsset tracks];
+        NSArray<AVAssetTrack *> *tracks = _localAsset.tracks;
         CMTime globaDuration = _localAsset.duration;
 
         NSArray *availableChapter = [_localAsset availableChapterLocales];
@@ -972,9 +973,14 @@ MP42_OBJC_DIRECT_MEMBERS
                 return [NSData dataWithBytes:cookie length:cookieSizeOut];
             }
 
-            else if (code == kAudioFormatFLAC) {
-                // TODO
-                return [NSData dataWithBytes:cookie length:cookieSizeOut];
+            else if (code == kAudioFormatFLAC || code == kMP42AudioCodecType_FLAC) {
+                NSMutableData *magicCookie = [NSMutableData dataWithBytes:cookie + 8 length:cookieSizeOut - 8];
+                uint8_t *bytes = magicCookie.mutableBytes;
+                bytes[0] = 'f';
+                bytes[1] = 'L';
+                bytes[2] = 'a';
+                bytes[3] = 'C';
+                return magicCookie;
             }
 
             else if (code == kAudioFormatEnhancedAC3) {
