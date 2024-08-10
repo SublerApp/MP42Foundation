@@ -974,13 +974,15 @@ MP42_OBJC_DIRECT_MEMBERS
             }
 
             else if (code == kAudioFormatFLAC || code == kMP42AudioCodecType_FLAC) {
-                NSMutableData *magicCookie = [NSMutableData dataWithBytes:cookie + 8 length:cookieSizeOut - 8];
-                uint8_t *bytes = magicCookie.mutableBytes;
-                bytes[0] = 'f';
-                bytes[1] = 'L';
-                bytes[2] = 'a';
-                bytes[3] = 'C';
-                return magicCookie;
+                if (cookieSizeOut > 12) {
+                    NSMutableData *magicCookie = [NSMutableData dataWithBytes:cookie + 8 length:cookieSizeOut - 8];
+                    uint8_t *bytes = magicCookie.mutableBytes;
+                    bytes[0] = 'f';
+                    bytes[1] = 'L';
+                    bytes[2] = 'a';
+                    bytes[3] = 'C';
+                    return magicCookie;
+                }
             }
 
             else if (code == kAudioFormatEnhancedAC3) {
