@@ -239,7 +239,9 @@ class AudioSampleDescription: SampleDescription {
  let test2 = FourCharCode("420f")
  print(test.string, test2.string)
 */
-extension FourCharCode: ExpressibleByStringLiteral {
+extension UInt32: @retroactive ExpressibleByExtendedGraphemeClusterLiteral {}
+extension UInt32: @retroactive ExpressibleByUnicodeScalarLiteral {}
+extension FourCharCode: @retroactive ExpressibleByStringLiteral {
 
     public init(stringLiteral value: StringLiteralType) {
         var code: FourCharCode = 0
