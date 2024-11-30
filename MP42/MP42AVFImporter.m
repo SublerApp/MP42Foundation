@@ -215,6 +215,9 @@ MP42_OBJC_DIRECT_MEMBERS
                                 // ???
                                 videoTrack.colorPrimaries = 1;
                             }
+                            else {
+                                videoTrack.colorPrimaries = 2;
+                            }
                         }
 
                         CFStringRef transferFunctions = CMFormatDescriptionGetExtension(formatDescription, kCMFormatDescriptionExtension_TransferFunction);
@@ -227,14 +230,17 @@ MP42_OBJC_DIRECT_MEMBERS
                             else if (CFEqual(transferFunctions, kCMFormatDescriptionTransferFunction_SMPTE_240M_1995)) {
                                 videoTrack.transferCharacteristics = 7;
                             }
-                            else if (CFEqual(transferFunctions, CFSTR("SMPTE_ST_2084_PQ"))) { // kCMFormatDescriptionTransferFunction_SMPTE_ST_2084_PQ
+                            else if (CFEqual(transferFunctions, kCMFormatDescriptionTransferFunction_SMPTE_ST_2084_PQ)) {
                                 videoTrack.transferCharacteristics = 16;
                             }
                             else if (CFEqual(transferFunctions, kCMFormatDescriptionTransferFunction_SMPTE_ST_428_1)) {
                                 videoTrack.transferCharacteristics = 17;
                             }
-                            else if (CFEqual(transferFunctions, CFSTR("ITU_R_2100_HLG"))) { // kCMFormatDescriptionTransferFunction_ITU_R_2100_HLG
+                            else if (CFEqual(transferFunctions, kCMFormatDescriptionTransferFunction_ITU_R_2100_HLG)) {
                                 videoTrack.transferCharacteristics = 18;
+                            }
+                            else {
+                                videoTrack.transferCharacteristics = 2;
                             }
                         }
 
@@ -252,6 +258,12 @@ MP42_OBJC_DIRECT_MEMBERS
                             }
                             else if (CFEqual(YCbCrMatrix, kCMFormatDescriptionYCbCrMatrix_ITU_R_2020)) {
                                 videoTrack.matrixCoefficients = 9;
+                            }
+                            else if (CFEqual(YCbCrMatrix, CFSTR("IPT_C2"))) {
+                                videoTrack.matrixCoefficients = 15;
+                            }
+                            else {
+                                videoTrack.matrixCoefficients = 2;
                             }
                         }
 
