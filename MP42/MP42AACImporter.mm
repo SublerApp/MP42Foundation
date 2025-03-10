@@ -811,15 +811,19 @@ static bool GetFirstHeader(FILE* inFile)
                                   samplesPerSecond,
                                   channelConfig);
 
-        newTrack.timescale = samplesPerSecond;
-        newTrack.channels = channelConfig;
-        newTrack.dataLength = [[[NSFileManager.defaultManager attributesOfItemAtPath:self.fileURL.path error:nil] valueForKey:NSFileSize] unsignedLongLongValue];
+        if (pConfig) {
+            newTrack.timescale = samplesPerSecond;
+            newTrack.channels = channelConfig;
+            newTrack.dataLength = [[[NSFileManager.defaultManager attributesOfItemAtPath:self.fileURL.path error:nil] valueForKey:NSFileSize] unsignedLongLongValue];
 
-        aacInfo = [[NSMutableData alloc] init];
-        [aacInfo appendBytes:pConfig length:configLength];
-        free(pConfig);
+            aacInfo = [[NSMutableData alloc] init];
+            [aacInfo appendBytes:pConfig length:configLength];
+            free(pConfig);
 
-        [self addTrack:newTrack];
+            [self addTrack:newTrack];
+        } else {
+            return nil;
+        }
     }
 
     return self;
