@@ -565,6 +565,9 @@
     if (tags->songDescription) {
         [self addMetadataItemWithUTF8String:tags->songDescription identifier:MP42MetadataKeySongDescription];
     }
+    if (tags->director) {
+        [self addMetadataItemWithUTF8String:tags->director identifier:MP42MetadataKeyDirector];
+    }
     if (tags->artDirector) {
         [self addMetadataItemWithUTF8String:tags->artDirector identifier:MP42MetadataKeyArtDirector];
     }
@@ -804,6 +807,11 @@
                 }
 
                 if ([tag = [self stringArrayFromDictionaryArray:dma[@"directors"] key:@"name"] count]) {
+                    // Replace the @dir tag
+                    NSArray<MP42MetadataItem *> *items = [self metadataItemsFilteredByIdentifier:MP42MetadataKeyDirector];
+                    if (items) {
+                        [self removeMetadataItems:items];
+                    }
                     [self addMetadataItemWithStringArray:tag identifier:MP42MetadataKeyDirector];
                 }
 
@@ -895,6 +903,7 @@
 
     MP4TagsSetTrackSubTitle    (tags, self.itemsMap[MP42MetadataKeyTrackSubTitle].stringValue.UTF8String);
     MP4TagsSetSongDescription  (tags, self.itemsMap[MP42MetadataKeySongDescription].stringValue.UTF8String);
+    MP4TagsSetDirector         (tags, self.itemsMap[MP42MetadataKeyDirector].stringValue.UTF8String);
     MP4TagsSetArtDirector      (tags, self.itemsMap[MP42MetadataKeyArtDirector].stringValue.UTF8String);
     MP4TagsSetArranger         (tags, self.itemsMap[MP42MetadataKeyArranger].stringValue.UTF8String);
     MP4TagsSetLyricist         (tags, self.itemsMap[MP42MetadataKeyAuthor].stringValue.UTF8String);
