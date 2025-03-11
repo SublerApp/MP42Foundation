@@ -425,7 +425,7 @@
 
 #pragma mark - MP42Foundation/mp4v2 read/write mapping
 
-- (void)addMetadataItemWithUTF8String:(const char *)value identifier:(NSString *)idenfitier MP42_OBJC_DIRECT
+- (void)addMetadataItemWithUTF8String:(const char *)value identifier:(NSString *)identifier MP42_OBJC_DIRECT
 {
     NSString *string = [NSString stringWithCString:value encoding:NSUTF8StringEncoding];
 
@@ -439,73 +439,73 @@
         string = @"";
     }
 
-    [self addMetadataItemWithString:string identifier:idenfitier];
+    [self addMetadataItemWithString:string identifier:identifier];
 }
 
-- (void)addMetadataItemWithDateString:(const char *)value identifier:(NSString *)idenfitier MP42_OBJC_DIRECT
+- (void)addMetadataItemWithDateString:(const char *)value identifier:(NSString *)identifier MP42_OBJC_DIRECT
 {
     NSString *string = [NSString stringWithCString:value encoding:NSUTF8StringEncoding];
 
-    MP42MetadataItem *item = [MP42MetadataItem metadataItemWithIdentifier:idenfitier
+    MP42MetadataItem *item = [MP42MetadataItem metadataItemWithIdentifier:identifier
                                                                     value:string
                                                                  dataType:MP42MetadataItemDataTypeUnspecified
                                                       extendedLanguageTag:nil];
     [self.itemsArray addObject:item];
-    [self.itemsMap setObject:item forKey:idenfitier];
+    [self.itemsMap setObject:item forKey:identifier];
 }
 
-- (void)addMetadataItemWithString:(NSString *)value identifier:(NSString *)idenfitier MP42_OBJC_DIRECT
+- (void)addMetadataItemWithString:(NSString *)value identifier:(NSString *)identifier MP42_OBJC_DIRECT
 {
-    MP42MetadataItem *item = [MP42MetadataItem metadataItemWithIdentifier:idenfitier
+    MP42MetadataItem *item = [MP42MetadataItem metadataItemWithIdentifier:identifier
                                                                     value:value
                                                                  dataType:MP42MetadataItemDataTypeString
                                                       extendedLanguageTag:nil];
     [self.itemsArray addObject:item];
-    [self.itemsMap setObject:item forKey:idenfitier];
+    [self.itemsMap setObject:item forKey:identifier];
 }
 
-- (void)addMetadataItemWithStringArray:(NSArray<NSString *> *)value identifier:(NSString *)idenfitier MP42_OBJC_DIRECT
+- (void)addMetadataItemWithStringArray:(NSArray<NSString *> *)value identifier:(NSString *)identifier MP42_OBJC_DIRECT
 {
-    MP42MetadataItem *item = [MP42MetadataItem metadataItemWithIdentifier:idenfitier
+    MP42MetadataItem *item = [MP42MetadataItem metadataItemWithIdentifier:identifier
                                                                     value:value
                                                                  dataType:MP42MetadataItemDataTypeStringArray
                                                       extendedLanguageTag:nil];
     [self.itemsArray addObject:item];
-    [self.itemsMap setObject:item forKey:idenfitier];
+    [self.itemsMap setObject:item forKey:identifier];
 }
 
-- (void)addMetadataItemWithBool:(BOOL)value identifier:(NSString *)idenfitier MP42_OBJC_DIRECT
+- (void)addMetadataItemWithBool:(BOOL)value identifier:(NSString *)identifier MP42_OBJC_DIRECT
 {
-    MP42MetadataItem *item = [MP42MetadataItem metadataItemWithIdentifier:idenfitier
+    MP42MetadataItem *item = [MP42MetadataItem metadataItemWithIdentifier:identifier
                                                                     value:@(value)
                                                                  dataType:MP42MetadataItemDataTypeBool
                                                       extendedLanguageTag:nil];
     [self.itemsArray addObject:item];
-    [self.itemsMap setObject:item forKey:idenfitier];
+    [self.itemsMap setObject:item forKey:identifier];
 }
 
-- (void)addMetadataItemWithInteger:(NSInteger)value identifier:(NSString *)idenfitier MP42_OBJC_DIRECT
+- (void)addMetadataItemWithInteger:(NSInteger)value identifier:(NSString *)identifier MP42_OBJC_DIRECT
 {
-    MP42MetadataItem *item = [MP42MetadataItem metadataItemWithIdentifier:idenfitier
+    MP42MetadataItem *item = [MP42MetadataItem metadataItemWithIdentifier:identifier
                                                                     value:@(value)
                                                                  dataType:MP42MetadataItemDataTypeInteger
                                                       extendedLanguageTag:nil];
     [self.itemsArray addObject:item];
-    [self.itemsMap setObject:item forKey:idenfitier];
+    [self.itemsMap setObject:item forKey:identifier];
 }
-- (void)addMetadataItemWithIntegerArray:(NSArray<NSNumber *> *)value identifier:(NSString *)idenfitier MP42_OBJC_DIRECT
+- (void)addMetadataItemWithIntegerArray:(NSArray<NSNumber *> *)value identifier:(NSString *)identifier MP42_OBJC_DIRECT
 {
-    MP42MetadataItem *item = [MP42MetadataItem metadataItemWithIdentifier:idenfitier
+    MP42MetadataItem *item = [MP42MetadataItem metadataItemWithIdentifier:identifier
                                                                     value:value
                                                                  dataType:MP42MetadataItemDataTypeIntegerArray
                                                       extendedLanguageTag:nil];
     [self.itemsArray addObject:item];
-    [self.itemsMap setObject:item forKey:idenfitier];
+    [self.itemsMap setObject:item forKey:identifier];
 }
 
-- (void)addMetadataItemWithImage:(MP42Image *)value identifier:(NSString *)idenfitier MP42_OBJC_DIRECT
+- (void)addMetadataItemWithImage:(MP42Image *)value identifier:(NSString *)identifier MP42_OBJC_DIRECT
 {
-    MP42MetadataItem *item = [MP42MetadataItem metadataItemWithIdentifier:idenfitier
+    MP42MetadataItem *item = [MP42MetadataItem metadataItemWithIdentifier:identifier
                                                                     value:value
                                                                  dataType:MP42MetadataItemDataTypeImage
                                                       extendedLanguageTag:nil];
