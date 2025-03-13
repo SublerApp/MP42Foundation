@@ -345,6 +345,14 @@ MP42_OBJC_DIRECT_MEMBERS
 
 #pragma mark - Metadata
 
+#define COLLECTION 70
+#define SEASON     60
+#define MOVIE      50
+#define PART       40
+#define CHAPTER    30
+#define SCENE      20
+#define SHOT       10
+
 - (void)addMetadataItem:(id)value identifier:(NSString *)identifier metadata:(MP42Metadata *)metadata
 {
     MP42MetadataItem *item = [MP42MetadataItem metadataItemWithIdentifier:identifier
@@ -356,80 +364,182 @@ MP42_OBJC_DIRECT_MEMBERS
 
 - (MP42Metadata *)readMatroskaMetadata
 {
-    MP42Metadata *mkvMetadata = [[MP42Metadata alloc] init];
+    MP42Metadata *metadata = [[MP42Metadata alloc] init];
 
     SegmentInfo *segInfo = mkv_GetFileInfo(_matroskaFile);
+
     if (segInfo->Title) {
-        [self addMetadataItem:[NSString stringWithUTF8String:segInfo->Title] identifier:MP42MetadataKeyName metadata:mkvMetadata];
+        [self addMetadataItem:@(segInfo->Title)
+                   identifier:MP42MetadataKeyName
+                     metadata:metadata];
     }
-    
-    Tag *tags;
+
+    NSDictionary<NSString *, NSString *> *simpleMap = @{
+        @"TITLE":         MP42MetadataKeyName,
+        @"SUBTITLE":      MP42MetadataKeyTrackSubTitle,
+        @"ALBUM":         MP42MetadataKeyAlbum,
+        @"ARTIST":        MP42MetadataKeyArtist,
+
+        @"COMMENT":       MP42MetadataKeyUserComment,
+        @"GENRE":         MP42MetadataKeyUserGenre,
+        @"DATE_RELEASED": MP42MetadataKeyReleaseDate,
+
+        @"BPM":           MP42MetadataKeyBeatsPerMin,
+
+        @"KEYWORDS":      MP42MetadataKeyKeywords,
+        @"THANKS_TO":     MP42MetadataKeyThanks,
+        @"COPYRIGHT":     MP42MetadataKeyCopyright,
+
+        @"DESCRIPTION":   MP42MetadataKeyDescription,
+        @"SYNOPSIS":      MP42MetadataKeyLongDescription,
+
+        @"DIRECTOR_OF_PHOTOGRAPHY": MP42MetadataKeyArtDirector,
+        @"COMPOSER":                MP42MetadataKeyComposer,
+        @"ARRANGER":                MP42MetadataKeyArranger,
+        @"WRITTEN_BY":              MP42MetadataKeyAuthor,
+        @"LYRICS":                  MP42MetadataKeyLyrics,
+        @"CONDUCTOR":               MP42MetadataKeyConductor,
+        @"PUBLISHER":               MP42MetadataKeyPublisher,
+        @"SOUND_ENGINEER":          MP42MetadataKeySoundEngineer,
+        @"LEAD_PERFORMER":          MP42MetadataKeySoloist,
+
+        @"PRODUCTION_STUDIO":  MP42MetadataKeyStudio,
+        @"DIRECTOR":           MP42MetadataKeyDirector,
+        @"PRODUCER":           MP42MetadataKeyProducer,
+        @"EXECUTIVE_PRODUCER": MP42MetadataKeyExecProducer,
+        @"SCREENPLAY_BY":      MP42MetadataKeyScreenwriters,
+
+        @"ENCODER":       MP42MetadataKeyEncodingTool,
+    };
+
+    NSDictionary<NSString *, NSString *> *collectionMap = @{
+        @"TITLE":         MP42MetadataKeyTVShow,
+        @"COPYRIGHT":     MP42MetadataKeyCopyright,
+        @"DESCRIPTION":   MP42MetadataKeySeriesDescription,
+        @"SYNOPSIS":      MP42MetadataKeySeriesDescription,
+    };
+
+    NSDictionary<NSString *, NSString *> *seasonMap = @{
+        @"PART_NUMBER":   MP42MetadataKeyTVSeason,
+        @"DESCRIPTION":   MP42MetadataKeySeriesDescription,
+        @"SYNOPSIS":      MP42MetadataKeySeriesDescription,
+        @"DATE_RELEASED": MP42MetadataKeyReleaseDate
+    };
+
     unsigned count;
+    Tag *tag_groups;
 
-    mkv_GetTags(_matroskaFile, &tags, &count);
-    if (count) {
-        for (unsigned int xi = 0; xi < tags->nSimpleTags; xi++) {
+    mkv_GetTags(_matroskaFile, &tag_groups, &count);
 
-            if (!strcmp(tags->SimpleTags[xi].Name, "TITLE")) {
-                [self addMetadataItem:@(tags->SimpleTags[xi].Value) identifier:MP42MetadataKeyName metadata:mkvMetadata];
-            }
-            
-            if (!strcmp(tags->SimpleTags[xi].Name, "DATE_RELEASED")) {
-                [self addMetadataItem:@(tags->SimpleTags[xi].Value) identifier:MP42MetadataKeyReleaseDate metadata:mkvMetadata];
-            }
+    char *total_parts = NULL;
+    char *part_number = NULL;
 
-            if (!strcmp(tags->SimpleTags[xi].Name, "COMMENT")) {
-                [self addMetadataItem:@(tags->SimpleTags[xi].Value) identifier:MP42MetadataKeyUserComment metadata:mkvMetadata];
-            }
+    for (unsigned int xi = 0; xi < count; xi++) {
+        Tag *tags = &tag_groups[xi];
 
-            if (!strcmp(tags->SimpleTags[xi].Name, "DIRECTOR")) {
-                [self addMetadataItem:@(tags->SimpleTags[xi].Value) identifier:MP42MetadataKeyDirector metadata:mkvMetadata];
-            }
+        ulonglong UID = 0;
+        NSDictionary<NSString *, NSString *> *map = simpleMap;
 
-            if (!strcmp(tags->SimpleTags[xi].Name, "COPYRIGHT")) {
-                [self addMetadataItem:@(tags->SimpleTags[xi].Value) identifier:MP42MetadataKeyCopyright metadata:mkvMetadata];
+        if (tags->nTargetsSize) {
+            struct Target *target = &tags->Targets[0];
+
+            if (target->Type != TARGET_TYPE_VALUE) {
+                continue;
             }
 
-            if (!strcmp(tags->SimpleTags[xi].Name, "ARTIST")) {
-                [self addMetadataItem:@(tags->SimpleTags[xi].Value) identifier:MP42MetadataKeyArtist metadata:mkvMetadata];
+            UID = target->UID;
+
+            if (UID == CHAPTER ||
+                UID == SCENE   ||
+                UID == SHOT) {
+                continue;
             }
 
-            if (!strcmp(tags->SimpleTags[xi].Name, "ENCODER")) {
-                [self addMetadataItem:@(tags->SimpleTags[xi].Value) identifier:MP42MetadataKeyEncodingTool metadata:mkvMetadata];
+            if (UID == COLLECTION) {
+                map = collectionMap;
+            } else if (UID == SEASON) {
+                map = seasonMap;
             }
+        }
+
+        for (unsigned int yi = 0; yi < tags->nSimpleTags; yi++) {
+            struct SimpleTag *tag = &tags->SimpleTags[yi];
+
+            if (tag->Name) {
+                NSString *simpleTagKey = @(tag->Name);
+                NSString *key = map[simpleTagKey];
+
+                if (key && tag->Value) {
+                    [self addMetadataItem:@(tag->Value)
+                               identifier:key
+                                 metadata:metadata];
+                } else if (UID == SEASON &&
+                           [simpleTagKey isEqualToString:@"TOTAL_PARTS"]) {
+                    total_parts = tag->Value;
+                } else if ([simpleTagKey isEqualToString:@"PART_NUMBER"]) {
+                    part_number = tag->Value;
+                }
+            }
+        }
+    }
+
+    if (part_number) {
+        int track, total = 0;
+
+        track = atoi(part_number);
+        if (total_parts) {
+            total = atoi(total_parts);
+        }
+
+        [self addMetadataItem:@[@(track), @(total)]
+                   identifier:MP42MetadataKeyTrackNumber
+                     metadata:metadata];
+
+        [self addMetadataItem:@(track)
+                   identifier:MP42MetadataKeyTVEpisodeNumber
+                     metadata:metadata];
+
+        int season = [metadata metadataItemsFilteredByIdentifier:MP42MetadataKeyTVSeason].firstObject.numberValue.intValue;
+        if (season) {
+            [self addMetadataItem:[NSString stringWithFormat:@"%d%02d", season, track]
+                       identifier:MP42MetadataKeyTVEpisodeID
+                         metadata:metadata];
         }
     }
 
     Attachment *attachments;
     mkv_GetAttachments(_matroskaFile, &attachments, &count);
 
-    if (count) {
-        for (unsigned int xi = 0; xi < count; xi++) {
-            Attachment *attachment = &attachments[xi];
+    for (unsigned int xi = 0; xi < count; xi++) {
+        Attachment *attachment = &attachments[xi];
 
-            if (attachment->Name && attachment->MimeType && attachment->Length > 0) {
-                if (!strcmp(attachment->MimeType, "image/jpeg") || !strcmp(attachment->MimeType, "image/png")) {
-                    uint8_t *data = malloc(attachment->Length);
+        if (attachment->Name && attachment->MimeType && attachment->Length > 0) {
+            if (!strcmp(attachment->MimeType, "image/jpeg") ||
+                !strcmp(attachment->MimeType, "image/png")) {
+                uint8_t *data = malloc(attachment->Length);
 
-                    if (readData(_ioStream, attachment->Position, &data, attachment->Length)) {
-                        MP42TagArtworkType type = MP42_ART_JPEG;
+                if (readData(_ioStream, attachment->Position, &data, attachment->Length)) {
+                    MP42TagArtworkType type = MP42_ART_JPEG;
 
-                        if (!strcmp(attachment->MimeType, "image/png")) {
-                            type = MP42_ART_PNG;
-                        }
-
-                        MP42Image *image = [[MP42Image alloc] initWithBytes:data length:attachment->Length type:type];
-
-                        [self addMetadataItem:image identifier:MP42MetadataKeyCoverArt metadata:mkvMetadata];
+                    if (!strcmp(attachment->MimeType, "image/png")) {
+                        type = MP42_ART_PNG;
                     }
 
-                    free(data);
+                    MP42Image *image = [[MP42Image alloc] initWithBytes:data
+                                                                 length:attachment->Length
+                                                                   type:type];
+
+                    [self addMetadataItem:image
+                               identifier:MP42MetadataKeyCoverArt
+                                 metadata:metadata];
                 }
+
+                free(data);
             }
         }
     }
 
-    return mkvMetadata;
+    return metadata;
 }
 
 - (NSArray<NSNumber *> *)approximatedTrackDataLength

@@ -305,9 +305,11 @@ struct Cue {
 typedef struct Cue Cue;
 
 #define    TARGET_TRACK      0
-#define    TARGET_CHAPTER      1
+#define    TARGET_CHAPTER    1
 #define    TARGET_ATTACHMENT 2
-#define    TARGET_EDITION      3
+#define    TARGET_EDITION    3
+#define    TARGET_TYPE_VALUE 4
+
 struct Target {
   ulonglong        UID;
   unsigned        Type;

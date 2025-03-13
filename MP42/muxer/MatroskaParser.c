@@ -2198,6 +2198,11 @@ static void parseTags(MatroskaFile *mf,ulonglong toplen) {
               target->UID = readUInt(mf,(unsigned)len);
               target->Type = TARGET_EDITION;
               break;
+            case 0x68ca: // Target type value
+              target = ASGET(mf,tag,Targets);
+              target->UID = readUInt(mf,(unsigned)len);
+              target->Type = TARGET_TYPE_VALUE;
+              break;
           ENDFOR(mf);
           break;
         case 0x67c8: // SimpleTag
