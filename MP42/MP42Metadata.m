@@ -115,10 +115,12 @@
             MP42MetadataKeyGenreID,
             MP42MetadataKeyComposerID,
             MP42MetadataKeyXID,
+            MP42MetadataKeyASIN,
             MP42MetadataKeyAppleID,
             MP42MetadataKeyAccountKind,
             MP42MetadataKeyAccountCountry,
             MP42MetadataKeyPurchasedDate,
+            MP42MetadataKeyLanguage,
             MP42MetadataKeyOnlineExtras,
             MP42MetadataKeySongDescription,
             MP42MetadataKeyArtDirector,
@@ -204,10 +206,12 @@
             MP42MetadataKeyGenreID,
             MP42MetadataKeyComposerID,
             MP42MetadataKeyXID,
+            MP42MetadataKeyASIN,
             MP42MetadataKeyAppleID,
             MP42MetadataKeyAccountKind,
             MP42MetadataKeyAccountCountry,
             MP42MetadataKeyPurchasedDate,
+            MP42MetadataKeyLanguage,
             MP42MetadataKeyOnlineExtras,
             MP42MetadataKeyArtDirector,
             MP42MetadataKeyArranger,
@@ -691,6 +695,9 @@
     if (tags->purchaseDate) {
         [self addMetadataItemWithUTF8String:tags->purchaseDate identifier:MP42MetadataKeyPurchasedDate];
     }
+    if (tags->language) {
+        [self addMetadataItemWithUTF8String:tags->language identifier:MP42MetadataKeyLanguage];
+    }
     if (tags->iTunesAccount) {
         [self addMetadataItemWithUTF8String:tags->iTunesAccount identifier:MP42MetadataKeyAppleID];
     }
@@ -717,6 +724,9 @@
     }
     if (tags->xid) {
         [self addMetadataItemWithUTF8String:tags->xid identifier:MP42MetadataKeyXID];
+    }
+    if (tags->asin) {
+        [self addMetadataItemWithUTF8String:tags->asin identifier:MP42MetadataKeyASIN];
     }
     if (tags->sortName) {
         [self addMetadataItemWithUTF8String:tags->sortName identifier:MP42MetadataKeySortName];
@@ -986,6 +996,7 @@
     MP4TagsSetEncodingTool      (tags, self.itemsMap[MP42MetadataKeyEncodingTool].stringValue.UTF8String);
     MP4TagsSetEncodedBy         (tags, self.itemsMap[MP42MetadataKeyEncodedBy].stringValue.UTF8String);
     MP4TagsSetPurchaseDate      (tags, self.itemsMap[MP42MetadataKeyPurchasedDate].stringValue.UTF8String);
+    MP4TagsSetLanguage          (tags, self.itemsMap[MP42MetadataKeyLanguage].stringValue.UTF8String);
     MP4TagsSetITunesAccount     (tags, self.itemsMap[MP42MetadataKeyAppleID].stringValue.UTF8String);
 
     if (self.itemsMap[MP42MetadataKeyMediaKind]) {
@@ -1096,6 +1107,7 @@
     }
 
     MP4TagsSetXID            (tags, self.itemsMap[MP42MetadataKeyXID].stringValue.UTF8String);
+    MP4TagsSetASIN           (tags, self.itemsMap[MP42MetadataKeyASIN].stringValue.UTF8String);
     MP4TagsSetSortName       (tags, self.itemsMap[MP42MetadataKeySortName].stringValue.UTF8String);
     MP4TagsSetSortArtist     (tags, self.itemsMap[MP42MetadataKeySortArtist].stringValue.UTF8String);
     MP4TagsSetSortAlbumArtist(tags, self.itemsMap[MP42MetadataKeySortAlbumArtist].stringValue.UTF8String);
