@@ -18,7 +18,7 @@ NS_ASSUME_NONNULL_BEGIN
 + (instancetype)chapterTrackFromFile:(NSURL *)URL;
 
 - (NSUInteger)addChapter:(MP42TextSample *)chapter;
-- (NSUInteger)addChapter:(NSString *)title duration:(uint64_t)timestamp;
+- (NSUInteger)addChapter:(NSString *)title timestamp:(uint64_t)timestamp;
 - (NSUInteger)addChapter:(NSString *)title image:(MP42Image *)image duration:(uint64_t)timestamp;
 
 - (void)removeChapterAtIndex:(NSUInteger)index;

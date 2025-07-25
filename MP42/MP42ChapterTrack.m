@@ -118,7 +118,7 @@ MP42_OBJC_DIRECT_MEMBERS
     return [_chapters indexOfObject:chapter];
 }
 
-- (NSUInteger)addChapter:(NSString *)title duration:(uint64_t)timestamp
+- (NSUInteger)addChapter:(NSString *)title timestamp:(uint64_t)timestamp
 {
     MP42TextSample *newChapter = [[MP42TextSample alloc] init];
     newChapter.title = title;

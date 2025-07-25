@@ -323,10 +323,10 @@ MP42_OBJC_DIRECT_MEMBERS
                 }
                 if (chapters->Children[xi].Display && strlen(chapters->Children[xi].Display->String)) {
                     [newTrack addChapter:[NSString stringWithUTF8String:chapters->Children[xi].Display->String]
-                                duration:timestamp];
+                                timestamp:timestamp];
                 } else {
                     [newTrack addChapter:[NSString stringWithFormat:@"Chapter %d", xi+1]
-                                duration:timestamp];
+                                timestamp:timestamp];
                 }
             }
             [self addTrack:newTrack];

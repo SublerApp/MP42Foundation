@@ -106,7 +106,7 @@ MP42_OBJC_DIRECT_MEMBERS
                     for (AVMetadataItem *item in chapterData.items) {
                         CMTime time = item.time;
                         NSString *title = item.stringValue ? item.stringValue : @"";
-                        [chapters addChapter:title duration:time.value * time.timescale / 1000];
+                        [chapters addChapter:title timestamp:time.value * time.timescale / 1000];
                     }
                 }
             }
