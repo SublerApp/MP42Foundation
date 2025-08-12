@@ -108,10 +108,16 @@ extern NSString *const MP42MetadataKeyAccountCountry;           // Int
 extern NSString *const MP42MetadataKeyPurchasedDate;            // Date
 extern NSString *const MP42MetadataKeyOnlineExtras;             // String
 
-// Sort Metadata Keys
+// Sort Metadata keys
 extern NSString *const MP42MetadataKeySortName;                 // String
 extern NSString *const MP42MetadataKeySortArtist;               // String
 extern NSString *const MP42MetadataKeySortAlbumArtist;          // String
 extern NSString *const MP42MetadataKeySortAlbum;                // String
 extern NSString *const MP42MetadataKeySortComposer;             // String
 extern NSString *const MP42MetadataKeySortTVShow;               // String
+
+// Unofficial Metadata keys for Audiobooks
+extern NSString *const MP42MetadataKeyUnofficialSubtitle;       // String
+extern NSString *const MP42MetadataKeyUnofficialLanguage;       // String
+extern NSString *const MP42MetadataKeyUnofficialASIN;           // String
+extern NSString *const MP42MetadataKeyUnofficialAbridged;       // Bool

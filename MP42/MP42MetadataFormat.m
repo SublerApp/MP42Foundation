@@ -218,3 +218,8 @@ NSString *const MP42MetadataKeySortAlbumArtist = @"Sort Album Artist";
 NSString *const MP42MetadataKeySortAlbum = @"Sort Album";
 NSString *const MP42MetadataKeySortComposer = @"Sort Composer";
 NSString *const MP42MetadataKeySortTVShow = @"Sort TV Show";
+
+NSString *const MP42MetadataKeyUnofficialSubtitle = @"Unofficial Subtitle";
+NSString *const MP42MetadataKeyUnofficialLanguage = @"Unofficial Language";
+NSString *const MP42MetadataKeyUnofficialASIN = @"Unofficial ASIN";
+NSString *const MP42MetadataKeyUnofficialAbridged = @"Unofficial Abridged";

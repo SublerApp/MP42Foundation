@@ -150,7 +150,11 @@
             MP42MetadataKeySortAlbumArtist,
             MP42MetadataKeySortAlbum,
             MP42MetadataKeySortComposer,
-            MP42MetadataKeySortTVShow];
+            MP42MetadataKeySortTVShow,
+            MP42MetadataKeyUnofficialSubtitle,
+            MP42MetadataKeyUnofficialLanguage,
+            MP42MetadataKeyUnofficialASIN,
+            MP42MetadataKeyUnofficialAbridged];
 }
 
 + (NSArray<NSString *> *)writableMetadata
@@ -236,7 +240,12 @@
             MP42MetadataKeySortAlbumArtist,
             MP42MetadataKeySortAlbum,
             MP42MetadataKeySortComposer,
-            MP42MetadataKeySortTVShow];
+            MP42MetadataKeySortTVShow,
+            MP42MetadataKeyUnofficialSubtitle,
+            MP42MetadataKeyUnofficialLanguage,
+            MP42MetadataKeyUnofficialASIN,
+            MP42MetadataKeyUnofficialAbridged
+    ];
 }
 
 #pragma mark - Public methods
@@ -757,13 +766,10 @@
     // read the remaining iTMF items
     MP4ItmfItemList *list = MP4ItmfGetItemsByMeaning(sourceHandle, "com.apple.iTunes", "iTunEXTC");
     if (list) {
-
         for (uint32_t i = 0; i < list->size; i++) {
-
             MP4ItmfItem *item = &list->elements[i];
 
             for (uint32_t j = 0; j < item->dataList.size; j++) {
-
                 MP4ItmfData *data = &item->dataList.elements[j];
 
                 NSString *ratingString = [[NSString alloc] initWithBytes:data->value length: data->valueSize encoding:NSUTF8StringEncoding];
@@ -787,13 +793,9 @@
 
     list = MP4ItmfGetItemsByMeaning(sourceHandle, "com.apple.iTunes", "iTunMOVI");
     if (list) {
-
         for (uint32_t i = 0; i < list->size; i++) {
-
             MP4ItmfItem *item = &list->elements[i];
-
             for (uint32_t j = 0; j < item->dataList.size; j++) {
-
                 MP4ItmfData *data = &item->dataList.elements[j];
                 NSData *xmlData = [NSData dataWithBytes:data->value length:data->valueSize];
                 NSDictionary *dma = (NSDictionary *)[NSPropertyListSerialization propertyListWithData:xmlData
@@ -833,6 +835,121 @@
                         [self addMetadataItemWithString:tag identifier:MP42MetadataKeyStudio];
                     }
                 }
+            }
+        }
+        MP4ItmfItemListFree(list);
+    }
+
+    list = MP4ItmfGetItemsByMeaning(sourceHandle, "com.apple.iTunes", "SUBTITLE");
+    if (list) {
+        for (uint32_t i = 0; i < list->size; i++) {
+            MP4ItmfItem *item = &list->elements[i];
+
+            for (uint32_t j = 0; j < item->dataList.size; j++) {
+                MP4ItmfData *data = &item->dataList.elements[j];
+                NSString *tag = [[NSString alloc] initWithBytes:data->value length: data->valueSize encoding:NSUTF8StringEncoding];
+
+                if (tag.length) {
+                    [self addMetadataItemWithString:tag identifier:MP42MetadataKeyUnofficialSubtitle];
+                }
+            }
+        }
+        MP4ItmfItemListFree(list);
+    }
+
+    list = MP4ItmfGetItemsByMeaning(sourceHandle, "com.apple.iTunes", "LANGUAGE");
+    if (list) {
+        for (uint32_t i = 0; i < list->size; i++) {
+            MP4ItmfItem *item = &list->elements[i];
+
+            for (uint32_t j = 0; j < item->dataList.size; j++) {
+                MP4ItmfData *data = &item->dataList.elements[j];
+                NSString *tag = [[NSString alloc] initWithBytes:data->value length: data->valueSize encoding:NSUTF8StringEncoding];
+
+                if (tag.length) {
+                    [self addMetadataItemWithString:tag identifier:MP42MetadataKeyUnofficialLanguage];
+                }
+            }
+        }
+        MP4ItmfItemListFree(list);
+    }
+
+    list = MP4ItmfGetItemsByMeaning(sourceHandle, "com.apple.iTunes", "ASIN");
+    if (list) {
+        for (uint32_t i = 0; i < list->size; i++) {
+            MP4ItmfItem *item = &list->elements[i];
+
+            for (uint32_t j = 0; j < item->dataList.size; j++) {
+                MP4ItmfData *data = &item->dataList.elements[j];
+                NSString *tag = [[NSString alloc] initWithBytes:data->value length: data->valueSize encoding:NSUTF8StringEncoding];
+
+                if (tag.length) {
+                    [self addMetadataItemWithString:tag identifier:MP42MetadataKeyUnofficialASIN];
+                }
+            }
+        }
+        MP4ItmfItemListFree(list);
+    }
+
+    list = MP4ItmfGetItemsByMeaning(sourceHandle, "com.apple.iTunes", "ABRIDGED");
+    if (list) {
+        for (uint32_t i = 0; i < list->size; i++) {
+            MP4ItmfItem *item = &list->elements[i];
+
+            for (uint32_t j = 0; j < item->dataList.size; j++) {
+                MP4ItmfData *data = &item->dataList.elements[j];
+                NSString *tag = [[NSString alloc] initWithBytes:data->value length: data->valueSize encoding:NSUTF8StringEncoding];
+
+                if (tag.length) {
+                    [self addMetadataItemWithBool:[tag boolValue] identifier:MP42MetadataKeyUnofficialAbridged];
+                }
+            }
+        }
+        MP4ItmfItemListFree(list);
+    }
+}
+
+- (void)writeiTunEXTCMetadataWithFileHandle:(MP4FileHandle)fileHandle
+                                metadataKey:(NSString *)metadataKey
+                                  iTunesKey:(const char *)iTunesKey
+{
+    if (self.itemsMap[metadataKey]) {
+
+        MP4ItmfItemList *list = MP4ItmfGetItemsByMeaning(fileHandle, "com.apple.iTunes", iTunesKey);
+        if (list) {
+            for (uint32_t i = 0; i < list->size; i++) {
+                MP4ItmfItem *item = &list->elements[i];
+                MP4ItmfRemoveItem(fileHandle, item);
+            }
+        }
+        MP4ItmfItemListFree(list);
+
+        MP4ItmfItem *newItem = MP4ItmfItemAlloc("----", 1);
+        newItem->mean = strdup("com.apple.iTunes");
+        newItem->name = strdup(iTunesKey);
+
+        MP4ItmfData *data = &newItem->dataList.elements[0];
+
+        NSString *value = self.itemsMap[metadataKey].stringValue;
+        if (value) {
+            data->typeCode = MP4_ITMF_BT_UTF8;
+            size_t len = strlen(value.UTF8String);
+            if (len < UINT32_MAX) {
+                data->valueSize = (uint32_t)len;
+                data->value = (uint8_t *)malloc(data->valueSize);
+                memcpy(data->value, value.UTF8String, data->valueSize);
+
+                MP4ItmfAddItem(fileHandle, newItem);
+            }
+        }
+
+        MP4ItmfItemFree(newItem);
+    } else {
+        MP4ItmfItemList *list = MP4ItmfGetItemsByMeaning(fileHandle, "com.apple.iTunes", iTunesKey);
+        if (list) {
+            for (uint32_t i = 0; i < list->size; i++) {
+                MP4ItmfItem *item = &list->elements[i];
+                MP4ItmfRemoveItem(fileHandle, item);
             }
         }
 
@@ -1285,6 +1402,19 @@
             MP4ItmfItemListFree(moviList);
         }
     }
+
+    [self writeiTunEXTCMetadataWithFileHandle:fileHandle
+                                  metadataKey:MP42MetadataKeyUnofficialSubtitle
+                                    iTunesKey:"SUBTITLE"];
+    [self writeiTunEXTCMetadataWithFileHandle:fileHandle
+                                  metadataKey:MP42MetadataKeyUnofficialLanguage
+                                    iTunesKey:"LANGUAGE"];
+    [self writeiTunEXTCMetadataWithFileHandle:fileHandle
+                                  metadataKey:MP42MetadataKeyUnofficialASIN
+                                    iTunesKey:"ASIN"];
+    [self writeiTunEXTCMetadataWithFileHandle:fileHandle
+                                  metadataKey:MP42MetadataKeyUnofficialAbridged
+                                    iTunesKey:"ABRIDGED"];
 }
 
 #pragma mark - NSSecureCoding
