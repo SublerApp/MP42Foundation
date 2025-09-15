@@ -207,6 +207,7 @@ struct TrackInfo {
   /* various strings */
   char            *Name;
   char            Language[4];
+  char            *LanguageBCP47;
   char            *CodecID;
 
   unsigned int NeedKeyframes;

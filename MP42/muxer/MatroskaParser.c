@@ -1572,6 +1572,9 @@ static void parseTrackEntry(MatroskaFile *mf,ulonglong toplen) {
     case 0x22b59c: // Language
       readLangCC(mf, len, t.Language);
       break;
+    case 0x22B59D: // LanguageBCP47
+      STRGETA(mf,t.LanguageBCP47,len);
+      break;
     case 0x86: // CodecID
       STRGETA(mf,t.CodecID,len);
       break;
@@ -1758,6 +1761,8 @@ static void parseTrackEntry(MatroskaFile *mf,ulonglong toplen) {
   // copy strings
   if (t.Name)
     cpadd += strlen(t.Name)+1;
+  if (t.LanguageBCP47)
+    cpadd += strlen(t.LanguageBCP47)+1;
   if (t.CodecID)
     cpadd += strlen(t.CodecID)+1;
 
@@ -1781,6 +1786,7 @@ static void parseTrackEntry(MatroskaFile *mf,ulonglong toplen) {
 
   cp = (char*)(tp+1) + cplen + cslen;
   CopyStr(&tp->Name,&cp);
+  CopyStr(&tp->LanguageBCP47,&cp);
   CopyStr(&tp->CodecID,&cp);
 
   // set default language
