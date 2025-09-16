@@ -207,7 +207,7 @@ enum : MP42TimeCodeFormatType
 {
     kMP42TimeCodeFormatType_TimeCode32	= 'tmcd',
     kMP42TimeCodeFormatType_TimeCode64	= 'tc64',
-    kCMP42TimeCodeFormatType_Counter32  = 'cn32',
+    kMP42TimeCodeFormatType_Counter32   = 'cn32',
     kMP42TimeCodeFormatType_Counter64   = 'cn64'
 };
 

@@ -409,7 +409,7 @@ NSString *localizedTimeCodeDisplayName(FourCharCode mediaSubtype)
             result = NSLocalizedString(@"TimeCode 64", nil);
             break;
 
-        case kCMP42TimeCodeFormatType_Counter32:
+        case kMP42TimeCodeFormatType_Counter32:
             result = NSLocalizedString(@"Counter 32", nil);
             break;
 
