@@ -912,7 +912,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
 				CLASSPREFIX = MP42;
-				LastUpgradeCheck = 1610;
+				LastUpgradeCheck = 2600;
 				ORGANIZATIONNAME = "Damiano Galassi";
 				TargetAttributes = {
 					A910B5A218394E900064028F = {
