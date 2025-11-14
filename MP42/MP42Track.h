@@ -55,6 +55,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly) BOOL canExport;
 - (BOOL)exportToURL:(NSURL *)url error:(NSError * __autoreleasing *)error;
 
+@property (nonatomic, readwrite, nullable) NSUndoManager *undo;
+
 #pragma mark - Private
 
 - (void)enqueue:(MP42SampleBuffer *)sample MP42_OBJC_DIRECT;

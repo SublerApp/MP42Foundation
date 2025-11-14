@@ -287,42 +287,69 @@ typedef struct muxer_helper {
 
 }
 
-- (void)setLanguage:(NSString *)newLang
+- (void)setLanguage:(NSString *)language
 {
-    _language = [newLang copy];
-    self.edited = YES;
-    _updatedProperty[@"language"] = @YES;
+    if (![_language isEqualToString:language]) {
+        [[self.undo prepareWithInvocationTarget:self] setMediaCharacteristicTags:_mediaCharacteristicTags];
+        _language = [language copy];
+    }
 
+    if (!(self.undo.isUndoing || self.undo.isRedoing)) {
+        self.edited = YES;
+        _updatedProperty[@"language"] = @YES;
+    }
 }
 
 - (void)setMediaCharacteristicTags:(NSSet<NSString *> *)mediaCharacteristicTags
 {
-    _mediaCharacteristicTags = [mediaCharacteristicTags copy];
-    self.edited = YES;
-    _updatedProperty[@"mediaCharacteristicTags"] = @YES;
+    if (![_mediaCharacteristicTags isEqualToSet:mediaCharacteristicTags]) {
+        [[self.undo prepareWithInvocationTarget:self] setMediaCharacteristicTags:_mediaCharacteristicTags];
+        _mediaCharacteristicTags = [mediaCharacteristicTags copy];
+    }
+
+    if (!(self.undo.isUndoing || self.undo.isRedoing)) {
+        self.edited = YES;
+        _updatedProperty[@"mediaCharacteristicTags"] = @YES;
+    }
 }
 
-- (void)setEnabled:(BOOL)newState
+- (void)setEnabled:(BOOL)enabled
 {
-    if (_enabled != newState) {
-        _enabled = newState;
+    if (_enabled != enabled) {
+        [[self.undo prepareWithInvocationTarget:self] setEnabled:_enabled];
+        _enabled = enabled;
+    }
+
+    if (!(self.undo.isUndoing || self.undo.isRedoing)) {
         self.edited = YES;
         _updatedProperty[@"enabled"] = @YES;
     }
 }
 
-- (void)setAlternateGroup:(uint64_t)newGroup
+- (void)setAlternateGroup:(uint64_t)alternateGroup
 {
-    _alternateGroup = newGroup;
-    self.edited = YES;
-    _updatedProperty[@"alternate_group"] = @YES;
+    if (_alternateGroup != alternateGroup) {
+        [[self.undo prepareWithInvocationTarget:self] setAlternateGroup:_alternateGroup];
+        _alternateGroup = alternateGroup;
+    }
+
+    if (!(self.undo.isUndoing || self.undo.isRedoing)) {
+        self.edited = YES;
+        _updatedProperty[@"alternate_group"] = @YES;
+    }
 }
 
-- (void)setStartOffset:(NSTimeInterval)newOffset
+- (void)setStartOffset:(NSTimeInterval)startOffset
 {
-    _startOffset = newOffset;
-    self.edited = YES;
-    _updatedProperty[@"start_offset"] = @YES;
+    if (_startOffset != startOffset) {
+        [[self.undo prepareWithInvocationTarget:self] setStartOffset:_startOffset];
+        _startOffset = startOffset;
+    }
+
+    if (!(self.undo.isUndoing || self.undo.isRedoing)) {
+        self.edited = YES;
+        _updatedProperty[@"start_offset"] = @YES;
+    }
 }
 
 - (MP42CodecType)targetFormat
