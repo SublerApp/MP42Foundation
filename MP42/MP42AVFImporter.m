@@ -104,9 +104,9 @@ MP42_OBJC_DIRECT_MEMBERS
                 NSArray *chapterList = [_localAsset chapterMetadataGroupsWithTitleLocale:locale containingItemsWithCommonKeys:nil];
                 for (AVTimedMetadataGroup *chapterData in chapterList) {
                     for (AVMetadataItem *item in chapterData.items) {
-                        CMTime time = item.time;
+                        CMTime timestamp = CMTimeConvertScale(item.time, 1000, kCMTimeRoundingMethod_QuickTime);
                         NSString *title = item.stringValue ? item.stringValue : @"";
-                        [chapters addChapter:title timestamp:time.value * time.timescale / 1000];
+                        [chapters addChapter:title timestamp:timestamp.value];
                     }
                 }
             }
