@@ -344,10 +344,14 @@ int LoadSRTFromURL(NSURL *url, MP42SubSerializer *ss, MP4Duration *duration)
 				state = LINES;
 				break;
 			case LINES:
+                res = @"";
 				[sc scanUpToString:@"\n\n" intoString:&res];
 				[sc scanString:@"\n\n" intoString:nil];
-				MP42SubLine *sl = [[MP42SubLine alloc] initWithLine:res start:startTime end:endTime top_pos:position forced:forced];
-				[ss addLine:sl];
+                if (res.length)
+                {
+                    MP42SubLine *sl = [[MP42SubLine alloc] initWithLine:res start:startTime end:endTime top_pos:position forced:forced];
+                    [ss addLine:sl];
+                }
 				state = INITIAL;
 				break;
 		};
