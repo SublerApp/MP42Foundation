@@ -297,7 +297,7 @@ MP42_OBJC_DIRECT_MEMBERS
                     newTrack.name = trackName;
                 }
                 if (mkvTrack->LanguageBCP47) {
-                    newTrack.language = @(mkvTrack->LanguageBCP47);
+                    newTrack.language = [MP42Languages.defaultManager normalizedExtendedTag:@(mkvTrack->LanguageBCP47)];
                 } else {
                     newTrack.language = [MP42Languages.defaultManager extendedTagForISO_639_2b:@(mkvTrack->Language)];
                 }

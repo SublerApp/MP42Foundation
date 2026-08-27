@@ -817,8 +817,18 @@ MP42_OBJC_DIRECT_MEMBERS
 #pragma mark - Validation
 
 - (BOOL)validateExtendedTag:(NSString *)tag {
-    NSString *fixedCode = [tag stringByReplacingOccurrencesOfString:@"-" withString:@"_"];
-    return [NSLocale.availableLocaleIdentifiers containsObject:fixedCode];
+    NSString *fixedTag = [tag stringByReplacingOccurrencesOfString:@"-" withString:@"_"];
+    return [NSLocale.availableLocaleIdentifiers containsObject:fixedTag];
+}
+
+- (nullable NSString *)normalizedExtendedTag:(NSString *)tag {
+    NSString *fixedTag = [tag stringByReplacingOccurrencesOfString:@"-" withString:@"_"];
+    for (NSString *identifier in NSLocale.availableLocaleIdentifiers) {
+        if ([identifier caseInsensitiveCompare:fixedTag] == NSOrderedSame) {
+            return [identifier stringByReplacingOccurrencesOfString:@"_" withString:@"-"];
+        }
+    }
+    return tag;
 }
 
 
