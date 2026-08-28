@@ -174,7 +174,7 @@ NSString *const MP42MetadataKeyTVShow = @"TV Show";
 NSString *const MP42MetadataKeyTVEpisodeNumber = @"TV Episode #";
 NSString *const MP42MetadataKeyTVNetwork = @"TV Network";
 NSString *const MP42MetadataKeyTVEpisodeID = @"TV Episode ID";
-NSString *const MP42MetadataKeyTVSeason = @"TV Season";
+NSString *const MP42MetadataKeyTVSeason = @"TV Season #";
 
 NSString *const MP42MetadataKeyArtDirector = @"Art Director";
 NSString *const MP42MetadataKeyComposer = @"Composer";
