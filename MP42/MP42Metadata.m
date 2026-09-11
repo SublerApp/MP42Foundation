@@ -56,7 +56,7 @@
     if (self) {
         MP42XMLReader *xmlReader = [[MP42XMLReader alloc] initWithURL:URL error:NULL];
         if (xmlReader) {
-            [self mergeMetadata:[xmlReader mMetadata]];
+            [self mergeMetadata:[xmlReader mMetadata] overwrite:true];
         } else {
             return nil;
         }
@@ -414,7 +414,7 @@
 
 #pragma mark - Mutators
 
-- (void)mergeMetadata:(MP42Metadata *)metadata {
+- (void)mergeMetadata:(MP42Metadata *)metadata overwrite:(BOOL)overwrite {
     NSArray<MP42MetadataItem *> *coverArts = [metadata metadataItemsFilteredByIdentifier:MP42MetadataKeyCoverArt];
 
     // Remove existings cover arts only if new one is available
@@ -425,7 +425,14 @@
     }
 
     for (MP42MetadataItem *item in metadata.items) {
-        [self addMetadataItem:[item copy]];
+        if (overwrite) {
+            [self addMetadataItem:[item copy]];
+        }
+        else {
+            if ([self metadataItemsFilteredByIdentifier:item.identifier].count == 0) {
+                [self addMetadataItem:[item copy]];
+            }
+        }
     }
 
     self.edited = YES;
@@ -1465,7 +1472,7 @@
 - (id)copyWithZone:(NSZone *)zone
 {
     MP42Metadata *newObject = [[MP42Metadata allocWithZone:zone] init];
-    [newObject mergeMetadata:self];
+    [newObject mergeMetadata:self overwrite:true];
     return newObject;
 }
 

@@ -46,7 +46,7 @@ typedef struct MP4DemuxHelper {
         }
 
         [self addTracks:sourceFile.tracks];
-        [self.metadata mergeMetadata:sourceFile.metadata];
+        [self.metadata mergeMetadata:sourceFile.metadata overwrite:true];
     }
 
     return self;

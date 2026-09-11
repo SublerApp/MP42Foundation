@@ -336,7 +336,7 @@ MP42_OBJC_DIRECT_MEMBERS
             [self addTrack:newTrack];
         }
 
-        [self.metadata mergeMetadata:[self readMatroskaMetadata]];
+        [self.metadata mergeMetadata:[self readMatroskaMetadata] overwrite:true];
     }
 
     return self;
