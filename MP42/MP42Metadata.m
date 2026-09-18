@@ -417,8 +417,17 @@
 - (void)mergeMetadata:(MP42Metadata *)metadata overwrite:(BOOL)overwrite {
     NSArray<MP42MetadataItem *> *coverArts = [metadata metadataItemsFilteredByIdentifier:MP42MetadataKeyCoverArt];
 
-    // Remove existings cover arts only if new one is available
-    if (coverArts.count) {
+    // Remove existing cover arts only if a new one is available AND we're
+    // overwriting. addMetadataItem: never dedupes cover art itself (it
+    // explicitly allows more than one), so when overwrite is true we still
+    // have to clear the old artwork ourselves before adding the new set,
+    // or the two would just pile up together. But when overwrite is false
+    // this removal must not happen unconditionally the way it used to --
+    // doing so erased existing artwork even though the caller asked us not
+    // to touch existing data. The per-item loop below already leaves
+    // existing cover art alone in that case (its identifier is already
+    // present), so skipping the removal here is enough to fix it.
+    if (overwrite && coverArts.count) {
         for (MP42MetadataItem *item in [self metadataItemsFilteredByIdentifier:MP42MetadataKeyCoverArt]) {
             [self removeMetadataItem:item];
         }
