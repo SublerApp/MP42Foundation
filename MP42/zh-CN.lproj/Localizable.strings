@@ -5,43 +5,46 @@
 "AC3" = "AC3";
 
 /* No comment provided by engineer. */
-"Acknowledgement" = "Riconoscimento";
+"Acknowledgement" = "致谢";
 
 /* No comment provided by engineer. */
-"Album" = "Album";
+"Album" = "专辑";
 
 /* No comment provided by engineer. */
-"Album Artist" = "Artista album";
+"Album Artist" = "专辑艺人";
 
 /* No comment provided by engineer. */
-"Animation" = "Animazione";
+"Animation" = "动画";
 
 /* No comment provided by engineer. */
-"Apple Lossless" = "Apple Lossless";
+"Apple Lossless" = "Apple 无损音频编码";
 
 /* No comment provided by engineer. */
-"Arranger" = "Arrangiatore";
+"Arranger" = "编曲者";
 
 /* No comment provided by engineer. */
-"Art Director" = "Direttore artistico";
+"Art Director" = "艺术导演";
 
 /* No comment provided by engineer. */
-"Artist" = "Artista";
+"Artist" = "艺人";
 
 /* No comment provided by engineer. */
-"Atmos" = "Atmos";
+"artist ID" = "艺人 ID";
 
 /* No comment provided by engineer. */
-"ATSC" = "ATSC";
+"Atmos" = "杜比全景声";
+
+/* No comment provided by engineer. */
+"ATSC" = "高级电视系统委员会";
 
 /* No comment provided by engineer. */
 "AV1" = "AV1";
 
 /* No comment provided by engineer. */
-"Cast" = "Cast";
+"Cast" = "主演";
 
 /* No comment provided by engineer. */
-"Category" = "Categoria";
+"Category" = "归类";
 
 /* No comment provided by engineer. */
 "CEA-608" = "CEA-608";
@@ -50,64 +53,58 @@
 "CEA-708" = "CEA-708";
 
 /* Default Chapter Track name */
-"Chapter Track" = "Traccia Capitoli";
+"Chapter Track" = "章节标记";
 
 /* No comment provided by engineer. */
-"Cinepak" = "Cinepak";
+"Cinepak" = "高压缩倍率影片";
 
 /* No comment provided by engineer. */
-"Closed Caption Track" = "Traccia Closed Caption";
+"Closed Caption Track" = "隐藏式字幕轨道";
 
 /* No comment provided by engineer. */
-"Codirector" = "Coregista";
+"Codirector" = "联合导演";
 
 /* No comment provided by engineer. */
-"Comments" = "Commenti";
+"Comments" = "注释";
 
 /* No comment provided by engineer. */
-"Compilation" = "Compilation";
+"Compilation" = "合辑";
 
 /* No comment provided by engineer. */
-"Composer" = "Compositore";
+"Composer" = "作曲者";
 
 /* No comment provided by engineer. */
-"Conductor" = "Conduttore";
+"composer ID" = "作曲者 ID";
 
 /* No comment provided by engineer. */
-"Content Rating" = "Classificazione contenuti";
+"Conductor" = "指挥";
 
 /* No comment provided by engineer. */
-"Copyright" = "Copyright";
+"content ID" = "内容 ID";
 
 /* No comment provided by engineer. */
-"Counter 32" = "Counter 32";
+"Content Rating" = "内容分级";
 
 /* No comment provided by engineer. */
-"Counter 64" = "Counter 64";
+"Copyright" = "版权";
 
 /* No comment provided by engineer. */
-"Credits" = "Crediti";
+"Counter 32" = "32位计数器";
 
 /* No comment provided by engineer. */
-"Description" = "Descrizione";
+"Counter 64" = "64位计数器";
 
 /* No comment provided by engineer. */
-"Director" = "Regista";
+"Credits" = "工作人员";
 
 /* No comment provided by engineer. */
-"Disk #" = "# disco";
+"Description" = "简短描述";
 
 /* No comment provided by engineer. */
-"Dolby Vision H.264" = "Dolby Vision H.264";
+"Director" = "导演";
 
 /* No comment provided by engineer. */
-"Dolby Vision H.264 (Parameter Sets in Bitstream)" = "Dolby Vision H.264 (Conjuntos de parámetros en la secuencia de bits)";
-
-/* No comment provided by engineer. */
-"Dolby Vision HEVC" = "Dolby Vision HEVC";
-
-/* No comment provided by engineer. */
-"Dolby Vision HEVC (Parameter Sets in Bitstream)" = "Dolby Vision HEVC (Conjuntos de parámetros en la secuencia de bits)";
+"Disk #" = "光盘编号";
 
 /* No comment provided by engineer. */
 "DTS" = "DTS";
@@ -125,13 +122,13 @@
 "E-AC3" = "E-AC3";
 
 /* No comment provided by engineer. */
-"Encoded By" = "Codificato da";
+"Encoded By" = "编码者";
 
 /* No comment provided by engineer. */
-"Encoding Tool" = "Tool di codifica";
+"Encoding Tool" = "编码方式";
 
 /* No comment provided by engineer. */
-"Executive Producer" = "Produttore esecutivo";
+"Executive Producer" = "监制";
 
 /* No comment provided by engineer. */
 "FairPlay AAC" = "FairPlay AAC";
@@ -143,25 +140,28 @@
 "FairPlay CEA-608" = "FairPlay CEA-608";
 
 /* No comment provided by engineer. */
-"FairPlay Sound" = "FairPlay Sound";
+"FairPlay Sound" = "FairPlay 音频";
 
 /* No comment provided by engineer. */
 "FairPlay Tx3g" = "FairPlay Tx3g";
 
 /* No comment provided by engineer. */
-"FairPlay Video" = "FairPlay Video";
+"FairPlay Video" = "FairPlay 视频";
 
 /* No comment provided by engineer. */
 "FLAC" = "FLAC";
 
 /* No comment provided by engineer. */
-"Gapless" = "Senza pausa";
+"Gapless" = "无缝播放";
 
 /* No comment provided by engineer. */
-"Genre" = "Genere";
+"Genre" = "类型";
 
 /* No comment provided by engineer. */
-"Grouping" = "Gruppo";
+"genre ID" = "类型 ID";
+
+/* No comment provided by engineer. */
+"Grouping" = "归类";
 
 /* No comment provided by engineer. */
 "H.263" = "H.263";
@@ -170,10 +170,10 @@
 "H.264" = "H.264";
 
 /* No comment provided by engineer. */
-"H.264 (Parameter Sets in Bitstream)" = "H.264 (Conjuntos de parámetros en la secuencia de bits)";
+"H.264 (Parameter Sets in Bitstream)" = "H.264 (参数集位于比特流中)";
 
 /* No comment provided by engineer. */
-"HD Video" = "Vídeo HD";
+"HD Video" = "清晰度";
 
 /* No comment provided by engineer. */
 "HE-AAC" = "HE-AAC";
@@ -182,22 +182,22 @@
 "HEVC" = "HEVC";
 
 /* No comment provided by engineer. */
-"HEVC (Parameter Sets in Bitstream)" = "HEVC (Conjuntos de parámetros en la secuencia de bits)";
+"HEVC (Parameter Sets in Bitstream)" = "HEVC (参数集位于比特流中)";
 
 /* No comment provided by engineer. */
-"Hint" = "Indicación";
+"Hint" = "提示";
 
 /* No comment provided by engineer. */
-"Hint Track" = "Traccia Hint";
+"Hint Track" = "提示轨道";
 
 /* No comment provided by engineer. */
-"iTunes Account" = "Account iTunes";
+"iTunes Account" = "iTunes 账户";
 
 /* No comment provided by engineer. */
-"iTunes Account Type" = "Tipo account iTunes";
+"iTunes Account Type" = "iTunes 账户类型";
 
 /* No comment provided by engineer. */
-"iTunes Country" = "Stato iTunes";
+"iTunes Country" = "iTunes 地区";
 
 /* No comment provided by engineer. */
 "JPEG" = "JPEG";
@@ -206,34 +206,34 @@
 "JPEG OpenDML" = "JPEG OpenDML";
 
 /* No comment provided by engineer. */
-"Keywords" = "Parole chiave";
+"Keywords" = "关键词";
 
 /* No comment provided by engineer. */
-"Linear Notes" = "Note Copertina";
+"Linear Notes" = "唱片说明";
 
 /* No comment provided by engineer. */
-"Long Description" = "Descrizione completa";
+"Long Description" = "完整描述";
 
 /* No comment provided by engineer. */
-"Lyricist" = "Paroliere";
+"Lyricist" = "词作者";
 
 /* No comment provided by engineer. */
-"Lyrics" = "Testo";
+"Lyrics" = "歌词";
 
 /* No comment provided by engineer. */
-"Media Kind" = "Tipo media";
+"Media Kind" = "媒体种类";
 
 /* No comment provided by engineer. */
-"Metadata Track" = "Traccia Metadata";
+"Metadata Track" = "元数据轨道";
 
 /* No comment provided by engineer. */
-"Movement Count" = "Numero totale movimenti";
+"Movement Count" = "乐章数";
 
 /* No comment provided by engineer. */
-"Movement Name" = "Nome movimento";
+"Movement Name" = "乐章标题";
 
 /* No comment provided by engineer. */
-"Movement Number" = "Numero movimento";
+"Movement Number" = "乐章编号";
 
 /* No comment provided by engineer. */
 "MP1" = "MP1";
@@ -245,67 +245,70 @@
 "MP3" = "MP3";
 
 /* No comment provided by engineer. */
-"MPEG-1 Video" = "Video MPEG-1";
+"MPEG-1 Video" = "MPEG-1 视频";
 
 /* No comment provided by engineer. */
-"MPEG-2 Video" = "Video MPEG-2";
+"MPEG-2 Video" = "MPEG-2 视频";
 
 /* No comment provided by engineer. */
-"MPEG-4 Control" = "MPEG-4 Control";
+"MPEG-4 Control" = "MPEG-4 控制信息";
 
 /* No comment provided by engineer. */
-"MPEG-4 Control Track" = "Pista MPEG-4 Control";
+"MPEG-4 Control Track" = "MPEG-4 控制轨道";
 
 /* No comment provided by engineer. */
 "MPEG-4 ODSM" = "MPEG-4 ODSM";
 
 /* No comment provided by engineer. */
-"MPEG-4 ODSM Track" = "Pista MPEG-4 ODSM";
+"MPEG-4 ODSM Track" = "MPEG-4 ODSM 轨道";
 
 /* No comment provided by engineer. */
 "MPEG-4 SDSM" = "MPEG-4 SDSM";
 
 /* No comment provided by engineer. */
-"MPEG-4 SDSM Track" = "Pista MPEG-4 SDSM";
+"MPEG-4 SDSM Track" = "MPEG-4 SDSM 轨道";
 
 /* No comment provided by engineer. */
-"MPEG-4 Visual" = "MPEG-4 Visual";
+"MPEG-4 Visual" = "MPEG-4 视觉信息";
 
 /* No comment provided by engineer. */
-"Muxed Track" = "Traccia Muxed";
+"Muxed Track" = "已混流轨道";
 
 /* No comment provided by engineer. */
-"Name" = "Nome";
+"Name" = "标题";
 
 /* No comment provided by engineer. */
-"Online Extras" = "Extra online";
+"Online Extras" = "在线特辑";
 
 /* No comment provided by engineer. */
 "Opus" = "Opus";
 
 /* No comment provided by engineer. */
-"Original Artist" = "Artista originario";
+"Original Artist" = "原唱艺人";
 
 /* No comment provided by engineer. */
 "PCM" = "PCM";
 
 /* No comment provided by engineer. */
-"Performer" = "Esecutore";
+"Performer" = "表演者";
 
 /* No comment provided by engineer. */
 "PGS" = "PGS";
 
 /* No comment provided by engineer. */
-"Phonogram Rights" = "Diritti di riproduzione";
+"Phonogram Rights" = "录音制品版权";
+
+/* No comment provided by engineer. */
+"playlist ID" = "播放列表 ID";
 
 /* No comment provided by engineer. */
 "PNG" = "PNG";
 
 /* No comment provided by engineer. */
-"Podcast" = "Podcast";
+"Podcast" = "播客";
 
 /* No comment provided by engineer. */
-"Producers" = "Produttori";
+"Producers" = "制作人";
 
 /* No comment provided by engineer. */
 "ProRes 422" = "ProRes 422";
@@ -323,106 +326,112 @@
 "ProRes 4444" = "ProRes 4444";
 
 /* No comment provided by engineer. */
-"ProRes RAW" = "ProRes RAW";
+"Publisher" = "出版商";
 
 /* No comment provided by engineer. */
-"Publisher" = "Editore";
+"Purchase Date" = "购买日期";
 
 /* No comment provided by engineer. */
-"Purchase Date" = "Data d'acquisto";
+"Rating" = "分级";
 
 /* No comment provided by engineer. */
-"Rating" = "Classificazione";
+"Rating Annotation" = "分级注释";
 
 /* No comment provided by engineer. */
-"Rating Annotation" = "Nota classificazione";
+"Record Company" = "唱片公司";
 
 /* No comment provided by engineer. */
-"Record Company" = "Casa discografica";
+"Release Date" = "发行时间";
 
 /* No comment provided by engineer. */
-"Release Date" = "Data di rilascio";
+"Screenwriters" = "编剧";
 
 /* No comment provided by engineer. */
-"Screenwriters" = "Sceneggiatori";
+"Series Description" = "节目描述";
 
 /* No comment provided by engineer. */
-"Series Description" = "Descrizione serie";
+"Show Work And Movement" = "显示作品和乐章";
 
 /* No comment provided by engineer. */
-"Show Work And Movement" = "Mostra opera e movimento";
+"Soloist" = "独奏家";
 
 /* No comment provided by engineer. */
-"Soloist" = "Solista";
+"Song Description" = "歌曲描述";
 
 /* No comment provided by engineer. */
-"Song Description" = "Descrizione brano";
+"Song Producer" = "歌曲制作人";
 
 /* No comment provided by engineer. */
-"Song Producer" = "Produttore brano";
+"Sorenson Video" = "Sorenson 视频";
 
 /* No comment provided by engineer. */
-"Sorenson Video" = "Sorenson Video";
+"Sorenson Video 3" = "Sorenson 视频3";
 
 /* No comment provided by engineer. */
-"Sorenson Video 3" = "Sorenson Video 3";
+"Sort Album" = "专辑分类";
 
 /* No comment provided by engineer. */
-"Sort Album" = "Album per ordinare";
+"Sort Album Artist" = "专辑艺人分类";
 
 /* No comment provided by engineer. */
-"Sort Album Artist" = "Artista album per ordinare";
+"Sort Artist" = "艺人分类";
 
 /* No comment provided by engineer. */
-"Sort Artist" = "Artista per ordinare";
+"Sort Composer" = "作曲者分类";
 
 /* No comment provided by engineer. */
-"Sort Composer" = "Compositore per ordinare";
+"Sort Name" = "标题分类";
 
 /* No comment provided by engineer. */
-"Sort Name" = "Nome per ordinare";
+"Sort TV Show" = "节目分类";
 
 /* No comment provided by engineer. */
-"Sort TV Show" = "Serie TV per ordinare";
+"Sound Engineer" = "音响师";
 
 /* No comment provided by engineer. */
-"Sound Engineer" = "Ingegnere del suono";
-
-/* No comment provided by engineer. */
-"Sound Track" = "Traccia Suono";
+"Sound Track" = "音频轨道";
 
 /* No comment provided by engineer. */
 "SSA" = "SSA";
 
 /* No comment provided by engineer. */
-"Studio" = "Studio";
+"Studio" = "制片商";
 
 /* No comment provided by engineer. */
-"Subtitle Track" = "Traccia Sottotitoli";
+"Subtitle Track" = "字幕轨道";
 
 /* No comment provided by engineer. */
-"Tempo" = "Tempo";
+"Tempo" = "节奏";
 
 /* No comment provided by engineer. */
-"Text Track" = "Traccia Testo";
+"Text" = "文本";
 
 /* No comment provided by engineer. */
-"Thanks" = "Ringraziamenti";
+"Text Track" = "文本轨道";
 
 /* No comment provided by engineer. */
-"Theora" = "Theora";
+"Thanks" = "感谢";
 
 /* No comment provided by engineer. */
-"TimeCode" = "TimeCode";
+"Theora" = "Theora 视频";
 
 /* No comment provided by engineer. */
-"TimeCode 64" = "TimeCode 64";
+"TimeCode" = "时间码";
 
 /* No comment provided by engineer. */
-"Track #" = "# traccia";
+"TimeCode 64" = "64位时间码";
 
 /* No comment provided by engineer. */
-"Track Sub-Title" = "Sottotitolo traccia";
+"TimeCode Track" = "时间码轨道";
+
+/* No comment provided by engineer. */
+"Timed Metadata" = "定时的元数据";
+
+/* No comment provided by engineer. */
+"Track #" = "音轨";
+
+/* No comment provided by engineer. */
+"Track Sub-Title" = "副标题";
 
 /* No comment provided by engineer. */
 "True Audio" = "True Audio";
@@ -431,25 +440,25 @@
 "True HD" = "True HD";
 
 /* No comment provided by engineer. */
-"TV Episode #" = "# episodio TV";
+"TV Episode #" = "剧集";
 
 /* No comment provided by engineer. */
-"TV Episode ID" = "ID episodio TV";
+"TV Episode ID" = "剧集 ID";
 
 /* No comment provided by engineer. */
-"TV Network" = "Network TV";
+"TV Network" = "电视网";
 
 /* No comment provided by engineer. */
-"TV Season" = "Stagione TV";
+"TV Season" = "季";
 
 /* No comment provided by engineer. */
-"TV Show" = "Serie TV";
+"TV Show" = "节目";
 
 /* No comment provided by engineer. */
 "Tx3g" = "Tx3g";
 
 /* No comment provided by engineer. */
-"Video Track" = "Traccia Video";
+"Video Track" = "视频轨道";
 
 /* No comment provided by engineer. */
 "VobSub" = "VobSub";
@@ -464,13 +473,10 @@
 "VP9" = "VP9";
 
 /* No comment provided by engineer. */
-"VVC" = "VVC";
-
-/* No comment provided by engineer. */
 "WebVTT" = "WebVTT";
 
 /* No comment provided by engineer. */
-"Work Name" = "Nome opera";
+"Work Name" = "作品名称";
 
 /* No comment provided by engineer. */
 "XAVC Long GOP" = "XAVC Long GOP";

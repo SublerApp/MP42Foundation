@@ -307,6 +307,10 @@
 		A925AAAE18379AF800BE84D4 /* MP42Utilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MP42Utilities.m; sourceTree = "<group>"; };
 		A930D8E622351E2F0061CF37 /* MP42SecurityAccessToken.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MP42SecurityAccessToken.h; sourceTree = "<group>"; };
 		A930D8E722351E2F0061CF37 /* MP42SecurityAccessToken.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MP42SecurityAccessToken.m; sourceTree = "<group>"; };
+		A939EF203062FD0500E830A4 /* pt-BR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "pt-BR"; path = "pt-BR.lproj/Localizable.strings"; sourceTree = "<group>"; };
+		A939EF213062FD0500E830A4 /* pt-BR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "pt-BR"; path = "pt-BR.lproj/Localizable.strings"; sourceTree = "<group>"; };
+		A939EF223062FD2600E830A4 /* zh-CN */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-CN"; path = "zh-CN.lproj/Localizable.strings"; sourceTree = "<group>"; };
+		A939EF233062FD2600E830A4 /* zh-CN */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-CN"; path = "zh-CN.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		A941A7B21DA7B08600FB2A7C /* MP42MetadataFormat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MP42MetadataFormat.h; sourceTree = "<group>"; };
 		A941A7B31DA7B08600FB2A7C /* MP42MetadataFormat.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MP42MetadataFormat.m; sourceTree = "<group>"; };
 		A941C9541F82996600FC5E8D /* MP42TextSubConverter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MP42TextSubConverter.h; sourceTree = "<group>"; };
@@ -938,6 +942,8 @@
 				"zh-Hans",
 				fr,
 				"es-419",
+				"pt-BR",
+				"zh-CN",
 			);
 			mainGroup = A9B9C1E3182391DF00416A4E;
 			productRefGroup = A9B9C1EE182391DF00416A4E /* Products */;
@@ -1115,6 +1121,8 @@
 				A9E059D42529DF97000E0E9A /* zh-Hans */,
 				A9146866278D8F0C00860468 /* fr */,
 				50682E732B86B6CC008DB28B /* es-419 */,
+				A939EF213062FD0500E830A4 /* pt-BR */,
+				A939EF233062FD2600E830A4 /* zh-CN */,
 			);
 			name = Localizable.strings;
 			sourceTree = "<group>";
@@ -1137,6 +1145,8 @@
 				A9E059D52529DF97000E0E9A /* zh-Hans */,
 				A9146867278D8F0C00860468 /* fr */,
 				50682E742B86B6E3008DB28B /* es-419 */,
+				A939EF203062FD0500E830A4 /* pt-BR */,
+				A939EF223062FD2600E830A4 /* zh-CN */,
 			);
 			name = Localizable.strings;
 			sourceTree = "<group>";

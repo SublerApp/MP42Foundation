@@ -1,5 +1,11 @@
 /* No comment provided by engineer. */
-"Acknowledgement" = "Reconocimiento";
+"AAC" = "AAC";
+
+/* No comment provided by engineer. */
+"AC3" = "AC3";
+
+/* No comment provided by engineer. */
+"Acknowledgement" = "Reconocimientos";
 
 /* No comment provided by engineer. */
 "Album" = "Álbum";
@@ -8,13 +14,31 @@
 "Album Artist" = "Artista del álbum";
 
 /* No comment provided by engineer. */
-"Arranger" = "Arreglista";
+"Animation" = "Animación";
 
 /* No comment provided by engineer. */
-"Art Director" = "Director de arte";
+"Apple Lossless" = "Apple Lossless";
+
+/* No comment provided by engineer. */
+"Arranger" = "Arreglos";
+
+/* No comment provided by engineer. */
+"Art Director" = "Dirección de arte";
 
 /* No comment provided by engineer. */
 "Artist" = "Artista";
+
+/* No comment provided by engineer. */
+"artist ID" = "ID del artista";
+
+/* No comment provided by engineer. */
+"Atmos" = "Atmos";
+
+/* No comment provided by engineer. */
+"ATSC" = "ATSC";
+
+/* No comment provided by engineer. */
+"AV1" = "AV1";
 
 /* No comment provided by engineer. */
 "Cast" = "Reparto";
@@ -23,31 +47,52 @@
 "Category" = "Categoría";
 
 /* No comment provided by engineer. */
-"Chapter Track" = "Pista de capítulo";
+"CEA-608" = "CEA-608";
 
 /* No comment provided by engineer. */
-"Closed Caption Track" = "Pista de subtítulo";
+"CEA-708" = "CEA-708";
+
+/* Default Chapter Track name */
+"Chapter Track" = "Pista de capítulos";
 
 /* No comment provided by engineer. */
-"Codirector" = "Co-director";
+"Cinepak" = "Cinepak";
+
+/* No comment provided by engineer. */
+"Closed Caption Track" = "Pista de subtítulos opcionales (CC)";
+
+/* No comment provided by engineer. */
+"Codirector" = "Codirección";
 
 /* No comment provided by engineer. */
 "Comments" = "Comentarios";
 
 /* No comment provided by engineer. */
-"Compilation" = "Compilación";
+"Compilation" = "Recopilación";
 
 /* No comment provided by engineer. */
-"Composer" = "Compositor";
+"Composer" = "Composición";
 
 /* No comment provided by engineer. */
-"Conductor" = "Conductor";
+"composer ID" = "ID del compositor";
 
 /* No comment provided by engineer. */
-"Content Rating" = "Clasificación de contenido";
+"Conductor" = "Dirección de orquesta";
+
+/* No comment provided by engineer. */
+"content ID" = "ID del contenido";
+
+/* No comment provided by engineer. */
+"Content Rating" = "Advertencia sobre el contenido";
 
 /* No comment provided by engineer. */
 "Copyright" = "Copyright";
+
+/* No comment provided by engineer. */
+"Counter 32" = "Counter 32";
+
+/* No comment provided by engineer. */
+"Counter 64" = "Counter 64";
 
 /* No comment provided by engineer. */
 "Credits" = "Créditos";
@@ -56,10 +101,37 @@
 "Description" = "Descripción";
 
 /* No comment provided by engineer. */
-"Director" = "Director";
+"Director" = "Dirección";
 
 /* No comment provided by engineer. */
-"Disk #" = "Disco #";
+"Disk #" = "Disco nro.";
+
+/* No comment provided by engineer. */
+"Dolby Vision H.264" = "Dolby Vision H.264";
+
+/* No comment provided by engineer. */
+"Dolby Vision H.264 (Parameter Sets in Bitstream)" = "Dolby Vision H.264 (Conjunto de parámetros en flujo de datos)";
+
+/* No comment provided by engineer. */
+"Dolby Vision HEVC" = "Dolby Vision HEVC";
+
+/* No comment provided by engineer. */
+"Dolby Vision HEVC (Parameter Sets in Bitstream)" = "Dolby Vision HEVC (Conjunto de parámetros en flujo de datos)";
+
+/* No comment provided by engineer. */
+"DTS" = "DTS";
+
+/* No comment provided by engineer. */
+"DV NTSC" = "DV NTSC";
+
+/* No comment provided by engineer. */
+"DV PAL" = "DV PAL";
+
+/* No comment provided by engineer. */
+"DVC Pro PAL" = "DVC Pro PAL";
+
+/* No comment provided by engineer. */
+"E-AC3" = "E-AC3";
 
 /* No comment provided by engineer. */
 "Encoded By" = "Codificado por";
@@ -68,49 +140,100 @@
 "Encoding Tool" = "Herramienta de codificación";
 
 /* No comment provided by engineer. */
-"Executive Producer" = "Productor ejecutivo";
+"Executive Producer" = "Producción ejecutiva";
 
 /* No comment provided by engineer. */
-"Gapless" = "Sin pausa";
+"FairPlay AAC" = "FairPlay AAC";
+
+/* No comment provided by engineer. */
+"FairPlay AC3" = "FairPlay AC3";
+
+/* No comment provided by engineer. */
+"FairPlay CEA-608" = "FairPlay CEA-608";
+
+/* No comment provided by engineer. */
+"FairPlay Sound" = "FairPlay Sound";
+
+/* No comment provided by engineer. */
+"FairPlay Tx3g" = "FairPlay Tx3g";
+
+/* No comment provided by engineer. */
+"FairPlay Video" = "FairPlay Video";
+
+/* No comment provided by engineer. */
+"FLAC" = "FLAC";
+
+/* No comment provided by engineer. */
+"Gapless" = "Sin pausas";
 
 /* No comment provided by engineer. */
 "Genre" = "Género";
 
 /* No comment provided by engineer. */
-"Grouping" = "Grupo";
+"genre ID" = "ID del género";
 
 /* No comment provided by engineer. */
-"HD Video" = "Vídeo HD";
+"Grouping" = "Agrupación";
 
 /* No comment provided by engineer. */
-"Hint Track" = "Pista de pistas";
+"H.263" = "H.263";
+
+/* No comment provided by engineer. */
+"H.264" = "H.264";
+
+/* No comment provided by engineer. */
+"H.264 (Parameter Sets in Bitstream)" = "H.264 (Conjunto de parámetros en flujo de datos)";
+
+/* No comment provided by engineer. */
+"HD Video" = "Video HD";
+
+/* No comment provided by engineer. */
+"HE-AAC" = "HE-AAC";
+
+/* No comment provided by engineer. */
+"HEVC" = "HEVC";
+
+/* No comment provided by engineer. */
+"HEVC (Parameter Sets in Bitstream)" = "HEVC (Conjunto de parámetros en flujo de datos)";
+
+/* No comment provided by engineer. */
+"Hint" = "Indicación";
+
+/* No comment provided by engineer. */
+"Hint Track" = "Pista de indicaciones";
+
+/* No comment provided by engineer. */
+"iTunes Account" = "Cuenta de iTunes";
+
+/* No comment provided by engineer. */
+"iTunes Account Type" = "Tipo de cuenta de iTunes";
+
+/* No comment provided by engineer. */
+"iTunes Country" = "País de iTunes";
+
+/* No comment provided by engineer. */
+"JPEG" = "JPEG";
+
+/* No comment provided by engineer. */
+"JPEG OpenDML" = "JPEG OpenDML";
 
 /* No comment provided by engineer. */
 "Keywords" = "Palabras clave";
 
 /* No comment provided by engineer. */
-"Linear Notes" = "Notas lineales";
+"Linear Notes" = "Notas del álbum";
 
 /* No comment provided by engineer. */
 "Long Description" = "Descripción completa";
 
 /* No comment provided by engineer. */
-"Lyricist" = "Letrista";
+"Lyricist" = "Autoría de la letra";
 
 /* No comment provided by engineer. */
 "Lyrics" = "Letra";
 
 /* No comment provided by engineer. */
-"MPEG-4 Control Track" = "Pista MPEG-4 Control";
-
-/* No comment provided by engineer. */
-"MPEG-4 ODSM Track" = "Pista MPEG-4 ODSM";
-
-/* No comment provided by engineer. */
-"MPEG-4 SDSM Track" = "Pista MPEG-4 SDSM";
-
-/* No comment provided by engineer. */
-"Media Kind" = "Tipo";
+"Media Kind" = "Tipo de soporte";
 
 /* No comment provided by engineer. */
 "Metadata Track" = "Pista de metadatos";
@@ -122,31 +245,103 @@
 "Movement Name" = "Nombre del movimiento";
 
 /* No comment provided by engineer. */
-"Movement Number" = "Número del movimiento";
+"Movement Number" = "Número de movimiento";
 
 /* No comment provided by engineer. */
-"Muxed Track" = "Pista mezclada";
+"MP1" = "MP1";
 
 /* No comment provided by engineer. */
-"Name" = "Nombre";
+"MP2" = "MP2";
+
+/* No comment provided by engineer. */
+"MP3" = "MP3";
+
+/* No comment provided by engineer. */
+"MPEG-1 Video" = "Video MPEG-1";
+
+/* No comment provided by engineer. */
+"MPEG-2 Video" = "Video MPEG-2";
+
+/* No comment provided by engineer. */
+"MPEG-4 Control" = "MPEG-4 Control";
+
+/* No comment provided by engineer. */
+"MPEG-4 Control Track" = "Pista MPEG-4 Control";
+
+/* No comment provided by engineer. */
+"MPEG-4 ODSM" = "MPEG-4 ODSM";
+
+/* No comment provided by engineer. */
+"MPEG-4 ODSM Track" = "Pista MPEG-4 ODSM";
+
+/* No comment provided by engineer. */
+"MPEG-4 SDSM" = "MPEG-4 SDSM";
+
+/* No comment provided by engineer. */
+"MPEG-4 SDSM Track" = "Pista MPEG-4 SDSM";
+
+/* No comment provided by engineer. */
+"MPEG-4 Visual" = "MPEG-4 Visual";
+
+/* No comment provided by engineer. */
+"Muxed Track" = "Pista multiplexada";
+
+/* No comment provided by engineer. */
+"Name" = "Título";
 
 /* No comment provided by engineer. */
 "Online Extras" = "Extras en línea";
 
 /* No comment provided by engineer. */
+"Opus" = "Opus";
+
+/* No comment provided by engineer. */
 "Original Artist" = "Artista original";
+
+/* No comment provided by engineer. */
+"PCM" = "PCM";
 
 /* No comment provided by engineer. */
 "Performer" = "Intérprete";
 
 /* No comment provided by engineer. */
+"PGS" = "PGS";
+
+/* No comment provided by engineer. */
 "Phonogram Rights" = "Derechos de fonograma";
 
 /* No comment provided by engineer. */
-"Producers" = "Productores";
+"playlist ID" = "ID de la playlist";
 
 /* No comment provided by engineer. */
-"Publisher" = "Editor";
+"PNG" = "PNG";
+
+/* No comment provided by engineer. */
+"Podcast" = "Podcast";
+
+/* No comment provided by engineer. */
+"Producers" = "Producción";
+
+/* No comment provided by engineer. */
+"ProRes 422" = "ProRes 422";
+
+/* No comment provided by engineer. */
+"ProRes 422 HQ" = "ProRes 422 HQ";
+
+/* No comment provided by engineer. */
+"ProRes 422 LT" = "ProRes 422 LT";
+
+/* No comment provided by engineer. */
+"ProRes 422 Proxy" = "ProRes 422 Proxy";
+
+/* No comment provided by engineer. */
+"ProRes 4444" = "ProRes 4444";
+
+/* No comment provided by engineer. */
+"ProRes RAW" = "ProRes RAW";
+
+/* No comment provided by engineer. */
+"Publisher" = "Editorial";
 
 /* No comment provided by engineer. */
 "Purchase Date" = "Fecha de compra";
@@ -155,7 +350,7 @@
 "Rating" = "Clasificación";
 
 /* No comment provided by engineer. */
-"Rating Annotation" = "Nota de clasificación";
+"Rating Annotation" = "Etiqueta de clasificación";
 
 /* No comment provided by engineer. */
 "Record Company" = "Sello discográfico";
@@ -164,13 +359,13 @@
 "Release Date" = "Fecha de lanzamiento";
 
 /* No comment provided by engineer. */
-"Screenwriters" = "Guionistas";
+"Screenwriters" = "Guion";
 
 /* No comment provided by engineer. */
 "Series Description" = "Descripción del programa";
 
 /* No comment provided by engineer. */
-"Show Work And Movement" = "Mostrar Trabajo y Movimiento";
+"Show Work And Movement" = "Mostrar obra y movimiento";
 
 /* No comment provided by engineer. */
 "Soloist" = "Solista";
@@ -179,52 +374,46 @@
 "Song Description" = "Descripción de la canción";
 
 /* No comment provided by engineer. */
-"Song Producer" = "Productor de la canción";
+"Song Producer" = "Producción de la canción";
 
 /* No comment provided by engineer. */
-"Sort Album" = "Ordenar álbum";
+"Sorenson Video" = "Sorenson Video";
 
 /* No comment provided by engineer. */
-"Sort Album Artist" = "Ordenar artista del álbum";
+"Sorenson Video 3" = "Sorenson Video 3";
 
 /* No comment provided by engineer. */
-"Sort Artist" = "Ordenar artista";
+"Sort Album" = "Ordenar álbum como";
 
 /* No comment provided by engineer. */
-"Sort Composer" = "Ordenar compositor";
+"Sort Album Artist" = "Ordenar artista del álbum como";
 
 /* No comment provided by engineer. */
-"Sort Name" = "Ordenar nombre";
+"Sort Artist" = "Ordenar artista como";
 
 /* No comment provided by engineer. */
-"Sort TV Show" = "Ordenar Programa de TV";
+"Sort Composer" = "Ordenar composición como";
 
 /* No comment provided by engineer. */
-"Sound Engineer" = "Ingeniero de sonido";
+"Sort Name" = "Ordenar título como";
+
+/* No comment provided by engineer. */
+"Sort TV Show" = "Ordenar programa como";
+
+/* No comment provided by engineer. */
+"Sound Engineer" = "Ingeniería de sonido";
 
 /* No comment provided by engineer. */
 "Sound Track" = "Pista de audio";
 
 /* No comment provided by engineer. */
+"SSA" = "SSA";
+
+/* No comment provided by engineer. */
 "Studio" = "Estudio";
 
 /* No comment provided by engineer. */
-"Subtitle Track" = "Pista de subtítulo";
-
-/* No comment provided by engineer. */
-"TV Episode #" = "Episodio #";
-
-/* No comment provided by engineer. */
-"TV Episode ID" = "ID del episodio";
-
-/* No comment provided by engineer. */
-"TV Network" = "Cadena de TV";
-
-/* No comment provided by engineer. */
-"TV Season" = "Temporada";
-
-/* No comment provided by engineer. */
-"TV Show" = "Programa";
+"Subtitle Track" = "Pista de subtítulos";
 
 /* No comment provided by engineer. */
 "Tempo" = "Tempo";
@@ -239,43 +428,80 @@
 "Thanks" = "Agradecimientos";
 
 /* No comment provided by engineer. */
+"Theora" = "Theora";
+
+/* No comment provided by engineer. */
+"TimeCode" = "TimeCode";
+
+/* No comment provided by engineer. */
+"TimeCode 64" = "TimeCode 64";
+
+/* No comment provided by engineer. */
 "TimeCode Track" = "Pista TimeCode";
 
 /* No comment provided by engineer. */
-"Track #" = "Pista #";
+"Timed Metadata" = "Metadatos cronometrados";
 
 /* No comment provided by engineer. */
-"Track Sub-Title" = "Subtítulo de pista";
+"Track #" = "Pista nro.";
 
 /* No comment provided by engineer. */
-"Unnamed Set" = "Preset sin título";
+"Track Sub-Title" = "Subtítulo";
 
 /* No comment provided by engineer. */
-"Video Track" = "Pista de vídeo";
+"True Audio" = "True Audio";
 
 /* No comment provided by engineer. */
-"Work Name" = "Nombre de trabajo";
+"True HD" = "True HD";
 
 /* No comment provided by engineer. */
-"iTunes Account" = "Cuenta de iTunes";
+"TV Episode #" = "Episodio nro.";
 
 /* No comment provided by engineer. */
-"iTunes Account Type" = "Tipo de cuenta de iTunes";
+"TV Episode ID" = "ID del episodio";
 
 /* No comment provided by engineer. */
-"iTunes Country" = "País de iTunes";
+"TV Network" = "Cadena de TV";
 
 /* No comment provided by engineer. */
-"artist ID" = "ID del artista";
+"TV Season" = "Temporada";
 
 /* No comment provided by engineer. */
-"composer ID" = "ID del compositor";
+"TV Show" = "Programa";
 
 /* No comment provided by engineer. */
-"content ID" = "ID del contenido";
+"Tx3g" = "Tx3g";
 
 /* No comment provided by engineer. */
-"genre ID" = "ID del género";
+"Video Track" = "Pista de video";
 
 /* No comment provided by engineer. */
-"playlist ID" = "ID de la playlist";
+"VobSub" = "VobSub";
+
+/* No comment provided by engineer. */
+"Vorbis" = "Vorbis";
+
+/* No comment provided by engineer. */
+"VP8" = "VP8";
+
+/* No comment provided by engineer. */
+"VP9" = "VP9";
+
+/* No comment provided by engineer. */
+"VVC" = "VVC";
+
+/* No comment provided by engineer. */
+"VVC (Parameter Sets in Bitstream)" = "VVC (Conjunto de parámetros en flujo de datos)";
+
+/* No comment provided by engineer. */
+"WebVTT" = "WebVTT";
+
+/* No comment provided by engineer. */
+"Work Name" = "Nombre de la obra";
+
+/* No comment provided by engineer. */
+"XAVC Long GOP" = "XAVC Long GOP";
+
+/* No comment provided by engineer. */
+"XID" = "XID";
+
