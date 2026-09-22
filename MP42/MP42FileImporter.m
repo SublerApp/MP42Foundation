@@ -37,7 +37,7 @@ static NSArray<Class> *_fileImporters;
 static NSArray<NSString *> *_supportedFileFormats;
 
 /// The supporter uniform type identifiers.
-static NSArray<UTType *> *_supportedContentTypes;
+static NSArray<UTType *> *_supportedContentTypes API_AVAILABLE(macos(11.0));
 
 
 @implementation MP42FileImporter {
