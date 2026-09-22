@@ -209,7 +209,12 @@ MP42_OBJC_DIRECT_MEMBERS
                         imageData[ii] = 255;
                     }
 
-                    CGBitmapInfo bitmapInfo = kCGBitmapByteOrderDefault | kCGImageAlphaFirst;
+                    CGBitmapInfo bitmapInfo = 0;
+                    if (@available(macOS 10.14, *)) {
+                        bitmapInfo = CGBitmapInfoMake(kCGImageAlphaFirst, 0, kCGImageByteOrderDefault, 0);
+                    } else {
+                        bitmapInfo = (uint32_t)kCGBitmapByteOrderDefault | (uint32_t)kCGImageAlphaFirst;
+                    }
                     CFDataRef imgData = CFDataCreateWithBytesNoCopy(kCFAllocatorDefault, imageData, w*h*4, kCFAllocatorNull);
                     CGDataProviderRef provider = CGDataProviderCreateWithCFData(imgData);
                     CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
@@ -331,7 +336,12 @@ MP42_OBJC_DIRECT_MEMBERS
                         forced = YES;
                     }
 
-                    CGBitmapInfo bitmapInfo = kCGBitmapByteOrderDefault | kCGImageAlphaFirst;
+                    CGBitmapInfo bitmapInfo = 0;
+                    if (@available(macOS 10.14, *)) {
+                        bitmapInfo = CGBitmapInfoMake(kCGImageAlphaFirst, 0, kCGImageByteOrderDefault, 0);
+                    } else {
+                        bitmapInfo = (uint32_t)kCGBitmapByteOrderDefault | (uint32_t)kCGImageAlphaFirst;
+                    }
                     CFDataRef imgData = CFDataCreateWithBytesNoCopy(kCFAllocatorDefault, (uint8_t*)imageData,rect->w * rect->h * 4, kCFAllocatorNull);
                     CGDataProviderRef provider = CGDataProviderCreateWithCFData(imgData);
                     CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
