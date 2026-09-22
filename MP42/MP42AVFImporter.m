@@ -54,6 +54,16 @@ MP42_OBJC_DIRECT_MEMBERS
              @"ac3", @"eac3", @"ec3", @"webvtt", @"vtt", @"caf", @"aif", @"aiff", @"aifc", @"wav", @"flac"];
 }
 
++ (NSArray<UTType *> *)supportedContentTypes
+{
+    return @[UTTypeQuickTimeMovie, UTTypeMPEG4Movie, UTTypeMPEG4Audio, UTTypeAppleProtectedMPEG4Video,
+             [UTType typeWithFilenameExtension:@"mfx"], UTTypeMPEG2TransportStream,
+             [UTType typeWithFilenameExtension:@"ac3"], [UTType typeWithFilenameExtension:@"eac3"],
+             [UTType typeWithFilenameExtension:@"ec3"], [UTType typeWithFilenameExtension:@"caf"],
+             [UTType typeWithFilenameExtension:@"flac"], UTTypeMP3, UTTypeAIFF, UTTypeWAV,
+             [UTType typeWithFilenameExtension:@"webvtt"], [UTType typeWithFilenameExtension:@"vtt"]];
+}
+
 - (FourCharCode)formatForTrack:(AVAssetTrack *)track {
     FourCharCode result = 0;
     CMFormatDescriptionRef formatDescription = (__bridge CMFormatDescriptionRef)track.formatDescriptions.firstObject;

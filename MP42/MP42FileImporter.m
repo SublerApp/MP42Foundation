@@ -36,6 +36,10 @@ static NSArray<Class> *_fileImporters;
 /// The supporter file extentions.
 static NSArray<NSString *> *_supportedFileFormats;
 
+/// The supporter uniform type identifiers.
+static NSArray<UTType *> *_supportedContentTypes;
+
+
 @implementation MP42FileImporter {
     NSMutableArray<MP42Track *> *_tracksArray;
 
@@ -50,7 +54,8 @@ static NSArray<NSString *> *_supportedFileFormats;
     _Atomic BOOL _cancelled;
 }
 
-+ (void)initialize {
++ (void)initialize
+{
     if (self == [MP42FileImporter class]) {
         _fileImporters = @[[MP42MkvImporter class],
                            [MP42Mp4Importer class],
@@ -70,15 +75,43 @@ static NSArray<NSString *> *_supportedFileFormats;
         }
 
         _supportedFileFormats = [formats copy];
+
+        if (@available(macOS 11, *)) {
+            NSMutableArray<UTType *> *contentTypes = [[NSMutableArray alloc] init];
+
+            for (Class c in _fileImporters) {
+                [contentTypes addObjectsFromArray:[c supportedContentTypes]];
+            }
+
+            _supportedContentTypes = [contentTypes copy];
+        }
     }
 }
 
-+ (NSArray<NSString *> *)supportedFileFormats {
++ (NSArray<NSString *> *)supportedFileFormats
+{
     return _supportedFileFormats;
 }
 
-+ (BOOL)canInitWithFileType:(NSString *)fileType {
++ (BOOL)canInitWithFileType:(NSString *)fileType
+{
     return [[self supportedFileFormats] containsObject:fileType.lowercaseString];
+}
+
++ (NSArray<UTType *> *)supportedContentTypes
+{
+    return _supportedContentTypes;
+}
+
++ (BOOL)canInitWithContentType:(UTType *)contentType
+{
+    for (UTType *type in _supportedContentTypes) {
+        if ([contentType conformsToType:type]) {
+            return YES;
+        }
+    }
+
+    return NO;
 }
 
 - (instancetype)initWithURL:(NSURL *)fileURL error:(NSError * __autoreleasing *)error

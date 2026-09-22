@@ -271,6 +271,11 @@ static bool GetFirstHeader(FILE* inFile)
     return @[@"ac3"];
 }
 
++ (NSArray<UTType *> *)supportedContentTypes
+{
+    return @[[UTType typeWithFilenameExtension:@"ac3"]];
+}
+
 - (instancetype)initWithURL:(NSURL *)fileURL error:(NSError * __autoreleasing *)outError
 {
     if ((self = [super initWithURL:fileURL])) {

@@ -34,6 +34,11 @@ MP42_OBJC_DIRECT_MEMBERS
     return @[@"ssa", @"ass"];
 }
 
++ (NSArray<UTType *> *)supportedContentTypes
+{
+    return @[[UTType typeWithFilenameExtension:@"ssa"], [UTType typeWithFilenameExtension:@"ass"]];
+}
+
 - (instancetype)initWithURL:(NSURL *)fileURL error:(NSError * __autoreleasing *)outError
 {
     if ((self = [super initWithURL:fileURL])) {

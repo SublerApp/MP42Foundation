@@ -71,6 +71,13 @@ MP42_OBJC_DIRECT_MEMBERS
     return @[@"mkv", @"mka", @"mks"];
 }
 
++ (NSArray<UTType *> *)supportedContentTypes
+{
+    return @[[UTType typeWithFilenameExtension:@"mkv"],
+             [UTType typeWithFilenameExtension:@"mka"],
+             [UTType typeWithFilenameExtension:@"mks"]];
+}
+
 - (instancetype)initWithURL:(NSURL *)fileURL error:(NSError * __autoreleasing *)outError
 {
     if ((self = [super initWithURL:fileURL])) {

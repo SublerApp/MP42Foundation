@@ -454,7 +454,7 @@ extern "C" bool MP4AV_AacGetConfiguration_SBR(
     
     pConfig[2] = (syncExtensionType >> 3) & 0xFF;
     pConfig[3] = ((syncExtensionType & 0x7) << 5) | 5 /* ext ot id */;
-    pConfig[4] = ((1 & 0x1) << 7) | (extensionSamplingRateIndex << 3);
+    pConfig[4] = (0x1 << 7) | (extensionSamplingRateIndex << 3);
     
     *ppConfig = pConfig;
     *pConfigLength = 5;
@@ -722,6 +722,11 @@ static bool GetFirstHeader(FILE* inFile)
 
 + (NSArray<NSString *> *)supportedFileFormats {
     return @[@"aac"];
+}
+
++ (NSArray<UTType *> *)supportedContentTypes
+{
+    return @[[UTType typeWithFilenameExtension:@"aac"]];
 }
 
 - (instancetype)initWithURL:(NSURL *)fileURL error:(NSError * __autoreleasing *)outError

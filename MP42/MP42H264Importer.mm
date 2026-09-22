@@ -1387,6 +1387,12 @@ MP42_OBJC_DIRECT_MEMBERS
     return @[@"264", @"h264"];
 }
 
++ (NSArray<UTType *> *)supportedContentTypes
+{
+    return @[[UTType typeWithFilenameExtension:@"264"],
+             [UTType typeWithFilenameExtension:@"h264"]];
+}
+
 - (instancetype)initWithURL:(NSURL *)fileURL error:(NSError * __autoreleasing *)outError
 {
     if ((self = [super initWithURL:fileURL])) {

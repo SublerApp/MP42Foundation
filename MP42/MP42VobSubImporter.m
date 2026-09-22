@@ -224,6 +224,11 @@ MP42_OBJC_DIRECT_MEMBERS
     return @[@"idx"];
 }
 
++ (NSArray<UTType *> *)supportedContentTypes
+{
+    return @[[UTType typeWithFilenameExtension:@"idx"]];
+}
+
 - (instancetype)initWithURL:(NSURL *)fileURL error:(NSError * __autoreleasing *)outError
 {
     if ((self = [super initWithURL:fileURL])) {

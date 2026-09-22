@@ -130,12 +130,23 @@ MP42_OBJC_DIRECT_MEMBERS
             CGSize trackSize = CGSizeMake(track.trackWidth, track.trackHeight);
             MP42SubLine *sl = [_ss getSerializedPacket];
             MP42SampleBuffer *sample;
+            BOOL top = NO;
 
-            if ([sl->line isEqualToString:@"\n"]) {
+            NSString *text;
+
+            if ([sl->line containsString:@"{\\an8}"]) {
+                text = [sl->line stringByReplacingOccurrencesOfString:@"{\\an8}" withString:@""];
+                top = YES;
+            }
+            else {
+                text = sl->line;
+            }
+
+            if ([text isEqualToString:@"\n"]) {
                 sample = copyEmptySubtitleSample(_trackID, sl->end_time - sl->begin_time, NO);
             }
             else {
-                sample = copySubtitleSample(_trackID, sl->line, sl->end_time - sl->begin_time, sl->forced, NO, YES, trackSize, 0);
+                sample = copySubtitleSample(_trackID, text, sl->end_time - sl->begin_time, sl->forced, NO, YES, trackSize, top);
             }
 
             return sample;

@@ -504,7 +504,7 @@ MP42_OBJC_DIRECT_MEMBERS
             NSSize videoSize = NSMakeSize(0, 0);
 
             MP42SubtitleTrack *subTrack = (MP42SubtitleTrack *)track;
-            NSInteger vPlacement = subTrack.verticalPlacement;
+            BOOL vPlacement = subTrack.verticalPlacement;
 
             for (id workingTrack in _activeTracks) {
                 if ([workingTrack isMemberOfClass:[MP42VideoTrack class]]) {

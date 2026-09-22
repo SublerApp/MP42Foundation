@@ -36,6 +36,11 @@ typedef struct MP4DemuxHelper {
     return @[@"mp4", @"m4v", @"m4a", @"m4r"];
 }
 
++ (NSArray<UTType *> *)supportedContentTypes
+{
+    return @[UTTypeMPEG4Movie, UTTypeMPEG4Audio, UTTypeAppleProtectedMPEG4Video, [UTType typeWithFilenameExtension:@"m4r"]];
+}
+
 - (instancetype)initWithURL:(NSURL *)fileURL error:(NSError * __autoreleasing *)outError
 {
     if ((self = [super initWithURL:fileURL])) {

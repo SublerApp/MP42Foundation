@@ -231,7 +231,7 @@ unsigned ParseSubTime(const char *time, unsigned secondScale, BOOL hasSign)
 	return timeval * sign;
 }
 
-NSMutableString *STStandardizeStringNewlines(NSString *str)
+NSMutableString * _Nullable STStandardizeStringNewlines(NSString *str)
 {
     if(str == nil)
 		return nil;
@@ -241,7 +241,7 @@ NSMutableString *STStandardizeStringNewlines(NSString *str)
 	return ms;
 }
 
-extern NSString *STLoadFileWithUnknownEncoding(NSURL *url)
+NSString * _Nullable STLoadFileWithUnknownEncoding(NSURL *url)
 {
 	NSData *data = [NSData dataWithContentsOfURL:url];
 

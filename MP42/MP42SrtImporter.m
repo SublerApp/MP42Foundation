@@ -28,6 +28,11 @@ MP42_OBJC_DIRECT_MEMBERS
     return @[@"srt", @"smi"];
 }
 
++ (NSArray<UTType *> *)supportedContentTypes
+{
+    return @[[UTType typeWithFilenameExtension:@"srt"], [UTType typeWithFilenameExtension:@"smi"]];
+}
+
 - (instancetype)initWithURL:(NSURL *)fileURL error:(NSError * __autoreleasing *)outError
 {
     if ((self = [super initWithURL:fileURL])) {

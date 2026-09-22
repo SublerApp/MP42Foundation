@@ -44,8 +44,8 @@ MP42_OBJC_DIRECT_MEMBERS
 
 @end
 
-NSMutableString *STStandardizeStringNewlines(NSString *str);
-extern NSString *STLoadFileWithUnknownEncoding(NSURL *url);
+NSMutableString * _Nullable STStandardizeStringNewlines(NSString *str);
+NSString * _Nullable STLoadFileWithUnknownEncoding(NSURL *url);
 int LoadSRTFromURL(NSURL *url, MP42SubSerializer *ss, MP4Duration *duration);
 int LoadSMIFromURL(NSURL *url, MP42SubSerializer *ss, int subCount);
 
