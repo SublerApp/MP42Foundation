@@ -121,18 +121,29 @@ MP42_OBJC_DIRECT_MEMBERS
 
 - (void)setSomeSamplesAreForced:(BOOL)value
 {
-    _someSamplesAreForced = value;
-    self.edited = YES;
+    if (_someSamplesAreForced != value) {
+        [[self.undo prepareWithInvocationTarget:self] setSomeSamplesAreForced:_someSamplesAreForced];
+    }
 
-    self.updatedProperty[@"forcedSubtitles"] = @YES;
+    _someSamplesAreForced = value;
+
+    if (!(self.undo.isUndoing || self.undo.isRedoing)) {
+        self.edited = YES;
+        self.updatedProperty[@"forcedSubtitles"] = @YES;
+    }
 }
 
 - (void)setAllSamplesAreForced:(BOOL)value
 {
+    if (_allSamplesAreForced != value) {
+        [[self.undo prepareWithInvocationTarget:self] setAllSamplesAreForced:_allSamplesAreForced];
+    }
     _allSamplesAreForced = value;
-    self.edited = YES;
 
-    self.updatedProperty[@"forcedSubtitles"] = @YES;
+    if (!(self.undo.isUndoing || self.undo.isRedoing)) {
+        self.edited = YES;
+        self.updatedProperty[@"forcedSubtitles"] = @YES;
+    }
 }
 
 - (BOOL)canExport

@@ -428,82 +428,160 @@ static uint32_t convertToFixedPoint(CGFloat value) {
 
 - (void)setTrackWidth:(float)trackWidth
 {
+    if (_trackWidth != trackWidth) {
+        [[self.undo prepareWithInvocationTarget:self] setTrackWidth:_trackWidth];
+    }
+
     _trackWidth = trackWidth;
-    self.edited = YES;
+
+    if (!(self.undo.isUndoing || self.undo.isRedoing)) {
+        self.edited = YES;
+    }
 }
 
 - (void)setTrackHeight:(float)trackHeight
 {
+    if (_trackHeight != trackHeight) {
+        [[self.undo prepareWithInvocationTarget:self] setTrackHeight:_trackHeight];
+    }
+
     _trackHeight = trackHeight;
-    self.edited = YES;
+
+    if (!(self.undo.isUndoing || self.undo.isRedoing)) {
+        self.edited = YES;
+    }
 }
 
 - (void)setTransform:(CGAffineTransform)transform
 {
+    if (CGAffineTransformEqualToTransform(_transform, transform) == false) {
+        [(MP42VideoTrack *)[self.undo prepareWithInvocationTarget:self] setTransform:_transform];
+    }
+
     _transform = transform;
-    self.edited = YES;
+
+    if (!(self.undo.isUndoing || self.undo.isRedoing)) {
+        self.edited = YES;
+    }
 }
 
 - (void)setColorPrimaries:(uint16_t)colorPrimaries
 {
-    self.updatedProperty[@"colr"] = @YES;
+    if (_colorPrimaries != colorPrimaries) {
+        [[self.undo prepareWithInvocationTarget:self] setColorPrimaries:_colorPrimaries];
+    }
+
     _colorPrimaries = colorPrimaries;
-    self.edited = YES;
+
+    if (!(self.undo.isUndoing || self.undo.isRedoing)) {
+        self.updatedProperty[@"colr"] = @YES;
+        self.edited = YES;
+    }
 }
 
 - (void)setTransferCharacteristics:(uint16_t)transferCharacteristics
 {
-    self.updatedProperty[@"colr"] = @YES;
+    if (_transferCharacteristics != transferCharacteristics) {
+        [[self.undo prepareWithInvocationTarget:self] setTransferCharacteristics:_transferCharacteristics];
+    }
+
     _transferCharacteristics = transferCharacteristics;
-    self.edited = YES;
+
+    if (!(self.undo.isUndoing || self.undo.isRedoing)) {
+        self.updatedProperty[@"colr"] = @YES;
+        self.edited = YES;
+    }
 }
 
 - (void)setMatrixCoefficients:(uint16_t)matrixCoefficients
 {
-    self.updatedProperty[@"colr"] = @YES;
+    if (_matrixCoefficients != matrixCoefficients) {
+        [[self.undo prepareWithInvocationTarget:self] setMatrixCoefficients:_matrixCoefficients];
+    }
+
     _matrixCoefficients = matrixCoefficients;
-    self.edited = YES;
+
+    if (!(self.undo.isUndoing || self.undo.isRedoing)) {
+        self.updatedProperty[@"colr"] = @YES;
+        self.edited = YES;
+    }
 }
 
 - (void)setColorRange:(uint16_t)colorRange
 {
-    self.updatedProperty[@"colr"] = @YES;
+    if (_colorRange != colorRange) {
+        [[self.undo prepareWithInvocationTarget:self] setColorRange:_colorRange];
+    }
+
     _colorRange = colorRange;
-    self.edited = YES;
+
+    if (!(self.undo.isUndoing || self.undo.isRedoing)) {
+        self.updatedProperty[@"colr"] = @YES;
+        self.edited = YES;
+    }
 }
 
 - (void)setMastering:(MP42MasteringDisplayMetadata)mastering
 {
-    self.updatedProperty[@"mdcv"] = @YES;
+    [[self.undo prepareWithInvocationTarget:self] setMastering:_mastering];
     _mastering = mastering;
-    self.edited = YES;
+
+    if (!(self.undo.isUndoing || self.undo.isRedoing)) {
+        self.updatedProperty[@"mdcv"] = @YES;
+        self.edited = YES;
+    }
 }
 
 - (void)setColl:(MP42ContentLightMetadata)coll
 {
-    self.updatedProperty[@"coll"] = @YES;
+    [[self.undo prepareWithInvocationTarget:self] setColl:_coll];
     _coll = coll;
-    self.edited = YES;
+
+    if (!(self.undo.isUndoing || self.undo.isRedoing)) {
+        self.updatedProperty[@"coll"] = @YES;
+        self.edited = YES;
+    }
 }
 
 - (void)setHSpacing:(uint64_t)newHSpacing
 {
+    if (_hSpacing != newHSpacing) {
+        [[self.undo prepareWithInvocationTarget:self] setHSpacing:_hSpacing];
+    }
+
     _hSpacing = newHSpacing;
-    self.edited = YES;
-    self.updatedProperty[@"hSpacing"] = @YES;
+
+    if (!(self.undo.isUndoing || self.undo.isRedoing)) {
+        self.edited = YES;
+        self.updatedProperty[@"hSpacing"] = @YES;
+    }
 }
 
 - (void)setVSpacing:(uint64_t)newVSpacing
 {
+    if (_vSpacing != newVSpacing) {
+        [[self.undo prepareWithInvocationTarget:self] setVSpacing:_vSpacing];
+    }
+
     _vSpacing = newVSpacing;
-    self.edited = YES;
-    self.updatedProperty[@"vSpacing"] = @YES;
+
+    if (!(self.undo.isUndoing || self.undo.isRedoing)) {
+        self.edited = YES;
+        self.updatedProperty[@"vSpacing"] = @YES;
+    }
 }
 
 - (void)setNewProfile:(uint8_t)newProfile
 {
+    if (_newProfile != newProfile) {
+        [[self.undo prepareWithInvocationTarget:self] setNewProfile:_newProfile];
+    }
+
     _newProfile = newProfile;
-    self.edited = YES;
+
+    if (!(self.undo.isUndoing || self.undo.isRedoing)) {
+        self.edited = YES;
+    }
 
     if (_newProfile == _origProfile) {
         self.updatedProperty[@"profile"] = @NO;
@@ -515,8 +593,15 @@ static uint32_t convertToFixedPoint(CGFloat value) {
 
 - (void)setNewLevel:(uint8_t)newLevel
 {
+    if (_newLevel != newLevel) {
+        [[self.undo prepareWithInvocationTarget:self] setNewLevel:_newLevel];
+    }
+
     _newLevel = newLevel;
-    self.edited = YES;
+
+    if (!(self.undo.isUndoing || self.undo.isRedoing)) {
+        self.edited = YES;
+    }
 
     if (_newLevel == _origLevel) {
         self.updatedProperty[@"level"] = @NO;

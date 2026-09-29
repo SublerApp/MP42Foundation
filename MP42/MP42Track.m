@@ -260,6 +260,15 @@ typedef struct muxer_helper {
     return StringFromTime(_duration, 1000);
 }
 
+- (void)setEdited:(BOOL)edited
+{
+    if (_edited != edited) {
+        [[self.undo prepareWithInvocationTarget:self] setEdited:_edited];
+    }
+
+    _edited = edited;
+}
+
 @synthesize name = _name;
 
 - (NSString *)name {
@@ -275,6 +284,10 @@ typedef struct muxer_helper {
 
 - (void)setName:(NSString *)newName
 {
+    if ([newName isEqualToString:_name] == NO) {
+        [(MP42Track *)[self.undo prepareWithInvocationTarget:self] setName:_name];
+    }
+
     if (newName.length) {
         _name = [newName copy];
     }
@@ -290,9 +303,10 @@ typedef struct muxer_helper {
 - (void)setLanguage:(NSString *)language
 {
     if (![_language isEqualToString:language]) {
-        [[self.undo prepareWithInvocationTarget:self] setMediaCharacteristicTags:_mediaCharacteristicTags];
-        _language = [language copy];
+        [(MP42Track *)[self.undo prepareWithInvocationTarget:self] setLanguage:_language];
     }
+
+    _language = [language copy];
 
     if (!(self.undo.isUndoing || self.undo.isRedoing)) {
         self.edited = YES;
@@ -304,8 +318,9 @@ typedef struct muxer_helper {
 {
     if (![_mediaCharacteristicTags isEqualToSet:mediaCharacteristicTags]) {
         [[self.undo prepareWithInvocationTarget:self] setMediaCharacteristicTags:_mediaCharacteristicTags];
-        _mediaCharacteristicTags = [mediaCharacteristicTags copy];
     }
+
+    _mediaCharacteristicTags = [mediaCharacteristicTags copy];
 
     if (!(self.undo.isUndoing || self.undo.isRedoing)) {
         self.edited = YES;
@@ -317,8 +332,9 @@ typedef struct muxer_helper {
 {
     if (_enabled != enabled) {
         [[self.undo prepareWithInvocationTarget:self] setEnabled:_enabled];
-        _enabled = enabled;
     }
+
+    _enabled = enabled;
 
     if (!(self.undo.isUndoing || self.undo.isRedoing)) {
         self.edited = YES;
@@ -330,8 +346,9 @@ typedef struct muxer_helper {
 {
     if (_alternateGroup != alternateGroup) {
         [[self.undo prepareWithInvocationTarget:self] setAlternateGroup:_alternateGroup];
-        _alternateGroup = alternateGroup;
     }
+
+    _alternateGroup = alternateGroup;
 
     if (!(self.undo.isUndoing || self.undo.isRedoing)) {
         self.edited = YES;
@@ -343,8 +360,9 @@ typedef struct muxer_helper {
 {
     if (_startOffset != startOffset) {
         [[self.undo prepareWithInvocationTarget:self] setStartOffset:_startOffset];
-        _startOffset = startOffset;
     }
+
+    _startOffset = startOffset;
 
     if (!(self.undo.isUndoing || self.undo.isRedoing)) {
         self.edited = YES;
