@@ -20,7 +20,8 @@
 #import "MP42PrivateUtilities.h"
 #import "MP42SubtitleTrack.h"
 
-#import "MP42OCRWrapper.h"
+#import "MP42TesseractOCR.h"
+#import "MP42VisionOCR.h"
 #import "MP42SubUtilities.h"
 
 #include "FFmpegUtils.h"
@@ -32,7 +33,7 @@ MP42_OBJC_DIRECT_MEMBERS
 {
     NSThread *decoderThread;
 
-    MP42OCRWrapper          *_ocr;
+    id<MP42TextRecognizer>   _ocr;
     CIContext               *_imgContext;
     AVCodec                 *avCodec;
     AVCodecContext          *avContext;
@@ -426,7 +427,8 @@ MP42_OBJC_DIRECT_MEMBERS
 
         srcMagicCookie = [track.importer magicCookieForTrack:track];
 
-        _ocr = [[MP42OCRWrapper alloc] initWithLanguage:track.language];
+        _ocr = [[MP42TesseractOCR alloc] initWithLanguage:track.language];
+//        _ocr = [[MP42VisionOCR alloc] initWithLanguage:track.language];
 
         if (format == kMP42SubtitleCodecType_VobSub) {
             // Launch the vobsub decoder thread.
