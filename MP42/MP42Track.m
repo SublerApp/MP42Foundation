@@ -85,14 +85,24 @@ typedef struct muxer_helper {
             }
 
             // Extended language tag
+            NSString *mdhdLanguage = [MP42Languages.defaultManager extendedTagForISO_639_2:getTrackLanguage(fileHandle, _trackId)];
             if (MP4HaveTrackAtom(fileHandle, _trackId, "mdia.elng.")) {
                 const char *elng;
                 if (MP4GetTrackStringProperty(fileHandle, _trackId, "mdia.elng.extended_language", &elng)) {
                     _language = [NSString stringWithCString:elng encoding:NSASCIIStringEncoding];
+                    if ([_language isEqualToString:@"und"] && ![mdhdLanguage isEqualToString:@"und"]) {
+                        _language = mdhdLanguage;
+                        _edited = YES;
+                        _updatedProperty[@"language"] = @YES;
+                    }
+                    else if (![_language isEqualToString:@"und"] && [mdhdLanguage isEqualToString:@"und"]) {
+                        _edited = YES;
+                        _updatedProperty[@"language"] = @YES;
+                    }
                 }
             }
             else {
-                _language = [MP42Languages.defaultManager extendedTagForISO_639_2:getTrackLanguage(fileHandle, _trackId)];
+                _language = mdhdLanguage;
             }
 
             _timescale = MP4GetTrackTimeScale(fileHandle, _trackId);
