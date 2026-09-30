@@ -190,6 +190,10 @@ NSString *localizedVideoDisplayName(FourCharCode mediaSubtype)
             result = NSLocalizedString(@"AV1", nil);
             break;
 
+        case kMP42VideoCodecType_AppleProRes4444XQ:
+            result = NSLocalizedString(@"ProRes 4444 XQ", nil);
+            break;
+
         case kMP42VideoCodecType_AppleProRes4444:
             result = NSLocalizedString(@"ProRes 4444", nil);
             break;
@@ -213,6 +217,11 @@ NSString *localizedVideoDisplayName(FourCharCode mediaSubtype)
         case kMP42VideoCodecType_AppleProResRAW:
             result = NSLocalizedString(@"ProRes RAW", nil);
             break;
+
+        case kMP42VideoCodecType_AppleProResRAWHQ:
+            result = NSLocalizedString(@"ProRes RAW HQ", nil);
+            break;
+
         case kMP42VideoCodecType_DVCNTSC:
             result = NSLocalizedString(@"DV NTSC", nil);
             break;
