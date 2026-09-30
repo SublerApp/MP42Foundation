@@ -200,6 +200,8 @@ typedef void (^MP42FileProgressHandler)(double progress);
  */
 - (void)cancel;
 
+@property (nonatomic, readwrite, nullable) NSUndoManager *undo;
+
 @end
 
 NS_ASSUME_NONNULL_END

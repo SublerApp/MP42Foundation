@@ -1409,4 +1409,12 @@ MP42_OBJC_DIRECT_MEMBERS
     [self.URL stopAccessingSecurityScopedResource];
 }
 
+- (void)setUndo:(NSUndoManager *)undo {
+    _undo = undo;
+
+    for (MP42Track *track in self.tracks) {
+        track.undo = undo;
+    }
+}
+
 @end

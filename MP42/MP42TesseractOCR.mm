@@ -1,12 +1,12 @@
 //
-//  SBOcr.mm
+//  MP42TesseractOCR.mm
 //  Subler
 //
 //  Created by Damiano Galassi on 27/03/11.
 //  Copyright 2022 Damiano Galassi. All rights reserved.
 //
 
-#import "MP42OCRWrapper.h"
+#import "MP42TesseractOCR.h"
 #import "MP42Languages.h"
 
 // Tesseract OCR
@@ -22,7 +22,7 @@ public:
             if (base_path) {
                 path = base_path.fileSystemRepresentation;
             } else {
-                path = [[NSBundle bundleForClass:[MP42OCRWrapper class]].bundlePath stringByAppendingString:@"/Versions/A/Resources/tessdata/"].fileSystemRepresentation;
+                path = [[NSBundle bundleForClass:[MP42TesseractOCR class]].bundlePath stringByAppendingString:@"/Versions/A/Resources/tessdata/"].fileSystemRepresentation;
             }
 
             int result = tess_base_api.Init(path, lang.UTF8String, mode);
@@ -49,7 +49,7 @@ protected:
 };
 
 MP42_OBJC_DIRECT_MEMBERS
-@implementation MP42OCRWrapper {
+@implementation MP42TesseractOCR {
     OCRWrapper *tess_base;
 }
 

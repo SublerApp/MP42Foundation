@@ -216,25 +216,48 @@ MP42_OBJC_DIRECT_MEMBERS
 
 - (void)setVolume:(float)newVolume
 {
+    if (_volume != newVolume) {
+        [[self.undo prepareWithInvocationTarget:self] setVolume:_volume];
+    }
+
     _volume = newVolume;
-    self.edited = YES;
-    self.updatedProperty[@"volume"] = @YES;
+
+    if (!(self.undo.isUndoing || self.undo.isRedoing)) {
+        self.edited = YES;
+        self.updatedProperty[@"volume"] = @YES;
+    }
 }
 
 - (void)setFallbackTrack:(MP42Track *)newFallbackTrack
 {
+    MP42Track *_fallbackTrackStrongRef = _fallbackTrack;
+    if (_fallbackTrackStrongRef != newFallbackTrack) {
+        [[self.undo prepareWithInvocationTarget:self] setFallbackTrack:_fallbackTrackStrongRef];
+    }
+
     _fallbackTrack = newFallbackTrack;
     _fallbackTrackId = 0;
-    self.edited = YES;
-    self.updatedProperty[@"fallback"] = @YES;
+
+    if (!(self.undo.isUndoing || self.undo.isRedoing)) {
+        self.edited = YES;
+        self.updatedProperty[@"fallback"] = @YES;
+    }
 }
 
 - (void)setFollowsTrack:(MP42Track *)newFollowsTrack
 {
+    MP42Track *_followsTrackStrongRef = _followsTrack;
+    if (_followsTrackStrongRef != newFollowsTrack) {
+        [[self.undo prepareWithInvocationTarget:self] setFollowsTrack:_followsTrackStrongRef];
+    }
+
     _followsTrack = newFollowsTrack;
     _followsTrackId = 0;
-    self.edited = YES;
-    self.updatedProperty[@"follows"] = @YES;
+
+    if (!(self.undo.isUndoing || self.undo.isRedoing)) {
+        self.edited = YES;
+        self.updatedProperty[@"follows"] = @YES;
+    }
 }
 
 - (NSString *)formatSummary
