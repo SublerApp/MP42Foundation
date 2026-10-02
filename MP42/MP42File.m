@@ -14,6 +14,7 @@
 #import "MP42Track+Private.h"
 #import "MP42PreviewGenerator.h"
 #import "MP42Metadata+Private.h"
+#import "MP42FormatUtilites.h"
 #import "MP42RelatedItem.h"
 
 #import "mp4v2.h"
@@ -35,6 +36,46 @@ typedef NS_ENUM(NSUInteger, MP42Status) {
 };
 
 static id <MP42Logging> _logger = nil;
+
+static BOOL forceHvc1(MP4FileHandle fileHandle, MP4TrackId trackId) {
+    uint32_t sampleDescriptions = MP4GetTrackNumberOfSampleDescriptions(fileHandle, trackId);
+    BOOL hasHev1 = NO;
+
+    for (uint32_t index = 0; index < sampleDescriptions; index++) {
+        const char *mediaDataName = MP4GetTrackMediaDataName(fileHandle, trackId, index);
+        if (mediaDataName && !strcmp(mediaDataName, "hev1")) {
+            hasHev1 = YES;
+            break;
+        }
+    }
+
+    if (!hasHev1) {
+        return YES;
+    }
+
+    if (sampleDescriptions != 1) {
+        return NO;
+    }
+
+    uint8_t *hvcC = NULL;
+    uint32_t hvcCSize = 0;
+    if (!MP4GetTrackBytesProperty(fileHandle, trackId, "mdia.minf.stbl.stsd.hev1.hvcC.content", &hvcC, &hvcCSize) || !hvcC || !hvcCSize) {
+        MP4Free(hvcC);
+        return NO;
+    }
+
+    bool completeness = false;
+    if (analyze_HEVC(hvcC, hvcCSize, &completeness)) {
+        MP4Free(hvcC);
+        return NO;
+    }
+
+    force_HEVC_completeness(hvcC, hvcCSize);
+    BOOL success = MP4SetTrackBytesProperty(fileHandle, trackId, "mdia.minf.stbl.stsd.hev1.hvcC.content", hvcC, hvcCSize);
+    MP4Free(hvcC);
+
+    return success && MP4SetTrackMediaDataName(fileHandle, trackId, "hvc1", 0);
+}
 
 static void logCallback(MP4LogLevel loglevel, const char *fmt, va_list ap) {
     const char *level;
@@ -1070,6 +1111,20 @@ MP42_OBJC_DIRECT_MEMBERS
     [importersTokens removeAllObjects];
 #endif
     [self.importers removeAllObjects];
+
+    if ([options[MP42ForceHvc1] boolValue]) {
+        for (MP42Track *track in tracksToUpdate) {
+            if (!forceHvc1(self.fileHandle, track.trackId)) {
+                if (outError) {
+                    *outError = MP42Error(MP42LocalizedString(@"The file could not be saved.", @"error message"),
+                                          MP42LocalizedString(@"The HEVC track could not be updated to hvc1.", @"error message"), 103);
+                    [_logger writeErrorToLog:*outError];
+                }
+                [self stopWriting];
+                return NO;
+            }
+        }
+    }
 
     // Update moov atom
     updateMoovDuration(self.fileHandle);
