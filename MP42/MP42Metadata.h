@@ -71,6 +71,8 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)mergeMetadata:(MP42Metadata *)metadata overwrite:(BOOL)overwrite;
 
+@property (nonatomic, readwrite, nullable) NSUndoManager *undo;
+
 @end
 
 NS_ASSUME_NONNULL_END

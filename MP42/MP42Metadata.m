@@ -65,6 +65,24 @@
     return self;
 }
 
+- (void)setEdited:(BOOL)edited
+{
+    if (_edited != edited) {
+        [[self.undo prepareWithInvocationTarget:self] setEdited:_edited];
+    }
+
+    _edited = edited;
+}
+
+- (void)setArtworkEdited:(BOOL)artworkEdited
+{
+    if (_artworkEdited != artworkEdited) {
+        [[self.undo prepareWithInvocationTarget:self] setArtworkEdited:_artworkEdited];
+    }
+
+    _artworkEdited = artworkEdited;
+}
+
 #pragma mark - Supported metadata
 
 + (NSArray<NSString *> *)availableMetadata
@@ -296,16 +314,23 @@
     // as we don't support multiple languages yet,
     // Allow multiple MP42MetadataKeyCoverArt items.
     if ([item.identifier isEqualToString:MP42MetadataKeyCoverArt]) {
-        self.artworkEdited = YES;
+        if (!(self.undo.isUndoing || self.undo.isRedoing)) {
+            self.artworkEdited = YES;
+        }
     } else {
         MP42MetadataItem *existingItem = self.itemsMap[item.identifier];
         if (existingItem) {
-            [self.itemsArray removeObject:existingItem];
+            [self removeMetadataItem:existingItem];
         }
     }
     [self.itemsArray addObject:item];
     [self.itemsMap setObject:item forKey:item.identifier];
-    self.edited = YES;
+
+    [[self.undo prepareWithInvocationTarget:self] removeMetadataItem:item];
+
+    if (!(self.undo.isUndoing || self.undo.isRedoing)) {
+        self.edited = YES;
+    }
 }
 
 - (void)addMetadataItems:(NSArray<MP42MetadataItem *> *)items
@@ -317,14 +342,18 @@
 
 - (void)removeMetadataItem:(MP42MetadataItem *)item
 {
+    [[self.undo prepareWithInvocationTarget:self] addMetadataItem:item];
+
     [self.itemsArray removeObject:item];
     [self.itemsMap removeObjectForKey:item.identifier];
 
-    if ([item.identifier isEqualToString:MP42MetadataKeyCoverArt]) {
-        self.artworkEdited = YES;
-    }
-    else {
-        self.edited = YES;
+    if (!(self.undo.isUndoing || self.undo.isRedoing)) {
+        if ([item.identifier isEqualToString:MP42MetadataKeyCoverArt]) {
+            self.artworkEdited = YES;
+        }
+        else {
+            self.edited = YES;
+        }
     }
 }
 
@@ -434,9 +463,6 @@
             }
         }
     }
-
-    self.edited = YES;
-    self.artworkEdited = YES;
 }
 
 #pragma mark - MP42Foundation/mp4v2 read/write mapping

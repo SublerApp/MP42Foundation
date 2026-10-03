@@ -1420,6 +1420,8 @@ MP42_OBJC_DIRECT_MEMBERS
 - (void)setUndo:(NSUndoManager *)undo {
     _undo = undo;
 
+    self.metadata.undo = undo;
+
     for (MP42Track *track in self.tracks) {
         track.undo = undo;
     }
