@@ -396,10 +396,18 @@ fail:
 
 - (void)setForcedTrack:(MP42Track *)newForcedTrack
 {
+    MP42Track *forcedTrackStrongRef = _forcedTrack;
+    if (forcedTrackStrongRef != newForcedTrack) {
+        [[self.undo prepareWithInvocationTarget:self] setForcedTrack:forcedTrackStrongRef];
+    }
+
     _forcedTrack = newForcedTrack;
     _forcedTrackId = 0;
-    self.edited = YES;
-    self.updatedProperty[@"forced"] = @YES;
+
+    if (!(self.undo.isUndoing || self.undo.isRedoing)) {
+        self.edited = YES;
+        self.updatedProperty[@"forced"] = @YES;
+    }
 }
 
 #pragma mark - NSCopying

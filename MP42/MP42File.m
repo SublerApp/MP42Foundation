@@ -490,6 +490,10 @@ MP42_OBJC_DIRECT_MEMBERS
         track.duration = self.duration;
     }
 
+    track.undo = self.undo;
+
+    [[self.undo prepareWithInvocationTarget:self] removeTracks:@[track]];
+
     [self.itracks addObject:track];
 }
 
@@ -516,6 +520,10 @@ MP42_OBJC_DIRECT_MEMBERS
                     a.forcedTrack = nil;
             }
         }
+    }
+
+    for (MP42Track *track in tracks) {
+        [(MP42File *)[self.undo prepareWithInvocationTarget:self] addTrack:track];
     }
 
     [self.itracks removeObjectsInArray:tracks];

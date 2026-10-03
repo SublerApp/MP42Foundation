@@ -12,7 +12,6 @@
 #import "MP42PrivateUtilities.h"
 #import "MP42MediaFormat.h"
 
-MP42_OBJC_DIRECT_MEMBERS
 @implementation MP42ChapterTrack {
 @private
     NSMutableArray<MP42TextSample *> *_chapters;
@@ -102,18 +101,23 @@ MP42_OBJC_DIRECT_MEMBERS
     return [[MP42ChapterTrack alloc] initWithTextFile:URL];
 }
 
-- (NSString *)defaultName {
+- (NSString *)defaultName
+{
     NSBundle *bundle = [NSBundle bundleForClass:[MP42ChapterTrack class]];
     return NSLocalizedStringFromTableInBundle(@"Chapter Track", @"Localizable", bundle, @"Default Chapter Track name");
 }
 
 - (NSUInteger)addChapter:(MP42TextSample *)chapter
 {
-    self.edited = YES;
-    _areChaptersEdited = YES;
-
     [_chapters addObject:chapter];
     [_chapters sortUsingSelector:@selector(compare:)];
+
+    [[self.undo prepareWithInvocationTarget:self] removeChapter:chapter];
+
+    if (!(self.undo.isUndoing || self.undo.isRedoing)) {
+        self.edited = YES;
+        _areChaptersEdited = YES;
+    }
 
     return [_chapters indexOfObject:chapter];
 }
@@ -129,7 +133,8 @@ MP42_OBJC_DIRECT_MEMBERS
     return idx;
 }
 
-- (NSUInteger)addChapter:(NSString *)title image:(MP42Image *)image duration:(uint64_t)timestamp {
+- (NSUInteger)addChapter:(NSString *)title image:(MP42Image *)image duration:(uint64_t)timestamp
+{
     MP42TextSample *newChapter = [[MP42TextSample alloc] init];
     newChapter.title = title;
     newChapter.image = image;
@@ -140,8 +145,20 @@ MP42_OBJC_DIRECT_MEMBERS
     return idx;
 }
 
-- (NSUInteger)indexOfChapter:(MP42TextSample *)chapterSample {
+- (NSUInteger)indexOfChapter:(MP42TextSample *)chapterSample
+{
     return [_chapters indexOfObject:chapterSample];
+}
+
+- (void)removeChapter:(MP42TextSample *)chapter
+{
+    [[self.undo prepareWithInvocationTarget:self] addChapter:chapter];
+    [_chapters removeObject:chapter];
+
+    if (!(self.undo.isUndoing || self.undo.isRedoing)) {
+        self.edited = YES;
+        _areChaptersEdited = YES;
+    }
 }
 
 - (void)removeChapterAtIndex:(NSUInteger)index
@@ -151,24 +168,43 @@ MP42_OBJC_DIRECT_MEMBERS
 
 - (void)removeChaptersAtIndexes:(NSIndexSet *)indexes
 {
-    self.edited = YES;
-    _areChaptersEdited = YES;
-    [_chapters removeObjectsAtIndexes:indexes];
+    NSArray<MP42TextSample *> *toBeRemoved = [_chapters objectsAtIndexes:indexes];
+
+    for (MP42TextSample *chapter in toBeRemoved) {
+        [self removeChapter:chapter];
+    }
 }
 
 - (void)setTimestamp:(MP4Duration)timestamp forChapter:(MP42TextSample *)chapterSample
 {
-    self.edited = YES;
-    _areChaptersEdited = YES;
+    MP4Duration previousTimestamp = chapterSample.timestamp;
+
+    if (previousTimestamp != timestamp) {
+        [[self.undo prepareWithInvocationTarget:self] setTimestamp:previousTimestamp forChapter:chapterSample];
+    }
+
     [chapterSample setTimestamp:timestamp];
     [_chapters sortUsingSelector:@selector(compare:)];
+
+    if (!(self.undo.isUndoing || self.undo.isRedoing)) {
+        self.edited = YES;
+        _areChaptersEdited = YES;
+    }
 }
 
 - (void)setTitle:(NSString *)title forChapter:(MP42TextSample *)chapterSample
 {
-    self.edited = YES;
-    _areChaptersEdited = YES;
+    NSString *previousTitle = chapterSample.title;
+    if ([previousTitle isEqualToString:title] == NO) {
+        [[self.undo prepareWithInvocationTarget:self] setTitle:previousTitle forChapter:chapterSample];
+    }
+
     [chapterSample setTitle:title];
+
+    if (!(self.undo.isUndoing || self.undo.isRedoing)) {
+        self.edited = YES;
+        _areChaptersEdited = YES;
+    }
 }
 
 - (MP42TextSample *)chapterAtIndex:(NSUInteger)index

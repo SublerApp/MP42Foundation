@@ -230,9 +230,9 @@ MP42_OBJC_DIRECT_MEMBERS
 
 - (void)setFallbackTrack:(MP42Track *)newFallbackTrack
 {
-    MP42Track *_fallbackTrackStrongRef = _fallbackTrack;
-    if (_fallbackTrackStrongRef != newFallbackTrack) {
-        [[self.undo prepareWithInvocationTarget:self] setFallbackTrack:_fallbackTrackStrongRef];
+    MP42Track *fallbackTrackStrongRef = _fallbackTrack;
+    if (fallbackTrackStrongRef != newFallbackTrack) {
+        [[self.undo prepareWithInvocationTarget:self] setFallbackTrack:fallbackTrackStrongRef];
     }
 
     _fallbackTrack = newFallbackTrack;
@@ -246,9 +246,9 @@ MP42_OBJC_DIRECT_MEMBERS
 
 - (void)setFollowsTrack:(MP42Track *)newFollowsTrack
 {
-    MP42Track *_followsTrackStrongRef = _followsTrack;
-    if (_followsTrackStrongRef != newFollowsTrack) {
-        [[self.undo prepareWithInvocationTarget:self] setFollowsTrack:_followsTrackStrongRef];
+    MP42Track *followsTrackStrongRef = _followsTrack;
+    if (followsTrackStrongRef != newFollowsTrack) {
+        [[self.undo prepareWithInvocationTarget:self] setFollowsTrack:followsTrackStrongRef];
     }
 
     _followsTrack = newFollowsTrack;
