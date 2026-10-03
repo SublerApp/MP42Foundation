@@ -338,7 +338,7 @@ typedef struct MP4DemuxHelper {
         NSUInteger tracksNumber = inputTracks.count;
         NSUInteger tracksDone = 0;
 
-        MP4DemuxHelper * helpers[tracksNumber];
+        MP4DemuxHelper *helpers[tracksNumber];
 
         for (NSUInteger index = 0; index < tracksNumber; index += 1) {
             MP42Track *track = inputTracks[index];
