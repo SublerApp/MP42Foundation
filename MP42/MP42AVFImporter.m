@@ -93,7 +93,15 @@ MP42_OBJC_DIRECT_MEMBERS
 }
 
 - (instancetype)initWithURL:(NSURL *)fileURL error:(NSError * __autoreleasing *)outError {
+    return [self initWithURL:fileURL progressHandler:nil error:outError];
+}
+
+- (instancetype)initWithURL:(NSURL *)fileURL
+            progressHandler:(MP42FileImporterProgressHandler)progressHandler
+                      error:(NSError * __autoreleasing *)outError {
+  
     if ((self = [super initWithURL:fileURL])) {
+        if (progressHandler) progressHandler(0.0);
 
         VTRegisterProfessionalVideoWorkflowVideoDecoders();
         MTRegisterProfessionalVideoWorkflowFormatReaders();
@@ -106,6 +114,7 @@ MP42_OBJC_DIRECT_MEMBERS
 
         NSArray *availableChapter = [_localAsset availableChapterLocales];
         MP42ChapterTrack *chapters = nil;
+        if (progressHandler) progressHandler(0.1);
 
         // Checks if there is a chapter tracks
         if (tracks.count) {
@@ -123,6 +132,7 @@ MP42_OBJC_DIRECT_MEMBERS
         }
 
         // Converts the tracks to the MP42File types
+        NSUInteger trackIndex = 0;
         for (AVAssetTrack *track in tracks) {
 
             MP42Track *newTrack = nil;
@@ -537,9 +547,14 @@ MP42_OBJC_DIRECT_MEMBERS
             newTrack.enabled = track.isEnabled;
 
             [self addTrack:newTrack];
+            trackIndex++;
+            if (progressHandler && tracks.count) {
+                progressHandler(0.1 + 0.65 * ((double)trackIndex / (double)tracks.count));
+            }
         }
 
         // Reconnect references
+        NSUInteger associationIndex = 0;
         for (AVAssetTrack *track in tracks) {
 
             NSArray<AVAssetTrack *> *fallbacks = [track associatedTracksOfType:AVTrackAssociationTypeAudioFallback];
@@ -568,9 +583,15 @@ MP42_OBJC_DIRECT_MEMBERS
                     subTrack.forcedTrack = forcedTrack;
                 }
             }
+            associationIndex++;
+            if (progressHandler && tracks.count) {
+                progressHandler(0.75 + 0.15 * ((double)associationIndex / (double)tracks.count));
+            }
         }
 
+        if (progressHandler) progressHandler(0.9);
         [self convertMetadata];
+        if (progressHandler) progressHandler(1.0);
     }
 
     return self;

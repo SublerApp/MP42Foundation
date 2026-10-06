@@ -116,13 +116,27 @@ static NSArray<UTType *> *_supportedContentTypes API_AVAILABLE(macos(11.0));
 
 - (instancetype)initWithURL:(NSURL *)fileURL error:(NSError * __autoreleasing *)error
 {
+    return [self initWithURL:fileURL progressHandler:nil error:error];
+}
+
+- (instancetype)initWithURL:(NSURL *)fileURL
+            progressHandler:(MP42FileImporterProgressHandler)progressHandler
+                      error:(NSError * __autoreleasing *)error
+{
     self = nil;
 
-    // Initialize the right file importer subclass
+    // Initialize the right file importer subclass. AVFoundation can report
+    // inspection progress; other importers report completion as a single step.
     for (Class c in _fileImporters) {
         if ([c canInitWithFileType:fileURL.pathExtension]) {
+            if (c == [MP42AVFImporter class]) {
+                self = [[c alloc] initWithURL:fileURL progressHandler:progressHandler error:error];
+            } else {
+                if (progressHandler) progressHandler(0.0);
+                self = [[c alloc] initWithURL:fileURL error:error];
+                if (self && progressHandler) progressHandler(1.0);
+            }
 
-            self = [[c alloc] initWithURL:fileURL error:error];
             if (self) {
                 for (MP42Track *track in _tracksArray) {
                     track.importer = self;

@@ -11,5 +11,9 @@
 
 @interface MP42AVFImporter : MP42FileImporter
 
+- (nullable instancetype)initWithURL:(NSURL * _Nonnull)fileURL
+                     progressHandler:(nullable MP42FileImporterProgressHandler)progressHandler
+                               error:(NSError * _Nullable * _Nullable)error;
+
 @end
 

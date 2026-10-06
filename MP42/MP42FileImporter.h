@@ -19,6 +19,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+typedef void (^MP42FileImporterProgressHandler)(double progress);
 
 @interface MP42FileImporter : NSObject
 
@@ -29,6 +30,9 @@ NS_ASSUME_NONNULL_BEGIN
 + (BOOL)canInitWithContentType:(UTType *)contentType API_AVAILABLE(macos(11.0));
 
 - (nullable instancetype)initWithURL:(NSURL *)fileURL error:(NSError * __autoreleasing *)error;
+- (nullable instancetype)initWithURL:(NSURL *)fileURL
+                       progressHandler:(nullable MP42FileImporterProgressHandler)progressHandler
+                                 error:(NSError * __autoreleasing *)error;
 
 @property (nonatomic, readonly) NSURL *fileURL;
 @property (nonatomic, readonly) MP42Metadata *metadata;
